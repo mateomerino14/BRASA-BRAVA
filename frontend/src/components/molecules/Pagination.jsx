@@ -3,8 +3,9 @@ import {cn} from '../../lib/cn';
 
 const styles = {
   nav: 'flex items-center gap-1',
-  button: 'flex h-7 min-w-7 items-center justify-center rounded border border-arena/60 bg-white px-2 text-xs text-cafe transition-colors hover:border-brasa hover:text-brasa disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-arena/60 disabled:hover:text-cafe',
-  active: 'border-brasa bg-brasa font-bold text-white hover:text-white',
+  button: 'flex h-7 min-w-7 items-center justify-center rounded border px-2 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+  idle: 'border-arena/60 bg-white text-cafe enabled:hover:border-brasa enabled:hover:text-brasa',
+  active: 'border-brasa bg-brasa font-bold text-white',
 };
 
 const maxVisiblePages = 5;
@@ -23,7 +24,7 @@ export function Pagination({page, totalPages, onChange}) {
 
   return (
     <nav aria-label="Paginación" className={styles.nav}>
-      <button type="button" aria-label="Página anterior" disabled={page <= 1} onClick={() => onChange(page - 1)} className={styles.button}>
+      <button type="button" aria-label="Página anterior" disabled={page <= 1} onClick={() => onChange(page - 1)} className={cn(styles.button, styles.idle)}>
         <ChevronLeft size={14} />
       </button>
       {visiblePages(page, totalPages).map((number) => (
@@ -33,12 +34,12 @@ export function Pagination({page, totalPages, onChange}) {
           aria-label={`Página ${number}`}
           aria-current={number === page ? 'page' : undefined}
           onClick={() => onChange(number)}
-          className={cn(styles.button, number === page && styles.active)}
+          className={cn(styles.button, number === page ? styles.active : styles.idle)}
         >
           {number}
         </button>
       ))}
-      <button type="button" aria-label="Página siguiente" disabled={page >= totalPages} onClick={() => onChange(page + 1)} className={styles.button}>
+      <button type="button" aria-label="Página siguiente" disabled={page >= totalPages} onClick={() => onChange(page + 1)} className={cn(styles.button, styles.idle)}>
         <ChevronRight size={14} />
       </button>
     </nav>
