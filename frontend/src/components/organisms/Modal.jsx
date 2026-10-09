@@ -7,8 +7,8 @@ import {cn} from '../../lib/cn';
 const styles = {
   overlay: 'fixed inset-0 z-50 flex items-center justify-center p-4',
   backdrop: 'absolute inset-0 bg-carbon/40 backdrop-blur-md',
-  panel: 'relative w-full rounded-3xl bg-crema p-8 shadow-float',
-  sizes: {sm: 'max-w-md', md: 'max-w-lg'},
+  panel: 'relative max-h-[90dvh] w-full overflow-y-auto rounded-3xl bg-crema p-8 shadow-float',
+  sizes: {sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl'},
   close: 'absolute right-4 top-4 rounded-full p-1.5 text-cafe transition hover:rotate-90 hover:bg-hueso hover:text-carbon',
   title: 'pr-8 font-display text-4xl leading-none text-carbon',
   description: 'mt-2 text-base text-cafe',
