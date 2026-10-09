@@ -62,7 +62,7 @@ Monorepo con dos paquetes (npm workspaces):
 ```
 BRASA-BRAVA/
 ├── backend/              API REST (ver backend/README.md)
-├── frontend/             Interfaz React
+├── frontend/             Interfaz React (ver frontend/README.md)
 ├── .github/workflows/    Pruebas automáticas en cada Pull Request
 ├── eslint.style.js       Reglas de formato compartidas
 └── reglas.md             Estándares de ramas, commits y codificación
@@ -74,7 +74,7 @@ BRASA-BRAVA/
 |---|---|
 | Sistema de diseño (paleta, tipografía, menú lateral, modales) | Terminado |
 | Autenticación (login, modo DIRECTORIO, recuperación con código) | Terminado |
-| Página principal | Pendiente |
+| Página principal | Terminado |
 | Aplicación de escritorio | Pendiente |
 | Familia, Caja, Productos, Categorías, Stock, Secciones, Promociones, Empleados | Pendiente |
 
