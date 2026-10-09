@@ -1,0 +1,16 @@
+{
+  "name": "brasa-brava",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Sistema de gestión para el restaurante Brasa Brava (escritorio + web)",
+  "type": "module",
+  "workspaces": [],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present"
+  }
+}
