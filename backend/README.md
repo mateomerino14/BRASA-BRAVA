@@ -113,14 +113,16 @@ src/
 │   ├── migrate.js             Aplicación de migraciones pendientes
 │   └── seed.js                Datos de prueba
 ├── modules/
-│   └── auth/                  routes, controller, service, repository, schemas,
-│                              permisos por pantalla y plantilla del correo
+│   ├── auth/                  routes, controller, service, repository, schemas,
+│   │                          permisos por pantalla y plantilla del correo
+│   ├── employees/             Gestión de empleados
+│   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
 │   ├── auth.js                Token de sesión y permisos por pantalla
 │   ├── validate.js            Validación de la petición con Zod
 │   └── errorHandler.js        Respuesta uniforme ante errores
 ├── services/mailer.js       Correo por consola (desarrollo) o Brevo
-├── utils/                   Hash, tokens, códigos y errores HTTP
+├── utils/                   Hash, tokens, códigos, errores HTTP y respuesta de servicios
 ├── scripts/                 migrate y seed para npm run
 ├── app.js                   Configuración de Express (seguridad, CORS, rutas)
 └── server.js                Arranque del servidor
@@ -139,7 +141,21 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo del empleado |
 | `POST` | `/api/auth/password-reset/verify` | Verifica el código sin consumirlo |
 | `POST` | `/api/auth/password-reset/confirm` | Cambia la contraseña con el código verificado |
+| `GET` | `/api/employees` | Empleados con búsqueda (`search`), filtro por cargo (`idCargo`) y estado (`estado`: `todos`, `activos`, `inactivos`) y paginación (`page`, `pageSize`) |
+| `GET` | `/api/employees/:id` | Detalle de un empleado |
+| `POST` | `/api/employees` | Registra un empleado con su contraseña inicial |
+| `PUT` | `/api/employees/:id` | Modifica un empleado; la contraseña solo cambia si se envía |
+| `PATCH` | `/api/employees/:id/status` | Da de baja (`{activo: false}`) o reactiva a un empleado |
+| `GET` | `/api/roles` | Cargos activos |
 | `GET` | `/api/health` | Estado de la API y de la base |
+
+Las rutas de empleados y cargos exigen el permiso `empleados`.
+
+### Reglas de la gestión de empleados
+
+- El CI, el usuario y el correo no se pueden repetir; el usuario y el correo se guardan en minúsculas.
+- Un empleado dado de baja no puede iniciar sesión ni aparece en el carrusel del login, pero conserva su historial y se puede reactivar.
+- Nadie puede darse de baja a sí mismo; el DIRECTORIO sí puede dar de baja a cualquier empleado.
 
 ## Autorización
 
