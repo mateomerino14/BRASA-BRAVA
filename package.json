@@ -4,11 +4,16 @@
   "version": "0.1.0",
   "description": "Sistema de gestión para el restaurante Brasa Brava (escritorio + web)",
   "type": "module",
-  "workspaces": [],
+  "workspaces": [
+    "backend"
+  ],
   "engines": {
     "node": ">=22"
   },
   "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "db:migrate": "npm run db:migrate -w backend",
+    "db:seed": "npm run db:seed -w backend",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present"
