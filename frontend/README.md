@@ -59,13 +59,15 @@ La sesión se maneja en `context/` (`AuthProvider` y `useAuth`). El cliente HTTP
 ```
 src/
 ├── components/
-│   ├── atoms/           Button, Input, PasswordInput, Avatar, Badge, Logo, Spinner, SocialIcon
-│   ├── molecules/       FormField, CodeInput, Alert, LiveClock
-│   ├── organisms/       Sidebar, Header, Footer, Modal, EmployeeCarousel
+│   ├── atoms/           Button, IconButton, Input, PasswordInput, Select, Avatar, Badge, Logo, Spinner, SocialIcon
+│   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination
+│   ├── organisms/       Sidebar, Header, Footer, Modal, EmployeeCarousel, DataTable, FilterBar,
+│   │                    RegisterCallout, ConfirmDialog
 │   └── templates/       MainLayout, AuthLayout
 ├── features/
 │   ├── auth/            Login, carrusel de empleados, modo DIRECTORIO y recuperación
 │   ├── home/            Bienvenida con reloj y accesos rápidos
+│   ├── employees/       Gestión de empleados: tabla, filtros, registro, modificación y baja
 │   └── shared/          Páginas "en construcción" y 404
 ├── config/navigation.js Menú lateral y pantalla que exige cada ruta
 ├── context/             Sesión del usuario
@@ -111,10 +113,11 @@ Todo respeta la opción del sistema "reducir movimiento".
 | `/login` | Inicio de sesión y recuperación de contraseña | Público |
 | `/` | Página principal | Todos |
 | `/familia`, `/caja` | Familia y Caja | `familia`, `caja` |
-| `/productos`, `/secciones`, `/stock`, `/categorias`, `/promociones`, `/empleados` | Administración | Uno por pantalla |
+| `/empleados` | Gestión de empleados | `empleados` |
+| `/productos`, `/secciones`, `/stock`, `/categorias`, `/promociones` | Administración | Uno por pantalla |
 
 Las pantallas que todavía no se construyeron muestran un aviso de "en construcción". Si un usuario entra a una ruta sin permiso, vuelve al Home.
 
 ## Pruebas
 
-Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable y los componentes base.
+Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor) y los componentes base.

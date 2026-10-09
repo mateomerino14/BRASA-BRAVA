@@ -54,12 +54,14 @@ export const mockApi = (handlers = {}) => {
   };
   const routes = {...defaults, ...handlers};
   const fetchMock = vi.fn((url, options = {}) => {
-    const key = `${options.method ?? 'GET'} ${url.replace(/^\/api/, '')}`;
+    const [path, queryString = ''] = url.replace(/^\/api/, '').split('?');
+    const key = `${options.method ?? 'GET'} ${path}`;
+    const query = Object.fromEntries(new URLSearchParams(queryString));
     const handler = routes[key];
     if (!handler) {
       return json(404, {message: `Sin mock para ${key}`});
     }
-    const [status, body] = handler(options.body ? JSON.parse(options.body) : undefined);
+    const [status, body] = handler(options.body ? JSON.parse(options.body) : undefined, query);
     return json(status, body);
   });
   vi.stubGlobal('fetch', fetchMock);

@@ -3,6 +3,8 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import {createAuthRouter} from './modules/auth/auth.routes.js';
+import {createEmployeesRouter} from './modules/employees/employees.routes.js';
+import {createRolesRouter} from './modules/roles/roles.routes.js';
 import {errorHandler, notFoundHandler} from './middlewares/errorHandler.js';
 
 // Construye la app Express con sus dependencias inyectadas (db, mailer, config)
@@ -21,6 +23,8 @@ export const createApp = ({db, mailer, config, logger = console}) => {
   });
 
   app.use('/api/auth', createAuthRouter({db, mailer, config, logger}));
+  app.use('/api/employees', createEmployeesRouter({db, config}));
+  app.use('/api/roles', createRolesRouter({db, config}));
   app.use('/api', notFoundHandler);
 
   if (config.STATIC_DIR) {
