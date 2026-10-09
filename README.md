@@ -21,6 +21,7 @@ git clone https://github.com/mateomerino14/BRASA-BRAVA.git
 cd BRASA-BRAVA
 npm install
 cp backend/.env.example backend/.env    # ajustar DATABASE_URL
+npm run db:seed                         # crea las tablas y los datos de prueba
 ```
 
 ## Ejecución
@@ -28,9 +29,22 @@ cp backend/.env.example backend/.env    # ajustar DATABASE_URL
 ```bash
 npm run dev:backend       # API en http://localhost:3000
 npm run dev:frontend      # interfaz en http://localhost:5173
+npm run storybook         # sistema de diseño en http://localhost:6006
 npm test                  # todas las pruebas
 npm run lint              # revisión de estándares de código
 ```
+
+### Usuarios de prueba
+
+| Usuario | Contraseña | Cargo |
+|---|---|---|
+| `DIRECTORIO` (botón Modo directorio) | `Directorio2026` | Acceso total |
+| `admin` | `Brasa2026` | Administrador |
+| `a.romero` | `Brasa2026` | Cajero |
+| `c.mendoza` | `Brasa2026` | Mesero |
+| `r.sanchez` | `Brasa2026` | Cocinero |
+
+Para probar la recuperación de contraseña se usa `c.mendoza@brasabrava.bo`; con `MAIL_DRIVER=console` el código aparece en la terminal del backend.
 
 ## Stack
 
@@ -47,7 +61,7 @@ Monorepo con dos paquetes (npm workspaces):
 
 ```
 BRASA-BRAVA/
-├── backend/              API REST
+├── backend/              API REST (ver backend/README.md)
 ├── frontend/             Interfaz React
 ├── .github/workflows/    Pruebas automáticas en cada Pull Request
 ├── eslint.style.js       Reglas de formato compartidas
@@ -58,12 +72,12 @@ BRASA-BRAVA/
 
 | Módulo | Estado |
 |---|---|
-| Sistema de diseño (paleta, tipografía, menú lateral, modales) | Pendiente |
-| Autenticación (login, modo DIRECTORIO, recuperación con código) | Pendiente |
+| Sistema de diseño (paleta, tipografía, menú lateral, modales) | Terminado |
+| Autenticación (login, modo DIRECTORIO, recuperación con código) | Terminado |
 | Página principal | Pendiente |
 | Aplicación de escritorio | Pendiente |
 | Familia, Caja, Productos, Categorías, Stock, Secciones, Promociones, Empleados | Pendiente |
 
 ## Ramas y pruebas automáticas
 
-El trabajo sigue el flujo `feature/<modulo>` → `develop` → `main` descrito en `reglas.md`. En cada Pull Request, GitHub Actions revisa los estándares de código, corre las pruebas del backend (con base en memoria y con PostgreSQL 16), las del frontend y compila la interfaz.
+El trabajo sigue el flujo `feature/<modulo>` → `develop` → `main` descrito en `reglas.md`. En cada Pull Request, GitHub Actions revisa los estándares de código, corre las pruebas del backend (con base en memoria y con PostgreSQL 16), las del frontend y compila la interfaz y Storybook.
