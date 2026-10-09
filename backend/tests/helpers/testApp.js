@@ -4,6 +4,7 @@ import {createApp} from '../../src/app.js';
 import {loadConfig} from '../../src/config/env.js';
 import {createDb} from '../../src/db/pool.js';
 import {runMigrations} from '../../src/db/migrate.js';
+import {seedDemoData} from '../../src/db/seed.js';
 import {createConsoleMailer} from '../../src/services/mailer.js';
 
 const silentLogger = {info: () => {}, error: () => {}};
@@ -24,6 +25,7 @@ const createTestDb = async () => {
 export const createTestApp = async ({mailer: customMailer} = {}) => {
   const db = await createTestDb();
   await runMigrations(db);
+  await seedDemoData(db);
   const config = loadConfig({
     NODE_ENV: 'test',
     RATE_LIMIT_ENABLED: 'false',
