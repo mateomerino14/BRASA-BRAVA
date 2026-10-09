@@ -1,0 +1,94 @@
+@import '@fontsource/bebas-neue/400.css';
+@import '@fontsource-variable/inter';
+@import '@fontsource/playfair-display-sc/400.css';
+@import 'tailwindcss';
+
+/*
+ * Design tokens de Brasa Brava (tomados de "PALETA DE COLORES" y "TIPOGRAFIA" del Figma).
+ * Tailwind genera utilidades a partir de estas variables: bg-brasa, text-carbon, font-display...
+ */
+@theme {
+  /* Paleta oficial */
+  --color-brasa: #f7941d; /* naranja principal: acciones y sidebar */
+  --color-carbon: #1c1a18; /* texto principal, footer, botón secundario */
+  --color-mostaza: #e8b23d; /* acentos cálidos, carrusel del login */
+  --color-crema: #faf3ea; /* fondos suaves, ítem activo, modales */
+  --color-rojo: #c1272d; /* peligro, cancelar, errores */
+  --color-verde: #2fa84f; /* éxito, estado activo */
+
+  /* Derivados usados en las pantallas del Figma */
+  --color-brasa-oscuro: #d97c0b;
+  --color-rojo-oscuro: #a51f25;
+  --color-cafe: #544435; /* texto secundario */
+  --color-arena: #dac2af; /* bordes */
+  --color-hueso: #f4ede4; /* chips */
+  --color-lienzo: #f7f8fa; /* fondo del área de contenido */
+
+  /* Tipografía: títulos/marca, interfaz y detalle de bienvenida */
+  --font-display: 'Bebas Neue', 'Impact', sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --font-accent: 'Playfair Display SC', 'Georgia', serif;
+
+  --radius-card: 12px;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-float: 0 18px 50px -12px rgb(28 26 24 / 0.35);
+  --shadow-brasa: 0 10px 30px -8px rgb(247 148 29 / 0.55);
+  --shadow-pill: 0 6px 18px -6px rgb(28 26 24 / 0.35);
+
+  --animate-shake: shake 0.4s ease-in-out;
+  --animate-ember: ember 3.5s ease-in-out infinite;
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20%,
+    60% {
+      transform: translateX(-6px);
+    }
+    40%,
+    80% {
+      transform: translateX(6px);
+    }
+  }
+
+  /* Brillo "de brasa" que respira alrededor del logo */
+  @keyframes ember {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgb(247 148 29 / 0.35);
+    }
+    50% {
+      box-shadow: 0 0 0 14px rgb(247 148 29 / 0);
+    }
+  }
+}
+
+/* Fondos decorativos reutilizables */
+@utility bg-sidebar-glow {
+  background-image: radial-gradient(120% 60% at 0% 0%, rgb(255 255 255 / 0.18), transparent 60%);
+}
+
+@utility bg-auth-glow {
+  background-image: radial-gradient(60% 50% at 50% 0%, rgb(232 178 61 / 0.18), transparent 70%);
+}
+
+@layer base {
+  html {
+    @apply bg-lienzo text-carbon font-sans antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brasa;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
