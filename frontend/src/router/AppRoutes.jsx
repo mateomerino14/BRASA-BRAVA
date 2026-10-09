@@ -2,12 +2,13 @@ import {Route, Routes} from 'react-router';
 import {NAVIGATION, flattenNavigation} from '../config/navigation';
 import {LoginPage} from '../features/auth/pages/LoginPage';
 import {HomePage} from '../features/home/pages/HomePage';
+import {EmployeesPage} from '../features/employees/pages/EmployeesPage';
 import {ComingSoonPage} from '../features/shared/pages/ComingSoonPage';
 import {NotFoundPage} from '../features/shared/pages/NotFoundPage';
 import {AppShell} from './AppShell';
 import {RequireAuth, RequirePermission} from './guards';
 
-const PAGES = {home: HomePage};
+const PAGES = {home: HomePage, empleados: EmployeesPage};
 const MODULE_ROUTES = flattenNavigation(NAVIGATION).filter((route) => route.permission !== 'home');
 
 const renderModule = (permission, label) => {
