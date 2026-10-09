@@ -1,0 +1,25 @@
+{
+  "name": "brasa-brava",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Sistema de gestión para el restaurante Brasa Brava (escritorio + web)",
+  "type": "module",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "db:migrate": "npm run db:migrate -w backend",
+    "db:seed": "npm run db:seed -w backend",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build -w frontend",
+    "storybook": "npm run storybook -w frontend",
+    "lint:fix": "npm run lint:fix --workspaces --if-present"
+  }
+}
