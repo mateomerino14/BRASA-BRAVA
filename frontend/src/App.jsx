@@ -1,14 +1,16 @@
-const styles = {
-  page: 'flex min-h-dvh flex-col items-center justify-center gap-2 bg-lienzo',
-  title: 'font-display text-6xl text-brasa',
-  subtitle: 'text-cafe',
-};
+import {BrowserRouter} from 'react-router';
+import {MotionConfig} from 'motion/react';
+import {AuthProvider} from './context/AuthContext';
+import {AppRoutes} from './router/AppRoutes';
 
 export function App() {
   return (
-    <main className={styles.page}>
-      <h1 className={styles.title}>Brasa Brava</h1>
-      <p className={styles.subtitle}>Panel de gestión en construcción</p>
-    </main>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </MotionConfig>
   );
 }

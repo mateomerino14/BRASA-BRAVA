@@ -2,10 +2,11 @@ import path from 'node:path';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import {createAuthRouter} from './modules/auth/auth.routes.js';
 import {errorHandler, notFoundHandler} from './middlewares/errorHandler.js';
 
-// Construye la app Express con sus dependencias inyectadas (db, config)
-export const createApp = ({db, config, logger = console}) => {
+// Construye la app Express con sus dependencias inyectadas (db, mailer, config)
+export const createApp = ({db, mailer, config, logger = console}) => {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 'loopback');
@@ -19,6 +20,7 @@ export const createApp = ({db, config, logger = console}) => {
     res.json({status: 'ok'});
   });
 
+  app.use('/api/auth', createAuthRouter({db, mailer, config, logger}));
   app.use('/api', notFoundHandler);
 
   if (config.STATIC_DIR) {
