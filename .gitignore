@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+release/
+coverage/
+storybook-static/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+backend/uploads/
+electron/pgdata/
