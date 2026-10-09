@@ -1,0 +1,61 @@
+import { Meta, ColorPalette, ColorItem, Typeset } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introducción/Design System" />
+
+# Brasa Brava · Design System
+
+Componentes organizados con **Atomic Design**: átomos → moléculas → organismos → plantillas → páginas
+(estas últimas viven en `src/features/<módulo>/pages`). Los colores y fuentes salen del prototipo de Figma
+y están definidos una sola vez como tokens en `src/styles/index.css` (`@theme` de Tailwind v4).
+
+## Paleta
+
+<ColorPalette>
+  <ColorItem
+    title="brasa"
+    subtitle="Acciones y sidebar"
+    colors={{ brasa: '#F7941D', 'brasa-oscuro': '#D97C0B' }}
+  />
+  <ColorItem
+    title="carbon"
+    subtitle="Texto, footer, botón secundario"
+    colors={{ carbon: '#1C1A18' }}
+  />
+  <ColorItem title="mostaza" subtitle="Acentos cálidos" colors={{ mostaza: '#E8B23D' }} />
+  <ColorItem
+    title="crema"
+    subtitle="Fondos suaves, modales, ítem activo"
+    colors={{ crema: '#FAF3EA', hueso: '#F4EDE4' }}
+  />
+  <ColorItem title="rojo" subtitle="Peligro, cancelar, errores" colors={{ rojo: '#C1272D' }} />
+  <ColorItem title="verde" subtitle="Éxito, estado activo" colors={{ verde: '#2FA84F' }} />
+  <ColorItem
+    title="neutros"
+    subtitle="Texto secundario, bordes, fondo"
+    colors={{ cafe: '#544435', arena: '#DAC2AF', lienzo: '#F7F8FA' }}
+  />
+</ColorPalette>
+
+## Tipografía
+
+**Bebas Neue** — títulos, marca, encabezados y botones (`font-display`)
+
+<Typeset fontFamily="Bebas Neue" fontSizes={[48, 36, 24]} sampleText="Gestión de productos" />
+
+**Inter** — interfaz y cuerpo: tablas, formularios (`font-sans`, por defecto)
+
+<Typeset
+  fontFamily="Inter Variable"
+  fontSizes={[18, 16, 14, 12]}
+  sampleText="Ingrese el correo asociado a su cuenta"
+/>
+
+**Playfair Display SC** — solo el mensaje de bienvenida del Home (`font-accent`)
+
+<Typeset fontFamily="Playfair Display SC" fontSizes={[40]} sampleText="¡Bienvenido de vuelta!" />
+
+## Movimiento
+
+Las animaciones usan [Motion](https://motion.dev): rebote al presionar botones, modales que entran con resorte,
+submenús que se despliegan y una "píldora" que se desliza al ítem activo del menú. Todo respeta la preferencia
+del sistema **"reducir movimiento"**.

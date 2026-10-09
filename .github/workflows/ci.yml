@@ -57,4 +57,10 @@ jobs:
       - run: npm ci
       - run: npm run test:coverage -w frontend
       - run: npm run build -w frontend
+      - run: npm run build-storybook -w frontend
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook
+          path: frontend/storybook-static
+          retention-days: 7
 
