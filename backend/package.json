@@ -1,0 +1,45 @@
+{
+  "name": "@brasa-brava/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/app.js",
+  "exports": {
+    ".": "./src/app.js",
+    "./server": "./src/server.js",
+    "./migrate": "./src/db/migrate.js",
+    "./db": "./src/db/pool.js",
+    "./seed": "./src/db/seed.js"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/server.js",
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "db:migrate": "node --env-file-if-exists=.env src/scripts/migrate.js",
+    "db:seed": "node --env-file-if-exists=.env src/scripts/seed.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "pg-mem": "^3.0.14",
+    "supertest": "^7.3.1",
+    "vitest": "^5.0.3"
+  }
+}
