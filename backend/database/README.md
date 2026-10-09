@@ -23,7 +23,7 @@ Se usan migraciones numeradas porque la aplicacion de escritorio se instala en c
 npm run db:seed
 ```
 
-Carga los cargos, cuatro empleados y el DIRECTORIO, solo si la base esta vacia. Contrasenia de los empleados: `Brasa2026`. Contrasenia del DIRECTORIO: `Directorio2026`.
+Carga los cargos, cinco empleados (uno de ellos dado de baja) y el DIRECTORIO, solo si la base esta vacia. Contrasenia de los empleados: `Brasa2026`. Contrasenia del DIRECTORIO: `Directorio2026`.
 
 Solo para entornos de prueba, nunca en produccion.
 

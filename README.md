@@ -44,6 +44,7 @@ npm run lint              # revisión de estándares de código
 | `a.romero` | `Brasa2026` | Cajero |
 | `c.mendoza` | `Brasa2026` | Mesero |
 | `r.sanchez` | `Brasa2026` | Cocinero |
+| `j.ortiz` | `Brasa2026` | Mesero (dado de baja, no puede ingresar) |
 
 Para probar la recuperación de contraseña se usa `c.mendoza@brasabrava.bo`; con `MAIL_DRIVER=console` el código aparece en la terminal del backend.
 
@@ -79,7 +80,8 @@ BRASA-BRAVA/
 | Autenticación (login, modo DIRECTORIO, recuperación con código) | Terminado |
 | Página principal | Terminado |
 | Aplicación de escritorio | Terminado |
-| Familia, Caja, Productos, Categorías, Stock, Secciones, Promociones, Empleados | Pendiente |
+| Gestión de empleados (listado, filtros, registro, modificación y baja) | Terminado |
+| Familia, Caja, Productos, Categorías, Stock, Secciones, Promociones | Pendiente |
 
 ## Ramas y pruebas automáticas
 
