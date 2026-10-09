@@ -22,7 +22,11 @@ const EMPLOYEES = [
     'Cocinero',
   ],
   ['Marco', 'Vargas', '5214789 LP', 'admin', 'admin@brasabrava.bo', '70112233', 'Administrador'],
+  ['Javier', 'Ortiz', '5912440 LP', 'j.ortiz', 'j.ortiz@brasabrava.bo', '78901234', 'Mesero'],
 ];
+
+// Empleados de demostración que ya fueron dados de baja
+const INACTIVE_ALIASES = ['j.ortiz'];
 
 // Inserta cargos, empleados y el DIRECTORIO de demostración si la base está vacía
 export const seedDemoData = async (
@@ -53,6 +57,9 @@ export const seedDemoData = async (
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [nombre, apellido, ci, alias, correo, telefono, hash, roleIds[cargo]],
     );
+  }
+  for (const alias of INACTIVE_ALIASES) {
+    await db.query('UPDATE empleado SET activo = FALSE WHERE alias = $1', [alias]);
   }
   await db.query('INSERT INTO directorio (alias, contrasena_hash) VALUES ($1, $2)', [
     'DIRECTORIO',
