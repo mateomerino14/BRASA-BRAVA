@@ -6,7 +6,8 @@
   "type": "module",
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "electron"
   ],
   "engines": {
     "node": ">=22"
@@ -14,6 +15,7 @@
   "scripts": {
     "dev:backend": "npm run dev -w backend",
     "dev:frontend": "npm run dev -w frontend",
+    "dev:desktop": "npm run start -w electron",
     "db:migrate": "npm run db:migrate -w backend",
     "db:seed": "npm run db:seed -w backend",
     "lint": "npm run lint --workspaces --if-present",

@@ -1,0 +1,59 @@
+{
+  "name": "@brasa-brava/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Brasa Brava para escritorio: Postgres embebido + API + interfaz en una sola app",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "cross-env ELECTRON_DEV_URL=http://localhost:5173 electron .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "dist": "npm --prefix ../frontend run build && electron-builder --win"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "cross-env": "^10.1.0",
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "@brasa-brava/backend": "^0.1.0",
+    "embedded-postgres": "18.4.0-beta.17",
+    "pg": "^8.23.1"
+  },
+  "build": {
+    "appId": "bo.brasabrava.desktop",
+    "productName": "Brasa Brava",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../frontend/dist",
+        "to": "frontend"
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/@embedded-postgres/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "../frontend/public/favicon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
