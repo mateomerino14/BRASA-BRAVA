@@ -1,14 +1,6 @@
-const resetRequested = 'Si el correo está registrado, recibirá un código de verificación';
+import {respond} from '../../utils/respond.js';
 
-// Responde el error previsto de un servicio o ejecuta la respuesta de éxito
-const respond = (res, result, onSuccess) => {
-  if (result.error) {
-    return res.status(result.status).json({message: result.error});
-  }
-  else {
-    return onSuccess(result);
-  }
-};
+const resetRequested = 'Si el correo está registrado, recibirá un código de verificación';
 
 // Controladores HTTP del módulo de autenticación
 export const createAuthController = (service) => ({

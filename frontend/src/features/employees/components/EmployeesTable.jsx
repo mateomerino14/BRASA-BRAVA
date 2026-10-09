@@ -1,0 +1,104 @@
+import {Ban, Pencil, RotateCcw} from 'lucide-react';
+import {DataTable} from '../../../components/organisms/DataTable';
+import {Pagination} from '../../../components/molecules/Pagination';
+import {Avatar} from '../../../components/atoms/Avatar';
+import {Badge} from '../../../components/atoms/Badge';
+import {IconButton} from '../../../components/atoms/IconButton';
+import {cn} from '../../../lib/cn';
+
+const styles = {
+  person: 'flex items-center gap-3',
+  avatar: 'ring-2 ring-arena/60',
+  name: 'font-semibold text-carbon',
+  inactiveName: 'text-cafe line-through',
+  email: 'text-xs text-cafe',
+  muted: 'text-cafe',
+  actions: 'inline-flex gap-2',
+  inactiveRow: 'bg-hueso/40',
+};
+
+const buildColumns = ({onEdit, onToggleStatus}) => [
+  {
+    key: 'empleado',
+    header: 'Empleado',
+    render: (employee) => (
+      <div className={styles.person}>
+        <Avatar name={`${employee.nombre} ${employee.apellido}`} src={employee.fotoUrl} size={40} className={styles.avatar} />
+        <div>
+          <p className={cn(styles.name, !employee.activo && styles.inactiveName)}>
+            {employee.nombre} {employee.apellido}
+          </p>
+          <p className={styles.email}>{employee.correo}</p>
+        </div>
+      </div>
+    ),
+  },
+  {key: 'ci', header: 'CI', align: 'center', render: (employee) => employee.ci},
+  {key: 'cargo', header: 'Cargo', align: 'center', render: (employee) => <Badge>{employee.cargo.nombre}</Badge>},
+  {key: 'usuario', header: 'Usuario', align: 'center', render: (employee) => employee.alias},
+  {
+    key: 'telefono',
+    header: 'Teléfono',
+    align: 'center',
+    render: (employee) => employee.telefono ?? <span className={styles.muted}>—</span>,
+  },
+  {
+    key: 'estado',
+    header: 'Estado',
+    align: 'center',
+    render: (employee) => (
+      <Badge dot tone={employee.activo ? 'success' : 'danger'}>
+        {employee.activo ? 'Activo' : 'Inhabilitado'}
+      </Badge>
+    ),
+  },
+  {
+    key: 'acciones',
+    header: 'Acciones',
+    align: 'center',
+    render: (employee) => (
+      <span className={styles.actions}>
+        <IconButton
+          icon={Pencil}
+          tone={employee.activo ? 'edit' : 'neutral'}
+          label={`Modificar a ${employee.nombre} ${employee.apellido}`}
+          onClick={() => onEdit(employee)}
+        />
+        <IconButton
+          icon={employee.activo ? Ban : RotateCcw}
+          tone={employee.activo ? 'danger' : 'success'}
+          label={`${employee.activo ? 'Dar de baja' : 'Reactivar'} a ${employee.nombre} ${employee.apellido}`}
+          onClick={() => onToggleStatus(employee)}
+        />
+      </span>
+    ),
+  },
+];
+
+const rangeText = ({page, pageSize, count, total}) => {
+  if (total === 0) {
+    return 'Sin resultados';
+  }
+  const from = (page - 1) * pageSize + 1;
+  return `Mostrando ${from}–${from + count - 1} de ${total} empleados`;
+};
+
+export function EmployeesTable({employees, total, page, pageSize, totalPages, loading, onPageChange, onEdit, onToggleStatus}) {
+  return (
+    <DataTable
+      caption="Empleados"
+      columns={buildColumns({onEdit, onToggleStatus})}
+      rows={employees}
+      rowKey={(employee) => employee.id}
+      loading={loading}
+      emptyMessage="No se encontraron empleados con esos filtros"
+      rowClassName={(employee) => !employee.activo && styles.inactiveRow}
+      footer={
+        <>
+          <span>{rangeText({page, pageSize, count: employees.length, total})}</span>
+          <Pagination page={page} totalPages={totalPages} onChange={onPageChange} />
+        </>
+      }
+    />
+  );
+}
