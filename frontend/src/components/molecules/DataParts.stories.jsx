@@ -5,6 +5,8 @@ import {SegmentedControl} from './SegmentedControl';
 import {StatCard} from './StatCard';
 import {Stepper} from './Stepper';
 import {ChipList} from './ChipList';
+import {DayPicker} from './DayPicker';
+import {PriceTag} from './PriceTag';
 import {Amount} from '../atoms/Amount';
 import {LevelBar} from '../atoms/LevelBar';
 import {NumberInput} from '../atoms/NumberInput';
@@ -55,3 +57,11 @@ export const ContadorConBotones = {render: () => <StepperDemo />};
 export const ChipsDesplegables = {
   render: () => <ChipList label="Mesas del salón" visible={4} items={Array.from({length: 10}, (_, index) => ({id: index, label: `Mesa ${index + 1} · 4`}))} />,
 };
+
+function DaysDemo() {
+  const [value, setValue] = useState('0010000');
+  return <DayPicker value={value} onChange={setValue} />;
+}
+
+export const DiasDeLaSemana = {render: () => <DaysDemo />};
+export const PrecioConPromocion = {render: () => <PriceTag regular={83} promo={70} size="lg" />};
