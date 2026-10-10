@@ -114,3 +114,12 @@ export const countText = (count, singular, plural) => {
   }
   return `${count} ${plural}`;
 };
+
+// Número escrito por el usuario con coma o punto decimal: "35,50" → 35.5 (NaN si no es número)
+export const parseDecimal = (text) => {
+  const clean = String(text ?? '').trim().replace(',', '.');
+  if (!clean) {
+    return Number.NaN;
+  }
+  return Number(clean);
+};

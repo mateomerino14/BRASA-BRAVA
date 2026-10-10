@@ -14,6 +14,8 @@ import {CatalogPanel} from './CatalogPanel';
 import {ItemPickerModal} from './ItemPickerModal';
 import {OrderPanel} from './OrderPanel';
 import {KitchenTicket} from './KitchenTicket';
+import {ReceiptTicket} from './ReceiptTicket';
+import {CheckoutModal} from './CheckoutModal';
 import {PrintPreview} from '../../../components/organisms/PrintPreview';
 import {orderTitle} from '../utils/cart';
 
@@ -35,7 +37,7 @@ const styles = {
 const barIn = {opacity: 0, y: 40};
 const barVisible = {opacity: 1, y: 0};
 
-export function OrderView({order, onBack}) {
+export function OrderView({order, checkout, onBack}) {
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -53,7 +55,11 @@ export function OrderView({order, onBack}) {
       setMobileOpen(false);
     }
   };
-  const panelOrder = {...order, submit};
+  const startCheckout = () => {
+    setMobileOpen(false);
+    checkout.start();
+  };
+  const panelOrder = {...order, submit, startCheckout};
 
   if (order.loading || !order.mesa) {
     return (
@@ -120,6 +126,21 @@ export function OrderView({order, onBack}) {
         {order.venta && order.printing.envio > 0 && (
           <KitchenTicket mesa={order.mesa} venta={order.venta} envio={order.printing.envio} printedAt={order.printing.printedAt} />
         )}
+      </PrintPreview>
+
+      {order.venta && <CheckoutModal checkout={checkout} venta={order.venta} mesa={order.mesa} />}
+
+      <PrintPreview
+        open={checkout.receipt.open}
+        title="Ticket de venta"
+        description={`${order.mesa.nombre} quedó libre. Imprima el ticket para el cliente.`}
+        autoPrint
+        onClose={() => {
+          checkout.closeReceipt();
+          onBack();
+        }}
+      >
+        {checkout.receipt.ticket && <ReceiptTicket ticket={checkout.receipt.ticket} printedAt={checkout.receipt.printedAt} />}
       </PrintPreview>
 
       <ItemPickerModal picker={order.picker} onConfirm={order.confirmPicker} onClose={order.closePicker} />

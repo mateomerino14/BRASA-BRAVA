@@ -4,16 +4,22 @@ import {FloorView} from '../components/FloorView';
 import {OrderView} from '../components/OrderView';
 import {useFloor} from '../hooks/useFloor';
 import {useTableOrder} from '../hooks/useTableOrder';
+import {useCheckout} from '../hooks/useCheckout';
+import {useTodaySales} from '../hooks/useTodaySales';
 
 function FloorScreen({sectionId, onSectionChange, onOpenTable}) {
+  const {user} = useAuth();
   const floor = useFloor({sectionId, onSectionChange});
-  return <FloorView floor={floor} onOpenTable={onOpenTable} />;
+  const sales = useTodaySales();
+  const canEditLink = Boolean(user?.isDirectorio || user?.permissions?.includes('administracion'));
+  return <FloorView floor={floor} sales={sales} canEditLink={canEditLink} onOpenTable={onOpenTable} />;
 }
 
 function OrderScreen({idMesa, onBack}) {
   const {user} = useAuth();
   const order = useTableOrder({idMesa, user});
-  return <OrderView order={order} onBack={onBack} />;
+  const checkout = useCheckout({idMesa, total: order.venta?.total ?? 0});
+  return <OrderView order={order} checkout={checkout} onBack={onBack} />;
 }
 
 // Caja: plano de mesas por sección y, al elegir una, el armado de su pedido; la mesa y la sección viven en la URL
