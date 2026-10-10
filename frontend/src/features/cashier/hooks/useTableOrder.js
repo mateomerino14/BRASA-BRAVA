@@ -29,7 +29,8 @@ export const ingredientGroups = (kind, item) => {
 };
 
 // Pedido de una mesa: lo ya registrado, el catálogo del día, los meseros y las líneas por registrar
-export function useTableOrder({api = cashierApi, idMesa, user}) {
+// "printKitchen" (app de escritorio con impresora de cocina) imprime la comanda directo; si no está o falla, se abre la vista previa
+export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
   const [state, setState] = useState(initialState);
   const [lines, setLines] = useState([]);
   const [idMesero, setIdMesero] = useState('');
@@ -41,6 +42,7 @@ export function useTableOrder({api = cashierApi, idMesa, user}) {
   const [submitError, setSubmitError] = useState('');
   const [notice, setNotice] = useState('');
   const [stockWarning, setStockWarning] = useState('');
+  const [printError, setPrintError] = useState('');
   const [printing, setPrinting] = useState({open: false, envio: 0, printedAt: null});
 
   useEffect(() => {
@@ -149,6 +151,7 @@ export function useTableOrder({api = cashierApi, idMesa, user}) {
     setSaving(true);
     setSubmitError('');
     setStockWarning('');
+    setPrintError('');
     try {
       const result = await api.addOrder(idMesa, toOrderPayload(idMesero, lines));
       setState((current) => ({...current, venta: result.venta}));
@@ -156,13 +159,22 @@ export function useTableOrder({api = cashierApi, idMesa, user}) {
       if (result.sinStock?.length > 0) {
         setStockWarning(`No alcanzó el stock de ${result.sinStock.join(', ')}: quedó en 0 y el pedido se envió igual. Revise el inventario.`);
       }
-      setPrinting({open: true, envio: result.envio, printedAt: new Date()});
+      let message = `Se envió a cocina el envío ${result.envio} del pedido Nº ${result.venta.numero}`;
       if (result.nueva) {
-        setNotice(`Se abrió ${result.mesa.nombre} con el pedido Nº ${result.venta.numero} y se envió a cocina`);
+        message = `Se abrió ${result.mesa.nombre} con el pedido Nº ${result.venta.numero} y se envió a cocina`;
+      }
+      const printedAt = new Date();
+      const printed = await printKitchen?.({mesa: result.mesa, venta: result.venta, envio: result.envio, printedAt});
+      if (printed?.ok) {
+        message = `${message}. Comanda impresa en ${printed.impresora}`;
       }
       else {
-        setNotice(`Se envió a cocina el envío ${result.envio} del pedido Nº ${result.venta.numero}`);
+        if (printed) {
+          setPrintError(`No se pudo imprimir la comanda en cocina: ${printed.error}. Imprímala desde la vista previa.`);
+        }
+        setPrinting({open: true, envio: result.envio, printedAt});
       }
+      setNotice(message);
       return true;
     }
     catch (problem) {
@@ -201,6 +213,7 @@ export function useTableOrder({api = cashierApi, idMesa, user}) {
     submitError,
     notice,
     stockWarning,
+    printError,
     printing,
     openPrint: (envio) => setPrinting({open: true, envio, printedAt: new Date()}),
     closePrint: () => setPrinting((current) => ({...current, open: false})),

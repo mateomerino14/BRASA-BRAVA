@@ -105,7 +105,7 @@ export function TodaySalesModal({sales, canEditLink}) {
         </div>
       </Modal>
 
-      <PrintPreview open={sales.receipt.open} title="Ticket de venta" description="Reimpresión" onClose={sales.closeReceipt}>
+      <PrintPreview open={sales.receipt.open} title="Ticket de venta" description="Reimpresión" destino="caja" onClose={sales.closeReceipt}>
         {sales.receipt.ticket && <ReceiptTicket ticket={sales.receipt.ticket} printedAt={sales.receipt.printedAt} />}
       </PrintPreview>
     </>
