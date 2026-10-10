@@ -1,6 +1,5 @@
 import {useState} from 'react';
 import {AnimatePresence, motion} from 'motion/react';
-import {VISIBLE_SUBCATEGORIES} from '../constants/categories';
 
 const styles = {
   list: 'flex flex-wrap items-center gap-1.5',
@@ -11,30 +10,31 @@ const styles = {
 const chipIn = {opacity: 0, y: -6, scale: 0.8};
 const chipVisible = {opacity: 1, y: 0, scale: 1};
 const STAGGER_SECONDS = 0.04;
+const DEFAULT_VISIBLE = 3;
 
-// Chips de subcategorías: muestra las primeras y despliega el resto con animación
-export function SubcategoryChips({categoryName, subcategories}) {
+// Lista de chips que muestra los primeros y despliega el resto con "+N más" y entrada escalonada
+export function ChipList({label, items, visible = DEFAULT_VISIBLE}) {
   const [expanded, setExpanded] = useState(false);
-  const hidden = subcategories.length - VISIBLE_SUBCATEGORIES;
-  let visible = subcategories;
+  const hidden = items.length - visible;
+  let shown = items;
   if (!expanded) {
-    visible = subcategories.slice(0, VISIBLE_SUBCATEGORIES);
+    shown = items.slice(0, visible);
   }
 
   return (
-    <motion.ul layout aria-label={`Subcategorías de ${categoryName}`} className={styles.list}>
+    <motion.ul layout aria-label={label} className={styles.list}>
       <AnimatePresence initial={false}>
-        {visible.map((sub, index) => (
+        {shown.map((item, index) => (
           <motion.li
-            key={sub.id}
+            key={item.id}
             layout
             initial={chipIn}
             animate={chipVisible}
             exit={chipIn}
-            transition={{delay: Math.max(0, index - VISIBLE_SUBCATEGORIES) * STAGGER_SECONDS}}
+            transition={{delay: Math.max(0, index - visible) * STAGGER_SECONDS}}
             className={styles.chip}
           >
-            {sub.nombre}
+            {item.label}
           </motion.li>
         ))}
       </AnimatePresence>
