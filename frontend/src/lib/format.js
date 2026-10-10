@@ -37,3 +37,11 @@ export const rangeText = ({page, pageSize, count, total, itemLabel}) => {
   const from = (page - 1) * pageSize + 1;
   return `Mostrando ${from}–${from + count - 1} de ${total} ${itemLabel}`;
 };
+
+const priceFormatter = new Intl.NumberFormat('es-BO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+// Monto con separadores bolivianos: 1234.5 → "1.234,50"
+export const formatAmount = (value) => priceFormatter.format(value);
+
+// Precio en bolivianos: 1234.5 → "Bs 1.234,50"
+export const formatPrice = (value) => `Bs ${formatAmount(value)}`;

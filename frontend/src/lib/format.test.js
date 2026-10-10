@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {formatDateTime, getInitials, rangeText} from './format';
+import {formatDateTime, formatPrice, getInitials, rangeText} from './format';
 
 describe('format', () => {
   it('obtiene hasta dos iniciales', () => {
@@ -19,5 +19,12 @@ describe('rangeText', () => {
   it('describe el rango visible o la falta de resultados', () => {
     expect(rangeText({page: 2, pageSize: 5, count: 3, total: 8, itemLabel: 'productos'})).toBe('Mostrando 6–8 de 8 productos');
     expect(rangeText({page: 1, pageSize: 5, count: 0, total: 0, itemLabel: 'productos'})).toBe('Sin resultados');
+  });
+});
+
+describe('formatPrice', () => {
+  it('usa Bs, coma decimal y punto de miles', () => {
+    expect(formatPrice(1234.5)).toBe('Bs 1.234,50');
+    expect(formatPrice(10)).toBe('Bs 10,00');
   });
 });

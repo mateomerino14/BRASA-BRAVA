@@ -1,8 +1,10 @@
 import {useState} from 'react';
 import {Textarea} from './Textarea';
 import {Thumbnail} from './Thumbnail';
+import {Switch} from './Switch';
+import {MoneyInput} from './MoneyInput';
 
-export default {title: 'Átomos/Imagen y texto largo'};
+export default {title: 'Átomos/Imagen, texto largo y montos'};
 
 function TextareaDemo() {
   const [value, setValue] = useState('Hamburguesas a la parrilla con pan artesanal');
@@ -27,3 +29,12 @@ export const Miniaturas = {
     </div>
   ),
 };
+
+function SwitchDemo() {
+  const [checked, setChecked] = useState(true);
+  return <Switch label="Disponible" checked={checked} onChange={setChecked} onText="Disponible" offText="Agotado" />;
+}
+
+export const Interruptor = {render: () => <SwitchDemo />};
+export const InterruptorDeshabilitado = {render: () => <Switch label="Disponible" checked={false} onChange={() => {}} disabled offText="Agotado" />};
+export const CampoDePrecio = {render: () => <div className="w-60"><MoneyInput aria-label="Precio" defaultValue="35,50" /></div>};

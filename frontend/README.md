@@ -65,6 +65,7 @@ Todas las pantallas de administración se arman igual, así que una pantalla nue
 | `molecules/FilterSelect` | Filtros de la barra con el mismo tamaño |
 | `hooks/usePaginatedList` | Búsqueda con espera, filtros, página, filas por página y orden guardados en la URL (`?search=...&estado=inactivos&sort=nombre&dir=desc`), recarga y aviso temporal |
 | `hooks/useStatusToggle` | Confirmar una baja o reactivación |
+| `hooks/useEntityForm` | Formulario de registro y modificación: valores, validación, guardado, foto opcional y aviso si los datos se guardaron pero la foto no (el reintento modifica en vez de duplicar) |
 
 Como el estado vive en la URL, recargar la página o volver atrás conserva búsqueda, filtros, página y orden, y se puede compartir el enlace. Los valores por defecto no se escriben para que la URL quede limpia. Cada módulo solo define su servicio, sus columnas (con `sortKey` en las ordenables), sus filtros y sus mensajes.
 
@@ -73,7 +74,7 @@ Como el estado vive en la URL, recargar la página o volver atrás conserva bús
 ```
 src/
 ├── components/
-│   ├── atoms/           Button, IconButton, Input, PasswordInput, Textarea, Select, Avatar, Thumbnail,
+│   ├── atoms/           Button, IconButton, Input, PasswordInput, MoneyInput, Textarea, Select, Switch, Avatar, Thumbnail,
 │   │                    Badge, Logo, Spinner, SocialIcon
 │   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination, PageSizeSelect,
 │   │                    FilterSelect, ImagePicker, TagInput
@@ -85,6 +86,7 @@ src/
 │   ├── home/            Bienvenida con reloj y accesos rápidos
 │   ├── employees/       Gestión de empleados: tabla, filtros, registro, modificación y baja
 │   ├── categories/      Gestión de categorías: foto, subcategorías, filtros, registro y baja
+│   ├── products/        Gestión de productos: precio, foto, categoría y subcategoría, disponible/agotado y baja
 │   └── shared/          Páginas "en construcción" y 404
 ├── config/              Menú lateral (navigation.js), valores de las tablas (lists.js) y anchos (breakpoints.js)
 ├── hooks/               Hooks compartidos: listado paginado, cambio de estado, foco de diálogos y media queries
@@ -148,10 +150,11 @@ Todo respeta la opción del sistema "reducir movimiento".
 | `/familia`, `/caja` | Familia y Caja | `familia`, `caja` |
 | `/empleados` | Gestión de empleados | `empleados` |
 | `/categorias` | Gestión de categorías | `categorias` |
-| `/productos`, `/secciones`, `/stock`, `/promociones` | Administración | Uno por pantalla |
+| `/productos` | Gestión de productos | `productos` |
+| `/secciones`, `/stock`, `/promociones` | Administración | Uno por pantalla |
 
 Las pantallas que todavía no se construyeron muestran un aviso de "en construcción". Si un usuario entra a una ruta sin permiso, vuelve al Home.
 
 ## Pruebas
 
-Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), el comportamiento estándar de las pantallas de gestión (filtros y orden en la URL, filas por página, limpiar filtros y orden en tarjetas), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.
+Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), la de productos (subcategoría dependiente de la categoría, precio con coma, interruptor de agotado, categoría de baja al modificar), el comportamiento estándar de las pantallas de gestión (filtros y orden en la URL, filas por página, limpiar filtros y orden en tarjetas), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.

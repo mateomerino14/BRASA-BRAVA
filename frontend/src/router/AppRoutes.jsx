@@ -3,13 +3,14 @@ import {NAVIGATION, flattenNavigation} from '../config/navigation';
 import {LoginPage} from '../features/auth/pages/LoginPage';
 import {HomePage} from '../features/home/pages/HomePage';
 import {CategoriesPage} from '../features/categories/pages/CategoriesPage';
+import {ProductsPage} from '../features/products/pages/ProductsPage';
 import {EmployeesPage} from '../features/employees/pages/EmployeesPage';
 import {ComingSoonPage} from '../features/shared/pages/ComingSoonPage';
 import {NotFoundPage} from '../features/shared/pages/NotFoundPage';
 import {AppShell} from './AppShell';
 import {RequireAuth, RequirePermission} from './guards';
 
-const PAGES = {home: HomePage, empleados: EmployeesPage, categorias: CategoriesPage};
+const PAGES = {home: HomePage, empleados: EmployeesPage, categorias: CategoriesPage, productos: ProductsPage};
 const MODULE_ROUTES = flattenNavigation(NAVIGATION).filter((route) => route.permission !== 'home');
 
 const renderModule = (permission, label) => {
