@@ -3,6 +3,8 @@ import {fn} from 'storybook/test';
 import {AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Boxes, PackageX, Scale} from 'lucide-react';
 import {SegmentedControl} from './SegmentedControl';
 import {StatCard} from './StatCard';
+import {Stepper} from './Stepper';
+import {ChipList} from './ChipList';
 import {Amount} from '../atoms/Amount';
 import {LevelBar} from '../atoms/LevelBar';
 import {NumberInput} from '../atoms/NumberInput';
@@ -42,4 +44,14 @@ export const MontosYNiveles = {
       <NumberInput aria-label="Cantidad" suffix="kg" defaultValue="3,5" />
     </div>
   ),
+};
+
+function StepperDemo() {
+  const [value, setValue] = useState(4);
+  return <Stepper label="Capacidad" value={value} min={1} max={30} onChange={setValue} />;
+}
+
+export const ContadorConBotones = {render: () => <StepperDemo />};
+export const ChipsDesplegables = {
+  render: () => <ChipList label="Mesas del salón" visible={4} items={Array.from({length: 10}, (_, index) => ({id: index, label: `Mesa ${index + 1} · 4`}))} />,
 };

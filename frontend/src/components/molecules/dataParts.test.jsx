@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import {Boxes, Scale} from 'lucide-react';
 import {SegmentedControl} from './SegmentedControl';
 import {StatCard} from './StatCard';
+import {Stepper} from './Stepper';
+import {ChipList} from './ChipList';
 import {Amount} from '../atoms/Amount';
 import {NumberInput} from '../atoms/NumberInput';
 import {levelRatio} from '../../lib/level';
@@ -44,5 +46,26 @@ describe('Piezas de stock', () => {
     expect(levelRatio(5, 5)).toBeCloseTo(1 / 3);
     expect(levelRatio(100, 5)).toBe(1);
     expect(levelRatio(3, 0)).toBe(1);
+  });
+});
+
+describe('Stepper y ChipList', () => {
+  it('Stepper suma, resta y respeta el rango', async () => {
+    const onChange = vi.fn();
+    const {rerender} = render(<Stepper label="Capacidad" value={1} min={1} max={3} onChange={onChange} />);
+    expect(screen.getByRole('button', {name: 'Restar capacidad'})).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', {name: 'Sumar capacidad'}));
+    expect(onChange).toHaveBeenLastCalledWith(2);
+    rerender(<Stepper label="Capacidad" value={3} min={1} max={3} onChange={onChange} />);
+    expect(screen.getByRole('button', {name: 'Sumar capacidad'})).toBeDisabled();
+    await userEvent.type(screen.getByLabelText('Capacidad'), '9');
+    expect(onChange).toHaveBeenLastCalledWith(3);
+  });
+
+  it('ChipList despliega los chips ocultos', async () => {
+    render(<ChipList label="Mesas" visible={1} items={[{id: 1, label: 'M1'}, {id: 2, label: 'M2'}]} />);
+    expect(screen.queryByText('M2')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', {name: '+1 más'}));
+    expect(screen.getByText('M2')).toBeInTheDocument();
   });
 });
