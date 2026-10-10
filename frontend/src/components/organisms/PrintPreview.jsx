@@ -1,3 +1,4 @@
+import {useEffect} from 'react';
 import {createPortal} from 'react-dom';
 import {Printer} from 'lucide-react';
 import {Modal} from './Modal';
@@ -10,7 +11,14 @@ const styles = {
 };
 
 // Vista previa de un documento para la ticketera; "Imprimir" abre el diálogo de impresión con solo ese documento
-export function PrintPreview({open, title, description, onClose, children}) {
+// "autoPrint" abre el diálogo de impresión apenas se muestra (ticket al cobrar)
+export function PrintPreview({open, title, description, onClose, autoPrint = false, children}) {
+  useEffect(() => {
+    if (open && autoPrint) {
+      window.print();
+    }
+  }, [open, autoPrint]);
+
   return (
     <>
       <Modal open={open} onClose={onClose} title={title} description={description} size="sm">
