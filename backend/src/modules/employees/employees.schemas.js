@@ -1,8 +1,7 @@
 import {z} from 'zod';
+import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
 
 const minPasswordLength = 8;
-const defaultPageSize = 5;
-const maxPageSize = 50;
 
 const text = (label, max) => z.string({error: `Ingrese ${label}`}).trim().min(1, `Ingrese ${label}`).max(max, `${label} es demasiado largo`);
 
@@ -31,10 +30,9 @@ export const statusSchema = z.object({activo: z.boolean({error: 'Indique el esta
 
 export const idParamSchema = z.object({id: z.coerce.number().int().positive('Empleado inválido')});
 
-export const listQuerySchema = z.object({
-  search: z.string().trim().max(60).optional().default(''),
+// Columnas por las que se puede ordenar el listado
+export const EMPLOYEE_SORT_KEYS = ['nombre', 'ci', 'cargo', 'usuario', 'estado'];
+
+export const listQuerySchema = baseListQuery(EMPLOYEE_SORT_KEYS, {
   idCargo: z.coerce.number().int().positive().optional(),
-  estado: z.enum(['todos', 'activos', 'inactivos']).optional().default('todos'),
-  page: z.coerce.number().int().positive().optional().default(1),
-  pageSize: z.coerce.number().int().positive().max(maxPageSize).optional().default(defaultPageSize),
 });

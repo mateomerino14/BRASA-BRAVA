@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {fn} from 'storybook/test';
 import {CategoriesTable} from './components/CategoriesTable';
 import {SubcategoryChips} from './components/SubcategoryChips';
+import {fakeList} from '../../stories/fakeList';
 
 export default {title: 'Pantallas/Categorías', parameters: {layout: 'padded'}};
 
@@ -13,11 +14,10 @@ const CATEGORIES = [
   {id: 4, nombre: 'Combos Especiales', descripcion: null, imagenUrl: null, activa: false, totalProductos: 0, subcategorias: subs('Dúo Parrillero', 'Familiar Brava')},
 ];
 
-function TableDemo({loading = false, rows = CATEGORIES}) {
-  const [page, setPage] = useState(1);
-  return (
-    <CategoriesTable categories={rows} total={rows.length} page={page} pageSize={5} totalPages={1} loading={loading} onPageChange={setPage} onEdit={fn()} onToggleStatus={fn()} />
-  );
+function TableDemo({rows = CATEGORIES}) {
+  const [sort, setSort] = useState({key: '', dir: 'asc'});
+  const list = fakeList({items: rows, sort, hasActiveFilters: rows.length === 0, handlers: {changeSort: (key, dir) => setSort({key, dir: dir ?? 'asc'})}});
+  return <CategoriesTable list={list} onEdit={fn()} onToggleStatus={fn()} />;
 }
 
 export const Tabla = {render: () => <TableDemo />};

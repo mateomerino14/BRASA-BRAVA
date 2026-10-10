@@ -142,4 +142,15 @@ describe('Gestión de categorías', () => {
     expect(missing.body.message).toBe('Adjunte una imagen');
     expect((await request(ctx.app).get('/uploads/no-existe.png')).status).toBe(404);
   });
+
+  it('ordena por columnas permitidas y rechaza las demás', async () => {
+    const asc = await api('get', '/api/categories?sort=nombre&dir=asc');
+    expect(asc.body.items.map((item) => item.nombre)).toEqual(['Bebidas y Refrescos', 'Combos Especiales', 'Guarniciones y Extras', 'Hamburguesas']);
+    const desc = await api('get', '/api/categories?sort=nombre&dir=desc&pageSize=1');
+    expect(desc.body.items[0].nombre).toBe('Hamburguesas');
+    const byStatus = await api('get', '/api/categories?sort=estado&dir=asc');
+    expect(byStatus.body.items[0].nombre).toBe('Combos Especiales');
+    expect((await api('get', '/api/categories?sort=imagen_url;DROP TABLE categoria')).status).toBe(400);
+    expect((await api('get', '/api/categories?dir=arriba')).status).toBe(400);
+  });
 });
