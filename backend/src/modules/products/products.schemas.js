@@ -19,6 +19,23 @@ export const productSchema = z.object({
   idSubcategoria: id('Seleccione una subcategoría'),
 });
 
+const MAX_RECIPE_ITEMS = 30;
+const RECIPE_DECIMALS = 3;
+const MAX_RECIPE_QUANTITY = 99999.999;
+
+const hasUniqueIngredients = (items) => new Set(items.map((item) => item.idInsumo)).size === items.length;
+
+// Receta completa del producto (reemplaza la anterior); vacía la quita
+export const recipeSchema = z.object({
+  ingredientes: z
+    .array(z.object({
+      idInsumo: id('Seleccione un insumo'),
+      cantidad: decimalSchema({label: 'la cantidad', decimals: RECIPE_DECIMALS, max: MAX_RECIPE_QUANTITY}),
+    }), {error: 'Envíe la lista de ingredientes'})
+    .max(MAX_RECIPE_ITEMS, `Máximo ${MAX_RECIPE_ITEMS} ingredientes por receta`)
+    .refine(hasUniqueIngredients, 'Hay insumos repetidos en la receta'),
+});
+
 export const statusSchema = z.object({activo: z.boolean({error: 'Indique el estado'})});
 
 export const availabilitySchema = z.object({disponible: z.boolean({error: 'Indique la disponibilidad'})});
