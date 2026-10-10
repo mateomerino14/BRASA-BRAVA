@@ -1,6 +1,6 @@
 import {HttpError} from '../utils/httpError.js';
 
-// Responde 404 para rutas de la API que no existen
+// Responde 404 para rutas de la API o archivos subidos que no existen
 export const notFoundHandler = (_req, res) => {
   res.status(404).json({message: 'Ruta no encontrada'});
 };

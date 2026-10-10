@@ -7,12 +7,13 @@ Scripts SQL del esquema de PostgreSQL. No hace falta correrlos a mano: la API lo
 Los archivos de `migrations/` se aplican en orden alfabetico, una sola vez cada uno:
 
 1. `001_autenticacion.sql` - cargos, permisos por pantalla, empleados, DIRECTORIO y codigos de recuperacion
+2. `002_categorias.sql` - categorias del menu y sus subcategorias
 
 La tabla `schema_migrations` guarda cuales ya se aplicaron, asi que una base nueva y una existente quedan siempre en el mismo estado.
 
 ## Como agregar un cambio
 
-1. Crear un archivo nuevo con el siguiente numero (por ejemplo `002_productos.sql`).
+1. Crear un archivo nuevo con el siguiente numero (por ejemplo `003_productos.sql`).
 2. Nunca editar una migracion que ya se subio: los locales que la aplicaron no volverian a correrla.
 
 Se usan migraciones numeradas porque la aplicacion de escritorio se instala en cada local y se actualiza sola, sin que nadie corra scripts en la base.
@@ -23,7 +24,7 @@ Se usan migraciones numeradas porque la aplicacion de escritorio se instala en c
 npm run db:seed
 ```
 
-Carga los cargos, cinco empleados (uno de ellos dado de baja) y el DIRECTORIO, solo si la base esta vacia. Contrasenia de los empleados: `Brasa2026`. Contrasenia del DIRECTORIO: `Directorio2026`.
+Carga los cargos, cinco empleados (uno de ellos dado de baja), el DIRECTORIO y cuatro categorias con sus subcategorias (una dada de baja). Cada bloque se carga solo si su tabla esta vacia. Contrasenia de los empleados: `Brasa2026`. Contrasenia del DIRECTORIO: `Directorio2026`.
 
 Solo para entornos de prueba, nunca en produccion.
 
@@ -36,4 +37,6 @@ Solo para entornos de prueba, nunca en produccion.
 | empleado | Empleados del local, con alias de ingreso y correo |
 | directorio | Cuenta unica del duenio, con acceso total |
 | codigo_recuperacion | Codigos de 6 digitos para recuperar la contrasenia, guardados cifrados, con vencimiento e intentos |
+| categoria | Secciones del menu, con descripcion, foto y estado |
+| subcategoria | Subdivisiones de cada categoria; se dan de baja en vez de borrarse |
 | schema_migrations | Control interno de las migraciones aplicadas |

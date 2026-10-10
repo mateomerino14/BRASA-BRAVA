@@ -27,7 +27,7 @@ npm run dist                 # instalador .exe en release/
 | `src/services.js` | Arranca PostgreSQL embebido en `pgdata/` en un puerto libre, crea la base si no existe, levanta la API (que aplica las migraciones) y sirve la interfaz |
 | `src/main.js` | Abre la ventana y, al cerrarla, detiene la API y la base de forma ordenada |
 
-Los datos quedan en la carpeta del usuario, así que actualizar la aplicación no los borra.
+Los datos (la base en `pgdata/` y las fotos en `uploads/`) quedan en la carpeta del usuario, así que actualizar la aplicación no los borra.
 
 ## Configuración
 

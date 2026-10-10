@@ -1,3 +1,6 @@
+import {mkdtemp} from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import {newDb} from 'pg-mem';
 import pg from 'pg';
 import {createApp} from '../../src/app.js';
@@ -30,6 +33,7 @@ export const createTestApp = async ({mailer: customMailer} = {}) => {
     NODE_ENV: 'test',
     RATE_LIMIT_ENABLED: 'false',
     JWT_SECRET: 'test-secret-1234567890',
+    UPLOADS_DIR: await mkdtemp(path.join(os.tmpdir(), 'brasa-uploads-')),
   });
   const mailer = customMailer ?? createConsoleMailer(silentLogger);
   const app = createApp({db, mailer, config, logger: silentLogger});
