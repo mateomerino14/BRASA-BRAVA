@@ -1,9 +1,9 @@
 import pg from 'pg';
 
-// Devuelve BIGINT y NUMERIC como número en vez de string (ids y montos caben en Number)
+// Devuelve BIGINT y NUMERIC como número
 pg.types.setTypeParser(pg.types.builtins.INT8, (value) => Number(value));
 pg.types.setTypeParser(pg.types.builtins.NUMERIC, (value) => Number(value));
-// Devuelve DATE como texto YYYY-MM-DD: una fecha de calendario no tiene zona horaria
+// Devuelve DATE como texto YYYY-MM-DD
 pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
 
 const maxConnections = 10;
@@ -13,7 +13,9 @@ export const createPool = (connectionString) => new pg.Pool({connectionString, m
 
 // Envuelve un pool en la interfaz mínima que usan los repositorios
 export const createDb = (pool) => ({
+  // Ejecuta una consulta con parámetros
   query: (text, params = []) => pool.query(text, params),
+  // Ejecuta el trabajo en una transacción y la deshace si falla
   transaction: async (work) => {
     const client = await pool.connect();
     try {
@@ -30,5 +32,6 @@ export const createDb = (pool) => ({
       client.release();
     }
   },
+  // Cierra todas las conexiones
   close: () => pool.end(),
 });

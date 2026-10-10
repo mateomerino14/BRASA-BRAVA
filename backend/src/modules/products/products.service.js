@@ -6,8 +6,10 @@ const invalidSubcategory = {error: 'Seleccione una subcategoría activa', status
 const invalidIngredient = {error: 'Hay insumos inexistentes o dados de baja en la receta', status: 400};
 
 const QUANTITY_DECIMALS = 3;
+// Redondea una cantidad a 3 decimales
 const round = (value) => Number(Number(value).toFixed(QUANTITY_DECIMALS));
 
+// Convierte una fila de receta en un insumo de la API
 const toRecipeItem = (row) => ({
   idInsumo: row.id_insumo,
   nombre: row.nombre,
@@ -24,7 +26,6 @@ const toProduct = (row) => ({
   descripcion: row.descripcion,
   precio: Number(row.precio),
   imagenUrl: row.imagen_url,
-  // null cuando el producto todavía no tiene receta
   porciones: row.porciones ?? null,
   activo: row.activo,
   disponible: row.disponible,
@@ -55,7 +56,7 @@ export const createProductsService = ({repository, transaction, images}) => {
     return {product: toProduct(row)};
   };
 
-  // Valida nombre único y que la subcategoría (y su categoría) estén activas; conservar la actual siempre se permite
+  // Valida nombre único y subcategoría activa
   const checkRules = async (data, current) => {
     if (await repository.findByName(data.nombre, current?.id_producto)) {
       return duplicateName;
@@ -137,7 +138,7 @@ export const createProductsService = ({repository, transaction, images}) => {
     insumos: (await repository.recipeOptions()).map((row) => ({id: row.id_insumo, nombre: row.nombre, unidad: row.unidad, stockActual: round(row.stock_actual)})),
   });
 
-  // Reemplaza la receta; los insumos nuevos deben estar activos, los que ya estaban se pueden conservar
+  // Reemplaza la receta del producto
   const saveRecipe = async (id, {ingredientes}) => {
     if (!await repository.findById(id)) {
       return notFound;

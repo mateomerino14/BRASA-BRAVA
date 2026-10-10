@@ -18,6 +18,7 @@ const invalidExclusion = {error: 'Hay ingredientes quitados que no son de la rec
 // Error de un producto o promoción que no se puede vender hoy
 const notSellable = (nombre, motivo) => ({error: `${nombre} ${motivo}`, status: 400});
 
+// Nombre completo de un empleado
 const fullName = (nombre, apellido) => `${nombre} ${apellido}`;
 
 // Agrupa filas por una clave: Map(clave → filas)
@@ -39,7 +40,7 @@ const THOUSAND = 1000;
 // Redondea una cantidad de stock a 3 decimales
 const round3 = (value) => Math.round(value * THOUSAND) / THOUSAND;
 
-// Insumos que consume un producto: su receta por la cantidad, sin los ingredientes quitados
+// Insumos que consume un producto sin los ingredientes quitados
 const addRecipeUsage = (usage, recipe, units, removed) => {
   for (const row of recipe) {
     if (removed.has(row.id_insumo)) {
@@ -49,7 +50,7 @@ const addRecipeUsage = (usage, recipe, units, removed) => {
   }
 };
 
-// Total de cada insumo que consume un envío (en combos, la receta de cada producto por su cantidad en el combo)
+// Total de cada insumo que consume un envío
 export const consumptionOf = (lines, recipes, promotionItems) => {
   const usage = new Map();
   for (const line of lines) {
@@ -96,11 +97,12 @@ const toDetail = (row, exclusions, combos) => {
   };
 };
 
-// Reglas de negocio de Caja: plano de mesas, catálogo del día y registro de pedidos
+// Reglas de negocio de Caja
 export const createSalesService = ({repository, transaction, clock, timeZone}) => {
+  // Fecha de hoy en la zona del local
   const currentDay = () => localToday(clock(), timeZone);
 
-  // Secciones activas con sus mesas (libres u ocupadas) y el resumen del salón
+  // Secciones activas con sus mesas y el resumen del salón
   const floor = async () => {
     const rows = await repository.floor();
     const sections = [];
@@ -134,7 +136,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     return {secciones: sections, summary};
   };
 
-  // Lo que se puede vender hoy: productos, promociones vigentes con sus productos y las recetas de todos ellos
+  // Productos, promociones vigentes y recetas que se venden hoy
   const loadToday = async () => {
     const products = await repository.sellableProducts();
     const day = currentDay();
@@ -170,7 +172,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     };
   };
 
-  // Catálogo de venta: categorías, productos con su receta y promociones vigentes hoy con todos sus productos a la venta
+  // Catálogo de venta de hoy
   const catalog = async () => {
     const {day, products, promotions, promotionItems, recipes} = await loadToday();
     const categories = new Map();
@@ -205,7 +207,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     meseros: (await repository.waiters()).map((row) => ({id: row.id_empleado, nombre: fullName(row.nombre, row.apellido), cargo: row.cargo})),
   });
 
-  // Venta abierta de una mesa con todas sus líneas (null si la mesa está libre)
+  // Venta abierta de una mesa con todas sus líneas
   const saleOf = async (idMesa) => {
     const row = await repository.openSale(idMesa);
     if (!row) {
@@ -248,7 +250,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     };
   };
 
-  // Comprueba que los ingredientes quitados sean de la receta de los productos permitidos
+  // Comprueba que los ingredientes quitados sean de la receta
   const checkExclusions = (exclusions, allowedProducts, recipes) => exclusions.every((item) => (
     allowedProducts.has(item.idProducto)
     && (recipes.get(item.idProducto) ?? []).some((row) => row.id_insumo === item.idInsumo)
@@ -263,7 +265,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     return [...seen.values()];
   };
 
-  // Convierte cada línea pedida en una línea con nombre y precio de hoy, o devuelve el motivo del rechazo
+  // Convierte una línea pedida en una línea con nombre y precio de hoy
   const priceLines = async (items) => {
     const loaded = await loadToday();
     const products = new Map(loaded.products.map((row) => [row.id_producto, row]));
@@ -311,8 +313,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     return {idCajero: user.id, cajero: user.alias};
   };
 
-  // Descuenta del stock lo que consume el envío sin bloquear nunca la venta: si no alcanza, el insumo queda en 0.
-  // Devuelve los nombres de los insumos que no alcanzaron
+  // Descuenta del stock lo que consume el envío sin bloquear la venta
   const discountStock = async (tx, usage, {idCajero, cajero, motivo}) => {
     const shortages = [];
     for (const row of await tx.lockIngredients([...usage.keys()])) {
@@ -338,7 +339,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     return shortages;
   };
 
-  // Registra un envío de la mesa: abre la venta si está libre o suma las líneas a la venta abierta
+  // Registra un envío de la mesa y abre la venta si está libre
   const addOrder = async (idMesa, {idMesero, items}, user) => {
     const table = await repository.findTable(idMesa);
     if (!table) {
@@ -383,7 +384,6 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
       result = await register();
     }
     catch (error) {
-      // Otro envío abrió la venta de esta mesa al mismo tiempo: se reintenta una vez sumándose a esa venta
       if (error.code !== UNIQUE_VIOLATION) {
         throw error;
       }
@@ -392,7 +392,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     return {...await getTable(idMesa), created: result.opened, envio: result.envio, sinStock: result.shortages};
   };
 
-  // Ticket de venta: todo lo acumulado de la mesa, con líneas iguales juntas, pagos y cambio
+  // Ticket de venta con líneas iguales juntas, pagos y cambio
   const receipt = async (idVenta) => {
     const row = await repository.saleById(idVenta);
     if (!row) {
@@ -434,7 +434,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     };
   };
 
-  // Cobra la venta abierta de una mesa: todo debe estar listo en cocina y los pagos deben sumar el total exacto
+  // Cobra la venta abierta de una mesa
   const checkout = async (idMesa, {pagos, recibido}, user) => {
     if (!await repository.findTable(idMesa)) {
       return tableNotFound;
@@ -480,7 +480,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     return receipt(result.idVenta);
   };
 
-  // Ventas cobradas hoy (día del local) con sus pagos y los totales por método
+  // Ventas cobradas hoy con sus pagos y totales por método
   const todaySales = async () => {
     const day = currentDay();
     const {start, end} = localDayRange(day.date, timeZone);

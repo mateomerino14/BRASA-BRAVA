@@ -7,6 +7,7 @@ const duplicateName = {error: 'Ya existe una promoción con ese nombre', status:
 const invalidProduct = {error: 'Hay productos inexistentes o dados de baja en la promoción', status: 400};
 const comboNotCheaper = {error: 'El precio del combo debe ser menor que comprar los productos por separado', status: 400};
 
+// Convierte una fila en un producto de la promoción
 const toItem = (row) => ({idProducto: row.id_producto, nombre: row.nombre, precio: Number(row.precio), cantidad: row.cantidad, activo: row.activo});
 
 // Convierte una fila de la base al formato que consume el frontend
@@ -31,6 +32,7 @@ const toPromotion = (row, products, today) => {
 
 // Reglas de negocio de promociones
 export const createPromotionsService = ({repository, transaction, images, clock, timeZone}) => {
+  // Fecha de hoy en la zona del local
   const today = () => localToday(clock(), timeZone);
 
   // Devuelve una promoción con sus productos y precios
@@ -42,7 +44,7 @@ export const createPromotionsService = ({repository, transaction, images, clock,
     return {promotion: toPromotion(row, await repository.products([id]), today())};
   };
 
-  // Devuelve una página del listado y cuántas hay vigentes, programadas y vencidas
+  // Devuelve una página del listado con el resumen de vigencia
   const list = async (filters) => {
     const day = today();
     const rows = await repository.list(filters, day);
@@ -61,7 +63,7 @@ export const createPromotionsService = ({repository, transaction, images, clock,
     productos: (await repository.productOptions()).map((row) => ({id: row.id_producto, nombre: row.nombre, precio: Number(row.precio), categoria: row.categoria})),
   });
 
-  // Nombre único, productos válidos (los nuevos activos) y combo más barato que por separado
+  // Valida nombre, productos y precio del combo
   const checkRules = async (data, currentId) => {
     if (await repository.findByName(data.nombre, currentId)) {
       return duplicateName;

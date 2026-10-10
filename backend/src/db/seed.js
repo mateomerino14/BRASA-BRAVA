@@ -29,7 +29,7 @@ const EMPLOYEES = [
 // Empleados de demostración que ya fueron dados de baja
 const INACTIVE_ALIASES = ['j.ortiz'];
 
-// Categorías del menú con sus subcategorías; las de la lista INACTIVE_CATEGORIES quedan de baja
+// Categorías demo con sus subcategorías
 const CATEGORIES = [
   ['Hamburguesas', 'Hamburguesas a la parrilla con pan artesanal', ['Clásicas', 'Especiales', 'Doble Carne']],
   ['Bebidas y Refrescos', 'Gaseosas, jugos y cervezas bien frías', ['Gaseosas', 'Jugos Naturales', 'Cervezas']],
@@ -39,7 +39,7 @@ const CATEGORIES = [
 
 const INACTIVE_CATEGORIES = ['Combos Especiales'];
 
-// Productos demo: [nombre, descripción, precio, subcategoría, activo, disponible]
+// Productos demo con precio, subcategoría y estado
 const PRODUCTS = [
   ['Hamburguesa Clásica', 'Carne a la parrilla, queso, lechuga y tomate', 35, 'Clásicas', true, true],
   ['Cheeseburger', 'Doble queso cheddar y pepinillos', 38, 'Clásicas', true, true],
@@ -89,7 +89,7 @@ const seedCategories = async (db) => {
   return true;
 };
 
-// Inserta cargos, empleados y el DIRECTORIO de demostración si la base está vacía
+// Inserta cargos, empleados y el DIRECTORIO demo si la base está vacía
 const seedStaff = async (
   db,
   {password, directorioPassword},
@@ -129,7 +129,7 @@ const seedStaff = async (
   return true;
 };
 
-// Insumos demo: [nombre, unidad, stock actual, stock mínimo]
+// Insumos demo con unidad, stock y mínimo
 const INGREDIENTS = [
   ['Carne de res', 'kg', 12, 5],
   ['Pan de hamburguesa', 'unidad', 40, 30],
@@ -145,7 +145,7 @@ const INGREDIENTS = [
   ['Cerveza artesanal 330 ml', 'unidad', 0, 12],
 ];
 
-// Inserta los insumos demo con su inventario inicial en el historial, si la tabla está vacía
+// Inserta los insumos demo con su inventario inicial
 const seedIngredients = async (db) => {
   const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM insumo');
   if (rows[0].total > 0) {
@@ -167,7 +167,7 @@ const seedIngredients = async (db) => {
   return true;
 };
 
-// Recetas demo: producto → [insumo, cantidad por porción]
+// Recetas demo por producto
 const RECIPES = {
   'Hamburguesa Clásica': [['Carne de res', 0.15], ['Pan de hamburguesa', 1], ['Queso cheddar', 0.03], ['Tomate', 0.04], ['Lechuga', 1]],
   'Cheeseburger': [['Carne de res', 0.15], ['Pan de hamburguesa', 1], ['Queso cheddar', 0.06]],
@@ -197,10 +197,10 @@ const seedRecipes = async (db) => {
   return true;
 };
 
-// Mesas numeradas con una capacidad: tables('Mesa', 1, 3, 4) → Mesa 1..Mesa 3 de 4 personas
+// Mesas numeradas con una capacidad
 const tables = (prefix, from, to, capacidad) => Array.from({length: to - from + 1}, (_, index) => [`${prefix} ${from + index}`, capacidad]);
 
-// Secciones demo: [nombre, descripción, activa, mesas]
+// Secciones demo con sus mesas
 const SECTIONS = [
   ['Salón principal', 'Planta baja, junto a la parrilla', true, [...tables('Mesa', 1, 8, 4), ...tables('Mesa', 9, 10, 6)]],
   ['Terraza', 'Al aire libre, con vista a la calle', true, tables('Terraza', 1, 4, 4)],
@@ -232,7 +232,7 @@ const DEMO_TIMEZONE = 'America/La_Paz';
 // Fecha YYYY-MM-DD desplazada "days" días desde hoy (en la zona del local)
 const shiftDate = (now, days) => localToday(new Date(now.getTime() + days * DAY_MS), DEMO_TIMEZONE).date;
 
-// Promociones demo con fechas relativas a hoy: [nombre, tipo, valor, desde, hasta, días, activa, productos [nombre, cantidad]]
+// Promociones demo con fechas relativas a hoy
 const PROMOTIONS = [
   ['Martes de Hamburguesas', 'descuento', 20, -30, null, '0010000', true, [['Hamburguesa Clásica', 1], ['Cheeseburger', 1]]],
   ['Combo Brava', 'combo', 70, -7, 30, '1111111', true, [['Doble Brava', 1], ['Papas Fritas Clásicas', 1], ['Gaseosa 500 ml', 1]]],
@@ -269,7 +269,7 @@ const seedPromotions = async (db, now) => {
 
 const MINUTE_MS = 60 * 1000;
 
-// Ventas abiertas demo: [mesa, mesero, cajero, minutos desde la apertura, líneas [tipo, nombre, cantidad, consumo, ingredientes quitados]]
+// Ventas abiertas demo por mesa
 const OPEN_SALES = [
   ['Mesa 2', 'c.mendoza', 'a.romero', 25, [
     ['producto', 'Hamburguesa Clásica', 1, 'local', ['Tomate']],
@@ -284,7 +284,7 @@ const OPEN_SALES = [
   ]],
 ];
 
-// Nombre, id y precio unitario de una línea demo (el combo usa su precio fijo)
+// Nombre, id y precio unitario de una línea demo
 const demoLinePrice = async (db, tipo, nombre) => {
   if (tipo === 'promocion') {
     const {rows} = await db.query('SELECT id_promocion AS id, valor AS precio FROM promocion WHERE nombre = $1', [nombre]);
@@ -297,8 +297,7 @@ const demoLinePrice = async (db, tipo, nombre) => {
 // Líneas demo que cocina ya terminó
 const READY_DEMO_LINES = ['Jugo de Naranja', 'Gaseosa 500 ml'];
 
-// Inserta ventas abiertas demo (mesas ocupadas) si no hay ventas
-
+// Inserta ventas abiertas demo si no hay ventas
 const seedSales = async (db, now) => {
   const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM venta');
   if (rows[0].total > 0) {

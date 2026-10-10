@@ -53,7 +53,7 @@ export const createCategoriesService = ({repository, transaction, images}) => {
     return getById(id);
   };
 
-  // Modifica una categoría: renombra, agrega y da de baja subcategorías según la lista enviada
+  // Modifica una categoría y sincroniza sus subcategorías
   const update = async (id, data) => {
     const current = await repository.findById(id);
     if (!current) {

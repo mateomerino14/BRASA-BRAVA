@@ -7,6 +7,7 @@ const DESCRIPTION_MAX = 200;
 const MAX_PRICE = 99999.99;
 const PRICE_DECIMALS = 2;
 
+// Id entero positivo con un mensaje de error
 const id = (message) => z.coerce.number({error: message}).int(message).positive(message);
 
 // Acepta "35", "35.5" o "35,50"
@@ -23,9 +24,10 @@ const MAX_RECIPE_ITEMS = 30;
 const RECIPE_DECIMALS = 3;
 const MAX_RECIPE_QUANTITY = 99999.999;
 
+// Indica si los insumos de la receta no se repiten
 const hasUniqueIngredients = (items) => new Set(items.map((item) => item.idInsumo)).size === items.length;
 
-// Receta completa del producto (reemplaza la anterior); vacía la quita
+// Receta completa del producto
 export const recipeSchema = z.object({
   ingredientes: z
     .array(z.object({

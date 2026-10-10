@@ -1,6 +1,6 @@
 import {createSalesRepository} from '../sales/sales.repository.js';
 
-// Nuevo valor de "listos" según la acción; nunca baja de 0 ni pasa de la cantidad pedida
+// Nuevo valor de "listos" según la acción, entre 0 y la cantidad
 const LISTOS_BY_ACTION = {
   sumar: 'CASE WHEN listos < cantidad THEN listos + 1 ELSE listos END',
   restar: 'CASE WHEN listos > 0 THEN listos - 1 ELSE 0 END',
@@ -10,11 +10,11 @@ const LISTOS_BY_ACTION = {
 
 const openSaleFilter = "id_venta IN (SELECT id_venta FROM venta WHERE estado = 'abierta')";
 
-// Acceso a datos de cocina: líneas de las ventas abiertas y su avance (reutiliza las consultas de Caja)
+// Acceso a datos de cocina
 export const createKitchenRepository = (db) => ({
   ...createSalesRepository(db),
 
-  // Líneas de todas las ventas abiertas con su mesa, sección y los datos de su envío
+  // Líneas de las ventas abiertas con su mesa y su envío
   openLines: async () => {
     const {rows} = await db.query(
       `SELECT d.id_detalle, d.id_venta, d.envio, d.id_promocion, d.nombre, d.cantidad, d.listos, d.consumo,
@@ -31,7 +31,7 @@ export const createKitchenRepository = (db) => ({
     return rows;
   },
 
-  // Cambia las unidades listas de una línea de una venta abierta; devuelve null si no existe o ya se cerró
+  // Cambia las unidades listas de una línea de una venta abierta
   updateLine: async (idDetalle, accion) => {
     const {rows} = await db.query(
       `UPDATE venta_detalle SET listos = ${LISTOS_BY_ACTION[accion]}
@@ -42,7 +42,7 @@ export const createKitchenRepository = (db) => ({
     return rows[0] ?? null;
   },
 
-  // Marca todas las líneas de un envío de una venta abierta como listas o en preparación; devuelve cuántas cambió
+  // Marca un envío entero como listo o en preparación
   updateShipment: async (idVenta, envio, accion) => {
     const {rows} = await db.query(
       `UPDATE venta_detalle SET listos = ${LISTOS_BY_ACTION[accion]}

@@ -5,9 +5,10 @@ import {levelOf} from '../ingredients/ingredients.service.js';
 const notFound = {error: 'Producto no encontrado en el catálogo', status: 404};
 
 const QUANTITY_DECIMALS = 3;
+// Redondea una cantidad a 3 decimales
 const round3 = (value) => Number(Number(value).toFixed(QUANTITY_DECIMALS));
 
-// Orden de las promociones en el catálogo: primero las de hoy, después las de otros días y al final las programadas
+// Orden de las promociones: de hoy, de otros días y programadas
 const VIGENCIA_ORDER = {vigente: 0, otro_dia: 1, programada: 2};
 
 // Convierte una fila de producto al formato del catálogo
@@ -37,7 +38,7 @@ const toCategories = (rows) => {
   return [...categories.values()];
 };
 
-// Catálogo para el personal (Familia): qué se vende, a cuánto y cuánto alcanza con el stock
+// Catálogo de Familia: qué se vende, a cuánto y cuánto alcanza
 export const createCatalogService = ({repository, clock, timeZone}) => {
   // Categorías, productos y promociones activas que no vencieron
   const catalog = async () => {
@@ -76,7 +77,7 @@ export const createCatalogService = ({repository, clock, timeZone}) => {
     };
   };
 
-  // Detalle de un producto: su receta con lo que usa por porción, el stock de cada insumo y cuántas porciones alcanzan
+  // Detalle de un producto con su receta, stock y porciones
   const product = async (idProducto) => {
     const row = (await repository.products()).find((item) => item.id_producto === idProducto);
     if (!row) {

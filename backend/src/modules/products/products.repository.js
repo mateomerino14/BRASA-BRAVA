@@ -13,7 +13,7 @@ const productColumns = `p.id_producto, rp.porciones, p.nombre, p.descripcion, p.
        s.id_subcategoria, s.nombre AS subcategoria, s.activa AS subcategoria_activa,
        c.id_categoria, c.nombre AS categoria, c.activa AS categoria_activa`;
 
-// Porciones que alcanzan con el stock: el insumo más escaso manda; un insumo de baja cuenta como sin stock
+// Porciones que alcanzan con el stock de cada producto
 const productJoins = `FROM producto p
   JOIN subcategoria s ON s.id_subcategoria = p.id_subcategoria
   JOIN categoria c ON c.id_categoria = s.id_categoria
@@ -107,7 +107,7 @@ export const createProductsRepository = (db) => ({
     return rows[0] ?? null;
   },
 
-  // Categorías activas con sus subcategorías activas, para el formulario y los filtros
+  // Categorías activas con sus subcategorías activas
   options: async () => {
     const {rows} = await db.query(
       `SELECT c.id_categoria, c.nombre AS categoria, s.id_subcategoria, s.nombre AS subcategoria
@@ -118,7 +118,7 @@ export const createProductsRepository = (db) => ({
     return rows;
   },
 
-  // Ingredientes de la receta de un producto con el stock actual de cada insumo
+  // Receta de un producto con el stock de cada insumo
   recipe: async (id) => {
     const {rows} = await db.query(
       `SELECT r.id_insumo, r.cantidad, i.nombre, i.unidad, i.stock_actual, i.activo

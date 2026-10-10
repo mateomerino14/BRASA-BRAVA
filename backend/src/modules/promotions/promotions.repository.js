@@ -10,15 +10,17 @@ const DEFAULT_ORDER = 'p.activa DESC, p.fecha_inicio DESC, p.nombre, p.id_promoc
 
 const promotionColumns = 'p.id_promocion, p.nombre, p.descripcion, p.tipo, p.valor, p.fecha_inicio, p.fecha_fin, p.dias, p.imagen_url, p.activa';
 
-// Condiciones SQL de vigencia; "hoy" (y para las vigentes, el día de la semana) llegan como parámetros en la zona del local.
-// Cada una recibe el número del primer parámetro libre y devuelve su SQL y sus valores (PostgreSQL rechaza parámetros sin usar)
+// Condiciones SQL de cada vigencia con sus parámetros
 const VIGENCIA = {
+  // Activas y dentro de fechas y días de hoy
   vigentes: (next, today) => ({
     sql: `p.activa = TRUE AND p.fecha_inicio <= $${next}::date AND (p.fecha_fin IS NULL OR p.fecha_fin >= $${next}::date)
       AND SUBSTRING(p.dias, $${next + 1}::int, 1) = '1'`,
     params: [today.date, today.weekday + 1],
   }),
+  // Activas que empiezan después de hoy
   programadas: (next, today) => ({sql: `p.activa = TRUE AND p.fecha_inicio > $${next}::date`, params: [today.date]}),
+  // Las que terminaron antes de hoy
   vencidas: (next, today) => ({sql: `p.fecha_fin IS NOT NULL AND p.fecha_fin < $${next}::date`, params: [today.date]}),
 };
 
