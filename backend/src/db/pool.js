@@ -3,6 +3,8 @@ import pg from 'pg';
 // Devuelve BIGINT y NUMERIC como número en vez de string (ids y montos caben en Number)
 pg.types.setTypeParser(pg.types.builtins.INT8, (value) => Number(value));
 pg.types.setTypeParser(pg.types.builtins.NUMERIC, (value) => Number(value));
+// Devuelve DATE como texto YYYY-MM-DD: una fecha de calendario no tiene zona horaria
+pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
 
 const maxConnections = 10;
 

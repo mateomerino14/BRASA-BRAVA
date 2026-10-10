@@ -9,11 +9,12 @@ import {createCategoriesRouter} from './modules/categories/categories.routes.js'
 import {createProductsRouter} from './modules/products/products.routes.js';
 import {createIngredientsRouter} from './modules/ingredients/ingredients.routes.js';
 import {createSectionsRouter} from './modules/sections/sections.routes.js';
+import {createPromotionsRouter} from './modules/promotions/promotions.routes.js';
 import {UPLOADS_ROUTE, createImageStorage} from './services/imageStorage.js';
 import {errorHandler, notFoundHandler} from './middlewares/errorHandler.js';
 
 // Construye la app Express con sus dependencias inyectadas (db, mailer, config)
-export const createApp = ({db, mailer, config, logger = console, images = createImageStorage(config.UPLOADS_DIR)}) => {
+export const createApp = ({db, mailer, config, logger = console, images = createImageStorage(config.UPLOADS_DIR), clock = () => new Date()}) => {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 'loopback');
@@ -34,6 +35,7 @@ export const createApp = ({db, mailer, config, logger = console, images = create
   app.use('/api/products', createProductsRouter({db, config, images}));
   app.use('/api/ingredients', createIngredientsRouter({db, config}));
   app.use('/api/sections', createSectionsRouter({db, config}));
+  app.use('/api/promotions', createPromotionsRouter({db, config, images, clock}));
   app.use('/api', notFoundHandler);
   app.use(UPLOADS_ROUTE, express.static(images.root, {maxAge: '7d'}), notFoundHandler);
 

@@ -75,7 +75,7 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
 
   const submit = async (event) => {
     event?.preventDefault();
-    const nextErrors = validate(values, {isEdit});
+    const nextErrors = validate(values, {isEdit, editing});
     setErrors(nextErrors);
     if (hasErrors(nextErrors)) {
       return;

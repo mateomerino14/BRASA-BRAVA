@@ -6,10 +6,12 @@ import {SegmentedControl} from './SegmentedControl';
 import {StatCard} from './StatCard';
 import {Stepper} from './Stepper';
 import {ChipList} from './ChipList';
+import {DayPicker} from './DayPicker';
+import {PriceTag} from './PriceTag';
 import {Amount} from '../atoms/Amount';
 import {NumberInput} from '../atoms/NumberInput';
 import {levelRatio} from '../../lib/level';
-import {formatQuantity, quantityParts} from '../../lib/format';
+import {formatDate, formatDays, formatQuantity, quantityParts} from '../../lib/format';
 
 describe('Piezas de stock', () => {
   it('SegmentedControl funciona como grupo de radios', async () => {
@@ -67,5 +69,34 @@ describe('Stepper y ChipList', () => {
     expect(screen.queryByText('M2')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', {name: '+1 más'}));
     expect(screen.getByText('M2')).toBeInTheDocument();
+  });
+});
+
+describe('DayPicker y PriceTag', () => {
+  it('DayPicker enciende y apaga días y ofrece volver a todos', async () => {
+    const onChange = vi.fn();
+    const {rerender} = render(<DayPicker value="1111111" onChange={onChange} />);
+    expect(screen.queryByRole('button', {name: 'Todos los días'})).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', {name: 'Domingo'}));
+    expect(onChange).toHaveBeenLastCalledWith('0111111');
+    rerender(<DayPicker value="0010000" onChange={onChange} />);
+    expect(screen.getByRole('button', {name: 'Martes'})).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(screen.getByRole('button', {name: 'Todos los días'}));
+    expect(onChange).toHaveBeenLastCalledWith('1111111');
+  });
+
+  it('PriceTag muestra el regular tachado y el ahorro', () => {
+    render(<PriceTag regular={83} promo={70} />);
+    expect(screen.getByLabelText('Precio regular Bs 83,00')).toHaveClass('line-through');
+    expect(screen.getByText('−16%')).toBeInTheDocument();
+  });
+
+  it('formatea fechas y días de promociones', () => {
+    expect(formatDate('2026-10-03')).toBe('3 oct 2026');
+    expect(formatDays('1111111')).toBe('Todos los días');
+    expect(formatDays('0111110')).toBe('Lun a vie');
+    expect(formatDays('1000001')).toBe('Fines de semana');
+    expect(formatDays('0010000')).toBe('Martes');
+    expect(formatDays('0010100')).toBe('Mar, Jue');
   });
 });
