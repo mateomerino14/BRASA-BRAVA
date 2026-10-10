@@ -4,7 +4,8 @@ import {Thumbnail} from '../../../components/atoms/Thumbnail';
 import {Badge} from '../../../components/atoms/Badge';
 import {IconButton} from '../../../components/atoms/IconButton';
 import {cn} from '../../../lib/cn';
-import {SubcategoryChips} from './SubcategoryChips';
+import {VISIBLE_SUBCATEGORIES} from '../constants/categories';
+import {ChipList} from '../../../components/molecules/ChipList';
 
 const styles = {
   category: 'flex min-w-0 items-center gap-3',
@@ -37,7 +38,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
     key: 'subcategorias',
     header: 'Subcategorías',
     wide: true,
-    render: (category) => <SubcategoryChips categoryName={category.nombre} subcategories={category.subcategorias} />,
+    render: (category) => <ChipList label={`Subcategorías de ${category.nombre}`} items={category.subcategorias.map((sub) => ({id: sub.id, label: sub.nombre}))} visible={VISIBLE_SUBCATEGORIES} />,
   },
   {key: 'productos', header: 'Productos', sortKey: 'productos', align: 'center', render: (category) => <span className={styles.count}>{category.totalProductos}</span>},
   {
