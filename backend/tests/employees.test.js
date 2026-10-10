@@ -194,6 +194,9 @@ describe('Gestión de empleados', () => {
     expect(session.user.fotoUrl).toBe(firstUrl);
 
     const second = await api('put', `/api/employees/${id}/image`).attach('imagen', PNG, 'otra.png');
+    // La sesión ya abierta ve la foto nueva sin volver a iniciar sesión
+    const me = await request(ctx.app).get('/api/auth/me').set('authorization', session.authorization);
+    expect(me.body.user.fotoUrl).toBe(second.body.employee.fotoUrl);
     expect(existsSync(path.join(ctx.config.UPLOADS_DIR, path.basename(firstUrl)))).toBe(false);
     const removed = await api('delete', `/api/employees/${id}/image`);
     expect(removed.body.employee.fotoUrl).toBeNull();
