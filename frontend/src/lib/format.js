@@ -28,3 +28,12 @@ export const formatDateTime = (date) => ({
   date: titleCase(dateFormatter.format(date)),
   time: timeFormatter.format(date),
 });
+
+// Texto del pie de tabla: "Mostrando 1–5 de 12 empleados"
+export const rangeText = ({page, pageSize, count, total, itemLabel}) => {
+  if (total === 0) {
+    return 'Sin resultados';
+  }
+  const from = (page - 1) * pageSize + 1;
+  return `Mostrando ${from}–${from + count - 1} de ${total} ${itemLabel}`;
+};
