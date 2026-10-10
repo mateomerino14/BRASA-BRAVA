@@ -93,7 +93,7 @@ BRASA-BRAVA/
 | Caja: comanda de cocina por envío, descuento de stock por receta y marca de venta modificada | Terminado |
 | Cocina: pedidos pendientes por envío, unidades listas (−1, +1, todas), avance y semáforo de espera | Terminado |
 | Caja: cobro (efectivo, QR o mixto con cambio), ticket de venta impreso al cobrar, ventas del día y enlace a impuestos | Terminado |
-| Familia | Pendiente |
+| Familia: catálogo del local con productos por categoría, receta y porciones que alcanzan, y promociones con cuándo aplican | Terminado |
 
 ## Ramas y pruebas automáticas
 
