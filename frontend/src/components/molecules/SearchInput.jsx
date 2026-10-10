@@ -4,7 +4,7 @@ import {cn} from '../../lib/cn';
 const styles = {
   wrapper: 'relative min-w-60 flex-1',
   icon: 'pointer-events-none absolute inset-y-0 left-3.5 my-auto text-cafe',
-  input: 'h-10 w-full rounded-lg border border-arena/60 bg-crema/50 pl-10 pr-9 text-sm text-carbon placeholder:text-cafe/70 transition-[border-color,box-shadow,background-color] focus:border-brasa focus:bg-white focus:outline-none focus:ring-4 focus:ring-brasa/20',
+  input: 'h-10 w-full rounded-lg border border-arena/60 bg-crema/50 pl-10 pr-9 text-sm [&::-webkit-search-cancel-button]:appearance-none text-carbon placeholder:text-cafe/70 transition-[border-color,box-shadow,background-color] focus:border-brasa focus:bg-white focus:outline-none focus:ring-4 focus:ring-brasa/20',
   clear: 'absolute inset-y-0 right-2 my-auto flex size-7 items-center justify-center rounded-md text-cafe hover:bg-hueso hover:text-carbon',
 };
 

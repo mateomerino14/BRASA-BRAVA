@@ -1,7 +1,6 @@
 import {z} from 'zod';
+import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
 
-const defaultPageSize = 5;
-const maxPageSize = 50;
 const maxSubcategories = 20;
 
 const name = (label) => z.string({error: `Ingrese ${label}`}).trim().min(2, `Ingrese ${label} (mínimo 2 letras)`).max(50, `${label} es demasiado largo`);
@@ -27,9 +26,7 @@ export const statusSchema = z.object({activo: z.boolean({error: 'Indique el esta
 
 export const idParamSchema = z.object({id: z.coerce.number().int().positive('Categoría inválida')});
 
-export const listQuerySchema = z.object({
-  search: z.string().trim().max(60).optional().default(''),
-  estado: z.enum(['todos', 'activos', 'inactivos']).optional().default('todos'),
-  page: z.coerce.number().int().positive().optional().default(1),
-  pageSize: z.coerce.number().int().positive().max(maxPageSize).optional().default(defaultPageSize),
-});
+// Columnas por las que se puede ordenar el listado
+export const CATEGORY_SORT_KEYS = ['nombre', 'estado'];
+
+export const listQuerySchema = baseListQuery(CATEGORY_SORT_KEYS);

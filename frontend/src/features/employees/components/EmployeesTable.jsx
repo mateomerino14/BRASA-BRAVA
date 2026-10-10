@@ -1,6 +1,5 @@
 import {Ban, Pencil, RotateCcw} from 'lucide-react';
-import {DataTable} from '../../../components/organisms/DataTable';
-import {Pagination} from '../../../components/molecules/Pagination';
+import {ListTable} from '../../../components/organisms/ListTable';
 import {Avatar} from '../../../components/atoms/Avatar';
 import {Badge} from '../../../components/atoms/Badge';
 import {IconButton} from '../../../components/atoms/IconButton';
@@ -22,6 +21,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'empleado',
     header: 'Empleado',
+    sortKey: 'nombre',
     mobile: 'title',
     render: (employee) => (
       <div className={styles.person}>
@@ -35,9 +35,9 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
       </div>
     ),
   },
-  {key: 'ci', header: 'CI', align: 'center', render: (employee) => employee.ci},
-  {key: 'cargo', header: 'Cargo', align: 'center', render: (employee) => <Badge>{employee.cargo.nombre}</Badge>},
-  {key: 'usuario', header: 'Usuario', align: 'center', render: (employee) => employee.alias},
+  {key: 'ci', header: 'CI', sortKey: 'ci', align: 'center', render: (employee) => employee.ci},
+  {key: 'cargo', header: 'Cargo', sortKey: 'cargo', align: 'center', render: (employee) => <Badge>{employee.cargo.nombre}</Badge>},
+  {key: 'usuario', header: 'Usuario', sortKey: 'usuario', align: 'center', render: (employee) => employee.alias},
   {
     key: 'telefono',
     header: 'Teléfono',
@@ -47,6 +47,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'estado',
     header: 'Estado',
+    sortKey: 'estado',
     align: 'center',
     render: (employee) => (
       <Badge dot tone={employee.activo ? 'success' : 'danger'}>
@@ -78,30 +79,15 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   },
 ];
 
-const rangeText = ({page, pageSize, count, total}) => {
-  if (total === 0) {
-    return 'Sin resultados';
-  }
-  const from = (page - 1) * pageSize + 1;
-  return `Mostrando ${from}–${from + count - 1} de ${total} empleados`;
-};
-
-export function EmployeesTable({employees, total, page, pageSize, totalPages, loading, onPageChange, onEdit, onToggleStatus}) {
+export function EmployeesTable({list, onEdit, onToggleStatus}) {
   return (
-    <DataTable
+    <ListTable
+      list={list}
       caption="Empleados"
+      itemLabel="empleados"
       columns={buildColumns({onEdit, onToggleStatus})}
-      rows={employees}
-      rowKey={(employee) => employee.id}
-      loading={loading}
       emptyMessage="No se encontraron empleados con esos filtros"
       rowClassName={(employee) => !employee.activo && styles.inactiveRow}
-      footer={
-        <>
-          <span>{rangeText({page, pageSize, count: employees.length, total})}</span>
-          <Pagination page={page} totalPages={totalPages} onChange={onPageChange} />
-        </>
-      }
     />
   );
 }

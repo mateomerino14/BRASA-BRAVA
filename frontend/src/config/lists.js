@@ -8,3 +8,6 @@ export const STATUS_OPTIONS = [
   {value: 'activos', label: 'Estado: Activos'},
   {value: 'inactivos', label: 'Estado: Inactivos'},
 ];
+
+// Cantidades de filas que el usuario puede elegir en cualquier tabla
+export const PAGE_SIZE_OPTIONS = [5, 10, 20];

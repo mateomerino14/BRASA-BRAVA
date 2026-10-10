@@ -2,10 +2,10 @@ import {useEffect, useState} from 'react';
 import {employeesApi} from '../services/employeesApi';
 import {usePaginatedList} from '../../../hooks/usePaginatedList';
 
-const initialFilters = {idCargo: '', estado: 'todos'};
+const filterDefaults = {idCargo: '', estado: 'todos'};
 
 export function useEmployees({api = employeesApi} = {}) {
-  const list = usePaginatedList({fetchPage: api.list, initialFilters});
+  const list = usePaginatedList({fetchPage: api.list, filterDefaults});
   const [roles, setRoles] = useState([]);
 
   useEffect(() => {
