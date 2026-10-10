@@ -44,6 +44,7 @@ BREVO_API_KEY=...
 | `RATE_LIMIT_ENABLED` | `false` desactiva el límite de intentos por IP (solo para pruebas) |
 | `STATIC_DIR` | Opcional. Carpeta del frontend compilado para servirlo desde la API |
 | `UPLOADS_DIR` | Carpeta donde se guardan las imágenes subidas (por defecto `uploads`) |
+| `TIMEZONE` | Zona horaria del local para saber qué día es hoy (por defecto `America/La_Paz`) |
 
 La configuración se valida con Zod al arrancar: si falta una variable obligatoria o tiene formato inválido, el servidor no inicia e indica cuál corregir.
 
@@ -121,6 +122,7 @@ src/
 │   ├── products/              Productos: precio, foto, disponibilidad y estado
 │   ├── ingredients/           Insumos de stock, movimientos e historial
 │   ├── sections/              Secciones del local y sus mesas
+│   ├── promotions/            Promociones: combos y descuentos con vigencia
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
@@ -187,10 +189,18 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/sections` | Registra una sección con sus mesas |
 | `PUT` | `/api/sections/:id` | Modifica la sección y sincroniza sus mesas |
 | `PATCH` | `/api/sections/:id/status` | Da de baja o reactiva una sección |
+| `GET` | `/api/promotions` | Promociones con productos, precio regular, precio con promoción, ahorro y vigencia de hoy; búsqueda (también por producto), `tipo`, `vigencia` (`todos`, `vigentes`, `programadas`, `vencidas`) y los parámetros comunes. Orden: `nombre`, `inicio`, `estado`. Incluye `summary` y `hoy` |
+| `GET` | `/api/promotions/product-options` | Productos activos para armar promociones |
+| `GET` | `/api/promotions/:id` | Detalle de una promoción |
+| `POST` | `/api/promotions` | Registra una promoción |
+| `PUT` | `/api/promotions/:id` | Modifica una promoción y reemplaza sus productos |
+| `PATCH` | `/api/promotions/:id/status` | Da de baja o reactiva una promoción |
+| `PUT` | `/api/promotions/:id/image` | Sube o reemplaza la foto |
+| `DELETE` | `/api/promotions/:id/image` | Quita la foto |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`.
+Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`.
 
 ### Parámetros comunes de los listados
 
@@ -241,6 +251,14 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - El nombre de la sección no se repite. Cada sección tiene entre 1 y 50 mesas, sin nombres repetidos dentro de la sección, de 1 a 30 personas cada una.
 - Al modificar se envía la lista completa de mesas: las que traen `id` se actualizan, las nuevas se crean y las que faltan se dan de baja (no se borran, para conservar el historial de pedidos). La misma regla usan las subcategorías (`modules/shared/syncChildren.js`).
 - El resumen cuenta solo secciones activas y sus mesas activas.
+
+### Reglas de promociones
+
+- **Combo**: varios productos con cantidad (al menos 2 unidades en total) a un precio fijo, que debe ser menor que comprarlos por separado. **Descuento**: porcentaje entero de 1 a 90 sobre uno o más productos.
+- Vigencia por fechas (`fechaInicio`, `fechaFin` opcional) y días de la semana (`dias`: siete dígitos 1/0 de domingo a sábado, por ejemplo `0010000` = solo martes).
+- Estados del día: `vigente`, `otro_dia` (dentro de fechas pero hoy no aplica), `programada`, `vencida` o `inactiva`. "Hoy" se calcula en la zona horaria del local (`TIMEZONE`), no en la del servidor: a las 23:30 del miércoles en La Paz sigue siendo miércoles aunque en UTC ya sea jueves.
+- Los precios se calculan con el precio actual de cada producto. Los productos nuevos deben estar activos; uno dado de baja que ya estaba se puede conservar.
+- Las fechas (`DATE`) viajan como texto `YYYY-MM-DD`, sin zona horaria, para que no se corran un día.
 
 ## Autorización
 
