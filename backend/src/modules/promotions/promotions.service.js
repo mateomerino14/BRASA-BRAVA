@@ -1,42 +1,11 @@
 import {createImageActions} from '../shared/imageActions.js';
 import {localToday, toIsoDate} from '../../utils/calendar.js';
+import {pricing, vigenciaOf} from './promotionRules.js';
 
 const notFound = {error: 'Promoción no encontrada', status: 404};
 const duplicateName = {error: 'Ya existe una promoción con ese nombre', status: 409};
 const invalidProduct = {error: 'Hay productos inexistentes o dados de baja en la promoción', status: 400};
 const comboNotCheaper = {error: 'El precio del combo debe ser menor que comprar los productos por separado', status: 400};
-
-const PERCENT = 100;
-const round2 = (value) => Math.round(value * PERCENT) / PERCENT;
-
-// Precio regular (suma de productos), precio con la promoción y ahorro
-const pricing = (tipo, valor, items) => {
-  const regular = round2(items.reduce((total, item) => total + Number(item.precio) * item.cantidad, 0));
-  let promo = Number(valor);
-  if (tipo === 'descuento') {
-    promo = round2(regular * (1 - Number(valor) / PERCENT));
-  }
-  return {precioRegular: regular, precioPromocion: promo, ahorro: round2(regular - promo)};
-};
-
-// Vigencia para hoy: inactiva, programada, vencida, fuera de día o vigente
-const vigenciaOf = (row, today) => {
-  const inicio = toIsoDate(row.fecha_inicio);
-  const fin = toIsoDate(row.fecha_fin);
-  if (!row.activa) {
-    return 'inactiva';
-  }
-  if (fin && fin < today.date) {
-    return 'vencida';
-  }
-  if (inicio > today.date) {
-    return 'programada';
-  }
-  if (row.dias[today.weekday] !== '1') {
-    return 'otro_dia';
-  }
-  return 'vigente';
-};
 
 const toItem = (row) => ({idProducto: row.id_producto, nombre: row.nombre, precio: Number(row.precio), cantidad: row.cantidad, activo: row.activo});
 

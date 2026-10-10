@@ -267,6 +267,78 @@ const seedPromotions = async (db, now) => {
   return true;
 };
 
+const MINUTE_MS = 60 * 1000;
+
+// Ventas abiertas demo: [mesa, mesero, cajero, minutos desde la apertura, líneas [tipo, nombre, cantidad, consumo, ingredientes quitados]]
+const OPEN_SALES = [
+  ['Mesa 2', 'c.mendoza', 'a.romero', 25, [
+    ['producto', 'Hamburguesa Clásica', 1, 'local', ['Tomate']],
+    ['producto', 'Hamburguesa Clásica', 1, 'local', []],
+    ['promocion', 'Combo Brava', 1, 'local', []],
+    ['producto', 'Gaseosa 500 ml', 2, 'local', []],
+  ]],
+  ['Terraza 1', 'c.mendoza', 'a.romero', 50, [
+    ['producto', 'Doble Brava', 1, 'local', []],
+    ['producto', 'Papas Fritas Clásicas', 2, 'llevar', []],
+    ['producto', 'Jugo de Naranja', 1, 'local', []],
+  ]],
+];
+
+// Nombre, id y precio unitario de una línea demo (el combo usa su precio fijo)
+const demoLinePrice = async (db, tipo, nombre) => {
+  if (tipo === 'promocion') {
+    const {rows} = await db.query('SELECT id_promocion AS id, valor AS precio FROM promocion WHERE nombre = $1', [nombre]);
+    return {idProducto: null, idPromocion: rows[0].id, precio: Number(rows[0].precio)};
+  }
+  const {rows} = await db.query('SELECT id_producto AS id, precio FROM producto WHERE nombre = $1', [nombre]);
+  return {idProducto: rows[0].id, idPromocion: null, precio: Number(rows[0].precio)};
+};
+
+// Inserta ventas abiertas demo (mesas ocupadas) si no hay ventas
+const seedSales = async (db, now) => {
+  const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM venta');
+  if (rows[0].total > 0) {
+    return false;
+  }
+  for (const [mesa, mesero, cajero, minutes, lines] of OPEN_SALES) {
+    const openedAt = new Date(now.getTime() - minutes * MINUTE_MS);
+    const ids = await db.query(
+      `SELECT (SELECT id_mesa FROM mesa WHERE nombre = $1 AND activa = TRUE LIMIT 1) AS id_mesa,
+              (SELECT id_empleado FROM empleado WHERE alias = $2) AS id_mesero,
+              (SELECT id_empleado FROM empleado WHERE alias = $3) AS id_cajero`,
+      [mesa, mesero, cajero],
+    );
+    const {id_mesa: idMesa, id_mesero: idMesero, id_cajero: idCajero} = ids.rows[0];
+    let total = 0;
+    const priced = [];
+    for (const [tipo, nombre, cantidad, consumo, removed] of lines) {
+      const price = await demoLinePrice(db, tipo, nombre);
+      total += price.precio * cantidad;
+      priced.push({...price, nombre, cantidad, consumo, removed});
+    }
+    const sale = await db.query(
+      `INSERT INTO venta (id_mesa, id_mesero, id_cajero, cajero, total, envios, abierta_en)
+       VALUES ($1, $2, $3, $4, $5::numeric, 1, $6) RETURNING id_venta`,
+      [idMesa, idMesero, idCajero, cajero, total, openedAt],
+    );
+    for (const line of priced) {
+      const detail = await db.query(
+        `INSERT INTO venta_detalle (id_venta, envio, id_producto, id_promocion, nombre, precio_unitario, cantidad, consumo, id_mesero, creado_en)
+         VALUES ($1, 1, $2, $3, $4, $5::numeric, $6, $7, $8, $9) RETURNING id_detalle`,
+        [sale.rows[0].id_venta, line.idProducto, line.idPromocion, line.nombre, line.precio, line.cantidad, line.consumo, idMesero, openedAt],
+      );
+      for (const insumo of line.removed) {
+        await db.query(
+          `INSERT INTO venta_detalle_exclusion (id_detalle, id_producto, id_insumo)
+           SELECT $1::int, $2::int, id_insumo FROM insumo WHERE nombre = $3`,
+          [detail.rows[0].id_detalle, line.idProducto, insumo],
+        );
+      }
+    }
+  }
+  return true;
+};
+
 // Carga cada bloque de datos demo que falte; devuelve true si insertó algo
 export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026', now = new Date()} = {}) => {
   const staff = await seedStaff(db, {password, directorioPassword});
@@ -276,5 +348,6 @@ export const seedDemoData = async (db, {password = 'Brasa2026', directorioPasswo
   const recipes = await seedRecipes(db);
   const sections = await seedSections(db);
   const promotions = await seedPromotions(db, now);
-  return staff || categories || products || ingredients || recipes || sections || promotions;
+  const sales = await seedSales(db, now);
+  return staff || categories || products || ingredients || recipes || sections || promotions || sales;
 };
