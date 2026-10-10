@@ -13,6 +13,7 @@ import {createPromotionsRouter} from './modules/promotions/promotions.routes.js'
 import {createSalesRouter} from './modules/sales/sales.routes.js';
 import {createKitchenRouter} from './modules/kitchen/kitchen.routes.js';
 import {createSettingsRouter} from './modules/settings/settings.routes.js';
+import {createCatalogRouter} from './modules/catalog/catalog.routes.js';
 import {UPLOADS_ROUTE, createImageStorage} from './services/imageStorage.js';
 import {errorHandler, notFoundHandler} from './middlewares/errorHandler.js';
 
@@ -42,6 +43,7 @@ export const createApp = ({db, mailer, config, logger = console, images = create
   app.use('/api/sales', createSalesRouter({db, config, clock}));
   app.use('/api/kitchen', createKitchenRouter({db, config}));
   app.use('/api/settings', createSettingsRouter({db, config}));
+  app.use('/api/catalog', createCatalogRouter({db, config, clock}));
   app.use('/api', notFoundHandler);
   app.use(UPLOADS_ROUTE, express.static(images.root, {maxAge: '7d'}), notFoundHandler);
 
