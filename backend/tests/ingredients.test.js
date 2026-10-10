@@ -41,7 +41,7 @@ describe('Gestión de stock', () => {
 
   it('filtra por nivel y ordena por stock', async () => {
     const low = await api('get', '/api/ingredients?nivel=bajo&sort=nombre');
-    expect(low.body.items.map((item) => item.nombre)).toEqual(['Cerveza artesanal 330 ml', 'Lechuga', 'Queso cheddar']);
+    expect(low.body.items.map((item) => item.nombre)).toEqual(['Queso cheddar']);
     const empty = await api('get', '/api/ingredients?nivel=sin_stock');
     expect(empty.body.total).toBe(2);
     const most = await api('get', '/api/ingredients?sort=stock&dir=desc&pageSize=1');

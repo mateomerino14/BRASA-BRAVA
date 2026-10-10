@@ -25,7 +25,7 @@ const buildFilters = ({search, estado, nivel}) => {
     conditions.push('i.activo = FALSE');
   }
   if (nivel === 'bajo') {
-    conditions.push('i.stock_actual <= i.stock_minimo');
+    conditions.push('i.stock_actual > 0 AND i.stock_actual <= i.stock_minimo');
   }
   if (nivel === 'sin_stock') {
     conditions.push('i.stock_actual = 0');
