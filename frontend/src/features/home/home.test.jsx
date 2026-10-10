@@ -27,14 +27,6 @@ describe('Home', () => {
     expect(screen.queryByRole('button', {name: 'Administración'})).not.toBeInTheDocument();
   });
 
-  it('muestra "en construcción" en módulos pendientes', async () => {
-    mockApi();
-    renderApp('/familia', {token: 't'});
-    expect(
-      await screen.findByRole('heading', {name: 'Familia en construcción'}),
-    ).toBeInTheDocument();
-  });
-
   it('cerrar sesión borra el token y vuelve al login', async () => {
     mockApi();
     const {user} = renderApp('/', {token: 't'});

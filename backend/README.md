@@ -126,6 +126,7 @@ src/
 │   ├── sales/                 Caja: plano de mesas, catálogo del día y registro de pedidos
 │   ├── kitchen/               Cocina: envíos de las ventas abiertas y unidades listas
 │   ├── settings/              Ajustes del local (enlace a la página de impuestos)
+│   ├── catalog/               Familia: catálogo del local con receta y stock
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
@@ -208,6 +209,8 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/sales/tables/:idMesa/checkout` | Cobra la venta abierta de la mesa: `pagos` (`efectivo`, `qr` o ambos, con `monto`) y `recibido` opcional (efectivo entregado). Responde el `ticket` |
 | `GET` | `/api/sales/:idVenta/receipt` | Ticket de una venta para reimprimirlo |
 | `GET` | `/api/sales/today` | Ventas cobradas hoy (día del local) con sus pagos y `resumen` (`cantidad`, `total`, `efectivo`, `qr`) |
+| `GET` | `/api/catalog` | Catálogo de Familia: categorías activas con sus subcategorías, productos activos (disponibilidad y porciones) y promociones activas que no vencieron (`vigencia`, precio, productos), primero las de hoy |
+| `GET` | `/api/catalog/products/:id` | Producto con su receta: cantidad por porción, stock, nivel y porciones que alcanza cada insumo |
 | `GET` | `/api/settings` | Ajustes del local (`enlaceImpuestos`); cualquier sesión |
 | `PUT` | `/api/settings` | Cambia el enlace a la página de impuestos (permiso `administracion`) |
 | `GET` | `/api/kitchen/orders` | Envíos de las ventas abiertas (mesa, sección, mesero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
@@ -216,7 +219,7 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja, el permiso `caja`; las de cocina, el permiso `cocina`.
+Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja, el permiso `caja`; las de cocina, el permiso `cocina`; las del catálogo, el permiso `familia`.
 
 ### Parámetros comunes de los listados
 
