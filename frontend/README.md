@@ -54,7 +54,19 @@ npm test                  # pruebas automáticas (Vitest + Testing Library)
 
 La sesión se maneja en `context/` (`AuthProvider` y `useAuth`). El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
 
-El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco). Las pantallas con tabla reutilizan dos hooks de `src/hooks/`: `usePaginatedList` (búsqueda con espera, filtros, página, recarga y aviso temporal) y `useStatusToggle` (confirmar una baja o reactivación). Cada módulo solo define su servicio, sus filtros y sus mensajes.
+El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco). ### Pantallas de gestión estándar
+
+Todas las pantallas de administración se arman igual, así que una pantalla nueva no puede quedar distinta:
+
+| Pieza | Qué resuelve |
+|---|---|
+| `templates/ManagementPage` | Orden fijo: buscador y filtros, avisos, tabla, llamada a registrar y modales |
+| `organisms/ListTable` | Tabla con encabezados ordenables, pie "Mostrando 1–5 de N", filas por página (5, 10 o 20), paginación y botón "Limpiar filtros" cuando no hay resultados |
+| `molecules/FilterSelect` | Filtros de la barra con el mismo tamaño |
+| `hooks/usePaginatedList` | Búsqueda con espera, filtros, página, filas por página y orden guardados en la URL (`?search=...&estado=inactivos&sort=nombre&dir=desc`), recarga y aviso temporal |
+| `hooks/useStatusToggle` | Confirmar una baja o reactivación |
+
+Como el estado vive en la URL, recargar la página o volver atrás conserva búsqueda, filtros, página y orden, y se puede compartir el enlace. Los valores por defecto no se escriben para que la URL quede limpia. Cada módulo solo define su servicio, sus columnas (con `sortKey` en las ordenables), sus filtros y sus mensajes.
 
 ## Estructura
 
@@ -63,10 +75,11 @@ src/
 ├── components/
 │   ├── atoms/           Button, IconButton, Input, PasswordInput, Textarea, Select, Avatar, Thumbnail,
 │   │                    Badge, Logo, Spinner, SocialIcon
-│   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination, ImagePicker, TagInput
-│   ├── organisms/       Sidebar, MobileMenu, Header, Footer, Modal, EmployeeCarousel, DataTable, FilterBar,
+│   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination, PageSizeSelect,
+│   │                    FilterSelect, ImagePicker, TagInput
+│   ├── organisms/       Sidebar, MobileMenu, Header, Footer, Modal, EmployeeCarousel, DataTable, ListTable, FilterBar,
 │   │                    RegisterCallout, ConfirmDialog
-│   └── templates/       MainLayout, AuthLayout
+│   └── templates/       MainLayout, AuthLayout, ManagementPage
 ├── features/
 │   ├── auth/            Login, carrusel de empleados, modo DIRECTORIO y recuperación
 │   ├── home/            Bienvenida con reloj y accesos rápidos
@@ -141,4 +154,4 @@ Las pantallas que todavía no se construyeron muestran un aviso de "en construcc
 
 ## Pruebas
 
-Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.
+Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), el comportamiento estándar de las pantallas de gestión (filtros y orden en la URL, filas por página, limpiar filtros y orden en tarjetas), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.

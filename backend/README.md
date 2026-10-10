@@ -127,7 +127,7 @@ src/
 ├── services/
 │   ├── mailer.js              Correo por consola (desarrollo) o Brevo
 │   └── imageStorage.js        Guardado de imágenes validando su formato real
-├── utils/                   Hash, tokens, códigos, errores HTTP y respuesta de servicios
+├── utils/                   Hash, tokens, códigos, errores HTTP, respuesta de servicios y parámetros de listados
 ├── scripts/                 migrate y seed para npm run
 ├── app.js                   Configuración de Express (seguridad, CORS, rutas)
 └── server.js                Arranque del servidor
@@ -146,13 +146,13 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo del empleado |
 | `POST` | `/api/auth/password-reset/verify` | Verifica el código sin consumirlo |
 | `POST` | `/api/auth/password-reset/confirm` | Cambia la contraseña con el código verificado |
-| `GET` | `/api/employees` | Empleados con búsqueda (`search`), filtro por cargo (`idCargo`) y estado (`estado`: `todos`, `activos`, `inactivos`) y paginación (`page`, `pageSize`) |
+| `GET` | `/api/employees` | Empleados con búsqueda (`search`, por nombre, usuario o CI), filtro por cargo (`idCargo`) y los parámetros comunes de listado. Orden: `nombre`, `ci`, `cargo`, `usuario`, `estado` |
 | `GET` | `/api/employees/:id` | Detalle de un empleado |
 | `POST` | `/api/employees` | Registra un empleado con su contraseña inicial |
 | `PUT` | `/api/employees/:id` | Modifica un empleado; la contraseña solo cambia si se envía |
 | `PATCH` | `/api/employees/:id/status` | Da de baja (`{activo: false}`) o reactiva a un empleado |
 | `GET` | `/api/roles` | Cargos activos |
-| `GET` | `/api/categories` | Categorías con sus subcategorías activas; búsqueda (`search`, también por subcategoría), estado (`estado`) y paginación |
+| `GET` | `/api/categories` | Categorías con sus subcategorías activas; búsqueda (`search`, también por subcategoría) y los parámetros comunes de listado. Orden: `nombre`, `estado` |
 | `GET` | `/api/categories/:id` | Detalle de una categoría |
 | `POST` | `/api/categories` | Registra una categoría con sus subcategorías |
 | `PUT` | `/api/categories/:id` | Modifica la categoría y sincroniza sus subcategorías |
@@ -163,6 +163,21 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/api/health` | Estado de la API y de la base |
 
 Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`.
+
+### Parámetros comunes de los listados
+
+Todos los listados aceptan los mismos parámetros (definidos una sola vez en `utils/listQuery.js`) y responden `{items, total, page, pageSize}`:
+
+| Parámetro | Valores | Por defecto |
+|---|---|---|
+| `search` | Texto de hasta 60 caracteres | Vacío |
+| `estado` | `todos`, `activos`, `inactivos` | `todos` |
+| `page` | Número de página desde 1 | `1` |
+| `pageSize` | Filas por página, hasta 50 | `5` |
+| `sort` | Una de las columnas permitidas del módulo | Activos primero y por nombre |
+| `dir` | `asc` o `desc` | `asc` |
+
+El orden se arma con una lista blanca de columnas por módulo: un `sort` que no está en la lista responde 400 y nunca llega al SQL.
 
 ### Reglas de la gestión de empleados
 
