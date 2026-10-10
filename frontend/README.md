@@ -113,9 +113,10 @@ Los colores y fuentes salen del prototipo de Figma y se definen una sola vez en 
 | `brasa` | `#F7941D` | Acciones principales y menú lateral |
 | `carbon` | `#1C1A18` | Texto, footer y botón Ingresar |
 | `mostaza` | `#E8B23D` | Acentos y carrusel del login |
-| `crema` | `#FAF3EA` | Fondos suaves, modales e ítem activo |
+| `crema` | `#FAF3EA` | Superficies: modales, ítem activo del menú y encabezados de tabla (nunca campos) |
 | `rojo` | `#C1272D` | Cancelar, cerrar sesión y errores |
 | `verde` | `#2FA84F` | Éxito y estado activo |
+| `campo` | `#FFFFFF` | Fondo de todo campo editable (texto, listas, fechas, cantidades): resalta sobre el crema de los modales |
 
 | Fuente | Clase | Uso |
 |---|---|---|
