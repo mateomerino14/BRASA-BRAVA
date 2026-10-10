@@ -22,6 +22,7 @@ const envSchema = z.object({
     .transform((value) => value === 'true'),
   STATIC_DIR: z.string().optional(),
   UPLOADS_DIR: z.string().min(1).default('uploads'),
+  TIMEZONE: z.string().min(1).default('America/La_Paz'),
 });
 
 // Valida las variables de entorno y devuelve la configuración tipada
