@@ -13,6 +13,8 @@ import {formatAmount} from '../../../lib/format';
 import {CatalogPanel} from './CatalogPanel';
 import {ItemPickerModal} from './ItemPickerModal';
 import {OrderPanel} from './OrderPanel';
+import {KitchenTicket} from './KitchenTicket';
+import {PrintPreview} from '../../../components/organisms/PrintPreview';
 import {orderTitle} from '../utils/cart';
 
 const styles = {
@@ -83,6 +85,7 @@ export function OrderView({order, onBack}) {
       <AnimatePresence>
         {order.notice && <Alert key="notice" tone="success">{order.notice}</Alert>}
       </AnimatePresence>
+      {order.stockWarning && <Alert tone="info">{order.stockWarning}</Alert>}
 
       <div className={styles.layout}>
         <CatalogPanel order={order} />
@@ -107,6 +110,17 @@ export function OrderView({order, onBack}) {
           <OrderPanel order={panelOrder} bare />
         </Modal>
       )}
+
+      <PrintPreview
+        open={order.printing.open}
+        title="Comanda de cocina"
+        description={`Envío ${order.printing.envio} de ${order.mesa.nombre}: solo lo nuevo de este envío`}
+        onClose={order.closePrint}
+      >
+        {order.venta && order.printing.envio > 0 && (
+          <KitchenTicket mesa={order.mesa} venta={order.venta} envio={order.printing.envio} printedAt={order.printing.printedAt} />
+        )}
+      </PrintPreview>
 
       <ItemPickerModal picker={order.picker} onConfirm={order.confirmPicker} onClose={order.closePicker} />
 
