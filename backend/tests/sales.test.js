@@ -45,7 +45,7 @@ describe('Caja: mesas y registro de pedidos', () => {
     await start();
     const res = await api('get', '/api/sales/floor');
     expect(res.status).toBe(200);
-    expect(res.body.secciones.map((item) => item.nombre)).toEqual(['Barra', 'Salón principal', 'Terraza']);
+    expect(res.body.secciones.map((item) => item.nombre)).toEqual(['Salón principal', 'Terraza', 'Barra']);
     expect(res.body.summary).toEqual({mesas: 17, ocupadas: 2, libres: 15, porCobrar: 263});
     const salon = res.body.secciones.find((item) => item.nombre === 'Salón principal');
     expect(salon.mesas.map((item) => item.nombre).slice(0, 3)).toEqual(['Mesa 1', 'Mesa 2', 'Mesa 3']);
