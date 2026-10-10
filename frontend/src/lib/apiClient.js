@@ -22,16 +22,26 @@ export const setUnauthorizedHandler = (handler) => {
   onUnauthorized = handler;
 };
 
+const isFormData = (body) => typeof FormData !== 'undefined' && body instanceof FormData;
+
 const serializeBody = (body) => {
-  if (body === undefined) {
-    return undefined;
+  if (body === undefined || isFormData(body)) {
+    return body;
   }
   return JSON.stringify(body);
 };
 
+// Convierte una ruta de archivo subido (/uploads/...) en URL usable aunque la API esté en otro origen
+export const resolveAssetUrl = (url) => {
+  if (!url || !/^https?:\/\//.test(API_URL)) {
+    return url;
+  }
+  return new URL(url, API_URL).toString();
+};
+
 export const apiRequest = async (path, {method = 'GET', body, auth = true} = {}) => {
   const headers = {accept: 'application/json'};
-  if (body !== undefined) {
+  if (body !== undefined && !isFormData(body)) {
     headers['content-type'] = 'application/json';
   }
   const token = tokenStorage.get();

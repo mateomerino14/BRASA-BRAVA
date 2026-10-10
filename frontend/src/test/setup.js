@@ -12,6 +12,8 @@ window.matchMedia ??= (query) => ({
   removeListener: () => {},
 });
 Element.prototype.scrollBy ??= function scrollBy() {};
+URL.createObjectURL ??= (file) => `blob:${file.name}`;
+URL.revokeObjectURL ??= () => {};
 
 afterEach(() => {
   cleanup();

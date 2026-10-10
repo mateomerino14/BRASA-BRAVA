@@ -81,7 +81,8 @@ BRASA-BRAVA/
 | Página principal | Terminado |
 | Aplicación de escritorio | Terminado |
 | Gestión de empleados (listado, filtros, registro, modificación y baja) | Terminado |
-| Familia, Caja, Productos, Categorías, Stock, Secciones, Promociones | Pendiente |
+| Gestión de categorías (subcategorías, foto, filtros, baja y reactivación) | Terminado |
+| Familia, Caja, Productos, Stock, Secciones, Promociones | Pendiente |
 
 ## Ramas y pruebas automáticas
 
