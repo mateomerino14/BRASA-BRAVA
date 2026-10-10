@@ -47,6 +47,6 @@ export const historyQuerySchema = z.object({
 export const INGREDIENT_SORT_KEYS = ['nombre', 'stock', 'estado'];
 
 export const listQuerySchema = baseListQuery(INGREDIENT_SORT_KEYS, {
-  // "bajo" incluye los que están sin stock
+  // "bajo": queda algo pero en o por debajo del mínimo; "sin_stock": se acabó
   nivel: z.enum(['todos', 'bajo', 'sin_stock']).optional().default('todos'),
 });
