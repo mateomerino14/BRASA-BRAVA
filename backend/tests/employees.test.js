@@ -1,7 +1,12 @@
+import {existsSync} from 'node:fs';
+import path from 'node:path';
 import request from 'supertest';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 import {createTestApp} from './helpers/testApp.js';
 import {loginAs} from './helpers/session.js';
+
+// PNG mínimo válido (firma de 8 bytes + relleno)
+const PNG = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(32)]);
 
 const newEmployee = {
   nombre: 'Lucía',
@@ -174,5 +179,33 @@ describe('Gestión de empleados', () => {
     const byUser = await api('get', '/api/employees?sort=usuario&dir=desc&pageSize=1');
     expect(byUser.body.items[0].alias).toBe('r.sanchez');
     expect((await api('get', '/api/employees?sort=contrasena_hash')).status).toBe(400);
+  });
+
+  it('sube, reemplaza y quita la foto del empleado, y la muestra en el login', async () => {
+    const id = (await ctx.db.query("SELECT id_empleado FROM empleado WHERE alias = 'c.mendoza'")).rows[0].id_empleado;
+    const first = await api('put', `/api/employees/${id}/image`).attach('imagen', PNG, 'foto.png');
+    expect(first.status).toBe(200);
+    const firstUrl = first.body.employee.fotoUrl;
+    expect(firstUrl).toMatch(/^\/uploads\/.+\.png$/);
+    expect((await request(ctx.app).get(firstUrl)).headers['content-type']).toBe('image/png');
+    const carousel = await request(ctx.app).get('/api/auth/login-users');
+    expect(carousel.body.users.find((item) => item.alias === 'c.mendoza').fotoUrl).toBe(firstUrl);
+    const session = await loginAs(ctx.app, 'c.mendoza');
+    expect(session.user.fotoUrl).toBe(firstUrl);
+
+    const second = await api('put', `/api/employees/${id}/image`).attach('imagen', PNG, 'otra.png');
+    // La sesión ya abierta ve la foto nueva sin volver a iniciar sesión
+    const me = await request(ctx.app).get('/api/auth/me').set('authorization', session.authorization);
+    expect(me.body.user.fotoUrl).toBe(second.body.employee.fotoUrl);
+    expect(existsSync(path.join(ctx.config.UPLOADS_DIR, path.basename(firstUrl)))).toBe(false);
+    const removed = await api('delete', `/api/employees/${id}/image`);
+    expect(removed.body.employee.fotoUrl).toBeNull();
+    expect(existsSync(path.join(ctx.config.UPLOADS_DIR, path.basename(second.body.employee.fotoUrl)))).toBe(false);
+
+    const fake = await api('put', `/api/employees/${id}/image`).attach('imagen', Buffer.from('<script>'), 'foto.png');
+    expect(fake.status).toBe(400);
+    expect((await api('put', '/api/employees/9999/image').attach('imagen', PNG, 'foto.png')).status).toBe(404);
+    const cajero = await loginAs(ctx.app, 'a.romero');
+    expect((await request(ctx.app).put(`/api/employees/${id}/image`).set('authorization', cajero.authorization).attach('imagen', PNG, 'foto.png')).status).toBe(403);
   });
 });

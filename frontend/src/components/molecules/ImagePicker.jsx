@@ -1,8 +1,8 @@
-import {useEffect, useId, useMemo, useRef, useState} from 'react';
+import {useId, useRef, useState} from 'react';
 import {AnimatePresence, motion} from 'motion/react';
 import {ImagePlus, RefreshCw, Trash2} from 'lucide-react';
 import {cn} from '../../lib/cn';
-import {resolveAssetUrl} from '../../lib/apiClient';
+import {useImagePreview} from '../../hooks/useImagePreview';
 
 const styles = {
   zone: 'group relative flex h-44 w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-dashed bg-campo text-center transition-[border-color,background-color] duration-200',
@@ -27,24 +27,6 @@ const DEFAULT_MAX_MB = 5;
 const fadeIn = {opacity: 0, scale: 1.04};
 const fadeVisible = {opacity: 1, scale: 1};
 
-const createObjectUrl = (file) => {
-  if (!file) {
-    return null;
-  }
-  return URL.createObjectURL(file);
-};
-
-// Devuelve la URL a mostrar: el archivo recién elegido o la imagen guardada
-function usePreview(file, url) {
-  const objectUrl = useMemo(() => createObjectUrl(file), [file]);
-  useEffect(() => () => {
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-    }
-  }, [objectUrl]);
-  return objectUrl ?? resolveAssetUrl(url);
-}
-
 const validateFile = (file, maxMb) => {
   if (!ACCEPTED_TYPES.includes(file.type)) {
     return 'La imagen debe ser PNG, JPG o WEBP';
@@ -60,7 +42,7 @@ export function ImagePicker({label = 'Imagen', file = null, url = null, onChange
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [localError, setLocalError] = useState('');
-  const preview = usePreview(file, url);
+  const preview = useImagePreview(file, url);
   const message = localError || error;
 
   const pick = (selected) => {

@@ -1,11 +1,5 @@
-import {apiRequest} from '../../../lib/apiClient';
+import {apiRequest, imageEndpoints} from '../../../lib/apiClient';
 import {toQuery} from '../../../lib/query';
-
-const toImageForm = (file) => {
-  const form = new FormData();
-  form.append('imagen', file);
-  return form;
-};
 
 export const productsApi = {
   list: (params) => apiRequest(`/products?${toQuery(params)}`),
@@ -17,6 +11,5 @@ export const productsApi = {
   recipe: (id) => apiRequest(`/products/${id}/recipe`),
   saveRecipe: (id, ingredientes) => apiRequest(`/products/${id}/recipe`, {method: 'PUT', body: {ingredientes}}),
   recipeOptions: () => apiRequest('/products/recipe-options'),
-  uploadImage: (id, file) => apiRequest(`/products/${id}/image`, {method: 'PUT', body: toImageForm(file)}),
-  removeImage: (id) => apiRequest(`/products/${id}/image`, {method: 'DELETE'}),
+  ...imageEndpoints('/products'),
 };

@@ -13,6 +13,12 @@ export const createAuthRepository = (db) => ({
     return rows[0] ?? null;
   },
 
+  // Nombre y foto actuales de un empleado (pueden cambiar mientras la sesión sigue abierta)
+  findProfile: async (idEmpleado) => {
+    const {rows} = await db.query('SELECT nombre, apellido, foto_url FROM empleado WHERE id_empleado = $1', [idEmpleado]);
+    return rows[0] ?? null;
+  },
+
   // Busca un empleado activo por correo
   findActiveEmployeeByEmail: async (email) => {
     const {rows} = await db.query(

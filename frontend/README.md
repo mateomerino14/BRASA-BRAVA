@@ -67,7 +67,9 @@ Todas las pantallas de administración se arman igual, así que una pantalla nue
 | `molecules/FilterSelect` | Filtros de la barra con el mismo tamaño |
 | `hooks/usePaginatedList` | Búsqueda con espera, filtros, página, filas por página y orden guardados en la URL (`?search=...&estado=inactivos&sort=nombre&dir=desc`), recarga y aviso temporal |
 | `hooks/useStatusToggle` | Confirmar una baja o reactivación |
-| `hooks/useEntityForm` | Formulario de registro y modificación: valores, validación, guardado, foto opcional y aviso si los datos se guardaron pero la foto no (el reintento modifica en vez de duplicar) |
+| `hooks/useEntityForm` | Formulario de registro y modificación: valores, validación, guardado, foto opcional (`withImage`, `imageField` = `imagenUrl` o `fotoUrl`) y aviso si los datos se guardaron pero la foto no (el reintento modifica en vez de duplicar) |
+| `lib/apiClient` → `imageEndpoints('/recurso')` | Endpoints estándar de foto (subir o reemplazar y quitar) que usan categorías, productos, promociones y empleados |
+| `hooks/useImagePreview` | Vista previa de una foto: el archivo recién elegido o la guardada (la usan `ImagePicker` y el avatar del formulario de empleados) |
 
 Como el estado vive en la URL, recargar la página o volver atrás conserva búsqueda, filtros, página y orden, y se puede compartir el enlace. Los valores por defecto no se escriben para que la URL quede limpia. Cada módulo solo define su servicio, sus columnas (con `sortKey` en las ordenables), sus filtros y sus mensajes.
 

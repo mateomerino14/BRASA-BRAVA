@@ -149,5 +149,17 @@ export const createAuthService = ({repository, mailer, config, logger = console,
     return {updated: true};
   };
 
-  return {login, listLoginUsers, requestPasswordReset, verifyResetCode, confirmPasswordReset};
+  // Perfil de la sesión con el nombre y la foto actuales del empleado (el resto viene del token)
+  const profile = async (user) => {
+    if (user.isDirectorio) {
+      return user;
+    }
+    const row = await repository.findProfile(user.id);
+    if (!row) {
+      return user;
+    }
+    return {...user, nombre: `${row.nombre} ${row.apellido}`, fotoUrl: row.foto_url};
+  };
+
+  return {login, listLoginUsers, requestPasswordReset, verifyResetCode, confirmPasswordReset, profile};
 };

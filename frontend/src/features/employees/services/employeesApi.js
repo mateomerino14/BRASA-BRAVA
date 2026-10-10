@@ -1,4 +1,4 @@
-import {apiRequest} from '../../../lib/apiClient';
+import {apiRequest, imageEndpoints} from '../../../lib/apiClient';
 import {toQuery} from '../../../lib/query';
 
 export const employeesApi = {
@@ -7,4 +7,5 @@ export const employeesApi = {
   update: (id, data) => apiRequest(`/employees/${id}`, {method: 'PUT', body: data}),
   setStatus: (id, activo) => apiRequest(`/employees/${id}/status`, {method: 'PATCH', body: {activo}}),
   roles: () => apiRequest('/roles'),
+  ...imageEndpoints('/employees'),
 };

@@ -21,5 +21,7 @@ export function useEmployeeForm({onSaved, api = employeesApi} = {}) {
     validate: validateEmployee,
     messages: MESSAGES,
     onSaved,
+    withImage: true,
+    imageField: 'fotoUrl',
   });
 }

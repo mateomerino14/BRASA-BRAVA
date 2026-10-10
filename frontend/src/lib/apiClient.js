@@ -74,3 +74,15 @@ export const apiRequest = async (path, {method = 'GET', body, auth = true} = {})
   }
   return data;
 };
+
+const toImageForm = (file) => {
+  const form = new FormData();
+  form.append('imagen', file);
+  return form;
+};
+
+// Endpoints estándar de foto de un recurso (/categories, /products, /employees...): subir o reemplazar y quitar
+export const imageEndpoints = (resource) => ({
+  uploadImage: (id, file) => apiRequest(`${resource}/${id}/image`, {method: 'PUT', body: toImageForm(file)}),
+  removeImage: (id) => apiRequest(`${resource}/${id}/image`, {method: 'DELETE'}),
+});
