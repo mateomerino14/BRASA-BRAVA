@@ -5,11 +5,15 @@ import {uploadImage} from '../../middlewares/upload.js';
 import {createProductsRepository} from './products.repository.js';
 import {createProductsService} from './products.service.js';
 import {createProductsController} from './products.controller.js';
-import {availabilitySchema, idParamSchema, listQuerySchema, productSchema, statusSchema} from './products.schemas.js';
+import {availabilitySchema, idParamSchema, listQuerySchema, productSchema, recipeSchema, statusSchema} from './products.schemas.js';
 
 // Declara las rutas /api/products, protegidas con el permiso "productos"
 export const createProductsRouter = ({db, config, images}) => {
-  const service = createProductsService({repository: createProductsRepository(db), images});
+  const service = createProductsService({
+    repository: createProductsRepository(db),
+    transaction: (work) => db.transaction((tx) => work(createProductsRepository(tx))),
+    images,
+  });
   const controller = createProductsController(service);
   const byId = validate(idParamSchema, 'params');
   const router = Router();
@@ -17,11 +21,14 @@ export const createProductsRouter = ({db, config, images}) => {
 
   router.get('/', validate(listQuerySchema, 'query'), controller.list);
   router.get('/options', controller.options);
+  router.get('/recipe-options', controller.recipeOptions);
   router.get('/:id', byId, controller.getById);
   router.post('/', validate(productSchema), controller.create);
   router.put('/:id', byId, validate(productSchema), controller.update);
   router.patch('/:id/status', byId, validate(statusSchema), controller.setStatus);
   router.patch('/:id/availability', byId, validate(availabilitySchema), controller.setAvailability);
+  router.get('/:id/recipe', byId, controller.getRecipe);
+  router.put('/:id/recipe', byId, validate(recipeSchema), controller.saveRecipe);
   router.put('/:id/image', byId, uploadImage, controller.setImage);
   router.delete('/:id/image', byId, controller.removeImage);
 

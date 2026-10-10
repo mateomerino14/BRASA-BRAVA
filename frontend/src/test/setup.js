@@ -1,7 +1,10 @@
 import '@testing-library/jest-dom/vitest';
 import {afterEach, vi} from 'vitest';
-import {cleanup} from '@testing-library/react';
+import {cleanup, configure} from '@testing-library/react';
 import {matchesViewport, setViewport} from './viewport';
+
+// Las pantallas se cargan bajo demanda: en CI con cobertura pueden tardar más del segundo por defecto
+configure({asyncUtilTimeout: 5000});
 
 // jsdom no implementa estas APIs del navegador que usan motion y el carrusel.
 // Por defecto las pruebas simulan pantalla de escritorio; cada prueba puede cambiarlo con setViewport
