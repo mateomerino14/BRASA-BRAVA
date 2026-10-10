@@ -54,7 +54,7 @@ export const createSectionsService = ({repository, transaction}) => {
     return getById(id);
   };
 
-  // Modifica la sección y sincroniza sus mesas (las quitadas se dan de baja para conservar el historial de pedidos)
+  // Modifica la sección y sincroniza sus mesas
   const update = async (id, data) => {
     if (!await repository.findById(id)) {
       return notFound;

@@ -10,6 +10,7 @@ import {createIngredientSchema, historyQuerySchema, idParamSchema, listQuerySche
 export const createIngredientsRouter = ({db, config}) => {
   const service = createIngredientsService({
     repository: createIngredientsRepository(db),
+    // Ejecuta el trabajo con un repositorio dentro de una transacción
     transaction: (work) => db.transaction((tx) => work(createIngredientsRepository(tx))),
   });
   const controller = createIngredientsController(service);

@@ -1,7 +1,7 @@
 const lineNotFound = {error: 'La línea no existe o su pedido ya se cerró', status: 404};
 const shipmentNotFound = {error: 'El envío no existe o su pedido ya se cerró', status: 404};
 
-// Agrupa filas por una clave calculada: Map(clave → filas), en el orden en que aparecen
+// Agrupa filas por una clave calculada, en el orden en que aparecen
 const groupBy = (rows, keyOf) => {
   const groups = new Map();
   for (const row of rows) {
@@ -32,9 +32,9 @@ const toLine = (row, exclusions, combos) => {
   };
 };
 
-// Reglas de la pantalla de cocina: envíos de las ventas abiertas y unidades listas por línea
+// Reglas de la pantalla de cocina
 export const createKitchenService = ({repository}) => {
-  // Envíos de las ventas abiertas: primero los que esperan más; un envío está listo cuando todas sus unidades lo están
+  // Envíos de las ventas abiertas, los que esperan más primero
   const orders = async () => {
     const rows = await repository.openLines();
     const exclusions = groupBy(await repository.detailExclusions(rows.map((row) => row.id_detalle)), (row) => row.id_detalle);
@@ -49,7 +49,6 @@ export const createKitchenService = ({repository}) => {
       if (listas === unidades) {
         estado = 'listo';
       }
-      // Desde el segundo envío la comanda es una modificación del pedido
       let modificadoPor = null;
       if (first.envio > 1) {
         modificadoPor = first.cajero;

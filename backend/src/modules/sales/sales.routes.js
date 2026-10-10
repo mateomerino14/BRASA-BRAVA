@@ -10,6 +10,7 @@ import {checkoutSchema, orderSchema, saleParamSchema, tableParamSchema} from './
 export const createSalesRouter = ({db, config, clock}) => {
   const service = createSalesService({
     repository: createSalesRepository(db),
+    // Ejecuta el trabajo con un repositorio dentro de una transacción
     transaction: (work) => db.transaction((tx) => work(createSalesRepository(tx))),
     clock,
     timeZone: config.TIMEZONE,

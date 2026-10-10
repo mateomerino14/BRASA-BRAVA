@@ -1,7 +1,5 @@
 import {toIsoDate} from '../../utils/calendar.js';
 
-// Reglas de precio y vigencia de promociones, compartidas con Caja
-
 const PERCENT = 100;
 // Redondea un monto a centavos
 export const round2 = (value) => Math.round(value * PERCENT) / PERCENT;

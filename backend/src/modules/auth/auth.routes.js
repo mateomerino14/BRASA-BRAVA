@@ -11,7 +11,7 @@ const limitWindowMs = 15 * 60_000;
 const loginAttemptsLimit = 20;
 const resetAttemptsLimit = 10;
 
-// Limita los intentos por IP en rutas sensibles (se desactiva en las pruebas)
+// Limita los intentos por IP en rutas sensibles
 const createLimiter = (enabled, limit) => {
   if (!enabled) {
     return (_req, _res, next) => next();

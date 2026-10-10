@@ -17,7 +17,7 @@ const readSettings = async (db) => {
   return {enlaceImpuestos: rows[0]?.valor ?? ''};
 };
 
-// Declara /api/settings: cualquier sesión los lee; solo quien tiene Administración los cambia
+// Declara las rutas de /api/settings
 export const createSettingsRouter = ({db, config}) => {
   const router = Router();
   router.use(authenticate(config.JWT_SECRET));

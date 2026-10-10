@@ -16,7 +16,7 @@ const SORT_COLUMNS = {
 };
 const DEFAULT_ORDER = 's.activa DESC, s.nombre, s.id_seccion';
 
-// Arma el WHERE del listado: busca en el nombre de la sección y de sus mesas activas
+// Arma el WHERE del listado de secciones
 const buildFilters = ({search, estado}) => {
   const conditions = [];
   const params = [];

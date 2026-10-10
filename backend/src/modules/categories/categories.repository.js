@@ -8,7 +8,7 @@ const SORT_COLUMNS = {
 };
 const DEFAULT_ORDER = 'c.activa DESC, c.nombre, c.id_categoria';
 
-// Productos activos de cada categoría (a través de sus subcategorías)
+// Productos activos de cada categoría
 const productCountJoin = `LEFT JOIN (
     SELECT s.id_categoria, COUNT(*)::int AS total FROM producto p
       JOIN subcategoria s ON s.id_subcategoria = p.id_subcategoria
@@ -16,7 +16,7 @@ const productCountJoin = `LEFT JOIN (
   ) pc ON pc.id_categoria = c.id_categoria`;
 const categoryColumns = 'c.id_categoria, c.nombre, c.descripcion, c.imagen_url, c.activa, COALESCE(pc.total, 0) AS total_productos';
 
-// Arma el WHERE del listado: busca en el nombre de la categoría y de sus subcategorías
+// Arma el WHERE del listado de categorías
 const buildFilters = ({search, estado}) => {
   const conditions = [];
   const params = [];
@@ -38,7 +38,7 @@ const buildFilters = ({search, estado}) => {
   return {where, params};
 };
 
-// Acceso a datos de categorías y subcategorías (solo SQL, sin reglas de negocio)
+// Acceso a datos de categorías y subcategorías
 export const createCategoriesRepository = (db) => ({
   // Lista una página de categorías con los filtros dados
   list: async (filters) => {

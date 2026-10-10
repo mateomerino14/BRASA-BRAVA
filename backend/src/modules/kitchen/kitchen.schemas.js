@@ -1,5 +1,6 @@
 import {z} from 'zod';
 
+// Id entero positivo con un mensaje de error
 const positiveId = (message) => z.coerce.number({error: message}).int(message).positive(message);
 
 export const lineParamSchema = z.object({id: positiveId('Línea inválida')});

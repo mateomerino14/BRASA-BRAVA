@@ -16,6 +16,7 @@ const productItem = z.object({
   cantidad: z.coerce.number().int('La cantidad es un número entero').min(1, 'La cantidad mínima es 1').max(MAX_QUANTITY, `La cantidad máxima es ${MAX_QUANTITY}`).optional().default(1),
 });
 
+// Indica si los productos de la promoción no se repiten
 const hasUniqueProducts = (items) => new Set(items.map((item) => item.idProducto)).size === items.length;
 
 const optionalDate = z.union([z.iso.date({error: 'Ingrese una fecha válida'}), z.literal(''), z.null()]).optional().transform((value) => value || null);

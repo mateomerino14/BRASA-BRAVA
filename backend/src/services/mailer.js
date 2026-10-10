@@ -5,6 +5,7 @@ export const createConsoleMailer = (logger = console) => {
   const outbox = [];
   return {
     outbox,
+    // Guarda el correo y lo muestra en consola
     send: async (message) => {
       outbox.push(message);
       logger.info?.(`[mail] Para: ${message.to} | ${message.subject} | ${message.preview ?? ''}`);
@@ -14,6 +15,7 @@ export const createConsoleMailer = (logger = console) => {
 
 // Mailer de producción que envía mediante la API transaccional de Brevo
 export const createBrevoMailer = ({apiKey, fromEmail, fromName}, fetchImpl = fetch) => ({
+  // Envía el correo con la API de Brevo
   send: async ({to, toName, subject, html}) => {
     const response = await fetchImpl(BREVO_URL, {
       method: 'POST',

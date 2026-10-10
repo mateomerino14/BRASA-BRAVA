@@ -12,6 +12,7 @@ const MAX_QUANTITY = 999999.999;
 const DEFAULT_HISTORY_SIZE = 10;
 const MAX_HISTORY_SIZE = 50;
 
+// Cantidad decimal de stock
 const quantity = (label) => decimalSchema({label, decimals: QUANTITY_DECIMALS, max: MAX_QUANTITY, allowZero: true});
 
 const baseFields = {
@@ -27,7 +28,7 @@ export const createIngredientSchema = z.object({
 
 export const updateIngredientSchema = z.object(baseFields);
 
-// Entrada y salida mueven una cantidad mayor a 0; el ajuste fija el conteo real (puede ser 0)
+// Movimiento de stock: entrada, salida o ajuste
 export const movementSchema = z.object({
   tipo: z.enum(MOVEMENT_TYPES, {error: 'Seleccione el tipo de movimiento'}),
   cantidad: quantity('la cantidad'),
@@ -47,6 +48,5 @@ export const historyQuerySchema = z.object({
 export const INGREDIENT_SORT_KEYS = ['nombre', 'stock', 'estado'];
 
 export const listQuerySchema = baseListQuery(INGREDIENT_SORT_KEYS, {
-  // "bajo": queda algo pero en o por debajo del mínimo; "sin_stock": se acabó
   nivel: z.enum(['todos', 'bajo', 'sin_stock']).optional().default('todos'),
 });

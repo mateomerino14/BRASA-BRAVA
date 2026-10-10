@@ -11,6 +11,7 @@ import {idParamSchema, listQuerySchema, promotionSchema, statusSchema} from './p
 export const createPromotionsRouter = ({db, config, images, clock}) => {
   const service = createPromotionsService({
     repository: createPromotionsRepository(db),
+    // Ejecuta el trabajo con un repositorio dentro de una transacción
     transaction: (work) => db.transaction((tx) => work(createPromotionsRepository(tx))),
     images,
     clock,

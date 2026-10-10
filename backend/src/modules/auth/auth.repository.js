@@ -1,4 +1,4 @@
-// Acceso a datos del módulo de autenticación (solo SQL, sin reglas de negocio)
+// Acceso a datos del módulo de autenticación
 export const createAuthRepository = (db) => ({
   // Busca un empleado activo por alias, con su cargo
   findActiveEmployeeByAlias: async (alias) => {
@@ -13,7 +13,7 @@ export const createAuthRepository = (db) => ({
     return rows[0] ?? null;
   },
 
-  // Nombre y foto actuales de un empleado (pueden cambiar mientras la sesión sigue abierta)
+  // Nombre y foto actuales de un empleado
   findProfile: async (idEmpleado) => {
     const {rows} = await db.query('SELECT nombre, apellido, foto_url FROM empleado WHERE id_empleado = $1', [idEmpleado]);
     return rows[0] ?? null;
@@ -45,7 +45,7 @@ export const createAuthRepository = (db) => ({
     return rows[0] ?? null;
   },
 
-  // Lista los empleados activos para el carrusel del login (sin datos sensibles)
+  // Lista los empleados activos para el carrusel del login
   listLoginUsers: async () => {
     const {rows} = await db.query(
       `SELECT e.alias, e.nombre, e.apellido, e.foto_url, c.nombre AS cargo
