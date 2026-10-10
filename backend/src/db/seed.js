@@ -166,11 +166,42 @@ const seedIngredients = async (db) => {
   return true;
 };
 
+// Recetas demo: producto → [insumo, cantidad por porción]
+const RECIPES = {
+  'Hamburguesa Clásica': [['Carne de res', 0.15], ['Pan de hamburguesa', 1], ['Queso cheddar', 0.03], ['Tomate', 0.04], ['Lechuga', 1]],
+  'Cheeseburger': [['Carne de res', 0.15], ['Pan de hamburguesa', 1], ['Queso cheddar', 0.06]],
+  'Brava BBQ': [['Carne de res', 0.18], ['Pan de hamburguesa', 1], ['Tocino', 0.05], ['Cebolla', 0.05]],
+  'Doble Brava': [['Carne de res', 0.3], ['Pan de hamburguesa', 1], ['Queso cheddar', 0.06]],
+  'Papas Fritas Clásicas': [['Papas', 0.25], ['Aceite', 0.05]],
+  'Gaseosa 500 ml': [['Gaseosa 500 ml', 1]],
+  'Jugo de Naranja': [['Naranja', 0.4]],
+  'Cerveza Artesanal': [['Cerveza artesanal 330 ml', 1]],
+};
+
+// Inserta las recetas demo si la tabla está vacía
+const seedRecipes = async (db) => {
+  const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM receta');
+  if (rows[0].total > 0) {
+    return false;
+  }
+  for (const [product, items] of Object.entries(RECIPES)) {
+    for (const [ingredient, cantidad] of items) {
+      await db.query(
+        `INSERT INTO receta (id_producto, id_insumo, cantidad)
+         SELECT p.id_producto, i.id_insumo, $3::numeric FROM producto p, insumo i WHERE p.nombre = $1 AND i.nombre = $2`,
+        [product, ingredient, cantidad],
+      );
+    }
+  }
+  return true;
+};
+
 // Carga cada bloque de datos demo que falte; devuelve true si insertó algo
 export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026'} = {}) => {
   const staff = await seedStaff(db, {password, directorioPassword});
   const categories = await seedCategories(db);
   const products = await seedProducts(db);
   const ingredients = await seedIngredients(db);
-  return staff || categories || products || ingredients;
+  const recipes = await seedRecipes(db);
+  return staff || categories || products || ingredients || recipes;
 };
