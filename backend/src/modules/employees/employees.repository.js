@@ -1,3 +1,15 @@
+import {orderClause, pageClause} from '../../utils/listQuery.js';
+
+// Columnas SQL de cada clave de orden (lista blanca)
+const SORT_COLUMNS = {
+  nombre: ['e.nombre', 'e.apellido'],
+  ci: ['e.ci'],
+  cargo: ['c.nombre'],
+  usuario: ['e.alias'],
+  estado: ['e.activo'],
+};
+const DEFAULT_ORDER = 'e.activo DESC, e.nombre, e.apellido, e.id_empleado';
+
 const employeeColumns = `e.id_empleado, e.nombre, e.apellido, e.ci, e.alias, e.correo, e.telefono,
        e.foto_url, e.activo, e.id_cargo, c.nombre AS cargo`;
 
@@ -30,16 +42,16 @@ const buildFilters = ({search, idCargo, estado}) => {
 // Acceso a datos de empleados (solo SQL, sin reglas de negocio)
 export const createEmployeesRepository = (db) => ({
   // Lista una página de empleados con los filtros dados
-  list: async ({search, idCargo, estado, page, pageSize}) => {
-    const {where, params} = buildFilters({search, idCargo, estado});
-    const offset = (page - 1) * pageSize;
+  list: async (filters) => {
+    const {where, params} = buildFilters(filters);
+    const page = pageClause(params, filters);
     const {rows} = await db.query(
       `SELECT ${employeeColumns}
          FROM empleado e JOIN cargo c ON c.id_cargo = e.id_cargo
          ${where}
-        ORDER BY e.activo DESC, e.nombre, e.apellido
-        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, pageSize, offset],
+        ${orderClause(SORT_COLUMNS, filters, DEFAULT_ORDER)}
+        ${page.sql}`,
+      page.params,
     );
     return rows;
   },

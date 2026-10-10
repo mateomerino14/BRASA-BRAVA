@@ -1,3 +1,12 @@
+import {orderClause, pageClause} from '../../utils/listQuery.js';
+
+// Columnas SQL de cada clave de orden (lista blanca)
+const SORT_COLUMNS = {
+  nombre: ['c.nombre'],
+  estado: ['c.activa'],
+};
+const DEFAULT_ORDER = 'c.activa DESC, c.nombre, c.id_categoria';
+
 // Arma el WHERE del listado: busca en el nombre de la categoría y de sus subcategorías
 const buildFilters = ({search, estado}) => {
   const conditions = [];
@@ -23,14 +32,15 @@ const buildFilters = ({search, estado}) => {
 // Acceso a datos de categorías y subcategorías (solo SQL, sin reglas de negocio)
 export const createCategoriesRepository = (db) => ({
   // Lista una página de categorías con los filtros dados
-  list: async ({search, estado, page, pageSize}) => {
-    const {where, params} = buildFilters({search, estado});
+  list: async (filters) => {
+    const {where, params} = buildFilters(filters);
+    const page = pageClause(params, filters);
     const {rows} = await db.query(
       `SELECT c.id_categoria, c.nombre, c.descripcion, c.imagen_url, c.activa
          FROM categoria c ${where}
-        ORDER BY c.activa DESC, c.nombre
-        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, pageSize, (page - 1) * pageSize],
+        ${orderClause(SORT_COLUMNS, filters, DEFAULT_ORDER)}
+        ${page.sql}`,
+      page.params,
     );
     return rows;
   },
