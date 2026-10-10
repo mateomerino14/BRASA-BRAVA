@@ -6,6 +6,7 @@ import {createAuthRouter} from './modules/auth/auth.routes.js';
 import {createEmployeesRouter} from './modules/employees/employees.routes.js';
 import {createRolesRouter} from './modules/roles/roles.routes.js';
 import {createCategoriesRouter} from './modules/categories/categories.routes.js';
+import {createProductsRouter} from './modules/products/products.routes.js';
 import {UPLOADS_ROUTE, createImageStorage} from './services/imageStorage.js';
 import {errorHandler, notFoundHandler} from './middlewares/errorHandler.js';
 
@@ -28,6 +29,7 @@ export const createApp = ({db, mailer, config, logger = console, images = create
   app.use('/api/employees', createEmployeesRouter({db, config}));
   app.use('/api/roles', createRolesRouter({db, config}));
   app.use('/api/categories', createCategoriesRouter({db, config, images}));
+  app.use('/api/products', createProductsRouter({db, config, images}));
   app.use('/api', notFoundHandler);
   app.use(UPLOADS_ROUTE, express.static(images.root, {maxAge: '7d'}), notFoundHandler);
 
