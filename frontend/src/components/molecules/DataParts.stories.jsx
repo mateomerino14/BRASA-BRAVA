@@ -7,6 +7,7 @@ import {Stepper} from './Stepper';
 import {ChipList} from './ChipList';
 import {DayPicker} from './DayPicker';
 import {PriceTag} from './PriceTag';
+import {ChipTabs} from './ChipTabs';
 import {Amount} from '../atoms/Amount';
 import {LevelBar} from '../atoms/LevelBar';
 import {NumberInput} from '../atoms/NumberInput';
@@ -65,3 +66,16 @@ function DaysDemo() {
 
 export const DiasDeLaSemana = {render: () => <DaysDemo />};
 export const PrecioConPromocion = {render: () => <PriceTag regular={83} promo={70} size="lg" />};
+
+function ChipTabsDemo() {
+  const [value, setValue] = useState('1');
+  const options = [
+    {value: '1', label: 'Salón principal', count: 2, countLabel: '2 mesas ocupadas'},
+    {value: '2', label: 'Terraza', count: 1, countLabel: '1 mesa ocupada'},
+    {value: '3', label: 'Barra'},
+    {value: '4', label: 'Patio trasero'},
+  ];
+  return <div className="w-96"><ChipTabs label="Secciones" options={options} value={value} onChange={setValue} /></div>;
+}
+
+export const PestanasDesplazables = {render: () => <ChipTabsDemo />};
