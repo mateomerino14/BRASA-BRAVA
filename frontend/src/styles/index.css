@@ -93,3 +93,24 @@
     }
   }
 }
+
+/* Impresión: solo se imprime el contenido de .print-only (comandas y tickets), con márgenes de ticketera */
+.print-only {
+  display: none;
+}
+
+@media print {
+  body > *:not(.print-only) {
+    display: none !important;
+  }
+
+  /* Ancho útil de una ticketera de 80 mm */
+  .print-only {
+    display: block;
+    width: 72mm;
+  }
+
+  @page {
+    margin: 4mm;
+  }
+}
