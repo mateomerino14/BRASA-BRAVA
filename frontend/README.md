@@ -19,7 +19,7 @@ Opcionalmente, crear un `.env` en la carpeta `frontend` (ver `.env.example`):
 
 | Variable | Propósito |
 |---|---|
-| `VITE_API_URL` | URL base de la API. Por defecto `/api`: en desarrollo Vite la redirige al backend y en producción la sirve el mismo backend |
+| `VITE_API_URL` | URL base de la API. Por defecto `/api`: en desarrollo Vite redirige `/api` y `/uploads` al backend y en producción los sirve el mismo backend. Si se usa una URL absoluta, las fotos se piden a ese mismo servidor |
 
 ## Ejecución
 
@@ -52,15 +52,18 @@ npm test                  # pruebas automáticas (Vitest + Testing Library)
 | Página (`features/<modulo>/pages`) | Invocar hooks y componer organismos | No llama servicios directamente |
 | Componente (`components/`) | Presentar datos recibidos por props | No conoce hooks de negocio |
 
-La sesión se maneja en `context/` (`AuthProvider` y `useAuth`). El cliente HTTP (`lib/apiClient.js`) agrega el token, normaliza los errores y cierra la sesión si el servidor responde que venció.
+La sesión se maneja en `context/` (`AuthProvider` y `useAuth`). El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
+
+Las pantallas con tabla reutilizan dos hooks de `src/hooks/`: `usePaginatedList` (búsqueda con espera, filtros, página, recarga y aviso temporal) y `useStatusToggle` (confirmar una baja o reactivación). Cada módulo solo define su servicio, sus filtros y sus mensajes.
 
 ## Estructura
 
 ```
 src/
 ├── components/
-│   ├── atoms/           Button, IconButton, Input, PasswordInput, Select, Avatar, Badge, Logo, Spinner, SocialIcon
-│   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination
+│   ├── atoms/           Button, IconButton, Input, PasswordInput, Textarea, Select, Avatar, Thumbnail,
+│   │                    Badge, Logo, Spinner, SocialIcon
+│   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination, ImagePicker, TagInput
 │   ├── organisms/       Sidebar, Header, Footer, Modal, EmployeeCarousel, DataTable, FilterBar,
 │   │                    RegisterCallout, ConfirmDialog
 │   └── templates/       MainLayout, AuthLayout
@@ -68,11 +71,13 @@ src/
 │   ├── auth/            Login, carrusel de empleados, modo DIRECTORIO y recuperación
 │   ├── home/            Bienvenida con reloj y accesos rápidos
 │   ├── employees/       Gestión de empleados: tabla, filtros, registro, modificación y baja
+│   ├── categories/      Gestión de categorías: foto, subcategorías, filtros, registro y baja
 │   └── shared/          Páginas "en construcción" y 404
-├── config/navigation.js Menú lateral y pantalla que exige cada ruta
+├── config/              Menú lateral (navigation.js) y valores de las tablas (lists.js)
+├── hooks/               Hooks compartidos de listado paginado y cambio de estado
 ├── context/             Sesión del usuario
 ├── router/              Rutas, guardas de sesión y de permisos
-├── lib/                 Cliente HTTP y funciones de formato
+├── lib/                 Cliente HTTP, query strings y funciones de formato
 ├── stories/             Introducción del sistema de diseño en Storybook
 └── styles/index.css     Tokens de colores, fuentes, sombras y animaciones
 ```
@@ -103,6 +108,8 @@ Los colores y fuentes salen del prototipo de Figma y se definen una sola vez en 
 - Botones que se elevan al pasar el mouse y se hunden al presionar.
 - Código de verificación que avanza solo, acepta pegar y tiembla si es incorrecto.
 - Logo con brillo de brasa, reloj en vivo y transición suave entre pantallas.
+- Subcategorías en chips que se despliegan con "+N más" y entran escalonadas; en el formulario aparecen y desaparecen con rebote.
+- Selector de foto con arrastrar y soltar, vista previa inmediata y acciones Cambiar/Quitar sobre la imagen.
 
 Todo respeta la opción del sistema "reducir movimiento".
 
@@ -114,10 +121,11 @@ Todo respeta la opción del sistema "reducir movimiento".
 | `/` | Página principal | Todos |
 | `/familia`, `/caja` | Familia y Caja | `familia`, `caja` |
 | `/empleados` | Gestión de empleados | `empleados` |
-| `/productos`, `/secciones`, `/stock`, `/categorias`, `/promociones` | Administración | Uno por pantalla |
+| `/categorias` | Gestión de categorías | `categorias` |
+| `/productos`, `/secciones`, `/stock`, `/promociones` | Administración | Uno por pantalla |
 
 Las pantallas que todavía no se construyeron muestran un aviso de "en construcción". Si un usuario entra a una ruta sin permiso, vuelve al Home.
 
 ## Pruebas
 
-Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor) y los componentes base.
+Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar) y los componentes base.

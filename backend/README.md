@@ -43,6 +43,7 @@ BREVO_API_KEY=...
 | `RESET_CODE_MAX_ATTEMPTS` | Intentos antes de bloquear el código (por defecto 5) |
 | `RATE_LIMIT_ENABLED` | `false` desactiva el límite de intentos por IP (solo para pruebas) |
 | `STATIC_DIR` | Opcional. Carpeta del frontend compilado para servirlo desde la API |
+| `UPLOADS_DIR` | Carpeta donde se guardan las imágenes subidas (por defecto `uploads`) |
 
 La configuración se valida con Zod al arrancar: si falta una variable obligatoria o tiene formato inválido, el servidor no inicia e indica cuál corregir.
 
@@ -116,12 +117,16 @@ src/
 │   ├── auth/                  routes, controller, service, repository, schemas,
 │   │                          permisos por pantalla y plantilla del correo
 │   ├── employees/             Gestión de empleados
+│   ├── categories/            Categorías, subcategorías e imagen
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
 │   ├── auth.js                Token de sesión y permisos por pantalla
 │   ├── validate.js            Validación de la petición con Zod
+│   ├── upload.js              Recepción de una imagen (multipart, máx. 5 MB)
 │   └── errorHandler.js        Respuesta uniforme ante errores
-├── services/mailer.js       Correo por consola (desarrollo) o Brevo
+├── services/
+│   ├── mailer.js              Correo por consola (desarrollo) o Brevo
+│   └── imageStorage.js        Guardado de imágenes validando su formato real
 ├── utils/                   Hash, tokens, códigos, errores HTTP y respuesta de servicios
 ├── scripts/                 migrate y seed para npm run
 ├── app.js                   Configuración de Express (seguridad, CORS, rutas)
@@ -147,15 +152,29 @@ tests/                       Pruebas de la API y unitarias
 | `PUT` | `/api/employees/:id` | Modifica un empleado; la contraseña solo cambia si se envía |
 | `PATCH` | `/api/employees/:id/status` | Da de baja (`{activo: false}`) o reactiva a un empleado |
 | `GET` | `/api/roles` | Cargos activos |
+| `GET` | `/api/categories` | Categorías con sus subcategorías activas; búsqueda (`search`, también por subcategoría), estado (`estado`) y paginación |
+| `GET` | `/api/categories/:id` | Detalle de una categoría |
+| `POST` | `/api/categories` | Registra una categoría con sus subcategorías |
+| `PUT` | `/api/categories/:id` | Modifica la categoría y sincroniza sus subcategorías |
+| `PATCH` | `/api/categories/:id/status` | Da de baja (`{activo: false}`) o reactiva una categoría |
+| `PUT` | `/api/categories/:id/image` | Sube o reemplaza la foto (`multipart/form-data`, campo `imagen`) |
+| `DELETE` | `/api/categories/:id/image` | Quita la foto |
+| `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`.
+Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`.
 
 ### Reglas de la gestión de empleados
 
 - El CI, el usuario y el correo no se pueden repetir; el usuario y el correo se guardan en minúsculas.
 - Un empleado dado de baja no puede iniciar sesión ni aparece en el carrusel del login, pero conserva su historial y se puede reactivar.
 - Nadie puede darse de baja a sí mismo; el DIRECTORIO sí puede dar de baja a cualquier empleado.
+
+### Reglas de la gestión de categorías
+
+- El nombre de la categoría no se repite (sin distinguir mayúsculas). Cada categoría tiene entre 1 y 20 subcategorías sin nombres repetidos.
+- Al modificar se envía la lista completa de subcategorías: las que traen `id` se renombran, las nuevas se crean y las que faltan se dan de baja (no se borran, para no perder el historial de productos).
+- Las imágenes se aceptan solo si sus primeros bytes son de PNG, JPG o WEBP (no se confía en la extensión), pesan hasta 5 MB y se guardan con un nombre aleatorio. Al reemplazar o quitar una foto se borra el archivo anterior.
 
 ## Autorización
 
