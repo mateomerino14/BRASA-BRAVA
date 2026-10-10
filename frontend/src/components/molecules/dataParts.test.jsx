@@ -8,10 +8,11 @@ import {Stepper} from './Stepper';
 import {ChipList} from './ChipList';
 import {DayPicker} from './DayPicker';
 import {PriceTag} from './PriceTag';
+import {ChipTabs} from './ChipTabs';
 import {Amount} from '../atoms/Amount';
 import {NumberInput} from '../atoms/NumberInput';
 import {levelRatio} from '../../lib/level';
-import {formatDate, formatDays, formatQuantity, quantityParts} from '../../lib/format';
+import {formatDate, formatDays, formatQuantity, formatTime, normalizeText, quantityParts} from '../../lib/format';
 
 describe('Piezas de stock', () => {
   it('SegmentedControl funciona como grupo de radios', async () => {
@@ -98,5 +99,23 @@ describe('DayPicker y PriceTag', () => {
     expect(formatDays('1000001')).toBe('Fines de semana');
     expect(formatDays('0010000')).toBe('Martes');
     expect(formatDays('0010100')).toBe('Mar, Jue');
+  });
+});
+
+describe('ChipTabs', () => {
+  it('marca la opción elegida, avisa el cambio y lee el contador con su texto', async () => {
+    const onChange = vi.fn();
+    const options = [{value: '1', label: 'Salón', count: 2, countLabel: '2 mesas ocupadas'}, {value: '2', label: 'Terraza'}];
+    render(<ChipTabs label="Secciones" options={options} value="1" onChange={onChange} />);
+    expect(screen.getByRole('radio', {name: 'Salón, 2 mesas ocupadas'})).toBeChecked();
+    await userEvent.click(screen.getByRole('radio', {name: 'Terraza'}));
+    expect(onChange).toHaveBeenCalledWith('2');
+  });
+});
+
+describe('formato de hora y búsqueda', () => {
+  it('muestra la hora en 24 horas y compara textos sin tildes', () => {
+    expect(formatTime(new Date(2026, 9, 13, 20, 5))).toBe('20:05');
+    expect(normalizeText('Clásica ÑANDÚ')).toBe('clasica nandu');
   });
 });

@@ -123,6 +123,7 @@ src/
 │   ├── ingredients/           Insumos de stock, movimientos e historial
 │   ├── sections/              Secciones del local y sus mesas
 │   ├── promotions/            Promociones: combos y descuentos con vigencia
+│   ├── sales/                 Caja: plano de mesas, catálogo del día y registro de pedidos
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
@@ -197,10 +198,15 @@ tests/                       Pruebas de la API y unitarias
 | `PATCH` | `/api/promotions/:id/status` | Da de baja o reactiva una promoción |
 | `PUT` | `/api/promotions/:id/image` | Sube o reemplaza la foto |
 | `DELETE` | `/api/promotions/:id/image` | Quita la foto |
+| `GET` | `/api/sales/floor` | Secciones activas con sus mesas, la venta abierta de cada una (total, unidades, mesero, hora de apertura) y `summary` (`mesas`, `ocupadas`, `libres`, `porCobrar`) |
+| `GET` | `/api/sales/catalog` | Lo que se vende hoy: categorías, productos activos con disponibilidad, porciones e ingredientes de su receta, y promociones vigentes hoy con su precio y productos |
+| `GET` | `/api/sales/waiters` | Empleados activos que pueden atender mesas (su cargo tiene acceso a Caja) |
+| `GET` | `/api/sales/tables/:idMesa` | Mesa con su sección y su venta abierta (`null` si está libre) con todas sus líneas agrupables por envío |
+| `POST` | `/api/sales/tables/:idMesa/orders` | Registra un envío: abre la venta si la mesa está libre o suma las líneas a la abierta. Responde `nueva` |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`.
+Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja, el permiso `caja`.
 
 ### Parámetros comunes de los listados
 
@@ -259,6 +265,16 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - Estados del día: `vigente`, `otro_dia` (dentro de fechas pero hoy no aplica), `programada`, `vencida` o `inactiva`. "Hoy" se calcula en la zona horaria del local (`TIMEZONE`), no en la del servidor: a las 23:30 del miércoles en La Paz sigue siendo miércoles aunque en UTC ya sea jueves.
 - Los precios se calculan con el precio actual de cada producto. Los productos nuevos deben estar activos; uno dado de baja que ya estaba se puede conservar.
 - Las fechas (`DATE`) viajan como texto `YYYY-MM-DD`, sin zona horaria, para que no se corran un día.
+
+### Reglas de Caja
+
+- Una mesa ocupada tiene una sola venta abierta: un nuevo envío a esa mesa se suma a la misma venta, no crea otra. El id de la venta es su número correlativo y nunca retrocede.
+- Dos envíos al mismo tiempo para una mesa libre terminan en una sola venta: la fila de la mesa se bloquea durante la transacción, un índice único impide dos ventas abiertas y, si aun así chocan, el segundo se reintenta sumándose a la venta del primero.
+- Cada línea guarda el nombre y el precio del momento (si el producto cambia de precio después, la venta no cambia), la cantidad (1 a 99), el consumo (`local` o `llevar`), el número de envío y el mesero de ese envío. La venta guarda además el mesero que abrió la mesa y el cajero de la sesión (o el DIRECTORIO).
+- El precio lo calcula siempre el servidor: el de cada producto y, en promociones, el mismo cálculo que la pantalla de promociones (`modules/promotions/promotionRules.js`). Una promoción se vende solo si está vigente hoy y todos sus productos se pueden vender.
+- Se pueden quitar ingredientes solo de la receta de cada producto; en un combo, de la receta de cada producto del combo. No hay extras con costo: lo adicional se vende como un producto más (por ejemplo, de "Guarniciones y Extras").
+- No se venden productos agotados ni de baja. El stock **no bloquea** la venta: el catálogo avisa "Sin stock" o "Quedan N", pero el pedido se registra igual.
+- No se puede dar de baja una sección ni quitar una mesa que tenga una venta abierta.
 
 ## Autorización
 

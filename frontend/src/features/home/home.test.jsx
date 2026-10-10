@@ -29,9 +29,9 @@ describe('Home', () => {
 
   it('muestra "en construcción" en módulos pendientes', async () => {
     mockApi();
-    renderApp('/caja', {token: 't'});
+    renderApp('/familia', {token: 't'});
     expect(
-      await screen.findByRole('heading', {name: 'Caja en construcción'}),
+      await screen.findByRole('heading', {name: 'Familia en construcción'}),
     ).toBeInTheDocument();
   });
 

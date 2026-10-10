@@ -84,6 +84,16 @@ export const createSectionsRepository = (db) => ({
     return rows;
   },
 
+  // Mesas activas de la sección que tienen una venta abierta
+  occupiedTables: async (idSeccion) => {
+    const {rows} = await db.query(
+      `SELECT m.id_mesa, m.nombre FROM mesa m JOIN venta v ON v.id_mesa = m.id_mesa AND v.estado = 'abierta'
+        WHERE m.id_seccion = $1 AND m.activa = TRUE ORDER BY m.id_mesa`,
+      [idSeccion],
+    );
+    return rows;
+  },
+
   // Busca una sección por id con sus totales
   findById: async (id) => {
     const {rows} = await db.query(`SELECT ${sectionColumns} FROM seccion s ${totalsJoin} WHERE s.id_seccion = $1`, [id]);
