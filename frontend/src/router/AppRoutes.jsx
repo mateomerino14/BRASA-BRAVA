@@ -13,6 +13,7 @@ import {PageLoader} from './PageLoader';
 const lazyPage = (load, name) => lazy(() => load().then((module) => ({default: module[name]})));
 
 const PAGES = {
+  cocina: lazyPage(() => import('../features/kitchen/pages/KitchenPage'), 'KitchenPage'),
   caja: lazyPage(() => import('../features/cashier/pages/CashierPage'), 'CashierPage'),
   empleados: lazyPage(() => import('../features/employees/pages/EmployeesPage'), 'EmployeesPage'),
   categorias: lazyPage(() => import('../features/categories/pages/CategoriesPage'), 'CategoriesPage'),
