@@ -170,8 +170,9 @@ describe('Gestión de empleados', () => {
     expect(names).toEqual(['Roberto', 'Marco', 'Javier', 'Carlos', 'Andrea']);
     const byRole = await api('get', '/api/employees?sort=cargo&dir=asc&pageSize=10');
     expect(byRole.body.items[0].cargo.nombre).toBe('Administrador');
-    const byUser = await api('get', '/api/employees?sort=usuario&pageSize=1');
-    expect(byUser.body.items[0].alias).toBe('a.romero');
+    // Descendente para no depender de cómo la base ordena los puntos de "a.romero" frente a "admin"
+    const byUser = await api('get', '/api/employees?sort=usuario&dir=desc&pageSize=1');
+    expect(byUser.body.items[0].alias).toBe('r.sanchez');
     expect((await api('get', '/api/employees?sort=contrasena_hash')).status).toBe(400);
   });
 });
