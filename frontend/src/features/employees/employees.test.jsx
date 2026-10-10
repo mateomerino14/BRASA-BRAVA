@@ -43,8 +43,8 @@ describe('Gestión de empleados', () => {
     await waitFor(() => expect(within(table).getAllByRole('row')).toHaveLength(2));
   });
 
-  it('valida el formulario antes de enviar y registra un empleado', async () => {
-    const {user} = await openPage();
+  it('valida el formulario antes de enviar y registra un empleado con su foto', async () => {
+    const {backend, user} = await openPage();
     await user.click(screen.getByRole('button', {name: 'Registrar empleado'}));
     const dialog = await screen.findByRole('dialog', {name: 'Registrar nuevo empleado'});
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
@@ -59,9 +59,12 @@ describe('Gestión de empleados', () => {
     await user.selectOptions(within(dialog).getByLabelText(/^Cargo/), 'Cajero');
     await fillField(user, dialog, 'Contraseña inicial', 'Inicial2026');
     expect(within(dialog).getByText('Lucía Flores')).toBeInTheDocument();
+    await user.upload(within(dialog).getByLabelText('Foto del empleado', {selector: 'input'}), new File([new Uint8Array(64)], 'lucia.png', {type: 'image/png'}));
+    expect(within(dialog).getByRole('img', {name: 'Lucía Flores'}).getAttribute('src')).toMatch(/^blob:/);
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
 
     expect(await screen.findByText('Se registró a Lucía Flores')).toBeInTheDocument();
+    expect(backend.images.uploads[0].file.name).toBe('lucia.png');
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(await screen.findByText('l.flores')).toBeInTheDocument();
   });
@@ -88,9 +91,12 @@ describe('Gestión de empleados', () => {
     const dialog = await screen.findByRole('dialog', {name: 'Modificar empleado'});
     expect(within(dialog).getByLabelText(/^CI/)).toHaveValue('4920114 LP');
     expect(within(dialog).getByLabelText(/^Cargo/)).toHaveValue('4');
+    expect(within(dialog).getByRole('img', {name: 'Vista previa de foto del empleado'})).toHaveAttribute('src', '/uploads/carlos.png');
     await fillField(user, dialog, 'Nombre', 'Carlos Andrés');
+    await user.click(within(dialog).getByRole('button', {name: 'Quitar'}));
     await user.click(within(dialog).getByRole('button', {name: 'Guardar'}));
     expect(await screen.findByText('Se actualizaron los datos de Carlos Andrés Mendoza')).toBeInTheDocument();
+    expect(backend.images.removals).toEqual([1]);
     expect(backend.store.find((employee) => employee.id === 1).contrasena).toBe('');
   });
 
