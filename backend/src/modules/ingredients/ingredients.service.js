@@ -10,7 +10,7 @@ const QUANTITY_DECIMALS = 3;
 const round = (value) => Number(Number(value).toFixed(QUANTITY_DECIMALS));
 
 // Nivel del stock: sin stock, bajo (en o por debajo del mínimo) o suficiente
-const levelOf = (actual, minimo) => {
+export const levelOf = (actual, minimo) => {
   if (actual === 0) {
     return 'sin_stock';
   }
