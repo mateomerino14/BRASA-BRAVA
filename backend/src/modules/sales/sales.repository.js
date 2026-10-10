@@ -14,7 +14,7 @@ const unitsJoin = `LEFT JOIN (
     SELECT id_venta, SUM(cantidad)::int AS unidades FROM venta_detalle GROUP BY id_venta
   ) u ON u.id_venta = v.id_venta`;
 
-const saleColumns = `v.id_venta, v.id_mesa, v.total, v.envios, v.abierta_en, v.cajero, v.id_mesero,
+const saleColumns = `v.id_venta, v.id_mesa, v.total, v.envios, v.abierta_en, v.cajero, v.id_mesero, v.modificado, v.modificado_por,
        e.nombre AS mesero_nombre, e.apellido AS mesero_apellido`;
 
 // Acceso a datos de Caja: mesas, catálogo de venta y ventas abiertas (solo SQL, sin reglas de negocio)
@@ -56,7 +56,7 @@ export const createSalesRepository = (db) => ({
       return [];
     }
     const {rows} = await db.query(
-      `SELECT r.id_producto, i.id_insumo, i.nombre FROM receta r JOIN insumo i ON i.id_insumo = r.id_insumo
+      `SELECT r.id_producto, r.cantidad, i.id_insumo, i.nombre FROM receta r JOIN insumo i ON i.id_insumo = r.id_insumo
         WHERE r.id_producto IN (${placeholders(productIds)})
         ORDER BY i.nombre`,
       productIds,
@@ -187,6 +187,58 @@ export const createSalesRepository = (db) => ({
       [idVenta, envio, idProducto, idPromocion, nombre, precioUnitario, cantidad, consumo, idMesero, creadoEn],
     );
     return rows[0].id_detalle;
+  },
+
+  // Envíos de una venta con su cajero y su mesero, en orden
+  saleShipments: async (idVenta) => {
+    const {rows} = await db.query(
+      `SELECT s.numero, s.cajero, s.creado_en, s.id_mesero, e.nombre AS mesero_nombre, e.apellido AS mesero_apellido
+         FROM venta_envio s JOIN empleado e ON e.id_empleado = s.id_mesero
+        WHERE s.id_venta = $1 ORDER BY s.numero`,
+      [idVenta],
+    );
+    return rows;
+  },
+
+  // Registra un envío (comanda) de la venta
+  insertShipment: async ({idVenta, numero, idCajero, cajero, idMesero, creadoEn}) => {
+    await db.query(
+      `INSERT INTO venta_envio (id_venta, numero, id_cajero, cajero, id_mesero, creado_en)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [idVenta, numero, idCajero, cajero, idMesero, creadoEn],
+    );
+  },
+
+  // Marca la venta como modificada por el cajero indicado
+  markModified: async (idVenta, cajero) => {
+    await db.query('UPDATE venta SET modificado = TRUE, modificado_por = $2 WHERE id_venta = $1', [idVenta, cajero]);
+  },
+
+  // Bloquea los insumos indicados hasta el fin de la transacción y devuelve su stock actual
+  lockIngredients: async (ids) => {
+    if (ids.length === 0) {
+      return [];
+    }
+    const {rows} = await db.query(
+      `SELECT id_insumo, nombre, stock_actual, activo FROM insumo
+        WHERE id_insumo IN (${placeholders(ids)}) ORDER BY id_insumo FOR UPDATE`,
+      ids,
+    );
+    return rows;
+  },
+
+  // Fija el stock de un insumo
+  setStock: async (idInsumo, value) => {
+    await db.query('UPDATE insumo SET stock_actual = $2::numeric WHERE id_insumo = $1', [idInsumo, value]);
+  },
+
+  // Registra un movimiento de stock en el historial
+  insertMovement: async ({idInsumo, cantidad, stockResultante, motivo, idEmpleado, responsable}) => {
+    await db.query(
+      `INSERT INTO movimiento_stock (id_insumo, tipo, cantidad, stock_resultante, motivo, id_empleado, responsable)
+       VALUES ($1, 'venta', $2::numeric, $3::numeric, $4, $5, $6)`,
+      [idInsumo, cantidad, stockResultante, motivo, idEmpleado, responsable],
+    );
   },
 
   // Registra un ingrediente quitado de una línea
