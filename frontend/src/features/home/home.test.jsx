@@ -12,7 +12,7 @@ describe('Home', () => {
       await screen.findByRole('heading', {name: /Bienvenido de vuelta, Marco/}),
     ).toBeInTheDocument();
     const shortcuts = screen.getByRole('region', {name: 'Accesos rápidos'});
-    expect(shortcuts.querySelectorAll('a')).toHaveLength(8);
+    expect(shortcuts.querySelectorAll('a')).toHaveLength(9);
   });
 
   it('el cajero solo ve sus módulos y no entra a pantallas sin permiso', async () => {

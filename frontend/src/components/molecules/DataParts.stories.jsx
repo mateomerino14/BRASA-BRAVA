@@ -10,6 +10,7 @@ import {PriceTag} from './PriceTag';
 import {ChipTabs} from './ChipTabs';
 import {Amount} from '../atoms/Amount';
 import {LevelBar} from '../atoms/LevelBar';
+import {ProgressBar} from '../atoms/ProgressBar';
 import {NumberInput} from '../atoms/NumberInput';
 
 export default {title: 'Moléculas/Resumen y cantidades'};
@@ -79,3 +80,13 @@ function ChipTabsDemo() {
 }
 
 export const PestanasDesplazables = {render: () => <ChipTabsDemo />};
+
+export const BarraDeAvance = {
+  render: () => (
+    <div className="flex w-80 flex-col gap-3">
+      <ProgressBar value={1} max={5} label="Avance" />
+      <ProgressBar value={3} max={5} label="Avance" tone="warning" />
+      <ProgressBar value={5} max={5} label="Avance" tone="success" />
+    </div>
+  ),
+};

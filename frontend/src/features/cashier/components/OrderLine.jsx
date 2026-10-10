@@ -29,6 +29,8 @@ export function OrderLine({line, showQuantity = true, actions}) {
           <span className={styles.tags}>
             {combo && <Badge tone="brand">Promoción</Badge>}
             {line.consumo === 'llevar' && <Badge tone="warning">Para llevar</Badge>}
+            {line.listos !== undefined && line.listos === line.cantidad && <Badge tone="success">Listo</Badge>}
+            {line.listos !== undefined && line.listos < line.cantidad && <Badge tone="neutral">{line.listos}/{line.cantidad} listos</Badge>}
           </span>
           {removed && <span className={styles.exclusions}>{removed}</span>}
         </div>

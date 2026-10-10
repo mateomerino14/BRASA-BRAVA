@@ -7,7 +7,7 @@ const ROLES = {
   Administrador: SCREENS,
   Cajero: ['home', 'familia', 'caja'],
   Mesero: ['home', 'familia', 'caja'],
-  Cocinero: ['home', 'familia'],
+  Cocinero: ['home', 'familia', 'cocina'],
 };
 
 const EMPLOYEES = [
@@ -294,7 +294,11 @@ const demoLinePrice = async (db, tipo, nombre) => {
   return {idProducto: rows[0].id, idPromocion: null, precio: Number(rows[0].precio)};
 };
 
+// Líneas demo que cocina ya terminó
+const READY_DEMO_LINES = ['Jugo de Naranja', 'Gaseosa 500 ml'];
+
 // Inserta ventas abiertas demo (mesas ocupadas) si no hay ventas
+
 const seedSales = async (db, now) => {
   const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM venta');
   if (rows[0].total > 0) {
@@ -339,6 +343,9 @@ const seedSales = async (db, now) => {
         );
       }
     }
+  }
+  for (const nombre of READY_DEMO_LINES) {
+    await db.query('UPDATE venta_detalle SET listos = cantidad WHERE nombre = $1', [nombre]);
   }
   return true;
 };
