@@ -4,10 +4,12 @@ import {ConfirmDialog} from '../../../components/organisms/ConfirmDialog';
 import {FilterSelect} from '../../../components/molecules/FilterSelect';
 import {ProductsTable} from '../components/ProductsTable';
 import {ProductFormModal} from '../components/ProductFormModal';
+import {RecipeModal} from '../components/RecipeModal';
 import {useProducts} from '../hooks/useProducts';
 import {useProductForm} from '../hooks/useProductForm';
 import {useProductStatus} from '../hooks/useProductStatus';
 import {useProductAvailability} from '../hooks/useProductAvailability';
+import {useRecipe} from '../hooks/useRecipe';
 import {AVAILABILITY_OPTIONS, STATUS_OPTIONS} from '../constants/products';
 
 const statusMessage = (product) => {
@@ -34,6 +36,7 @@ export function ProductsPage() {
   const form = useProductForm({onSaved: list.reload, categories: list.categories});
   const status = useProductStatus({onChanged: list.reload});
   const availability = useProductAvailability({onChanged: list.reload, onError: list.reportError});
+  const recipe = useRecipe({onSaved: list.reload});
   const deactivating = Boolean(status.target?.activo);
   const selectedCategory = list.categories.find((category) => String(category.id) === list.filters.idCategoria);
 
@@ -52,10 +55,11 @@ export function ProductsPage() {
       }
       notice={list.notice}
       error={list.error}
-      table={<ProductsTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} availability={availability} />}
+      table={<ProductsTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} onRecipe={recipe.open} availability={availability} />}
       callout={{...CALLOUT, onAction: form.openCreate}}
     >
       <ProductFormModal form={form} categories={list.categories} />
+      <RecipeModal recipe={recipe} />
 
       <ConfirmDialog
         open={Boolean(status.target)}
