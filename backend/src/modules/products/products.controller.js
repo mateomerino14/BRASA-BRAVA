@@ -39,5 +39,20 @@ export const createProductsController = (service) => ({
     return respond(res, result, ({product}) => res.json({product}));
   },
 
+  // Insumos activos para armar recetas
+  recipeOptions: async (_req, res) => res.json(await service.recipeOptions()),
+
+  // Devuelve la receta de un producto
+  getRecipe: async (req, res) => {
+    const result = await service.getRecipe(req.validated.params.id);
+    return respond(res, result, ({recipe}) => res.json({recipe}));
+  },
+
+  // Guarda la receta completa de un producto
+  saveRecipe: async (req, res) => {
+    const result = await service.saveRecipe(req.validated.params.id, req.validated.body);
+    return respond(res, result, ({recipe}) => res.json({recipe}));
+  },
+
   ...createImageHandlers(service, 'product'),
 });

@@ -9,13 +9,20 @@ const SORT_COLUMNS = {
 };
 const DEFAULT_ORDER = 'p.activo DESC, c.nombre, s.nombre, p.nombre, p.id_producto';
 
-const productColumns = `p.id_producto, p.nombre, p.descripcion, p.precio, p.imagen_url, p.activo, p.disponible,
+const productColumns = `p.id_producto, rp.porciones, p.nombre, p.descripcion, p.precio, p.imagen_url, p.activo, p.disponible,
        s.id_subcategoria, s.nombre AS subcategoria, s.activa AS subcategoria_activa,
        c.id_categoria, c.nombre AS categoria, c.activa AS categoria_activa`;
 
+// Porciones que alcanzan con el stock: el insumo más escaso manda; un insumo de baja cuenta como sin stock
 const productJoins = `FROM producto p
   JOIN subcategoria s ON s.id_subcategoria = p.id_subcategoria
-  JOIN categoria c ON c.id_categoria = s.id_categoria`;
+  JOIN categoria c ON c.id_categoria = s.id_categoria
+  LEFT JOIN (
+    SELECT r.id_producto,
+           MIN(CASE WHEN i.activo THEN FLOOR(i.stock_actual / r.cantidad) ELSE 0 END)::int AS porciones
+      FROM receta r JOIN insumo i ON i.id_insumo = r.id_insumo
+     GROUP BY r.id_producto
+  ) rp ON rp.id_producto = p.id_producto`;
 
 // Arma el WHERE del listado según los filtros recibidos
 const buildFilters = ({search, estado, idCategoria, idSubcategoria, disponibilidad}) => {
@@ -109,6 +116,42 @@ export const createProductsRepository = (db) => ({
         ORDER BY c.nombre, s.id_subcategoria`,
     );
     return rows;
+  },
+
+  // Ingredientes de la receta de un producto con el stock actual de cada insumo
+  recipe: async (id) => {
+    const {rows} = await db.query(
+      `SELECT r.id_insumo, r.cantidad, i.nombre, i.unidad, i.stock_actual, i.activo
+         FROM receta r JOIN insumo i ON i.id_insumo = r.id_insumo
+        WHERE r.id_producto = $1
+        ORDER BY i.nombre`,
+      [id],
+    );
+    return rows;
+  },
+
+  // Insumos activos para armar recetas
+  recipeOptions: async () => {
+    const {rows} = await db.query('SELECT id_insumo, nombre, unidad, stock_actual FROM insumo WHERE activo = TRUE ORDER BY nombre');
+    return rows;
+  },
+
+  // Devuelve cuáles de los insumos indicados existen y si están activos
+  findIngredients: async (ids) => {
+    if (ids.length === 0) {
+      return [];
+    }
+    const placeholders = ids.map((_, index) => `$${index + 1}`).join(', ');
+    const {rows} = await db.query(`SELECT id_insumo, activo FROM insumo WHERE id_insumo IN (${placeholders})`, ids);
+    return rows;
+  },
+
+  // Reemplaza la receta completa de un producto
+  replaceRecipe: async (id, items) => {
+    await db.query('DELETE FROM receta WHERE id_producto = $1', [id]);
+    for (const item of items) {
+      await db.query('INSERT INTO receta (id_producto, id_insumo, cantidad) VALUES ($1, $2, $3)', [id, item.idInsumo, item.cantidad]);
+    }
   },
 
   // Inserta un producto y devuelve su id
