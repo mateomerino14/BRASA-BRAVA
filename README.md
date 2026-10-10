@@ -87,7 +87,8 @@ BRASA-BRAVA/
 | Gestión de productos (precio, foto, categoría, disponible/agotado, baja y reactivación) | Terminado |
 | Gestión de stock (insumos, alertas de nivel, entradas, salidas, ajustes e historial) | Terminado |
 | Recetas de productos (insumos por porción y porciones que alcanzan con el stock) | Terminado |
-| Familia, Caja, Secciones, Promociones | Pendiente |
+| Secciones y mesas (ambientes del local, mesas con capacidad y resumen) | Terminado |
+| Familia, Caja, Promociones | Pendiente |
 
 ## Ramas y pruebas automáticas
 

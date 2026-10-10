@@ -80,7 +80,7 @@ src/
 │   │                    Amount, LevelBar, Avatar, Thumbnail,
 │   │                    Badge, Logo, Spinner, SocialIcon
 │   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination, PageSizeSelect,
-│   │                    FilterSelect, ImagePicker, TagInput, SegmentedControl, StatCard
+│   │                    FilterSelect, ImagePicker, TagInput, SegmentedControl, StatCard, Stepper, ChipList
 │   ├── organisms/       Sidebar, MobileMenu, Header, Footer, Modal, EmployeeCarousel, DataTable, ListTable, FilterBar,
 │   │                    RegisterCallout, ConfirmDialog
 │   └── templates/       MainLayout, AuthLayout, ManagementPage
@@ -91,6 +91,7 @@ src/
 │   ├── categories/      Gestión de categorías: foto, subcategorías, filtros, registro y baja
 │   ├── products/        Gestión de productos: precio, foto, categoría y subcategoría, disponible/agotado y baja
 │   ├── stock/           Gestión de stock: resumen de alertas, nivel, entradas/salidas/ajustes e historial
+│   ├── sections/        Secciones y mesas: resumen del local, editor de mesas con capacidad
 │   └── shared/          Páginas "en construcción" y 404
 ├── config/              Menú lateral (navigation.js), valores de las tablas (lists.js) y anchos (breakpoints.js)
 ├── hooks/               Hooks compartidos: listado paginado, cambio de estado, foco de diálogos y media queries
@@ -158,10 +159,11 @@ Todo respeta la opción del sistema "reducir movimiento".
 | `/categorias` | Gestión de categorías | `categorias` |
 | `/productos` | Gestión de productos | `productos` |
 | `/stock` | Gestión de stock | `stock` |
-| `/secciones`, `/promociones` | Administración | Uno por pantalla |
+| `/secciones` | Gestión de secciones y mesas | `secciones` |
+| `/promociones` | Administración | `promociones` |
 
 Las pantallas que todavía no se construyeron muestran un aviso de "en construcción". Si un usuario entra a una ruta sin permiso, vuelve al Home.
 
 ## Pruebas
 
-Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), la de productos (subcategoría dependiente de la categoría, precio con coma, interruptor de agotado, categoría de baja al modificar, receta con porciones en vivo e insumos de baja), la de stock (tarjetas que filtran, vista previa del movimiento, salida mayor al stock, ajuste a cero, historial), el comportamiento estándar de las pantallas de gestión (filtros y orden en la URL, filas por página, limpiar filtros y orden en tarjetas), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.
+Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), la de productos (subcategoría dependiente de la categoría, precio con coma, interruptor de agotado, categoría de baja al modificar, receta con porciones en vivo e insumos de baja), la de secciones (mesas numeradas automáticamente, capacidad con botones, mesas repetidas, modificar conservando ids), la de stock (tarjetas que filtran, vista previa del movimiento, salida mayor al stock, ajuste a cero, historial), el comportamiento estándar de las pantallas de gestión (filtros y orden en la URL, filas por página, limpiar filtros y orden en tarjetas), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.
