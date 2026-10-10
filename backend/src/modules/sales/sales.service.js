@@ -1,9 +1,17 @@
-import {localToday} from '../../utils/calendar.js';
+import {localDayRange, localToday} from '../../utils/calendar.js';
 import {pricing, round2, vigenciaOf} from '../promotions/promotionRules.js';
 
 const UNIQUE_VIOLATION = '23505';
 
 const tableNotFound = {error: 'Mesa no encontrada o deshabilitada', status: 404};
+const noOpenSale = {error: 'La mesa no tiene un pedido abierto para cobrar', status: 404};
+const saleNotFound = {error: 'Pedido no encontrado', status: 404};
+const cashOnly = {error: 'El monto recibido solo se usa con pago en efectivo', status: 400};
+
+// Monto como lo lee el cajero: 1234.5 → "1234,50"
+const money = (value) => Number(value).toFixed(2).replace('.', ',');
+
+const CENT = 0.005;
 const invalidWaiter = {error: 'Elija un mesero activo', status: 400};
 const invalidExclusion = {error: 'Hay ingredientes quitados que no son de la receta del producto', status: 400};
 
@@ -90,7 +98,7 @@ const toDetail = (row, exclusions, combos) => {
 
 // Reglas de negocio de Caja: plano de mesas, catálogo del día y registro de pedidos
 export const createSalesService = ({repository, transaction, clock, timeZone}) => {
-  const today = () => localToday(clock(), timeZone);
+  const currentDay = () => localToday(clock(), timeZone);
 
   // Secciones activas con sus mesas (libres u ocupadas) y el resumen del salón
   const floor = async () => {
@@ -129,7 +137,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
   // Lo que se puede vender hoy: productos, promociones vigentes con sus productos y las recetas de todos ellos
   const loadToday = async () => {
     const products = await repository.sellableProducts();
-    const day = today();
+    const day = currentDay();
     const promotions = (await repository.activePromotions()).filter((row) => vigenciaOf(row, day) === 'vigente');
     const promotionItems = groupBy(await repository.promotionProducts(promotions.map((row) => row.id_promocion)), 'id_promocion');
     const productIds = new Set(products.map((row) => row.id_producto));
@@ -384,5 +392,116 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     return {...await getTable(idMesa), created: result.opened, envio: result.envio, sinStock: result.shortages};
   };
 
-  return {floor, catalog, waiters, getTable, addOrder};
+  // Ticket de venta: todo lo acumulado de la mesa, con líneas iguales juntas, pagos y cambio
+  const receipt = async (idVenta) => {
+    const row = await repository.saleById(idVenta);
+    if (!row) {
+      return saleNotFound;
+    }
+    const lines = new Map();
+    for (const detail of await repository.saleDetails(idVenta)) {
+      const key = `${detail.nombre}|${detail.precio_unitario}|${detail.consumo}`;
+      const current = lines.get(key) ?? {nombre: detail.nombre, consumo: detail.consumo, precioUnitario: Number(detail.precio_unitario), cantidad: 0, subtotal: 0};
+      current.cantidad += detail.cantidad;
+      current.subtotal = round2(current.precioUnitario * current.cantidad);
+      lines.set(key, current);
+    }
+    let recibido = null;
+    let cambio = null;
+    if (row.recibido !== null) {
+      recibido = Number(row.recibido);
+      cambio = Number(row.cambio);
+    }
+    return {
+      ticket: {
+        id: row.id_venta,
+        numero: row.id_venta,
+        estado: row.estado,
+        mesa: row.mesa,
+        seccion: row.seccion,
+        mesero: fullName(row.mesero_nombre, row.mesero_apellido),
+        cajero: row.cajero,
+        cobrador: row.cobrador,
+        modificadoPor: row.modificado_por,
+        abiertaEn: row.abierta_en,
+        cerradaEn: row.cerrada_en,
+        total: Number(row.total),
+        lineas: [...lines.values()],
+        pagos: (await repository.payments([idVenta])).map((item) => ({metodo: item.metodo, monto: Number(item.monto)})),
+        recibido,
+        cambio,
+      },
+    };
+  };
+
+  // Cobra la venta abierta de una mesa: todo debe estar listo en cocina y los pagos deben sumar el total exacto
+  const checkout = async (idMesa, {pagos, recibido}, user) => {
+    if (!await repository.findTable(idMesa)) {
+      return tableNotFound;
+    }
+    const cash = pagos.find((item) => item.metodo === 'efectivo');
+    if (recibido !== undefined && recibido !== null && !cash) {
+      return cashOnly;
+    }
+    const cashier = cashierOf(user);
+    const now = clock();
+    const result = await transaction(async (tx) => {
+      await tx.lockTable(idMesa);
+      const sale = await tx.openSale(idMesa);
+      if (!sale) {
+        return {problem: noOpenSale};
+      }
+      const pending = await tx.pendingUnits(sale.id_venta);
+      if (pending > 0) {
+        return {problem: {error: `Faltan ${pending} unidades por marcar como listas en cocina`, status: 409}};
+      }
+      const paid = round2(pagos.reduce((total, item) => total + item.monto, 0));
+      if (Math.abs(paid - Number(sale.total)) > CENT) {
+        return {problem: {error: `Los pagos deben sumar exactamente Bs ${money(sale.total)}`, status: 400}};
+      }
+      let received = null;
+      let change = null;
+      if (cash) {
+        received = recibido ?? cash.monto;
+        if (received < cash.monto) {
+          return {problem: {error: `El efectivo recibido no alcanza para cubrir Bs ${money(cash.monto)}`, status: 400}};
+        }
+        change = round2(received - cash.monto);
+      }
+      await tx.closeSale({idVenta: sale.id_venta, idCobrador: cashier.idCajero, cobrador: cashier.cajero, recibido: received, cambio: change, cerradaEn: now});
+      for (const item of pagos) {
+        await tx.insertPayment({idVenta: sale.id_venta, metodo: item.metodo, monto: item.monto, creadoEn: now});
+      }
+      return {idVenta: sale.id_venta};
+    });
+    if (result.problem) {
+      return result.problem;
+    }
+    return receipt(result.idVenta);
+  };
+
+  // Ventas cobradas hoy (día del local) con sus pagos y los totales por método
+  const todaySales = async () => {
+    const day = currentDay();
+    const {start, end} = localDayRange(day.date, timeZone);
+    const rows = await repository.closedSales(start, end);
+    const payments = groupBy(await repository.payments(rows.map((row) => row.id_venta)), 'id_venta');
+    const ventas = rows.map((row) => ({
+      id: row.id_venta,
+      numero: row.id_venta,
+      mesa: row.mesa,
+      cobrador: row.cobrador,
+      cerradaEn: row.cerrada_en,
+      total: Number(row.total),
+      pagos: (payments.get(row.id_venta) ?? []).map((item) => ({metodo: item.metodo, monto: Number(item.monto)})),
+    }));
+    const byMethod = (metodo) => round2(ventas.reduce((total, sale) => total + sale.pagos.filter((item) => item.metodo === metodo).reduce((sum, item) => sum + item.monto, 0), 0));
+    return {
+      hoy: day.date,
+      ventas,
+      resumen: {cantidad: ventas.length, total: round2(ventas.reduce((total, sale) => total + sale.total, 0)), efectivo: byMethod('efectivo'), qr: byMethod('qr')},
+    };
+  };
+
+  return {floor, catalog, waiters, getTable, addOrder, checkout, receipt, todaySales};
 };
