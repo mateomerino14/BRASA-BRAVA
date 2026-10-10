@@ -6,7 +6,7 @@ export const ROLES = [
 
 export const EMPLOYEES = [
   {id: 2, nombre: 'Andrea', apellido: 'Romero', ci: '6812903 LP', alias: 'a.romero', correo: 'a.romero@brasabrava.bo', telefono: '76543210', fotoUrl: null, activo: true, cargo: {id: 2, nombre: 'Cajero'}},
-  {id: 1, nombre: 'Carlos', apellido: 'Mendoza', ci: '4920114 LP', alias: 'c.mendoza', correo: 'c.mendoza@brasabrava.bo', telefono: null, fotoUrl: null, activo: true, cargo: {id: 4, nombre: 'Mesero'}},
+  {id: 1, nombre: 'Carlos', apellido: 'Mendoza', ci: '4920114 LP', alias: 'c.mendoza', correo: 'c.mendoza@brasabrava.bo', telefono: null, fotoUrl: '/uploads/carlos.png', activo: true, cargo: {id: 4, nombre: 'Mesero'}},
   {id: 5, nombre: 'Javier', apellido: 'Ortiz', ci: '5912440 LP', alias: 'j.ortiz', correo: 'j.ortiz@brasabrava.bo', telefono: '78901234', fotoUrl: null, activo: false, cargo: {id: 4, nombre: 'Mesero'}},
 ];
 
@@ -14,6 +14,7 @@ export const EMPLOYEES = [
 export const createEmployeesBackend = () => {
   const store = EMPLOYEES.map((employee) => ({...employee}));
   const calls = [];
+  const images = {uploads: [], removals: []};
   const matches = (employee, query) => {
     const text = `${employee.nombre} ${employee.apellido} ${employee.alias} ${employee.ci}`.toLowerCase();
     if (query.search && !text.includes(query.search.toLowerCase())) {
@@ -33,7 +34,18 @@ export const createEmployeesBackend = () => {
   return {
     store,
     calls,
+    images,
     handlers: {
+      'PUT /employees/99/image': (form) => {
+        images.uploads.push({id: 99, file: form.get('imagen')});
+        const employee = Object.assign(store.find((item) => item.id === 99), {fotoUrl: '/uploads/lucia.png'});
+        return [200, {employee}];
+      },
+      'DELETE /employees/1/image': () => {
+        images.removals.push(1);
+        const employee = Object.assign(store.find((item) => item.id === 1), {fotoUrl: null});
+        return [200, {employee}];
+      },
       'GET /roles': () => [200, {roles: ROLES}],
       'GET /employees': (_body, query) => {
         calls.push(query);

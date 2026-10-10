@@ -10,10 +10,10 @@ export const createAuthController = (service) => ({
     return respond(res, result, ({session}) => res.json(session));
   },
 
-  // Devuelve el perfil de la sesión actual sin los datos del token
-  me: (req, res) => {
+  // Devuelve el perfil de la sesión actual sin los datos del token, con el nombre y la foto al día
+  me: async (req, res) => {
     const {iat: _iat, exp: _exp, ...user} = req.user;
-    return res.json({user});
+    return res.json({user: await service.profile(user)});
   },
 
   // Lista los empleados para el carrusel del login

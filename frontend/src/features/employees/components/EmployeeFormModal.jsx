@@ -6,6 +6,8 @@ import {Select} from '../../../components/atoms/Select';
 import {Avatar} from '../../../components/atoms/Avatar';
 import {FormField} from '../../../components/molecules/FormField';
 import {Alert} from '../../../components/molecules/Alert';
+import {ImagePicker} from '../../../components/molecules/ImagePicker';
+import {useImagePreview} from '../../../hooks/useImagePreview';
 
 const styles = {
   form: 'flex flex-col gap-5',
@@ -37,6 +39,7 @@ function TextField({form, field, label, required, ...props}) {
 export function EmployeeFormModal({form, roles}) {
   const roleOptions = roles.map((role) => ({value: String(role.id), label: role.nombre}));
   const roleName = roles.find((role) => String(role.id) === form.values.idCargo)?.nombre ?? 'Sin cargo';
+  const photo = useImagePreview(form.image.file, form.image.url);
 
   return (
     <Modal
@@ -48,7 +51,7 @@ export function EmployeeFormModal({form, roles}) {
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <div className={styles.preview}>
-          <Avatar name={previewName(form.values)} size={56} />
+          <Avatar name={previewName(form.values)} src={photo} size={56} />
           <div>
             <p className={styles.previewName}>{previewName(form.values)}</p>
             <p className={styles.previewRole}>{roleName}</p>
@@ -89,6 +92,10 @@ export function EmployeeFormModal({form, roles}) {
             )}
           </FormField>
         </div>
+
+        <FormField label="Foto del empleado" hint="Se muestra en el inicio de sesión y en la lista de empleados.">
+          {() => <ImagePicker label="Foto del empleado" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
+        </FormField>
 
         {form.modalError && <Alert tone="error">{form.modalError}</Alert>}
 

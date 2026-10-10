@@ -1,4 +1,5 @@
 import {hashSecret} from '../../utils/password.js';
+import {createImageActions} from '../shared/imageActions.js';
 
 const notFound = {error: 'Empleado no encontrado', status: 404};
 
@@ -28,7 +29,7 @@ const duplicateMessage = (duplicate, data) => {
 };
 
 // Reglas de negocio de la gestión de empleados
-export const createEmployeesService = ({repository}) => {
+export const createEmployeesService = ({repository, images}) => {
   // Valida que el cargo sea válido y que no se repitan CI, usuario ni correo
   const checkConsistency = async (data, excludeId) => {
     const roleOk = await repository.roleIsActive(data.idCargo);
@@ -100,5 +101,5 @@ export const createEmployeesService = ({repository}) => {
     return getById(id);
   };
 
-  return {list, getById, create, update, setStatus};
+  return {list, getById, create, update, setStatus, ...createImageActions({repository, images, getById, notFound, imageOf: (row) => row.foto_url})};
 };

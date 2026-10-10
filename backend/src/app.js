@@ -33,7 +33,7 @@ export const createApp = ({db, mailer, config, logger = console, images = create
   });
 
   app.use('/api/auth', createAuthRouter({db, mailer, config, logger}));
-  app.use('/api/employees', createEmployeesRouter({db, config}));
+  app.use('/api/employees', createEmployeesRouter({db, config, images}));
   app.use('/api/roles', createRolesRouter({db, config}));
   app.use('/api/categories', createCategoriesRouter({db, config, images}));
   app.use('/api/products', createProductsRouter({db, config, images}));
