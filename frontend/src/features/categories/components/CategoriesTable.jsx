@@ -1,6 +1,5 @@
 import {Ban, Pencil, RotateCcw} from 'lucide-react';
-import {DataTable} from '../../../components/organisms/DataTable';
-import {Pagination} from '../../../components/molecules/Pagination';
+import {ListTable} from '../../../components/organisms/ListTable';
 import {Thumbnail} from '../../../components/atoms/Thumbnail';
 import {Badge} from '../../../components/atoms/Badge';
 import {IconButton} from '../../../components/atoms/IconButton';
@@ -22,6 +21,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'categoria',
     header: 'Categoría',
+    sortKey: 'nombre',
     mobile: 'title',
     render: (category) => (
       <div className={styles.category}>
@@ -43,6 +43,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'estado',
     header: 'Estado',
+    sortKey: 'estado',
     align: 'center',
     render: (category) => (
       <Badge dot tone={category.activa ? 'success' : 'danger'}>
@@ -69,30 +70,15 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   },
 ];
 
-const rangeText = ({page, pageSize, count, total}) => {
-  if (total === 0) {
-    return 'Sin resultados';
-  }
-  const from = (page - 1) * pageSize + 1;
-  return `Mostrando ${from}–${from + count - 1} de ${total} categorías`;
-};
-
-export function CategoriesTable({categories, total, page, pageSize, totalPages, loading, onPageChange, onEdit, onToggleStatus}) {
+export function CategoriesTable({list, onEdit, onToggleStatus}) {
   return (
-    <DataTable
+    <ListTable
+      list={list}
       caption="Categorías"
+      itemLabel="categorías"
       columns={buildColumns({onEdit, onToggleStatus})}
-      rows={categories}
-      rowKey={(category) => category.id}
-      loading={loading}
       emptyMessage="No se encontraron categorías con esos filtros"
       rowClassName={(category) => !category.activa && styles.inactiveRow}
-      footer={
-        <>
-          <span>{rangeText({page, pageSize, count: categories.length, total})}</span>
-          <Pagination page={page} totalPages={totalPages} onChange={onPageChange} />
-        </>
-      }
     />
   );
 }
