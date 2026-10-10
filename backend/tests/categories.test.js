@@ -47,7 +47,8 @@ describe('Gestión de categorías', () => {
     expect(res.body.items).toHaveLength(2);
     const burgers = (await api('get', '/api/categories')).body.items.find((item) => item.nombre === 'Hamburguesas');
     expect(burgers.subcategorias.map((sub) => sub.nombre)).toEqual(['Clásicas', 'Especiales', 'Doble Carne']);
-    expect(burgers).toMatchObject({activa: true, imagenUrl: null, totalProductos: 0});
+    // Cuenta solo productos activos: la Hamburguesa Hawaiana está de baja
+    expect(burgers).toMatchObject({activa: true, imagenUrl: null, totalProductos: 4});
   });
 
   it('filtra por estado y busca también en subcategorías', async () => {
