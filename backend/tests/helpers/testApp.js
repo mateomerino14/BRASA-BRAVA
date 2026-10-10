@@ -29,10 +29,10 @@ const createTestDb = async () => {
 };
 
 // Levanta la app completa con base migrada, datos demo y mailer en memoria
-export const createTestApp = async ({mailer: customMailer} = {}) => {
+export const createTestApp = async ({mailer: customMailer, clock} = {}) => {
   const db = await createTestDb();
   await runMigrations(db);
-  await seedDemoData(db);
+  await seedDemoData(db, {now: clock?.()});
   const config = loadConfig({
     NODE_ENV: 'test',
     RATE_LIMIT_ENABLED: 'false',
@@ -40,6 +40,6 @@ export const createTestApp = async ({mailer: customMailer} = {}) => {
     UPLOADS_DIR: await mkdtemp(path.join(os.tmpdir(), 'brasa-uploads-')),
   });
   const mailer = customMailer ?? createConsoleMailer(silentLogger);
-  const app = createApp({db, mailer, config, logger: silentLogger});
+  const app = createApp({db, mailer, config, logger: silentLogger, clock});
   return {app, db, mailer, config};
 };
