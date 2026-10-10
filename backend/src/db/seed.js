@@ -1,5 +1,6 @@
 import {hashSecret} from '../utils/password.js';
 import {SCREENS} from '../modules/auth/permissions.js';
+import {localToday} from '../utils/calendar.js';
 
 // Datos de demostración basados en el prototipo de Figma
 const ROLES = {
@@ -225,13 +226,55 @@ const seedSections = async (db) => {
   return true;
 };
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const DEMO_TIMEZONE = 'America/La_Paz';
+
+// Fecha YYYY-MM-DD desplazada "days" días desde hoy (en la zona del local)
+const shiftDate = (now, days) => localToday(new Date(now.getTime() + days * DAY_MS), DEMO_TIMEZONE).date;
+
+// Promociones demo con fechas relativas a hoy: [nombre, tipo, valor, desde, hasta, días, activa, productos [nombre, cantidad]]
+const PROMOTIONS = [
+  ['Martes de Hamburguesas', 'descuento', 20, -30, null, '0010000', true, [['Hamburguesa Clásica', 1], ['Cheeseburger', 1]]],
+  ['Combo Brava', 'combo', 70, -7, 30, '1111111', true, [['Doble Brava', 1], ['Papas Fritas Clásicas', 1], ['Gaseosa 500 ml', 1]]],
+  ['Happy Hour Cervecero', 'descuento', 15, 5, 60, '0111110', true, [['Cerveza Artesanal', 1]]],
+  ['Promo Aniversario', 'combo', 99, -40, -3, '1111111', true, [['Brava BBQ', 2], ['Aros de Cebolla', 1]]],
+  ['Jueves de Jugos', 'descuento', 10, -20, null, '0000100', false, [['Jugo de Naranja', 1]]],
+];
+
+// Inserta las promociones demo si la tabla está vacía
+const seedPromotions = async (db, now) => {
+  const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM promocion');
+  if (rows[0].total > 0) {
+    return false;
+  }
+  for (const [nombre, tipo, valor, desde, hasta, dias, activa, items] of PROMOTIONS) {
+    let fin = null;
+    if (hasta !== null) {
+      fin = shiftDate(now, hasta);
+    }
+    const inserted = await db.query(
+      `INSERT INTO promocion (nombre, tipo, valor, fecha_inicio, fecha_fin, dias, activa)
+       VALUES ($1, $2, $3::numeric, $4::date, $5::date, $6, $7) RETURNING id_promocion`,
+      [nombre, tipo, valor, shiftDate(now, desde), fin, dias, activa],
+    );
+    for (const [product, cantidad] of items) {
+      await db.query(
+        'INSERT INTO promocion_producto (id_promocion, id_producto, cantidad) SELECT $1::int, id_producto, $3::int FROM producto WHERE nombre = $2',
+        [inserted.rows[0].id_promocion, product, cantidad],
+      );
+    }
+  }
+  return true;
+};
+
 // Carga cada bloque de datos demo que falte; devuelve true si insertó algo
-export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026'} = {}) => {
+export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026', now = new Date()} = {}) => {
   const staff = await seedStaff(db, {password, directorioPassword});
   const categories = await seedCategories(db);
   const products = await seedProducts(db);
   const ingredients = await seedIngredients(db);
   const recipes = await seedRecipes(db);
   const sections = await seedSections(db);
-  return staff || categories || products || ingredients || recipes || sections;
+  const promotions = await seedPromotions(db, now);
+  return staff || categories || products || ingredients || recipes || sections || promotions;
 };
