@@ -128,10 +128,49 @@ const seedStaff = async (
   return true;
 };
 
+// Insumos demo: [nombre, unidad, stock actual, stock mínimo]
+const INGREDIENTS = [
+  ['Carne de res', 'kg', 12, 5],
+  ['Pan de hamburguesa', 'unidad', 40, 30],
+  ['Queso cheddar', 'kg', 1.5, 2],
+  ['Tomate', 'kg', 3, 1],
+  ['Lechuga', 'unidad', 0, 5],
+  ['Tocino', 'kg', 1.5, 1],
+  ['Cebolla', 'kg', 4, 2],
+  ['Papas', 'kg', 20, 8],
+  ['Aceite', 'l', 6, 4],
+  ['Gaseosa 500 ml', 'unidad', 48, 24],
+  ['Naranja', 'kg', 5, 3],
+  ['Cerveza artesanal 330 ml', 'unidad', 0, 12],
+];
+
+// Inserta los insumos demo con su inventario inicial en el historial, si la tabla está vacía
+const seedIngredients = async (db) => {
+  const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM insumo');
+  if (rows[0].total > 0) {
+    return false;
+  }
+  for (const [nombre, unidad, stock, minimo] of INGREDIENTS) {
+    const inserted = await db.query(
+      'INSERT INTO insumo (nombre, unidad, stock_actual, stock_minimo) VALUES ($1, $2, $3::numeric, $4::numeric) RETURNING id_insumo',
+      [nombre, unidad, stock, minimo],
+    );
+    if (stock > 0) {
+      await db.query(
+        `INSERT INTO movimiento_stock (id_insumo, tipo, cantidad, stock_resultante, motivo, responsable)
+         VALUES ($1, 'entrada', $2::numeric, $2::numeric, 'Inventario inicial', 'admin')`,
+        [inserted.rows[0].id_insumo, stock],
+      );
+    }
+  }
+  return true;
+};
+
 // Carga cada bloque de datos demo que falte; devuelve true si insertó algo
 export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026'} = {}) => {
   const staff = await seedStaff(db, {password, directorioPassword});
   const categories = await seedCategories(db);
   const products = await seedProducts(db);
-  return staff || categories || products;
+  const ingredients = await seedIngredients(db);
+  return staff || categories || products || ingredients;
 };

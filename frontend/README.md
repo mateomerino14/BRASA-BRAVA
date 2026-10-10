@@ -52,6 +52,8 @@ npm test                  # pruebas automáticas (Vitest + Testing Library)
 | Página (`features/<modulo>/pages`) | Invocar hooks y componer organismos | No llama servicios directamente |
 | Componente (`components/`) | Presentar datos recibidos por props | No conoce hooks de negocio |
 
+Las pantallas de los módulos se cargan bajo demanda (`React.lazy` en `router/AppRoutes.jsx`): el inicio descarga solo login, menú y Home, y cada pantalla de administración se baja al abrirla.
+
 La sesión se maneja en `context/` (`AuthProvider` y `useAuth`). El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
 
 El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco). ### Pantallas de gestión estándar
@@ -60,7 +62,7 @@ Todas las pantallas de administración se arman igual, así que una pantalla nue
 
 | Pieza | Qué resuelve |
 |---|---|
-| `templates/ManagementPage` | Orden fijo: buscador y filtros, avisos, tabla, llamada a registrar y modales |
+| `templates/ManagementPage` | Orden fijo: resumen opcional (tarjetas `StatCard` que filtran), buscador y filtros, avisos, tabla, llamada a registrar y modales |
 | `organisms/ListTable` | Tabla con encabezados ordenables, pie "Mostrando 1–5 de N", filas por página (5, 10 o 20), paginación y botón "Limpiar filtros" cuando no hay resultados |
 | `molecules/FilterSelect` | Filtros de la barra con el mismo tamaño |
 | `hooks/usePaginatedList` | Búsqueda con espera, filtros, página, filas por página y orden guardados en la URL (`?search=...&estado=inactivos&sort=nombre&dir=desc`), recarga y aviso temporal |
@@ -74,10 +76,11 @@ Como el estado vive en la URL, recargar la página o volver atrás conserva bús
 ```
 src/
 ├── components/
-│   ├── atoms/           Button, IconButton, Input, PasswordInput, MoneyInput, Textarea, Select, Switch, Avatar, Thumbnail,
+│   ├── atoms/           Button, IconButton, Input, PasswordInput, NumberInput, MoneyInput, Textarea, Select, Switch,
+│   │                    Amount, LevelBar, Avatar, Thumbnail,
 │   │                    Badge, Logo, Spinner, SocialIcon
 │   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination, PageSizeSelect,
-│   │                    FilterSelect, ImagePicker, TagInput
+│   │                    FilterSelect, ImagePicker, TagInput, SegmentedControl, StatCard
 │   ├── organisms/       Sidebar, MobileMenu, Header, Footer, Modal, EmployeeCarousel, DataTable, ListTable, FilterBar,
 │   │                    RegisterCallout, ConfirmDialog
 │   └── templates/       MainLayout, AuthLayout, ManagementPage
@@ -87,6 +90,7 @@ src/
 │   ├── employees/       Gestión de empleados: tabla, filtros, registro, modificación y baja
 │   ├── categories/      Gestión de categorías: foto, subcategorías, filtros, registro y baja
 │   ├── products/        Gestión de productos: precio, foto, categoría y subcategoría, disponible/agotado y baja
+│   ├── stock/           Gestión de stock: resumen de alertas, nivel, entradas/salidas/ajustes e historial
 │   └── shared/          Páginas "en construcción" y 404
 ├── config/              Menú lateral (navigation.js), valores de las tablas (lists.js) y anchos (breakpoints.js)
 ├── hooks/               Hooks compartidos: listado paginado, cambio de estado, foco de diálogos y media queries
@@ -124,6 +128,7 @@ Los colores y fuentes salen del prototipo de Figma y se definen una sola vez en 
 - Código de verificación que avanza solo, acepta pegar y tiembla si es incorrecto.
 - Logo con brillo de brasa, reloj en vivo y transición suave entre pantallas.
 - Subcategorías en chips que se despliegan con "+N más" y entran escalonadas; en el formulario aparecen y desaparecen con rebote.
+- Movimientos de stock con selector Entrada/Salida/Ajuste de píldora deslizante y vista previa "Stock actual → Queda"; barras de nivel que se llenan al cargar.
 - Selector de foto con arrastrar y soltar, vista previa inmediata y acciones Cambiar/Quitar sobre la imagen.
 
 Todo respeta la opción del sistema "reducir movimiento".
@@ -151,10 +156,11 @@ Todo respeta la opción del sistema "reducir movimiento".
 | `/empleados` | Gestión de empleados | `empleados` |
 | `/categorias` | Gestión de categorías | `categorias` |
 | `/productos` | Gestión de productos | `productos` |
-| `/secciones`, `/stock`, `/promociones` | Administración | Uno por pantalla |
+| `/stock` | Gestión de stock | `stock` |
+| `/secciones`, `/promociones` | Administración | Uno por pantalla |
 
 Las pantallas que todavía no se construyeron muestran un aviso de "en construcción". Si un usuario entra a una ruta sin permiso, vuelve al Home.
 
 ## Pruebas
 
-Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), la de productos (subcategoría dependiente de la categoría, precio con coma, interruptor de agotado, categoría de baja al modificar), el comportamiento estándar de las pantallas de gestión (filtros y orden en la URL, filas por página, limpiar filtros y orden en tarjetas), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.
+Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), la de productos (subcategoría dependiente de la categoría, precio con coma, interruptor de agotado, categoría de baja al modificar), la de stock (tarjetas que filtran, vista previa del movimiento, salida mayor al stock, ajuste a cero, historial), el comportamiento estándar de las pantallas de gestión (filtros y orden en la URL, filas por página, limpiar filtros y orden en tarjetas), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.

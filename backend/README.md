@@ -119,6 +119,7 @@ src/
 │   ├── employees/             Gestión de empleados
 │   ├── categories/            Categorías, subcategorías e imagen
 │   ├── products/              Productos: precio, foto, disponibilidad y estado
+│   ├── ingredients/           Insumos de stock, movimientos e historial
 │   └── shared/                Acciones de foto reutilizables (subir, reemplazar y quitar)
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
@@ -170,10 +171,17 @@ tests/                       Pruebas de la API y unitarias
 | `PATCH` | `/api/products/:id/availability` | Marca como agotado (`{disponible: false}`) o disponible |
 | `PUT` | `/api/products/:id/image` | Sube o reemplaza la foto (`multipart/form-data`, campo `imagen`) |
 | `DELETE` | `/api/products/:id/image` | Quita la foto |
+| `GET` | `/api/ingredients` | Insumos con su nivel (`suficiente`, `bajo`, `sin_stock`); búsqueda, `nivel` (`todos`, `bajo`, `sin_stock`) y los parámetros comunes. Orden: `nombre`, `stock`, `estado`. Incluye `summary` con totales de alertas |
+| `GET` | `/api/ingredients/:id` | Detalle de un insumo |
+| `POST` | `/api/ingredients` | Registra un insumo con `stockInicial` opcional (queda como primera entrada del historial) |
+| `PUT` | `/api/ingredients/:id` | Modifica nombre, unidad y stock mínimo |
+| `PATCH` | `/api/ingredients/:id/status` | Da de baja o reactiva un insumo |
+| `POST` | `/api/ingredients/:id/movements` | Registra una entrada, salida o ajuste (`{tipo, cantidad, motivo}`) |
+| `GET` | `/api/ingredients/:id/movements` | Historial de movimientos, del más reciente al más antiguo (`page`, `pageSize`) |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`.
+Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`.
 
 ### Parámetros comunes de los listados
 
@@ -208,6 +216,14 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - El nombre no se repite (sin distinguir mayúsculas). El precio es mayor a 0, con hasta 2 decimales, y acepta coma o punto decimal.
 - **Estado** (`activo`) y **disponibilidad** (`disponible`) son distintos: dar de baja saca el producto del menú; agotado es temporal (se acabó por hoy) y lo cambia el interruptor de la tabla.
 - La cantidad de productos de cada categoría cuenta solo los productos activos.
+
+### Reglas de la gestión de stock
+
+- El stock solo cambia con movimientos, y cada uno queda en el historial con la cantidad (con signo), el stock resultante, el motivo y quién lo hizo (el empleado de la sesión o el DIRECTORIO).
+- **Entrada** suma, **salida** resta y **ajuste** fija el conteo real (registra la diferencia). Una salida nunca deja el stock negativo: la resta se hace en una sola sentencia que falla si no alcanza, así dos ventas simultáneas no pueden pasarse.
+- Cantidades con hasta 3 decimales (acepta coma) en `kg`, `g`, `l`, `ml` o `unidad`. La unidad no se puede cambiar una vez que hay movimientos.
+- **Nivel**: sin stock (0), bajo (en o por debajo del mínimo) o suficiente. Los insumos dados de baja no cuentan en el resumen ni admiten movimientos.
+- El tipo `venta` queda reservado para los descuentos que hará Caja.
 
 ## Autorización
 
