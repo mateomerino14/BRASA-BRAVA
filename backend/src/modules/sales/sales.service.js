@@ -73,6 +73,7 @@ const toDetail = (row, exclusions, combos) => {
     nombre: row.nombre,
     precioUnitario,
     cantidad: row.cantidad,
+    listos: row.listos,
     subtotal: round2(precioUnitario * row.cantidad),
     consumo: row.consumo,
     mesero: {id: row.id_mesero, nombre: fullName(row.mesero_nombre, row.mesero_apellido)},
@@ -106,6 +107,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
               id: row.id_venta,
               total: Number(row.total),
               unidades: row.unidades ?? 0,
+              listos: row.listos ?? 0,
               mesero: fullName(row.mesero_nombre, row.mesero_apellido),
               abiertaEn: row.abierta_en,
             };

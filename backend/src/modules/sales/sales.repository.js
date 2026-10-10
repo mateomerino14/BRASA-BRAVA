@@ -11,7 +11,7 @@ const portionsJoin = `LEFT JOIN (
 
 // Unidades pedidas por venta
 const unitsJoin = `LEFT JOIN (
-    SELECT id_venta, SUM(cantidad)::int AS unidades FROM venta_detalle GROUP BY id_venta
+    SELECT id_venta, SUM(cantidad)::int AS unidades, SUM(listos)::int AS listos FROM venta_detalle GROUP BY id_venta
   ) u ON u.id_venta = v.id_venta`;
 
 const saleColumns = `v.id_venta, v.id_mesa, v.total, v.envios, v.abierta_en, v.cajero, v.id_mesero, v.modificado, v.modificado_por,
@@ -23,7 +23,7 @@ export const createSalesRepository = (db) => ({
   floor: async () => {
     const {rows} = await db.query(
       `SELECT s.id_seccion, s.nombre AS seccion, m.id_mesa, m.nombre, m.capacidad,
-              v.id_venta, v.total, v.abierta_en, e.nombre AS mesero_nombre, e.apellido AS mesero_apellido, u.unidades
+              v.id_venta, v.total, v.abierta_en, e.nombre AS mesero_nombre, e.apellido AS mesero_apellido, u.unidades, u.listos
          FROM seccion s
          JOIN mesa m ON m.id_seccion = s.id_seccion AND m.activa = TRUE
          LEFT JOIN venta v ON v.id_mesa = m.id_mesa AND v.estado = 'abierta'
@@ -133,7 +133,7 @@ export const createSalesRepository = (db) => ({
   // Líneas de una venta con el nombre del mesero de cada envío
   saleDetails: async (idVenta) => {
     const {rows} = await db.query(
-      `SELECT d.id_detalle, d.envio, d.id_producto, d.id_promocion, d.nombre, d.precio_unitario, d.cantidad, d.consumo,
+      `SELECT d.id_detalle, d.envio, d.id_producto, d.id_promocion, d.nombre, d.precio_unitario, d.cantidad, d.listos, d.consumo,
               d.creado_en, d.id_mesero, e.nombre AS mesero_nombre, e.apellido AS mesero_apellido
          FROM venta_detalle d JOIN empleado e ON e.id_empleado = d.id_mesero
         WHERE d.id_venta = $1
