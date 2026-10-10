@@ -13,6 +13,7 @@ const ALL = [
   'home',
   'familia',
   'caja',
+  'cocina',
   'productos',
   'secciones',
   'stock',

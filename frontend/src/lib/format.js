@@ -106,3 +106,11 @@ export const formatTime = (date) => clockFormatter.format(new Date(date));
 
 // Texto sin tildes y en minúsculas, para buscar "cafe" y encontrar "Café"
 export const normalizeText = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+
+// Cantidad con su palabra en singular o plural: (1, 'envío', 'envíos') → "1 envío"
+export const countText = (count, singular, plural) => {
+  if (count === 1) {
+    return `1 ${singular}`;
+  }
+  return `${count} ${plural}`;
+};
