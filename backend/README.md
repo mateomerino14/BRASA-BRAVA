@@ -124,6 +124,7 @@ src/
 │   ├── sections/              Secciones del local y sus mesas
 │   ├── promotions/            Promociones: combos y descuentos con vigencia
 │   ├── sales/                 Caja: plano de mesas, catálogo del día y registro de pedidos
+│   ├── kitchen/               Cocina: envíos de las ventas abiertas y unidades listas
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
@@ -203,10 +204,13 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/api/sales/waiters` | Empleados activos que pueden atender mesas (su cargo tiene acceso a Caja) |
 | `GET` | `/api/sales/tables/:idMesa` | Mesa con su sección y su venta abierta (`null` si está libre) con todas sus líneas agrupables por envío |
 | `POST` | `/api/sales/tables/:idMesa/orders` | Registra un envío a cocina: abre la venta si la mesa está libre o suma las líneas a la abierta, y descuenta el stock. Responde `nueva`, el número de `envio` y `sinStock` (insumos que no alcanzaron) |
+| `GET` | `/api/kitchen/orders` | Envíos de las ventas abiertas (mesa, sección, mesero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
+| `PATCH` | `/api/kitchen/lines/:id` | Cambia las unidades listas de una línea: `accion` = `sumar`, `restar`, `todos` o `ninguno`. Responde la lista actualizada |
+| `PATCH` | `/api/kitchen/shipments/:idVenta/:envio` | Marca todo el envío como listo (`todos`) o lo devuelve a preparación (`ninguno`) |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja, el permiso `caja`.
+Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja, el permiso `caja`; las de cocina, el permiso `cocina`.
 
 ### Parámetros comunes de los listados
 
@@ -278,6 +282,13 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - Cada envío es una comanda (`venta_envio`): guarda su número, el cajero, el mesero y la hora. La venta trae `comandas` y, en las líneas de promoción, los `productos` del combo. Desde el segundo envío la venta queda `modificado` con `modificadoPor` = cajero del último envío.
 - **Stock**: cada envío descuenta la receta de cada producto por su cantidad (en combos, la de cada producto del combo), sin los ingredientes quitados, con un movimiento `venta` en el historial (`Venta Nº 7 · Mesa 2 · envío 2`). Si no alcanza, el insumo queda en 0, el movimiento dice "(stock insuficiente)" y la respuesta lo avisa en `sinStock`, pero la venta se registra igual. Los insumos dados de baja no se tocan. Los insumos se bloquean en orden de id durante la transacción para que dos envíos no se pisen.
 
+### Reglas de cocina
+
+- Cada línea guarda cuántas unidades ya están listas (`listos`, de 0 a la cantidad pedida). Sumar y restar se hacen en una sola sentencia que nunca pasa de la cantidad ni baja de 0, así dos cocineros tocando a la vez no se pisan.
+- Un envío está **listo** cuando todas sus unidades lo están; si se desmarca una, vuelve solo a **preparación**.
+- Solo se cambian líneas de ventas abiertas. Caja ve el avance en cada línea (`listos`) y en el plano de mesas (`listos` de la venta).
+- La pantalla `cocina` es nueva: la migración se la da a los cargos Administrador y Cocinero que ya existían.
+
 ## Autorización
 
 Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`). El token de sesión lleva esa lista, y cada ruta protegida la verifica con el middleware `authorize(pantalla)`. El DIRECTORIO tiene acceso a todas las pantallas.
@@ -285,7 +296,7 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 | Pantalla | Clave |
 |---|---|
 | Home | `home` (todos los cargos) |
-| Familia, Caja | `familia`, `caja` |
+| Familia, Caja, Cocina | `familia`, `caja`, `cocina` |
 | Administración | `productos`, `secciones`, `stock`, `categorias`, `promociones`, `empleados` |
 
 ## Sesión y seguridad
