@@ -14,8 +14,7 @@ export const UNIT_OPTIONS = [
   {value: 'unidad', label: 'Unidades'},
 ];
 
-// Texto corto de la unidad para mostrar junto a los campos numéricos
-export const UNIT_SUFFIX = {kg: 'kg', g: 'g', l: 'L', ml: 'ml', unidad: 'unid.'};
+export {UNIT_SUFFIX} from '../../../config/units';
 
 export const LEVEL_OPTIONS = [
   {value: 'todos', label: 'Nivel: Todos'},
