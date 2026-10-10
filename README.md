@@ -85,7 +85,8 @@ BRASA-BRAVA/
 | Interfaz adaptable a celular y tablet (menú deslizable y tablas en tarjetas) | Terminado |
 | Pantallas de gestión estándar (filtros en la URL, orden por columna, filas por página, limpiar filtros) | Terminado |
 | Gestión de productos (precio, foto, categoría, disponible/agotado, baja y reactivación) | Terminado |
-| Familia, Caja, Stock, Secciones, Promociones | Pendiente |
+| Gestión de stock (insumos, alertas de nivel, entradas, salidas, ajustes e historial) | Terminado |
+| Familia, Caja, Secciones, Promociones | Pendiente |
 
 ## Ramas y pruebas automáticas
 
