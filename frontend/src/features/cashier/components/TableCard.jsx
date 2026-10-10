@@ -1,5 +1,5 @@
 import {motion} from 'motion/react';
-import {Armchair, Clock, ShoppingBag, UserRound} from 'lucide-react';
+import {Armchair, ChefHat, Clock, ShoppingBag, UserRound} from 'lucide-react';
 import {Amount} from '../../../components/atoms/Amount';
 import {Badge} from '../../../components/atoms/Badge';
 import {cn} from '../../../lib/cn';
@@ -15,6 +15,7 @@ const styles = {
   meta: 'flex flex-col gap-1 text-sm text-cafe',
   row: 'flex min-w-0 items-center gap-1.5',
   truncate: 'truncate',
+  ready: 'font-semibold text-verde',
   bottom: 'mt-auto flex items-end justify-between gap-2',
 };
 
@@ -45,6 +46,10 @@ export function TableCard({mesa, now, onSelect}) {
           <span className={styles.meta}>
             <span className={styles.row}><UserRound size={14} aria-hidden /><span className={styles.truncate}>{venta.mesero}</span></span>
             <span className={styles.row}><Clock size={14} aria-hidden />{elapsedText(venta.abiertaEn, now)}</span>
+            <span className={cn(styles.row, venta.listos === venta.unidades && styles.ready)}>
+              <ChefHat size={14} aria-hidden />
+              {venta.listos === venta.unidades ? 'Todo listo' : `${venta.listos} de ${venta.unidades} listos`}
+            </span>
           </span>
           <span className={styles.bottom}>
             <span className={styles.row}><ShoppingBag size={14} aria-hidden />{venta.unidades} u.</span>

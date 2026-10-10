@@ -2,7 +2,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {cashierApi} from '../services/cashierApi';
 import {NOTICE_DURATION_MS} from '../../../config/lists';
 import {normalizeText} from '../../../lib/format';
-import {ALL_CATEGORIES, MAX_QUANTITY, PROMOTIONS_CATEGORY} from '../constants/cashier';
+import {ALL_CATEGORIES, MAX_QUANTITY, PROMOTIONS_CATEGORY, TABLE_REFRESH_MS} from '../constants/cashier';
 import {addAmounts, addLine, cartTotal, cartUnits, removeLine, replaceLine, setLineQuantity, toOrderPayload} from '../utils/cart';
 
 const emptyCatalog = {categorias: [], productos: [], promociones: []};
@@ -65,6 +65,23 @@ export function useTableOrder({api = cashierApi, idMesa, user}) {
       cancelled = true;
     };
   }, [api, idMesa, user]);
+
+  // Refresca lo registrado de la mesa para ver lo que cocina va marcando como listo
+  useEffect(() => {
+    if (!state.mesa) {
+      return undefined;
+    }
+    const timer = setInterval(async () => {
+      try {
+        const table = await api.table(idMesa);
+        setState((current) => ({...current, venta: table.venta}));
+      }
+      catch {
+        // Si falla, se intenta de nuevo en la próxima vuelta
+      }
+    }, TABLE_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [api, idMesa, state.mesa]);
 
   useEffect(() => {
     if (!notice) {
