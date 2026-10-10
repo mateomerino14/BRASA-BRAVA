@@ -1,4 +1,4 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {screen, waitFor, within} from '@testing-library/react';
 import {renderApp} from '../../test/renderApp';
 import {USERS, mockApi} from '../../test/mockApi';
@@ -139,19 +139,33 @@ describe('Caja: armado del pedido', () => {
     expect(within(within(panel()).getByRole('list', {name: 'Productos por registrar'})).getByText('Bs 116,00')).toBeInTheDocument();
     await user.click(within(panel()).getByRole('button', {name: 'Quitar Doble Brava'}));
     expect(await within(panel()).findByText('Toque un producto del menú para agregarlo.')).toBeInTheDocument();
-    expect(within(panel()).getByRole('button', {name: 'Registrar pedido'})).toBeDisabled();
+    expect(within(panel()).getByRole('button', {name: 'Enviar a cocina'})).toBeDisabled();
   });
 
   it('pide el mesero y abre la venta de una mesa libre', async () => {
     const {user, backend} = await openTable('Mesa 1');
     await addItem(user, 'Hamburguesa Clásica', {remove: ['Lechuga']});
-    await user.click(within(panel()).getByRole('button', {name: 'Registrar pedido'}));
+    await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
     expect(await within(panel()).findByText('Elija el mesero que atiende la mesa')).toBeInTheDocument();
     expect(backend.calls.orders).toHaveLength(0);
 
     await user.selectOptions(within(panel()).getByLabelText(/^Mesero/), 'Carlos Mendoza · Mesero');
-    await user.click(within(panel()).getByRole('button', {name: 'Registrar pedido'}));
-    expect(await screen.findByText('Se abrió Mesa 1 con el pedido Nº 8')).toBeInTheDocument();
+    await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
+    expect(await screen.findByText('Se abrió Mesa 1 con el pedido Nº 8 y se envió a cocina')).toBeInTheDocument();
+    const print = vi.spyOn(window, 'print').mockImplementation(() => {});
+    const dialog = await screen.findByRole('dialog', {name: 'Comanda de cocina'});
+    const ticket = within(dialog).getByRole('article', {name: 'Comanda del envío 1'});
+    expect(within(ticket).getByText('Pedido Nº 8 · Envío 1')).toBeInTheDocument();
+    expect(within(ticket).getByText('Mesero: Carlos Mendoza')).toBeInTheDocument();
+    expect(within(ticket).getByText('sin: lechuga')).toBeInTheDocument();
+    expect(within(ticket).queryByText(/MODIFICADO/)).not.toBeInTheDocument();
+    expect(within(ticket).queryByText(/Bs/)).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Imprimir'}));
+    expect(print).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('.print-only article')).toHaveAccessibleName('Comanda del envío 1');
+    await user.click(within(dialog).getByRole('button', {name: 'Listo'}));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(document.querySelector('.print-only')).toBeNull();
     expect(backend.calls.orders[0]).toEqual({idMesa: 1, body: {idMesero: 1, items: [{tipo: 'producto', id: 11, cantidad: 1, consumo: 'local', exclusiones: [{idProducto: 11, idInsumo: 5}]}]}});
     expect(within(panel()).getByRole('heading', {name: 'Pedido Nº 8'})).toBeInTheDocument();
     expect(within(panel()).getByText('Toque un producto del menú para agregarlo.')).toBeInTheDocument();
@@ -172,10 +186,34 @@ describe('Caja: armado del pedido', () => {
 
     await addItem(user, 'Gaseosa 500 ml', {times: 1});
     expect(within(panel()).getByLabelText('Bs 125,00')).toBeInTheDocument();
-    await user.click(within(panel()).getByRole('button', {name: 'Registrar pedido'}));
-    expect(await screen.findByText('Se sumó el envío 2 al pedido Nº 7')).toBeInTheDocument();
+    await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
+    expect(await screen.findByText('Se envió a cocina el envío 2 del pedido Nº 7')).toBeInTheDocument();
     expect(backend.calls.orders[0].idMesa).toBe(2);
+    const dialog = await screen.findByRole('dialog', {name: 'Comanda de cocina'});
+    const ticket = within(dialog).getByRole('article', {name: 'Comanda del envío 2'});
+    expect(within(ticket).getByText('*** MODIFICADO POR: ADMIN ***')).toBeInTheDocument();
+    expect(within(ticket).getByText('Gaseosa 500 ml')).toBeInTheDocument();
+    expect(within(ticket).queryByText('Hamburguesa Clásica')).not.toBeInTheDocument();
+    expect(within(ticket).getByText('Unidades: 2')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Listo'}));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(within(panel()).getByText('Modificado por admin')).toBeInTheDocument();
     expect(within(panel()).getByText(/^Envío 2 · /)).toBeInTheDocument();
+
+    await user.click(within(panel()).getByRole('button', {name: 'Reimprimir la comanda del envío 1'}));
+    const reprint = await screen.findByRole('dialog', {name: 'Comanda de cocina'});
+    const first = within(reprint).getByRole('article', {name: 'Comanda del envío 1'});
+    expect(within(first).getByText('Combo Brava')).toBeInTheDocument();
+    expect(within(first).getByText('· 1 Doble Brava')).toBeInTheDocument();
+    expect(within(first).getByText('sin: tomate')).toBeInTheDocument();
+  });
+
+  it('avisa los insumos que no alcanzaron sin impedir el envío', async () => {
+    const {user, backend} = await openTable('Mesa 2');
+    backend.control.shortages = ['Lechuga'];
+    await addItem(user, 'Hamburguesa Clásica');
+    await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
+    expect(await screen.findByText('No alcanzó el stock de Lechuga: quedó en 0 y el pedido se envió igual. Revise el inventario.')).toBeInTheDocument();
   });
 
   it('elige al usuario de la sesión como mesero si atiende mesas', async () => {
@@ -187,7 +225,7 @@ describe('Caja: armado del pedido', () => {
     const {user, backend} = await openTable('Mesa 2');
     backend.control.orderError = 'Gaseosa 500 ml no está disponible por ahora';
     await addItem(user, 'Gaseosa 500 ml');
-    await user.click(within(panel()).getByRole('button', {name: 'Registrar pedido'}));
+    await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
     expect(await within(panel()).findByText('Gaseosa 500 ml no está disponible por ahora')).toBeInTheDocument();
     expect(within(within(panel()).getByRole('list', {name: 'Productos por registrar'})).getAllByRole('listitem')).toHaveLength(1);
   });
@@ -214,7 +252,7 @@ describe('Caja: armado del pedido', () => {
     await user.click(screen.getByRole('button', {name: /Ver pedido · 1 por registrar/}));
     const dialog = await screen.findByRole('dialog', {name: 'Nuevo pedido'});
     expect(within(dialog).getByText('Mesa 1 · Salón principal')).toBeInTheDocument();
-    expect(within(dialog).getByRole('button', {name: 'Registrar pedido'})).toBeEnabled();
+    expect(within(dialog).getByRole('button', {name: 'Enviar a cocina'})).toBeEnabled();
   });
 });
 

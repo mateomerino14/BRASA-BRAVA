@@ -33,7 +33,16 @@ const TABLES = [
   {id: 20, nombre: 'Terraza 1', capacidad: 6, seccion: {id: 2, nombre: 'Terraza'}},
 ];
 
+// Productos de un combo, como los manda la API en las líneas de promoción
+const comboProducts = (line) => {
+  if (line.tipo !== 'promocion') {
+    return [];
+  }
+  return CATALOG.promociones.find((entry) => entry.id === (line.idPromocion ?? line.id)).productos.map((item) => ({nombre: item.nombre, cantidad: item.cantidad}));
+};
+
 const detail = (id, envio, line, mesero, creadoEn) => ({
+  productos: comboProducts(line),
   id, envio, tipo: line.tipo, idProducto: line.idProducto ?? null, idPromocion: line.idPromocion ?? null,
   nombre: line.nombre, precioUnitario: line.precio, cantidad: line.cantidad, subtotal: line.precio * line.cantidad,
   consumo: line.consumo, mesero, creadoEn, exclusiones: line.exclusiones ?? [],
@@ -66,6 +75,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
   const sales = {
     2: {
       id: 7, numero: 7, total: 105, envios: 1, abiertaEn: openedAt, cajero: 'a.romero', mesero: waiterOf(1),
+      modificado: false, modificadoPor: null, comandas: [{envio: 1, cajero: 'a.romero', mesero: waiterOf(1), creadoEn: openedAt}],
       detalles: [
         detail(1, 1, {tipo: 'producto', idProducto: 11, nombre: 'Hamburguesa Clásica', precio: 35, cantidad: 1, consumo: 'local', exclusiones: [{idProducto: 11, producto: 'Hamburguesa Clásica', idInsumo: 4, insumo: 'Tomate'}]}, waiterOf(1), openedAt),
         detail(2, 1, {tipo: 'promocion', idPromocion: 2, nombre: 'Combo Brava', precio: 70, cantidad: 1, consumo: 'local'}, waiterOf(1), openedAt),
@@ -73,7 +83,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
     },
   };
   const calls = {orders: []};
-  const control = {orderError: null};
+  const control = {orderError: null, shortages: []};
   let nextSale = 8;
   let nextDetail = 100;
 
@@ -111,18 +121,23 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       const created = !sales[table.id];
       const stamp = new Date(now).toISOString();
       if (created) {
-        sales[table.id] = {id: nextSale, numero: nextSale, total: 0, envios: 0, abiertaEn: stamp, cajero: 'admin', mesero: waiterOf(body.idMesero), detalles: []};
+        sales[table.id] = {id: nextSale, numero: nextSale, total: 0, envios: 0, abiertaEn: stamp, cajero: 'admin', mesero: waiterOf(body.idMesero), modificado: false, modificadoPor: null, comandas: [], detalles: []};
         nextSale += 1;
       }
       const sale = sales[table.id];
       sale.envios += 1;
+      sale.comandas.push({envio: sale.envios, cajero: 'admin', mesero: waiterOf(body.idMesero), creadoEn: stamp});
+      if (sale.envios > 1) {
+        sale.modificado = true;
+        sale.modificadoPor = 'admin';
+      }
       for (const item of body.items) {
         nextDetail += 1;
         const line = lineFrom(item);
         sale.detalles.push(detail(nextDetail, sale.envios, line, waiterOf(body.idMesero), stamp));
         sale.total += line.precio * line.cantidad;
       }
-      return [201, {mesa: table, venta: sale, nueva: created}];
+      return [201, {mesa: table, venta: structuredClone(sale), nueva: created, envio: sale.envios, sinStock: control.shortages}];
     };
   }
   return {handlers, calls, control, sales};
