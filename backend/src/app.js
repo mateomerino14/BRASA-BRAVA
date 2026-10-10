@@ -5,10 +5,12 @@ import cors from 'cors';
 import {createAuthRouter} from './modules/auth/auth.routes.js';
 import {createEmployeesRouter} from './modules/employees/employees.routes.js';
 import {createRolesRouter} from './modules/roles/roles.routes.js';
+import {createCategoriesRouter} from './modules/categories/categories.routes.js';
+import {UPLOADS_ROUTE, createImageStorage} from './services/imageStorage.js';
 import {errorHandler, notFoundHandler} from './middlewares/errorHandler.js';
 
 // Construye la app Express con sus dependencias inyectadas (db, mailer, config)
-export const createApp = ({db, mailer, config, logger = console}) => {
+export const createApp = ({db, mailer, config, logger = console, images = createImageStorage(config.UPLOADS_DIR)}) => {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 'loopback');
@@ -25,7 +27,9 @@ export const createApp = ({db, mailer, config, logger = console}) => {
   app.use('/api/auth', createAuthRouter({db, mailer, config, logger}));
   app.use('/api/employees', createEmployeesRouter({db, config}));
   app.use('/api/roles', createRolesRouter({db, config}));
+  app.use('/api/categories', createCategoriesRouter({db, config, images}));
   app.use('/api', notFoundHandler);
+  app.use(UPLOADS_ROUTE, express.static(images.root, {maxAge: '7d'}), notFoundHandler);
 
   if (config.STATIC_DIR) {
     const staticDir = path.resolve(config.STATIC_DIR);
