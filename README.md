@@ -84,7 +84,8 @@ BRASA-BRAVA/
 | Gestión de categorías (subcategorías, foto, filtros, baja y reactivación) | Terminado |
 | Interfaz adaptable a celular y tablet (menú deslizable y tablas en tarjetas) | Terminado |
 | Pantallas de gestión estándar (filtros en la URL, orden por columna, filas por página, limpiar filtros) | Terminado |
-| Familia, Caja, Productos, Stock, Secciones, Promociones | Pendiente |
+| Gestión de productos (precio, foto, categoría, disponible/agotado, baja y reactivación) | Terminado |
+| Familia, Caja, Stock, Secciones, Promociones | Pendiente |
 
 ## Ramas y pruebas automáticas
 
