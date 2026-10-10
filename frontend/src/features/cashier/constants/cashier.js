@@ -11,4 +11,6 @@ export const ALL_CATEGORIES = 'todas';
 
 export const FLOOR_REFRESH_MS = 30000;
 
+export const TABLE_REFRESH_MS = 15000;
+
 export const MAX_QUANTITY = 99;
