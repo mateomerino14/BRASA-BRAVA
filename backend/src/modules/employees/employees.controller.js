@@ -1,4 +1,5 @@
 import {respond} from '../../utils/respond.js';
+import {createImageHandlers} from '../shared/imageActions.js';
 
 // Controladores HTTP de la gestión de empleados
 export const createEmployeesController = (service) => ({
@@ -31,4 +32,6 @@ export const createEmployeesController = (service) => ({
     const result = await service.setStatus(req.validated.params.id, req.validated.body.activo, req.user);
     return respond(res, result, ({employee}) => res.json({employee}));
   },
+
+  ...createImageHandlers(service, 'employee'),
 });

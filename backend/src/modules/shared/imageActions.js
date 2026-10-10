@@ -1,7 +1,8 @@
 import {respond} from '../../utils/respond.js';
 
-// Acciones de foto reutilizables por cualquier módulo cuyo repositorio tenga findById (con imagen_url) y setImage
-export const createImageActions = ({repository, images, getById, notFound}) => ({
+// Acciones de foto reutilizables por cualquier módulo cuyo repositorio tenga findById y setImage;
+// "imageOf" lee la URL guardada de la fila (imagen_url en el catálogo, foto_url en empleados)
+export const createImageActions = ({repository, images, getById, notFound, imageOf = (row) => row.imagen_url}) => ({
   // Guarda la nueva foto, la asocia y recién entonces borra la anterior
   setImage: async (id, buffer) => {
     const current = await repository.findById(id);
@@ -13,7 +14,7 @@ export const createImageActions = ({repository, images, getById, notFound}) => (
       return saved;
     }
     await repository.setImage(id, saved.url);
-    await images.remove(current.imagen_url);
+    await images.remove(imageOf(current));
     return getById(id);
   },
 
@@ -24,7 +25,7 @@ export const createImageActions = ({repository, images, getById, notFound}) => (
       return notFound;
     }
     await repository.setImage(id, null);
-    await images.remove(current.imagen_url);
+    await images.remove(imageOf(current));
     return getById(id);
   },
 });

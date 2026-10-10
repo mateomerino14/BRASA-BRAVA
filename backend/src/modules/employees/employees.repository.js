@@ -115,6 +115,11 @@ export const createEmployeesRepository = (db) => ({
     );
   },
 
+  // Guarda o quita la URL de la foto
+  setImage: async (id, url) => {
+    await db.query('UPDATE empleado SET foto_url = $1 WHERE id_empleado = $2', [url, id]);
+  },
+
   // Activa o da de baja a un empleado
   setActive: async (id, activo) => {
     await db.query('UPDATE empleado SET activo = $1 WHERE id_empleado = $2', [activo, id]);
