@@ -54,7 +54,7 @@ npm test                  # pruebas automáticas (Vitest + Testing Library)
 
 La sesión se maneja en `context/` (`AuthProvider` y `useAuth`). El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
 
-Las pantallas con tabla reutilizan dos hooks de `src/hooks/`: `usePaginatedList` (búsqueda con espera, filtros, página, recarga y aviso temporal) y `useStatusToggle` (confirmar una baja o reactivación). Cada módulo solo define su servicio, sus filtros y sus mensajes.
+El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco). Las pantallas con tabla reutilizan dos hooks de `src/hooks/`: `usePaginatedList` (búsqueda con espera, filtros, página, recarga y aviso temporal) y `useStatusToggle` (confirmar una baja o reactivación). Cada módulo solo define su servicio, sus filtros y sus mensajes.
 
 ## Estructura
 
@@ -64,7 +64,7 @@ src/
 │   ├── atoms/           Button, IconButton, Input, PasswordInput, Textarea, Select, Avatar, Thumbnail,
 │   │                    Badge, Logo, Spinner, SocialIcon
 │   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination, ImagePicker, TagInput
-│   ├── organisms/       Sidebar, Header, Footer, Modal, EmployeeCarousel, DataTable, FilterBar,
+│   ├── organisms/       Sidebar, MobileMenu, Header, Footer, Modal, EmployeeCarousel, DataTable, FilterBar,
 │   │                    RegisterCallout, ConfirmDialog
 │   └── templates/       MainLayout, AuthLayout
 ├── features/
@@ -73,8 +73,8 @@ src/
 │   ├── employees/       Gestión de empleados: tabla, filtros, registro, modificación y baja
 │   ├── categories/      Gestión de categorías: foto, subcategorías, filtros, registro y baja
 │   └── shared/          Páginas "en construcción" y 404
-├── config/              Menú lateral (navigation.js) y valores de las tablas (lists.js)
-├── hooks/               Hooks compartidos de listado paginado y cambio de estado
+├── config/              Menú lateral (navigation.js), valores de las tablas (lists.js) y anchos (breakpoints.js)
+├── hooks/               Hooks compartidos: listado paginado, cambio de estado, foco de diálogos y media queries
 ├── context/             Sesión del usuario
 ├── router/              Rutas, guardas de sesión y de permisos
 ├── lib/                 Cliente HTTP, query strings y funciones de formato
@@ -113,6 +113,19 @@ Los colores y fuentes salen del prototipo de Figma y se definen una sola vez en 
 
 Todo respeta la opción del sistema "reducir movimiento".
 
+### Diseño adaptable
+
+| Ancho | Menú | Tablas |
+|---|---|---|
+| Escritorio (1024 px o más) | Lateral fijo, contraíble a solo íconos | Tabla completa |
+| Tablet (768 a 1023 px) | Botón ☰ que abre un panel deslizable | Tarjetas en dos columnas |
+| Celular (menos de 768 px) | Panel deslizable con el perfil y "Cerrar sesión" al pie | Tarjetas en una columna |
+
+- El panel se cierra con la X, con Escape, tocando el fondo o al elegir una pantalla, y devuelve el foco al botón ☰.
+- En celular y tablet el pie de página se desplaza con el contenido para no ocupar pantalla fija.
+- Las columnas de `DataTable` indican cómo se ven en tarjeta: `mobile: 'title'` (encabezado), `mobile: 'actions'` (botones a la derecha), `mobile: 'hidden'` (se omite) y `wide: true` (ocupa todo el ancho); el resto se muestra como etiqueta y valor.
+- Los anchos están en `src/config/breakpoints.js` y se leen con el hook `useMediaQuery`.
+
 ## Rutas
 
 | Ruta | Pantalla | Permiso |
@@ -128,4 +141,4 @@ Las pantallas que todavía no se construyeron muestran un aviso de "en construcc
 
 ## Pruebas
 
-Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar) y los componentes base.
+Las pruebas simulan al usuario real (escribir, hacer clic, pegar el código) contra un backend falso (`src/test/mockApi.js`). Cubren el login, el modo DIRECTORIO, la recuperación completa, la sesión vencida, los permisos por cargo, el menú desplegable, la gestión de empleados (filtros, registro, modificación, baja y errores del servidor), la de categorías (subcategorías, subida y retiro de la foto, nombre duplicado y foto que falla después de guardar), los componentes base y la interfaz adaptable (menú deslizable en celular, cierre con Escape y al navegar, cierre de sesión desde el menú y tablas como tarjetas). Las pruebas simulan escritorio por defecto; `setViewport(ancho)` de `src/test/viewport.js` cambia el ancho.

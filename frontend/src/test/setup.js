@@ -1,10 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import {afterEach, vi} from 'vitest';
 import {cleanup} from '@testing-library/react';
+import {matchesViewport, setViewport} from './viewport';
 
 // jsdom no implementa estas APIs del navegador que usan motion y el carrusel.
-window.matchMedia ??= (query) => ({
-  matches: false,
+// Por defecto las pruebas simulan pantalla de escritorio; cada prueba puede cambiarlo con setViewport
+window.matchMedia = (query) => ({
+  matches: matchesViewport(query),
   media: query,
   addEventListener: () => {},
   removeEventListener: () => {},
@@ -20,4 +22,5 @@ afterEach(() => {
   localStorage.clear();
   vi.unstubAllGlobals();
   vi.useRealTimers();
+  setViewport();
 });
