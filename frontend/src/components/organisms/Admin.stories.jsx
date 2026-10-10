@@ -21,7 +21,7 @@ const ROWS = [
 ];
 
 const COLUMNS = [
-  {key: 'nombre', header: 'Empleado', render: (row) => row.nombre},
+  {key: 'nombre', header: 'Empleado', mobile: 'title', render: (row) => row.nombre},
   {key: 'cargo', header: 'Cargo', align: 'center', render: (row) => <Badge>{row.cargo}</Badge>},
   {
     key: 'estado',
@@ -31,6 +31,7 @@ const COLUMNS = [
   },
   {
     key: 'acciones',
+    mobile: 'actions',
     header: 'Acciones',
     align: 'center',
     render: () => (
@@ -108,3 +109,8 @@ function ConfirmDemo() {
 }
 
 export const Confirmacion = {render: () => <ConfirmDemo />};
+
+export const TablaComoTarjetas = {
+  globals: {viewport: {value: 'mobile2'}},
+  render: () => <TableDemo />,
+};
