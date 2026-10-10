@@ -151,7 +151,7 @@ tests/                       Pruebas de la API y unitarias
 | Método | Ruta | Alcance |
 |---|---|---|
 | `POST` | `/api/auth/login` | Inicio de sesión. Con usuario `DIRECTORIO` entra el dueño del local |
-| `GET` | `/api/auth/me` | Perfil de la sesión actual |
+| `GET` | `/api/auth/me` | Perfil de la sesión actual, con el nombre y la foto al día del empleado |
 | `GET` | `/api/auth/login-users` | Empleados activos para el carrusel del login (alias, nombre, cargo y foto) |
 | `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo del empleado |
 | `POST` | `/api/auth/password-reset/verify` | Verifica el código sin consumirlo |
@@ -161,6 +161,8 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/employees` | Registra un empleado con su contraseña inicial |
 | `PUT` | `/api/employees/:id` | Modifica un empleado; la contraseña solo cambia si se envía |
 | `PATCH` | `/api/employees/:id/status` | Da de baja (`{activo: false}`) o reactiva a un empleado |
+| `PUT` | `/api/employees/:id/image` | Sube o reemplaza la foto del empleado (campo `imagen`) |
+| `DELETE` | `/api/employees/:id/image` | Quita la foto del empleado |
 | `GET` | `/api/roles` | Cargos activos |
 | `GET` | `/api/categories` | Categorías con sus subcategorías activas; búsqueda (`search`, también por subcategoría) y los parámetros comunes de listado. Orden: `nombre`, `productos`, `estado` |
 | `GET` | `/api/categories/:id` | Detalle de una categoría |
@@ -240,6 +242,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 
 - El CI, el usuario y el correo no se pueden repetir; el usuario y el correo se guardan en minúsculas.
 - Un empleado dado de baja no puede iniciar sesión ni aparece en el carrusel del login, pero conserva su historial y se puede reactivar.
+- La foto sigue las mismas reglas que las de categorías, productos y promociones (`modules/shared/imageActions.js`, con `imageOf` para leer la columna `foto_url`) y se muestra en el carrusel del login, en la lista y en el encabezado.
 - Nadie puede darse de baja a sí mismo; el DIRECTORIO sí puede dar de baja a cualquier empleado.
 
 ### Reglas de la gestión de categorías
