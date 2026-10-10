@@ -92,6 +92,7 @@ export function OrderView({order, checkout, onBack}) {
         {order.notice && <Alert key="notice" tone="success">{order.notice}</Alert>}
       </AnimatePresence>
       {order.stockWarning && <Alert tone="info">{order.stockWarning}</Alert>}
+      {order.printError && <Alert tone="error">{order.printError}</Alert>}
 
       <div className={styles.layout}>
         <CatalogPanel order={order} />
@@ -121,6 +122,7 @@ export function OrderView({order, checkout, onBack}) {
         open={order.printing.open}
         title="Comanda de cocina"
         description={`Envío ${order.printing.envio} de ${order.mesa.nombre}: solo lo nuevo de este envío`}
+        destino="cocina"
         onClose={order.closePrint}
       >
         {order.venta && order.printing.envio > 0 && (
@@ -134,6 +136,7 @@ export function OrderView({order, checkout, onBack}) {
         open={checkout.receipt.open}
         title="Ticket de venta"
         description={`${order.mesa.nombre} quedó libre. Imprima el ticket para el cliente.`}
+        destino="caja"
         autoPrint
         onClose={() => {
           checkout.closeReceipt();
