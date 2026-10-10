@@ -1,26 +1,12 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {employeesApi} from '../services/employeesApi';
-import {NOTICE_DURATION_MS, PAGE_SIZE, SEARCH_DELAY_MS} from '../constants/employees';
+import {usePaginatedList} from '../../../hooks/usePaginatedList';
 
-const emptyResult = {items: [], total: 0};
+const initialFilters = {idCargo: '', estado: 'todos'};
 
 export function useEmployees({api = employeesApi} = {}) {
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [idCargo, setIdCargo] = useState('');
-  const [estado, setEstado] = useState('todos');
-  const [page, setPage] = useState(1);
-  const [result, setResult] = useState(emptyResult);
+  const list = usePaginatedList({fetchPage: api.list, initialFilters});
   const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [search]);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,79 +29,11 @@ export function useEmployees({api = employeesApi} = {}) {
     };
   }, [api]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      setLoading(true);
-      try {
-        const data = await api.list({search: debouncedSearch, idCargo, estado, page, pageSize: PAGE_SIZE});
-        if (!cancelled) {
-          setResult(data);
-          setError('');
-        }
-      }
-      catch (requestError) {
-        if (!cancelled) {
-          setResult(emptyResult);
-          setError(requestError.message);
-        }
-      }
-      if (!cancelled) {
-        setLoading(false);
-      }
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [api, debouncedSearch, idCargo, estado, page, reloadKey]);
-
-  useEffect(() => {
-    if (!notice) {
-      return undefined;
-    }
-    const timer = setTimeout(() => setNotice(''), NOTICE_DURATION_MS);
-    return () => clearTimeout(timer);
-  }, [notice]);
-
-  const changeSearch = (value) => {
-    setSearch(value);
-    setPage(1);
-  };
-
-  const changeRole = (value) => {
-    setIdCargo(value);
-    setPage(1);
-  };
-
-  const changeStatus = (value) => {
-    setEstado(value);
-    setPage(1);
-  };
-
-  const reload = useCallback((message) => {
-    if (message) {
-      setNotice(message);
-    }
-    setReloadKey((key) => key + 1);
-  }, []);
-
-  const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
-
   return {
-    employees: result.items,
-    total: result.total,
-    page,
-    totalPages,
+    ...list,
+    employees: list.items,
     roles,
-    loading,
-    error,
-    notice,
-    filters: {search, idCargo, estado},
-    changeSearch,
-    changeRole,
-    changeStatus,
-    setPage,
-    reload,
+    changeRole: (value) => list.changeFilter('idCargo', value),
+    changeStatus: (value) => list.changeFilter('estado', value),
   };
 }
