@@ -40,6 +40,8 @@ export function useTableOrder({api = cashierApi, idMesa, user}) {
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [notice, setNotice] = useState('');
+  const [stockWarning, setStockWarning] = useState('');
+  const [printing, setPrinting] = useState({open: false, envio: 0, printedAt: null});
 
   useEffect(() => {
     let cancelled = false;
@@ -129,15 +131,20 @@ export function useTableOrder({api = cashierApi, idMesa, user}) {
     }
     setSaving(true);
     setSubmitError('');
+    setStockWarning('');
     try {
       const result = await api.addOrder(idMesa, toOrderPayload(idMesero, lines));
       setState((current) => ({...current, venta: result.venta}));
       setLines([]);
+      if (result.sinStock?.length > 0) {
+        setStockWarning(`No alcanzó el stock de ${result.sinStock.join(', ')}: quedó en 0 y el pedido se envió igual. Revise el inventario.`);
+      }
+      setPrinting({open: true, envio: result.envio, printedAt: new Date()});
       if (result.nueva) {
-        setNotice(`Se abrió ${result.mesa.nombre} con el pedido Nº ${result.venta.numero}`);
+        setNotice(`Se abrió ${result.mesa.nombre} con el pedido Nº ${result.venta.numero} y se envió a cocina`);
       }
       else {
-        setNotice(`Se sumó el envío ${result.venta.envios} al pedido Nº ${result.venta.numero}`);
+        setNotice(`Se envió a cocina el envío ${result.envio} del pedido Nº ${result.venta.numero}`);
       }
       return true;
     }
@@ -176,6 +183,10 @@ export function useTableOrder({api = cashierApi, idMesa, user}) {
     saving,
     submitError,
     notice,
+    stockWarning,
+    printing,
+    openPrint: (envio) => setPrinting({open: true, envio, printedAt: new Date()}),
+    closePrint: () => setPrinting((current) => ({...current, open: false})),
     submit,
   };
 }

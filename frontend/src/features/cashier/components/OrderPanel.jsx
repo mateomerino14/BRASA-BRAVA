@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {AnimatePresence, motion} from 'motion/react';
-import {ChevronDown, Pencil, Send, ShoppingBasket, Trash2} from 'lucide-react';
+import {ChevronDown, Pencil, Printer, Send, ShoppingBasket, Trash2} from 'lucide-react';
+import {Badge} from '../../../components/atoms/Badge';
 import {Alert} from '../../../components/molecules/Alert';
 import {Amount} from '../../../components/atoms/Amount';
 import {Button} from '../../../components/atoms/Button';
@@ -28,7 +29,8 @@ const styles = {
   chevron: 'transition-transform duration-200',
   open: 'rotate-180',
   shipment: 'mt-2 rounded-xl bg-hueso/60 px-3',
-  shipmentTitle: 'pt-2 text-xs font-semibold text-cafe',
+  shipmentHead: 'flex items-center justify-between gap-2 pt-2',
+  shipmentTitle: 'text-xs font-semibold text-cafe',
   list: 'divide-y divide-arena/40',
   empty: 'mt-2 flex flex-col items-center gap-2 rounded-xl border border-dashed border-arena px-4 py-6 text-center text-sm text-cafe',
   lineActions: 'flex items-center gap-2',
@@ -56,6 +58,7 @@ export function OrderPanel({order, bare = false}) {
             <h2 className={styles.title}>{orderTitle(venta)}</h2>
             <p className={styles.subtitle}>{mesa.nombre} · {mesa.seccion.nombre}</p>
           </div>
+          {venta?.modificado && <Badge tone="warning">Modificado por {venta.modificadoPor}</Badge>}
         </header>
       )}
 
@@ -77,7 +80,10 @@ export function OrderPanel({order, bare = false}) {
             </button>
             {showRegistered && groupByShipment(venta.detalles).map((group) => (
               <div key={group.envio} className={styles.shipment}>
-                <p className={styles.shipmentTitle}>Envío {group.envio} · {formatTime(group.creadoEn)} · {group.mesero}</p>
+                <div className={styles.shipmentHead}>
+                  <p className={styles.shipmentTitle}>Envío {group.envio} · {formatTime(group.creadoEn)} · {group.mesero}</p>
+                  <IconButton icon={Printer} label={`Reimprimir la comanda del envío ${group.envio}`} onClick={() => order.openPrint(group.envio)} />
+                </div>
                 <ul className={styles.list}>
                   {group.detalles.map((detail) => <li key={detail.id}><OrderLine line={detail} /></li>)}
                 </ul>
@@ -136,7 +142,7 @@ export function OrderPanel({order, bare = false}) {
 
       {order.submitError && <Alert tone="error">{order.submitError}</Alert>}
       <Button fullWidth icon={<Send size={18} aria-hidden />} loading={order.saving} disabled={lines.length === 0} onClick={order.submit}>
-        Registrar pedido
+        Enviar a cocina
       </Button>
     </section>
   );
