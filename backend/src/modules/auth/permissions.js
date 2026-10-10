@@ -3,6 +3,7 @@ export const SCREENS = Object.freeze([
   'home',
   'familia',
   'caja',
+  'cocina',
   'administracion',
   'productos',
   'secciones',
