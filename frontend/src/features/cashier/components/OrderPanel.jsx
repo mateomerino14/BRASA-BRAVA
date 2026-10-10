@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {AnimatePresence, motion} from 'motion/react';
-import {ChevronDown, Pencil, Printer, Send, ShoppingBasket, Trash2} from 'lucide-react';
+import {ChevronDown, HandCoins, Pencil, Printer, Send, ShoppingBasket, Trash2} from 'lucide-react';
 import {Badge} from '../../../components/atoms/Badge';
 import {Alert} from '../../../components/molecules/Alert';
 import {Amount} from '../../../components/atoms/Amount';
@@ -10,7 +10,7 @@ import {Select} from '../../../components/atoms/Select';
 import {FormField} from '../../../components/molecules/FormField';
 import {Stepper} from '../../../components/molecules/Stepper';
 import {cn} from '../../../lib/cn';
-import {formatAmount, formatTime} from '../../../lib/format';
+import {countText, formatAmount, formatTime} from '../../../lib/format';
 import {MAX_QUANTITY} from '../constants/cashier';
 import {groupByShipment, lineSubtotal, orderTitle} from '../utils/cart';
 import {OrderLine} from './OrderLine';
@@ -37,10 +37,24 @@ const styles = {
   totals: 'flex flex-col gap-1.5 border-t border-arena/50 pt-4 text-sm text-cafe',
   totalRow: 'flex items-center justify-between',
   grandTotal: 'flex items-center justify-between pt-1 text-base font-semibold text-carbon',
+  hint: 'text-sm text-cafe',
+  actions: 'grid gap-3',
 };
 
 const lineIn = {opacity: 0, x: 16};
 const lineVisible = {opacity: 1, x: 0};
+
+// Motivo por el que todavía no se puede cobrar, o vacío si se puede
+const checkoutBlock = (venta, lines) => {
+  if (lines.length > 0) {
+    return 'Envíe a cocina o quite lo que falta registrar antes de cobrar.';
+  }
+  const pending = venta.detalles.reduce((total, detail) => total + detail.cantidad - detail.listos, 0);
+  if (pending > 0) {
+    return `Cocina tiene ${countText(pending, 'unidad', 'unidades')} por terminar.`;
+  }
+  return '';
+};
 
 const unitsOf = (detalles) => detalles.reduce((total, detail) => total + detail.cantidad, 0);
 
@@ -141,9 +155,17 @@ export function OrderPanel({order, bare = false}) {
       </div>
 
       {order.submitError && <Alert tone="error">{order.submitError}</Alert>}
-      <Button fullWidth icon={<Send size={18} aria-hidden />} loading={order.saving} disabled={lines.length === 0} onClick={order.submit}>
-        Enviar a cocina
-      </Button>
+      {venta && checkoutBlock(venta, lines) && <p className={styles.hint}>{checkoutBlock(venta, lines)}</p>}
+      <div className={styles.actions}>
+        <Button fullWidth icon={<Send size={18} aria-hidden />} loading={order.saving} disabled={lines.length === 0} onClick={order.submit}>
+          Enviar a cocina
+        </Button>
+        {venta && (
+          <Button variant="dark" fullWidth icon={<HandCoins size={18} aria-hidden />} disabled={Boolean(checkoutBlock(venta, lines))} onClick={order.startCheckout}>
+            Cobrar
+          </Button>
+        )}
+      </div>
     </section>
   );
 }

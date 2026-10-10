@@ -4,6 +4,9 @@ import {CatalogCard} from './components/CatalogCard';
 import {OrderPanel} from './components/OrderPanel';
 import {ItemPickerModal} from './components/ItemPickerModal';
 import {KitchenTicket} from './components/KitchenTicket';
+import {ReceiptTicket} from './components/ReceiptTicket';
+import {CheckoutModal} from './components/CheckoutModal';
+import {TodaySalesModal} from './components/TodaySalesModal';
 import {PrintPreview} from '../../components/organisms/PrintPreview';
 import {CATALOG} from '../../test/cashierBackend';
 
@@ -99,3 +102,41 @@ export const ComandaDeCocina = {
     </PrintPreview>
   ),
 };
+
+const CHECKOUT = {
+  open: true, values: {metodo: 'efectivo', recibido: '150,00', efectivo: ''}, errors: {}, error: '', saving: false, cambio: 10,
+  taxLink: 'https://siat.impuestos.gob.bo/v2/launcher/', change: fn(), confirm: fn(), close: fn(),
+};
+
+export const Cobro = {render: () => <CheckoutModal checkout={CHECKOUT} venta={ORDER.venta} mesa={ORDER.mesa} />};
+
+const TICKET = {
+  numero: 7, mesa: 'Mesa 2', seccion: 'Salón principal', mesero: 'Carlos Mendoza', cajero: 'a.romero', cobrador: 'admin', modificadoPor: 'admin', total: 140,
+  lineas: [
+    {nombre: 'Hamburguesa Clásica', consumo: 'local', precioUnitario: 35, cantidad: 1, subtotal: 35},
+    {nombre: 'Combo Brava', consumo: 'local', precioUnitario: 70, cantidad: 1, subtotal: 70},
+    {nombre: 'Hamburguesa Clásica', consumo: 'llevar', precioUnitario: 35, cantidad: 1, subtotal: 35},
+  ],
+  pagos: [{metodo: 'efectivo', monto: 100}, {metodo: 'qr', monto: 40}], recibido: 100, cambio: 0,
+};
+
+export const TicketDeVenta = {
+  render: () => (
+    <PrintPreview open title="Ticket de venta" description="Mesa 2 quedó libre. Imprima el ticket para el cliente." onClose={fn()}>
+      <ReceiptTicket ticket={TICKET} printedAt={new Date(NOW)} />
+    </PrintPreview>
+  ),
+};
+
+const SALES = {
+  open: true, close: fn(), loading: false, error: '', hoy: '2026-10-13',
+  ventas: [
+    {id: 7, numero: 7, mesa: 'Mesa 2', cobrador: 'admin', cerradaEn: minutesAgo(10), total: 140, pagos: TICKET.pagos},
+    {id: 6, numero: 6, mesa: 'Terraza 1', cobrador: 'a.romero', cerradaEn: minutesAgo(45), total: 103, pagos: [{metodo: 'qr', monto: 103}]},
+  ],
+  resumen: {cantidad: 2, total: 243, efectivo: 100, qr: 143},
+  receipt: {open: false, ticket: null, printedAt: null}, reprint: fn(), closeReceipt: fn(),
+  taxLink: 'https://siat.impuestos.gob.bo/v2/launcher/', linkDraft: null, editLink: fn(), changeLink: fn(), cancelLink: fn(), saveLink: fn(), linkError: '', savingLink: false,
+};
+
+export const VentasDeHoy = {render: () => <TodaySalesModal sales={SALES} canEditLink />};

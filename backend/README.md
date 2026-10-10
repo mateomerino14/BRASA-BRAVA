@@ -125,6 +125,7 @@ src/
 │   ├── promotions/            Promociones: combos y descuentos con vigencia
 │   ├── sales/                 Caja: plano de mesas, catálogo del día y registro de pedidos
 │   ├── kitchen/               Cocina: envíos de las ventas abiertas y unidades listas
+│   ├── settings/              Ajustes del local (enlace a la página de impuestos)
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
@@ -204,6 +205,11 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/api/sales/waiters` | Empleados activos que pueden atender mesas (su cargo tiene acceso a Caja) |
 | `GET` | `/api/sales/tables/:idMesa` | Mesa con su sección y su venta abierta (`null` si está libre) con todas sus líneas agrupables por envío |
 | `POST` | `/api/sales/tables/:idMesa/orders` | Registra un envío a cocina: abre la venta si la mesa está libre o suma las líneas a la abierta, y descuenta el stock. Responde `nueva`, el número de `envio` y `sinStock` (insumos que no alcanzaron) |
+| `POST` | `/api/sales/tables/:idMesa/checkout` | Cobra la venta abierta de la mesa: `pagos` (`efectivo`, `qr` o ambos, con `monto`) y `recibido` opcional (efectivo entregado). Responde el `ticket` |
+| `GET` | `/api/sales/:idVenta/receipt` | Ticket de una venta para reimprimirlo |
+| `GET` | `/api/sales/today` | Ventas cobradas hoy (día del local) con sus pagos y `resumen` (`cantidad`, `total`, `efectivo`, `qr`) |
+| `GET` | `/api/settings` | Ajustes del local (`enlaceImpuestos`); cualquier sesión |
+| `PUT` | `/api/settings` | Cambia el enlace a la página de impuestos (permiso `administracion`) |
 | `GET` | `/api/kitchen/orders` | Envíos de las ventas abiertas (mesa, sección, mesero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
 | `PATCH` | `/api/kitchen/lines/:id` | Cambia las unidades listas de una línea: `accion` = `sumar`, `restar`, `todos` o `ninguno`. Responde la lista actualizada |
 | `PATCH` | `/api/kitchen/shipments/:idVenta/:envio` | Marca todo el envío como listo (`todos`) o lo devuelve a preparación (`ninguno`) |
@@ -281,6 +287,14 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - No se puede dar de baja una sección ni quitar una mesa que tenga una venta abierta.
 - Cada envío es una comanda (`venta_envio`): guarda su número, el cajero, el mesero y la hora. La venta trae `comandas` y, en las líneas de promoción, los `productos` del combo. Desde el segundo envío la venta queda `modificado` con `modificadoPor` = cajero del último envío.
 - **Stock**: cada envío descuenta la receta de cada producto por su cantidad (en combos, la de cada producto del combo), sin los ingredientes quitados, con un movimiento `venta` en el historial (`Venta Nº 7 · Mesa 2 · envío 2`). Si no alcanza, el insumo queda en 0, el movimiento dice "(stock insuficiente)" y la respuesta lo avisa en `sinStock`, pero la venta se registra igual. Los insumos dados de baja no se tocan. Los insumos se bloquean en orden de id durante la transacción para que dos envíos no se pisen.
+
+### Reglas del cobro
+
+- Solo se cobra una venta abierta sin unidades pendientes en cocina (409 "Faltan N unidades por marcar como listas en cocina").
+- Los pagos (uno por método, efectivo y/o QR) deben sumar exactamente el total. `recibido` solo se usa con efectivo, debe cubrir la parte en efectivo y da el `cambio`; sin `recibido` el efectivo se toma exacto.
+- Todo pasa en una transacción con la mesa bloqueada: la venta queda `cobrada` con la hora de cierre y quién cobró, se guardan los pagos y la mesa queda libre. Un segundo cobro de la misma mesa responde 404.
+- El ticket junta las líneas iguales (mismo nombre, precio y consumo) y lleva todo lo acumulado de la mesa, los pagos, lo recibido, el cambio y "MODIFICADO POR" si hubo más de un envío.
+- "Hoy" para las ventas del día es el día del local (`TIMEZONE`): se convierte a un rango UTC (`utils/calendar.js`, `localDayRange`).
 
 ### Reglas de cocina
 
