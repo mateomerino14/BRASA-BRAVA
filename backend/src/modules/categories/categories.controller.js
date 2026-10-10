@@ -1,4 +1,5 @@
 import {respond} from '../../utils/respond.js';
+import {createImageHandlers} from '../shared/imageActions.js';
 
 // Controladores HTTP de categorías y subcategorías
 export const createCategoriesController = (service) => ({
@@ -32,15 +33,5 @@ export const createCategoriesController = (service) => ({
     return respond(res, result, ({category}) => res.json({category}));
   },
 
-  // Sube o reemplaza la imagen de una categoría
-  setImage: async (req, res) => {
-    const result = await service.setImage(req.validated.params.id, req.file.buffer);
-    return respond(res, result, ({category}) => res.json({category}));
-  },
-
-  // Quita la imagen de una categoría
-  removeImage: async (req, res) => {
-    const result = await service.removeImage(req.validated.params.id);
-    return respond(res, result, ({category}) => res.json({category}));
-  },
+  ...createImageHandlers(service, 'category'),
 });
