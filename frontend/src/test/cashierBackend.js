@@ -43,6 +43,7 @@ const comboProducts = (line) => {
 
 const detail = (id, envio, line, mesero, creadoEn) => ({
   productos: comboProducts(line),
+  listos: line.listos ?? 0,
   id, envio, tipo: line.tipo, idProducto: line.idProducto ?? null, idPromocion: line.idPromocion ?? null,
   nombre: line.nombre, precioUnitario: line.precio, cantidad: line.cantidad, subtotal: line.precio * line.cantidad,
   consumo: line.consumo, mesero, creadoEn, exclusiones: line.exclusiones ?? [],
@@ -77,7 +78,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       id: 7, numero: 7, total: 105, envios: 1, abiertaEn: openedAt, cajero: 'a.romero', mesero: waiterOf(1),
       modificado: false, modificadoPor: null, comandas: [{envio: 1, cajero: 'a.romero', mesero: waiterOf(1), creadoEn: openedAt}],
       detalles: [
-        detail(1, 1, {tipo: 'producto', idProducto: 11, nombre: 'Hamburguesa Clásica', precio: 35, cantidad: 1, consumo: 'local', exclusiones: [{idProducto: 11, producto: 'Hamburguesa Clásica', idInsumo: 4, insumo: 'Tomate'}]}, waiterOf(1), openedAt),
+        detail(1, 1, {tipo: 'producto', idProducto: 11, nombre: 'Hamburguesa Clásica', precio: 35, cantidad: 1, listos: 1, consumo: 'local', exclusiones: [{idProducto: 11, producto: 'Hamburguesa Clásica', idInsumo: 4, insumo: 'Tomate'}]}, waiterOf(1), openedAt),
         detail(2, 1, {tipo: 'promocion', idPromocion: 2, nombre: 'Combo Brava', precio: 70, cantidad: 1, consumo: 'local'}, waiterOf(1), openedAt),
       ],
     },
@@ -98,7 +99,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       const sale = sales[table.id];
       let venta = null;
       if (sale) {
-        venta = {id: sale.id, total: sale.total, unidades: sale.detalles.reduce((total, item) => total + item.cantidad, 0), mesero: sale.mesero.nombre, abiertaEn: sale.abiertaEn};
+        venta = {id: sale.id, total: sale.total, unidades: sale.detalles.reduce((total, item) => total + item.cantidad, 0), listos: sale.detalles.reduce((total, item) => total + item.listos, 0), mesero: sale.mesero.nombre, abiertaEn: sale.abiertaEn};
       }
       section.mesas.push({id: table.id, nombre: table.nombre, capacidad: table.capacidad, venta});
     }

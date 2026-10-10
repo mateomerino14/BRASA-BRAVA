@@ -11,8 +11,9 @@ import {PriceTag} from './PriceTag';
 import {ChipTabs} from './ChipTabs';
 import {Amount} from '../atoms/Amount';
 import {NumberInput} from '../atoms/NumberInput';
+import {ProgressBar} from '../atoms/ProgressBar';
 import {levelRatio} from '../../lib/level';
-import {formatDate, formatDays, formatQuantity, formatTime, normalizeText, quantityParts} from '../../lib/format';
+import {countText, formatDate, formatDays, formatQuantity, formatTime, normalizeText, quantityParts} from '../../lib/format';
 
 describe('Piezas de stock', () => {
   it('SegmentedControl funciona como grupo de radios', async () => {
@@ -117,5 +118,15 @@ describe('formato de hora y búsqueda', () => {
   it('muestra la hora en 24 horas y compara textos sin tildes', () => {
     expect(formatTime(new Date(2026, 9, 13, 20, 5))).toBe('20:05');
     expect(normalizeText('Clásica ÑANDÚ')).toBe('clasica nandu');
+  });
+});
+
+describe('ProgressBar y plurales', () => {
+  it('expone el avance a lectores de pantalla y arma singular o plural', () => {
+    render(<ProgressBar value={2} max={5} label="Avance de Mesa 2" />);
+    const bar = screen.getByRole('progressbar', {name: 'Avance de Mesa 2'});
+    expect(bar).toHaveAttribute('aria-valuenow', '2');
+    expect(bar).toHaveAttribute('aria-valuemax', '5');
+    expect([countText(1, 'envío', 'envíos'), countText(3, 'envío', 'envíos'), countText(0, 'envío', 'envíos')]).toEqual(['1 envío', '3 envíos', '0 envíos']);
   });
 });
