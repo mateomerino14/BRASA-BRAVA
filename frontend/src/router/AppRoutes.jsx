@@ -17,6 +17,7 @@ const PAGES = {
   categorias: lazyPage(() => import('../features/categories/pages/CategoriesPage'), 'CategoriesPage'),
   productos: lazyPage(() => import('../features/products/pages/ProductsPage'), 'ProductsPage'),
   stock: lazyPage(() => import('../features/stock/pages/StockPage'), 'StockPage'),
+  secciones: lazyPage(() => import('../features/sections/pages/SectionsPage'), 'SectionsPage'),
 };
 const MODULE_ROUTES = flattenNavigation(NAVIGATION).filter((route) => route.permission !== 'home');
 
