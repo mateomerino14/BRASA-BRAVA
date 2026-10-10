@@ -169,6 +169,9 @@ tests/                       Pruebas de la API y unitarias
 | `PUT` | `/api/products/:id` | Modifica un producto |
 | `PATCH` | `/api/products/:id/status` | Da de baja (`{activo: false}`) o reactiva un producto |
 | `PATCH` | `/api/products/:id/availability` | Marca como agotado (`{disponible: false}`) o disponible |
+| `GET` | `/api/products/recipe-options` | Insumos activos para armar recetas |
+| `GET` | `/api/products/:id/recipe` | Receta del producto con el stock de cada insumo y las porciones que alcanzan |
+| `PUT` | `/api/products/:id/recipe` | Reemplaza la receta completa (`{ingredientes: [{idInsumo, cantidad}]}`); una lista vacía la quita |
 | `PUT` | `/api/products/:id/image` | Sube o reemplaza la foto (`multipart/form-data`, campo `imagen`) |
 | `DELETE` | `/api/products/:id/image` | Quita la foto |
 | `GET` | `/api/ingredients` | Insumos con su nivel (`suficiente`, `bajo`, `sin_stock`); búsqueda, `nivel` (`todos`, `bajo`, `sin_stock`) y los parámetros comunes. Orden: `nombre`, `stock`, `estado`. Incluye `summary` con totales de alertas |
@@ -216,6 +219,8 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - El nombre no se repite (sin distinguir mayúsculas). El precio es mayor a 0, con hasta 2 decimales, y acepta coma o punto decimal.
 - **Estado** (`activo`) y **disponibilidad** (`disponible`) son distintos: dar de baja saca el producto del menú; agotado es temporal (se acabó por hoy) y lo cambia el interruptor de la tabla.
 - La cantidad de productos de cada categoría cuenta solo los productos activos.
+- **Receta**: cantidad de cada insumo por porción (hasta 3 decimales, sin repetir insumos). Los insumos nuevos deben estar activos; uno dado de baja que ya estaba se puede conservar.
+- **Porciones** (`porciones` en cada producto): cuántas se pueden preparar con el stock actual, según el insumo más escaso; un insumo de baja cuenta como sin stock. Es `null` si el producto no tiene receta.
 
 ### Reglas de la gestión de stock
 

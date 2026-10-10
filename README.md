@@ -86,6 +86,7 @@ BRASA-BRAVA/
 | Pantallas de gestión estándar (filtros en la URL, orden por columna, filas por página, limpiar filtros) | Terminado |
 | Gestión de productos (precio, foto, categoría, disponible/agotado, baja y reactivación) | Terminado |
 | Gestión de stock (insumos, alertas de nivel, entradas, salidas, ajustes e historial) | Terminado |
+| Recetas de productos (insumos por porción y porciones que alcanzan con el stock) | Terminado |
 | Familia, Caja, Secciones, Promociones | Pendiente |
 
 ## Ramas y pruebas automáticas
