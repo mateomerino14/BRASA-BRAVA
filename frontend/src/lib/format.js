@@ -70,3 +70,31 @@ export const formatAmount = (value) => priceFormatter.format(value);
 
 // Precio en bolivianos: 1234.5 → "Bs 1.234,50"
 export const formatPrice = (value) => `Bs ${formatAmount(value)}`;
+
+const shortDateFormatter = new Intl.DateTimeFormat('es-BO', {day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC'});
+
+// Fecha de calendario "2026-10-13" → "13 oct 2026" (sin desfase de zona horaria)
+export const formatDate = (isoDate) => shortDateFormatter.format(new Date(`${isoDate}T00:00:00Z`)).replace('.', '');
+
+const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const DAY_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const WEEKDAYS = '0111110';
+const WEEKEND = '1000001';
+
+// Días de una promoción en palabras: "Todos los días", "Martes", "Lun a vie" o "Mar, Jue"
+export const formatDays = (days) => {
+  const selected = [1, 2, 3, 4, 5, 6, 0].filter((index) => days[index] === '1');
+  if (selected.length === 7) {
+    return 'Todos los días';
+  }
+  if (days === WEEKDAYS) {
+    return 'Lun a vie';
+  }
+  if (days === WEEKEND) {
+    return 'Fines de semana';
+  }
+  if (selected.length === 1) {
+    return DAY_NAMES[selected[0]];
+  }
+  return selected.map((index) => DAY_SHORT[index]).join(', ');
+};
