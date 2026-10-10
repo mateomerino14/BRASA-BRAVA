@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {decimalSchema} from '../../utils/numbers.js';
 
 const MAX_QUANTITY = 99;
 const MAX_LINES = 50;
@@ -30,3 +31,21 @@ export const orderSchema = z.object({
 });
 
 export const tableParamSchema = z.object({idMesa: positiveId('Mesa inválida')});
+
+const MAX_AMOUNT = 100000;
+
+const payment = z.object({
+  metodo: z.enum(['efectivo', 'qr'], {error: 'Elija efectivo o QR'}),
+  monto: decimalSchema({label: 'el monto', decimals: 2, max: MAX_AMOUNT}),
+});
+
+export const checkoutSchema = z.object({
+  pagos: z
+    .array(payment, {error: 'Indique cómo paga el cliente'})
+    .min(1, 'Indique cómo paga el cliente')
+    .max(2, 'Se admite efectivo, QR o ambos')
+    .refine((items) => new Set(items.map((item) => item.metodo)).size === items.length, 'No repita el método de pago'),
+  recibido: decimalSchema({label: 'el monto recibido', decimals: 2, max: MAX_AMOUNT}).optional().nullable(),
+});
+
+export const saleParamSchema = z.object({idVenta: positiveId('Pedido inválido')});

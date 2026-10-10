@@ -241,6 +241,63 @@ export const createSalesRepository = (db) => ({
     );
   },
 
+  // Unidades de la venta que cocina todavía no marcó como listas
+  pendingUnits: async (idVenta) => {
+    const {rows} = await db.query('SELECT COALESCE(SUM(cantidad - listos), 0)::int AS pendientes FROM venta_detalle WHERE id_venta = $1', [idVenta]);
+    return rows[0].pendientes;
+  },
+
+  // Cierra una venta abierta como cobrada; devuelve null si ya no estaba abierta
+  closeSale: async ({idVenta, idCobrador, cobrador, recibido, cambio, cerradaEn}) => {
+    const {rows} = await db.query(
+      `UPDATE venta SET estado = 'cobrada', id_cobrador = $2, cobrador = $3, recibido = $4::numeric, cambio = $5::numeric, cerrada_en = $6
+        WHERE id_venta = $1 AND estado = 'abierta' RETURNING id_venta`,
+      [idVenta, idCobrador, cobrador, recibido, cambio, cerradaEn],
+    );
+    return rows[0] ?? null;
+  },
+
+  // Registra un pago de la venta
+  insertPayment: async ({idVenta, metodo, monto, creadoEn}) => {
+    await db.query('INSERT INTO pago (id_venta, metodo, monto, creado_en) VALUES ($1, $2, $3::numeric, $4)', [idVenta, metodo, monto, creadoEn]);
+  },
+
+  // Venta con su mesa, sección y datos del cobro (abierta o cerrada)
+  saleById: async (idVenta) => {
+    const {rows} = await db.query(
+      `SELECT ${saleColumns}, v.estado, v.cobrador, v.recibido, v.cambio, v.cerrada_en, m.nombre AS mesa, s.nombre AS seccion
+         FROM venta v JOIN empleado e ON e.id_empleado = v.id_mesero
+         JOIN mesa m ON m.id_mesa = v.id_mesa JOIN seccion s ON s.id_seccion = m.id_seccion
+        WHERE v.id_venta = $1`,
+      [idVenta],
+    );
+    return rows[0] ?? null;
+  },
+
+  // Pagos de varias ventas
+  payments: async (saleIds) => {
+    if (saleIds.length === 0) {
+      return [];
+    }
+    const {rows} = await db.query(
+      `SELECT id_venta, metodo, monto FROM pago WHERE id_venta IN (${placeholders(saleIds)}) ORDER BY id_pago`,
+      saleIds,
+    );
+    return rows;
+  },
+
+  // Ventas cobradas entre dos instantes, de la más reciente a la más antigua
+  closedSales: async (start, end) => {
+    const {rows} = await db.query(
+      `SELECT v.id_venta, v.total, v.cerrada_en, v.cobrador, m.nombre AS mesa
+         FROM venta v JOIN mesa m ON m.id_mesa = v.id_mesa
+        WHERE v.estado = 'cobrada' AND v.cerrada_en >= $1 AND v.cerrada_en < $2
+        ORDER BY v.cerrada_en DESC, v.id_venta DESC`,
+      [start, end],
+    );
+    return rows;
+  },
+
   // Registra un ingrediente quitado de una línea
   insertExclusion: async (idDetalle, {idProducto, idInsumo}) => {
     await db.query(
