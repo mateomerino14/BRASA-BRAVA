@@ -118,6 +118,8 @@ src/
 │   │                          permisos por pantalla y plantilla del correo
 │   ├── employees/             Gestión de empleados
 │   ├── categories/            Categorías, subcategorías e imagen
+│   ├── products/              Productos: precio, foto, disponibilidad y estado
+│   └── shared/                Acciones de foto reutilizables (subir, reemplazar y quitar)
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
 │   ├── auth.js                Token de sesión y permisos por pantalla
@@ -152,17 +154,26 @@ tests/                       Pruebas de la API y unitarias
 | `PUT` | `/api/employees/:id` | Modifica un empleado; la contraseña solo cambia si se envía |
 | `PATCH` | `/api/employees/:id/status` | Da de baja (`{activo: false}`) o reactiva a un empleado |
 | `GET` | `/api/roles` | Cargos activos |
-| `GET` | `/api/categories` | Categorías con sus subcategorías activas; búsqueda (`search`, también por subcategoría) y los parámetros comunes de listado. Orden: `nombre`, `estado` |
+| `GET` | `/api/categories` | Categorías con sus subcategorías activas; búsqueda (`search`, también por subcategoría) y los parámetros comunes de listado. Orden: `nombre`, `productos`, `estado` |
 | `GET` | `/api/categories/:id` | Detalle de una categoría |
 | `POST` | `/api/categories` | Registra una categoría con sus subcategorías |
 | `PUT` | `/api/categories/:id` | Modifica la categoría y sincroniza sus subcategorías |
 | `PATCH` | `/api/categories/:id/status` | Da de baja (`{activo: false}`) o reactiva una categoría |
 | `PUT` | `/api/categories/:id/image` | Sube o reemplaza la foto (`multipart/form-data`, campo `imagen`) |
 | `DELETE` | `/api/categories/:id/image` | Quita la foto |
+| `GET` | `/api/products` | Productos con categoría y subcategoría; búsqueda (`search`, nombre o descripción), `idCategoria`, `idSubcategoria`, `disponibilidad` (`todos`, `disponibles`, `agotados`) y los parámetros comunes. Orden: `nombre`, `precio`, `categoria`, `estado` |
+| `GET` | `/api/products/options` | Categorías activas con sus subcategorías activas, para el formulario y los filtros |
+| `GET` | `/api/products/:id` | Detalle de un producto |
+| `POST` | `/api/products` | Registra un producto |
+| `PUT` | `/api/products/:id` | Modifica un producto |
+| `PATCH` | `/api/products/:id/status` | Da de baja (`{activo: false}`) o reactiva un producto |
+| `PATCH` | `/api/products/:id/availability` | Marca como agotado (`{disponible: false}`) o disponible |
+| `PUT` | `/api/products/:id/image` | Sube o reemplaza la foto (`multipart/form-data`, campo `imagen`) |
+| `DELETE` | `/api/products/:id/image` | Quita la foto |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`.
+Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`.
 
 ### Parámetros comunes de los listados
 
@@ -190,6 +201,13 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - El nombre de la categoría no se repite (sin distinguir mayúsculas). Cada categoría tiene entre 1 y 20 subcategorías sin nombres repetidos.
 - Al modificar se envía la lista completa de subcategorías: las que traen `id` se renombran, las nuevas se crean y las que faltan se dan de baja (no se borran, para no perder el historial de productos).
 - Las imágenes se aceptan solo si sus primeros bytes son de PNG, JPG o WEBP (no se confía en la extensión), pesan hasta 5 MB y se guardan con un nombre aleatorio. Al reemplazar o quitar una foto se borra el archivo anterior.
+
+### Reglas de la gestión de productos
+
+- Cada producto pertenece a una subcategoría, y por ella a una categoría. Al registrar o cambiar de subcategoría, la subcategoría y su categoría deben estar activas; conservar la que ya tenía siempre se permite aunque se haya dado de baja.
+- El nombre no se repite (sin distinguir mayúsculas). El precio es mayor a 0, con hasta 2 decimales, y acepta coma o punto decimal.
+- **Estado** (`activo`) y **disponibilidad** (`disponible`) son distintos: dar de baja saca el producto del menú; agotado es temporal (se acabó por hoy) y lo cambia el interruptor de la tabla.
+- La cantidad de productos de cada categoría cuenta solo los productos activos.
 
 ## Autorización
 
