@@ -60,6 +60,7 @@ describe('Caja: plano de mesas', () => {
     expect(within(busy).getByText('Carlos Mendoza')).toBeInTheDocument();
     expect(within(busy).getByText('Hace 25 min')).toBeInTheDocument();
     expect(within(busy).getByText('2 u.')).toBeInTheDocument();
+    expect(within(busy).getByText('1 de 2 listos')).toBeInTheDocument();
     expect(within(tables).getByRole('button', {name: 'Mesa 1, libre, 4 personas'})).toBeInTheDocument();
 
     const sections = screen.getByRole('radiogroup', {name: 'Secciones'});
@@ -183,6 +184,8 @@ describe('Caja: armado del pedido', () => {
     await user.click(toggle);
     expect(within(panel()).getByText(/^Envío 1 · \d{2}:\d{2} · Carlos Mendoza$/)).toBeInTheDocument();
     expect(within(panel()).getByText('Sin tomate')).toBeInTheDocument();
+    expect(within(panel()).getByText('Listo')).toBeInTheDocument();
+    expect(within(panel()).getByText('0/1 listos')).toBeInTheDocument();
 
     await addItem(user, 'Gaseosa 500 ml', {times: 1});
     expect(within(panel()).getByLabelText('Bs 125,00')).toBeInTheDocument();
