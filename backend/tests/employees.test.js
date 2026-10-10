@@ -163,4 +163,15 @@ describe('Gestión de empleados', () => {
     expect(res.status).toBe(200);
     expect(res.body.roles.map((role) => role.nombre)).toEqual(['Administrador', 'Cajero', 'Cocinero', 'Mesero']);
   });
+
+  it('ordena por nombre, cargo o usuario y rechaza columnas no permitidas', async () => {
+    const byName = await api('get', '/api/employees?sort=nombre&dir=desc&pageSize=10');
+    const names = byName.body.items.map((employee) => employee.nombre);
+    expect(names).toEqual(['Roberto', 'Marco', 'Javier', 'Carlos', 'Andrea']);
+    const byRole = await api('get', '/api/employees?sort=cargo&dir=asc&pageSize=10');
+    expect(byRole.body.items[0].cargo.nombre).toBe('Administrador');
+    const byUser = await api('get', '/api/employees?sort=usuario&pageSize=1');
+    expect(byUser.body.items[0].alias).toBe('a.romero');
+    expect((await api('get', '/api/employees?sort=contrasena_hash')).status).toBe(400);
+  });
 });
