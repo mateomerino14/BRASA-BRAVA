@@ -1,21 +1,16 @@
 import {z} from 'zod';
 import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
+import {decimalSchema} from '../../utils/numbers.js';
 
 const NAME_MAX = 80;
 const DESCRIPTION_MAX = 200;
 const MAX_PRICE = 99999.99;
-const CENTS = 100;
-const ROUNDING_TOLERANCE = 1e-6;
+const PRICE_DECIMALS = 2;
 
 const id = (message) => z.coerce.number({error: message}).int(message).positive(message);
 
-// Acepta "35", "35.5" o "35,50" y exige como máximo dos decimales
-const price = z
-  .union([z.number(), z.string().trim().transform((value) => Number(value.replace(',', '.')))], {error: 'Ingrese el precio'})
-  .pipe(z.number({error: 'Ingrese un precio válido'})
-    .positive('El precio debe ser mayor a 0')
-    .max(MAX_PRICE, 'El precio es demasiado alto')
-    .refine((value) => Math.abs(value * CENTS - Math.round(value * CENTS)) < ROUNDING_TOLERANCE, 'El precio admite hasta 2 decimales'));
+// Acepta "35", "35.5" o "35,50"
+const price = decimalSchema({label: 'el precio', decimals: PRICE_DECIMALS, max: MAX_PRICE});
 
 export const productSchema = z.object({
   nombre: z.string({error: 'Ingrese el nombre del producto'}).trim().min(2, 'Ingrese el nombre del producto (mínimo 2 letras)').max(NAME_MAX, 'El nombre es demasiado largo'),

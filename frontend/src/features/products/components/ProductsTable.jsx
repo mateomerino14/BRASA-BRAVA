@@ -4,6 +4,7 @@ import {Thumbnail} from '../../../components/atoms/Thumbnail';
 import {Badge} from '../../../components/atoms/Badge';
 import {IconButton} from '../../../components/atoms/IconButton';
 import {Switch} from '../../../components/atoms/Switch';
+import {Amount} from '../../../components/atoms/Amount';
 import {cn} from '../../../lib/cn';
 import {formatAmount} from '../../../lib/format';
 
@@ -17,9 +18,6 @@ const styles = {
   categoryName: 'text-sm font-semibold text-carbon',
   subcategory: 'whitespace-nowrap rounded-full border border-arena/70 bg-hueso px-2.5 py-0.5 text-xs font-semibold text-carbon',
   warning: 'text-xs font-semibold text-rojo',
-  price: 'inline-flex items-baseline gap-1 whitespace-nowrap',
-  currency: 'text-xs font-semibold text-cafe',
-  amount: 'font-display text-2xl tabular-nums text-carbon',
   actions: 'inline-flex gap-2',
   inactiveRow: 'bg-hueso/40',
 };
@@ -69,10 +67,7 @@ const buildColumns = ({onEdit, onToggleStatus, availability}) => [
     sortKey: 'precio',
     align: 'right',
     render: (product) => (
-      <span className={styles.price} aria-label={`Bs ${formatAmount(product.precio)}`}>
-        <span aria-hidden className={styles.currency}>Bs</span>
-        <span aria-hidden className={styles.amount}>{formatAmount(product.precio)}</span>
-      </span>
+      <Amount prefix="Bs" value={formatAmount(product.precio)} />
     ),
   },
   {
