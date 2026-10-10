@@ -8,10 +8,11 @@ import {cn} from '../../../lib/cn';
 import {SubcategoryChips} from './SubcategoryChips';
 
 const styles = {
-  category: 'flex items-center gap-3',
-  name: 'font-semibold text-carbon',
+  category: 'flex min-w-0 items-center gap-3',
+  categoryText: 'min-w-0',
+  name: 'truncate font-semibold text-carbon',
   inactiveName: 'text-cafe line-through',
-  description: 'max-w-64 truncate text-xs text-cafe',
+  description: 'truncate text-xs text-cafe lg:max-w-64',
   count: 'font-display text-2xl text-carbon',
   actions: 'inline-flex gap-2',
   inactiveRow: 'bg-hueso/40',
@@ -21,10 +22,11 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'categoria',
     header: 'Categoría',
+    mobile: 'title',
     render: (category) => (
       <div className={styles.category}>
         <Thumbnail src={category.imagenUrl} alt={category.nombre} size={52} muted={!category.activa} />
-        <div>
+        <div className={styles.categoryText}>
           <p className={cn(styles.name, !category.activa && styles.inactiveName)}>{category.nombre}</p>
           {category.descripcion && <p className={styles.description} title={category.descripcion}>{category.descripcion}</p>}
         </div>
@@ -34,6 +36,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'subcategorias',
     header: 'Subcategorías',
+    wide: true,
     render: (category) => <SubcategoryChips categoryName={category.nombre} subcategories={category.subcategorias} />,
   },
   {key: 'productos', header: 'Productos', align: 'center', render: (category) => <span className={styles.count}>{category.totalProductos}</span>},
@@ -50,6 +53,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'acciones',
     header: 'Acciones',
+    mobile: 'actions',
     align: 'center',
     render: (category) => (
       <span className={styles.actions}>

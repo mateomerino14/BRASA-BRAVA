@@ -2,10 +2,10 @@ import {motion} from 'motion/react';
 import {SocialIcon} from '../atoms/SocialIcon';
 
 const styles = {
-  footer: 'flex flex-wrap items-center justify-between gap-4 bg-carbon px-6 py-4 text-crema sm:px-10',
-  copyright: 'text-sm font-semibold sm:text-base',
-  list: 'flex gap-4',
-  link: 'flex size-11 items-center justify-center rounded-full bg-crema text-carbon transition-colors hover:bg-brasa hover:text-white',
+  footer: 'flex flex-wrap items-center justify-between gap-3 bg-carbon px-4 py-3 text-crema sm:gap-4 sm:px-10 sm:py-4',
+  copyright: 'text-xs font-semibold sm:text-base',
+  list: 'flex gap-3 sm:gap-4',
+  link: 'flex size-9 items-center sm:size-11 justify-center rounded-full bg-crema text-carbon transition-colors hover:bg-brasa hover:text-white',
 };
 
 const SOCIALS = [

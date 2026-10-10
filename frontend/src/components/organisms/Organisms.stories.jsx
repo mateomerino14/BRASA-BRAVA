@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {fn} from 'storybook/test';
 import {Sidebar} from './Sidebar';
+import {MobileMenu} from './MobileMenu';
 import {Header} from './Header';
 import {Footer} from './Footer';
 import {Modal} from './Modal';
@@ -61,6 +62,28 @@ export const Encabezado = {
       onLogout={fn()}
     />
   ),
+};
+const ADMIN = {alias: 'admin', nombre: 'Marco Vargas', cargo: 'Administrador'};
+
+function MobileMenuDemo() {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="h-[700px] bg-lienzo p-4">
+      <Header title="Página principal" user={ADMIN} onLogout={fn()} onOpenMenu={() => setOpen(true)} menuOpen={open} />
+      <MobileMenu open={open} onClose={() => setOpen(false)} items={filterNavigation(NAVIGATION, ALL)} user={ADMIN} onLogout={fn()} />
+    </div>
+  );
+}
+
+export const MenuDeCelular = {
+  parameters: {layout: 'fullscreen'},
+  globals: {viewport: {value: 'mobile2'}},
+  render: () => <MobileMenuDemo />,
+};
+export const EncabezadoConBotonDeMenu = {
+  parameters: {layout: 'padded'},
+  globals: {viewport: {value: 'tablet'}},
+  render: () => <Header title="Gestión de categorías" user={ADMIN} onLogout={fn()} onOpenMenu={fn()} />,
 };
 export const PieDePagina = {parameters: {layout: 'fullscreen'}, render: () => <Footer />};
 
