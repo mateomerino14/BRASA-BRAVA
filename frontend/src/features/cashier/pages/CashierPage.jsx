@@ -6,18 +6,29 @@ import {useFloor} from '../hooks/useFloor';
 import {useTableOrder} from '../hooks/useTableOrder';
 import {useCheckout} from '../hooks/useCheckout';
 import {useTodaySales} from '../hooks/useTodaySales';
+import {KitchenTicket} from '../components/KitchenTicket';
+import {PrinterTestTicket} from '../components/PrinterTestTicket';
+import {usePrinterSettings} from '../hooks/usePrinterSettings';
+import {useDesktopPrinters} from '../../../hooks/useDesktopPrinters';
+import {printOnDesktop} from '../../../lib/desktopPrinting';
 
 function FloorScreen({sectionId, onSectionChange, onOpenTable}) {
   const {user} = useAuth();
   const floor = useFloor({sectionId, onSectionChange});
   const sales = useTodaySales();
+  const printerSettings = usePrinterSettings({testDocument: (destino, printer) => <PrinterTestTicket destino={destino} printer={printer} printedAt={new Date()} />});
   const canEditLink = Boolean(user?.isDirectorio || user?.permissions?.includes('administracion'));
-  return <FloorView floor={floor} sales={sales} canEditLink={canEditLink} onOpenTable={onOpenTable} />;
+  return <FloorView floor={floor} sales={sales} printerSettings={printerSettings} canEditLink={canEditLink} onOpenTable={onOpenTable} />;
 }
 
 function OrderScreen({idMesa, onBack}) {
   const {user} = useAuth();
-  const order = useTableOrder({idMesa, user});
+  const {printers} = useDesktopPrinters();
+  let printKitchen;
+  if (printers.cocina) {
+    printKitchen = ({mesa, venta, envio, printedAt}) => printOnDesktop('cocina', <KitchenTicket mesa={mesa} venta={venta} envio={envio} printedAt={printedAt} />);
+  }
+  const order = useTableOrder({idMesa, user, printKitchen});
   const checkout = useCheckout({idMesa, total: order.venta?.total ?? 0});
   return <OrderView order={order} checkout={checkout} onBack={onBack} />;
 }
