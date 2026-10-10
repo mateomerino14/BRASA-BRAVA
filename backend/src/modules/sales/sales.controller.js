@@ -20,6 +20,6 @@ export const createSalesController = (service) => ({
   // Registra un envío de productos para la mesa
   addOrder: async (req, res) => {
     const result = await service.addOrder(req.validated.params.idMesa, req.validated.body, req.user);
-    return respond(res, result, ({mesa, venta, created}) => res.status(201).json({mesa, venta, nueva: created}));
+    return respond(res, result, ({mesa, venta, created, envio, sinStock}) => res.status(201).json({mesa, venta, nueva: created, envio, sinStock}));
   },
 });

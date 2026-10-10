@@ -202,7 +202,7 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/api/sales/catalog` | Lo que se vende hoy: categorías, productos activos con disponibilidad, porciones e ingredientes de su receta, y promociones vigentes hoy con su precio y productos |
 | `GET` | `/api/sales/waiters` | Empleados activos que pueden atender mesas (su cargo tiene acceso a Caja) |
 | `GET` | `/api/sales/tables/:idMesa` | Mesa con su sección y su venta abierta (`null` si está libre) con todas sus líneas agrupables por envío |
-| `POST` | `/api/sales/tables/:idMesa/orders` | Registra un envío: abre la venta si la mesa está libre o suma las líneas a la abierta. Responde `nueva` |
+| `POST` | `/api/sales/tables/:idMesa/orders` | Registra un envío a cocina: abre la venta si la mesa está libre o suma las líneas a la abierta, y descuenta el stock. Responde `nueva`, el número de `envio` y `sinStock` (insumos que no alcanzaron) |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
@@ -250,7 +250,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - **Entrada** suma, **salida** resta y **ajuste** fija el conteo real (registra la diferencia). Una salida nunca deja el stock negativo: la resta se hace en una sola sentencia que falla si no alcanza, así dos ventas simultáneas no pueden pasarse.
 - Cantidades con hasta 3 decimales (acepta coma) en `kg`, `g`, `l`, `ml` o `unidad`. La unidad no se puede cambiar una vez que hay movimientos.
 - **Nivel**: sin stock (0), bajo (en o por debajo del mínimo) o suficiente. Los insumos dados de baja no cuentan en el resumen ni admiten movimientos.
-- El tipo `venta` queda reservado para los descuentos que hará Caja.
+- El tipo `venta` lo registra Caja al enviar cada pedido a cocina (ver Reglas de Caja).
 
 ### Reglas de secciones y mesas
 
@@ -275,6 +275,8 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - Se pueden quitar ingredientes solo de la receta de cada producto; en un combo, de la receta de cada producto del combo. No hay extras con costo: lo adicional se vende como un producto más (por ejemplo, de "Guarniciones y Extras").
 - No se venden productos agotados ni de baja. El stock **no bloquea** la venta: el catálogo avisa "Sin stock" o "Quedan N", pero el pedido se registra igual.
 - No se puede dar de baja una sección ni quitar una mesa que tenga una venta abierta.
+- Cada envío es una comanda (`venta_envio`): guarda su número, el cajero, el mesero y la hora. La venta trae `comandas` y, en las líneas de promoción, los `productos` del combo. Desde el segundo envío la venta queda `modificado` con `modificadoPor` = cajero del último envío.
+- **Stock**: cada envío descuenta la receta de cada producto por su cantidad (en combos, la de cada producto del combo), sin los ingredientes quitados, con un movimiento `venta` en el historial (`Venta Nº 7 · Mesa 2 · envío 2`). Si no alcanza, el insumo queda en 0, el movimiento dice "(stock insuficiente)" y la respuesta lo avisa en `sinStock`, pero la venta se registra igual. Los insumos dados de baja no se tocan. Los insumos se bloquean en orden de id durante la transacción para que dos envíos no se pisen.
 
 ## Autorización
 

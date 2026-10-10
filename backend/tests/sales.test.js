@@ -212,4 +212,68 @@ describe('Caja: mesas y registro de pedidos', () => {
     const allowed = await api('put', `/api/sections/${salon}`, admin).send({nombre: current.nombre, descripcion: current.descripcion, mesas: withoutMesa3});
     expect(allowed.status).toBe(200);
   });
+
+  const stockOf = async (name) => Number((await ctx.db.query('SELECT stock_actual FROM insumo WHERE nombre = $1', [name])).rows[0].stock_actual);
+  const salesMovements = async (name) => (await ctx.db.query(
+    `SELECT m.cantidad, m.stock_resultante, m.motivo, m.responsable FROM movimiento_stock m JOIN insumo i ON i.id_insumo = m.id_insumo
+      WHERE i.nombre = $1 AND m.tipo = 'venta' ORDER BY m.id_movimiento`,
+    [name],
+  )).rows.map((row) => ({...row, cantidad: Number(row.cantidad), stock_resultante: Number(row.stock_resultante)}));
+
+  it('descuenta del stock la receta de cada envío sin los ingredientes quitados, también en combos', async () => {
+    await start();
+    const clasica = await productId('Hamburguesa Clásica');
+    const doble = await productId('Doble Brava');
+    const res = await order('Mesa 1', [
+      {tipo: 'producto', id: clasica, cantidad: 2, consumo: 'local', exclusiones: [{idProducto: clasica, idInsumo: await ingredientId('Lechuga')}]},
+      {tipo: 'promocion', id: await promotionId('Combo Brava'), cantidad: 1, consumo: 'local', exclusiones: [{idProducto: doble, idInsumo: await ingredientId('Queso cheddar')}]},
+    ]);
+    expect(res.status).toBe(201);
+    expect(res.body.sinStock).toEqual([]);
+    expect(res.body.envio).toBe(1);
+    const expected = {'Carne de res': 11.4, 'Pan de hamburguesa': 37, 'Queso cheddar': 1.44, 'Tomate': 2.92, 'Papas': 19.75, 'Aceite': 5.95, 'Gaseosa 500 ml': 47, 'Lechuga': 0};
+    for (const [name, value] of Object.entries(expected)) {
+      expect(await stockOf(name)).toBeCloseTo(value, 3);
+    }
+    const [carne] = await salesMovements('Carne de res');
+    expect(carne).toEqual({cantidad: -0.6, stock_resultante: 11.4, motivo: `Venta Nº ${res.body.venta.numero} · Mesa 1 · envío 1`, responsable: 'a.romero'});
+    expect(await salesMovements('Lechuga')).toEqual([]);
+  });
+
+  it('nunca bloquea la venta: deja en 0 lo que no alcanza y avisa qué insumos faltaron', async () => {
+    await start();
+    const res = await order('Mesa 1', [
+      {tipo: 'producto', id: await productId('Cheeseburger'), cantidad: 30, consumo: 'local'},
+      {tipo: 'producto', id: await productId('Hamburguesa Clásica'), cantidad: 1, consumo: 'local'},
+    ]);
+    expect(res.status).toBe(201);
+    expect(res.body.venta.total).toBe(30 * 38 + 35);
+    expect(res.body.sinStock.sort()).toEqual(['Lechuga', 'Queso cheddar']);
+    expect(await stockOf('Queso cheddar')).toBe(0);
+    expect(await salesMovements('Queso cheddar')).toEqual([expect.objectContaining({cantidad: -1.5, stock_resultante: 0, motivo: expect.stringContaining('(stock insuficiente)')})]);
+    expect(await salesMovements('Lechuga')).toEqual([]);
+  });
+
+  it('no toca el stock de los insumos dados de baja', async () => {
+    await start();
+    await ctx.db.query("UPDATE insumo SET activo = FALSE WHERE nombre = 'Tomate'");
+    await order('Mesa 1', [{tipo: 'producto', id: await productId('Hamburguesa Clásica'), cantidad: 1, consumo: 'local'}]);
+    expect(await stockOf('Tomate')).toBe(3);
+    expect(await stockOf('Carne de res')).toBeCloseTo(11.85, 3);
+  });
+
+  it('guarda cada envío como comanda y marca la venta como modificada desde el segundo', async () => {
+    await start();
+    const opened = await order('Mesa 1', [{tipo: 'producto', id: await productId('Gaseosa 500 ml'), cantidad: 1, consumo: 'local'}]);
+    expect(opened.body.venta).toMatchObject({modificado: false, modificadoPor: null, comandas: [expect.objectContaining({envio: 1, cajero: 'a.romero', mesero: expect.objectContaining({nombre: 'Carlos Mendoza'})})]});
+
+    const admin = await loginAs(ctx.app, 'admin');
+    const res = await order('Mesa 2', [{tipo: 'producto', id: await productId('Jugo de Naranja'), cantidad: 1, consumo: 'llevar'}], {mesero: 'admin', session: admin});
+    expect(res.body.envio).toBe(2);
+    expect(res.body.venta).toMatchObject({modificado: true, modificadoPor: 'admin'});
+    expect(res.body.venta.comandas.map((item) => [item.envio, item.cajero, item.mesero.nombre])).toEqual([[1, 'a.romero', 'Carlos Mendoza'], [2, 'admin', 'Marco Vargas']]);
+    const combo = res.body.venta.detalles.find((item) => item.nombre === 'Combo Brava');
+    expect(combo.productos).toEqual([{nombre: 'Doble Brava', cantidad: 1}, {nombre: 'Gaseosa 500 ml', cantidad: 1}, {nombre: 'Papas Fritas Clásicas', cantidad: 1}]);
+    expect(res.body.venta.detalles[0].productos).toEqual([]);
+  });
 });
