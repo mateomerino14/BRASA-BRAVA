@@ -169,6 +169,8 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
 
   return {
     items: result.items,
+    // Respuesta completa, para datos extra del módulo (por ejemplo, el resumen de stock)
+    response: result,
     total: result.total,
     page,
     pageSize,
