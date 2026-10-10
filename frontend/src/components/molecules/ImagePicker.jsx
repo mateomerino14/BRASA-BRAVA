@@ -5,8 +5,8 @@ import {cn} from '../../lib/cn';
 import {resolveAssetUrl} from '../../lib/apiClient';
 
 const styles = {
-  zone: 'group relative flex h-44 w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-dashed bg-crema/60 text-center transition-[border-color,background-color] duration-200',
-  idle: 'border-arena hover:border-brasa hover:bg-crema',
+  zone: 'group relative flex h-44 w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-dashed bg-campo text-center transition-[border-color,background-color] duration-200',
+  idle: 'border-arena hover:border-brasa hover:bg-brasa/5',
   dragging: 'border-brasa bg-brasa/10',
   invalid: 'border-rojo',
   icon: 'text-brasa transition-transform duration-300 group-hover:-translate-y-1',

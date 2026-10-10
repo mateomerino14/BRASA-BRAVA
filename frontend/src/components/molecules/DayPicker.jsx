@@ -5,7 +5,7 @@ const styles = {
   wrapper: 'flex flex-wrap items-center gap-1.5',
   day: 'flex size-10 items-center justify-center rounded-full border text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-brasa',
   on: 'border-brasa bg-brasa text-white shadow-brasa',
-  off: 'border-arena bg-crema text-cafe hover:border-brasa hover:text-brasa',
+  off: 'border-arena bg-campo text-cafe hover:border-brasa hover:text-brasa',
   all: 'ml-1 rounded-full px-3 py-1.5 text-xs font-semibold text-brasa transition-colors hover:bg-brasa/10',
 };
 

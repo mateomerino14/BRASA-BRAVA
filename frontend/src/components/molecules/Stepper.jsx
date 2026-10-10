@@ -2,7 +2,7 @@ import {Minus, Plus} from 'lucide-react';
 import {cn} from '../../lib/cn';
 
 const styles = {
-  wrapper: 'inline-flex h-10 items-center rounded-lg border bg-crema',
+  wrapper: 'inline-flex h-10 items-center rounded-lg border bg-campo',
   normal: 'border-arena',
   invalid: 'border-rojo',
   button: 'flex size-10 items-center justify-center text-cafe transition-colors hover:text-brasa disabled:cursor-not-allowed disabled:opacity-40',
