@@ -94,6 +94,7 @@ BRASA-BRAVA/
 | Cocina: pedidos pendientes por envío, unidades listas (−1, +1, todas), avance y semáforo de espera | Terminado |
 | Caja: cobro (efectivo, QR o mixto con cambio), ticket de venta impreso al cobrar, ventas del día y enlace a impuestos | Terminado |
 | Familia: catálogo del local con productos por categoría, receta y porciones que alcanzan, y promociones con cuándo aplican | Terminado |
+| Impresión directa en escritorio: comanda en la ticketera de cocina y ticket en la de caja, sin diálogo, con hoja de prueba | Terminado |
 
 ## Ramas y pruebas automáticas
 
