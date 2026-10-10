@@ -321,6 +321,10 @@ const seedSales = async (db, now) => {
        VALUES ($1, $2, $3, $4, $5::numeric, 1, $6) RETURNING id_venta`,
       [idMesa, idMesero, idCajero, cajero, total, openedAt],
     );
+    await db.query(
+      'INSERT INTO venta_envio (id_venta, numero, id_cajero, cajero, id_mesero, creado_en) VALUES ($1, 1, $2, $3, $4, $5)',
+      [sale.rows[0].id_venta, idCajero, cajero, idMesero, openedAt],
+    );
     for (const line of priced) {
       const detail = await db.query(
         `INSERT INTO venta_detalle (id_venta, envio, id_producto, id_promocion, nombre, precio_unitario, cantidad, consumo, id_mesero, creado_en)
