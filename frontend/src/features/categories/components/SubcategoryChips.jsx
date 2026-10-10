@@ -4,8 +4,8 @@ import {VISIBLE_SUBCATEGORIES} from '../constants/categories';
 
 const styles = {
   list: 'flex flex-wrap items-center gap-1.5',
-  chip: 'rounded-full border border-arena/70 bg-hueso px-2.5 py-0.5 text-xs font-semibold text-carbon',
-  toggle: 'rounded-full border border-brasa/50 bg-brasa/10 px-2.5 py-0.5 text-xs font-bold text-brasa transition-colors hover:bg-brasa hover:text-white',
+  chip: 'whitespace-nowrap rounded-full border border-arena/70 bg-hueso px-2.5 py-0.5 text-xs font-semibold text-carbon',
+  toggle: 'whitespace-nowrap rounded-full border border-brasa/50 bg-brasa/10 px-2.5 py-0.5 text-xs font-bold text-brasa transition-colors hover:bg-brasa hover:text-white',
 };
 
 const chipIn = {opacity: 0, y: -6, scale: 0.8};

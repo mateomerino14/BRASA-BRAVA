@@ -7,11 +7,12 @@ import {IconButton} from '../../../components/atoms/IconButton';
 import {cn} from '../../../lib/cn';
 
 const styles = {
-  person: 'flex items-center gap-3',
+  person: 'flex min-w-0 items-center gap-3',
+  personText: 'min-w-0',
   avatar: 'ring-2 ring-arena/60',
-  name: 'font-semibold text-carbon',
+  name: 'truncate font-semibold text-carbon',
   inactiveName: 'text-cafe line-through',
-  email: 'text-xs text-cafe',
+  email: 'truncate text-xs text-cafe',
   muted: 'text-cafe',
   actions: 'inline-flex gap-2',
   inactiveRow: 'bg-hueso/40',
@@ -21,10 +22,11 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'empleado',
     header: 'Empleado',
+    mobile: 'title',
     render: (employee) => (
       <div className={styles.person}>
         <Avatar name={`${employee.nombre} ${employee.apellido}`} src={employee.fotoUrl} size={40} className={styles.avatar} />
-        <div>
+        <div className={styles.personText}>
           <p className={cn(styles.name, !employee.activo && styles.inactiveName)}>
             {employee.nombre} {employee.apellido}
           </p>
@@ -55,6 +57,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'acciones',
     header: 'Acciones',
+    mobile: 'actions',
     align: 'center',
     render: (employee) => (
       <span className={styles.actions}>

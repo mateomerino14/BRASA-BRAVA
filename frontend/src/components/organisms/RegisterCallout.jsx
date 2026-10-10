@@ -2,13 +2,13 @@ import {motion} from 'motion/react';
 import {Plus} from 'lucide-react';
 
 const styles = {
-  card: 'flex flex-wrap items-center justify-between gap-4 rounded-card border border-arena/60 bg-white p-4 shadow-card',
-  info: 'flex items-center gap-3',
+  card: 'flex items-center justify-between gap-4 rounded-card border border-arena/60 bg-white p-4 shadow-card',
+  info: 'flex min-w-0 items-center gap-3',
   iconBox: 'flex size-10 shrink-0 items-center justify-center rounded-lg border border-arena bg-crema text-brasa',
-  title: 'font-display text-xl tracking-wide text-carbon',
+  title: 'font-display text-xl leading-tight tracking-wide text-carbon',
   subtitle: 'text-xs text-cafe',
-  action: 'flex items-center gap-3',
-  actionLabel: 'font-display text-base tracking-wide text-cafe',
+  action: 'flex shrink-0 items-center gap-3',
+  actionLabel: 'hidden font-display text-base tracking-wide text-cafe sm:inline',
   button: 'flex size-12 items-center justify-center rounded-xl bg-brasa text-white shadow-brasa transition-colors hover:bg-brasa-oscuro',
 };
 
