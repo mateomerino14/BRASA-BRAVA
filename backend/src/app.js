@@ -17,7 +17,7 @@ import {createCatalogRouter} from './modules/catalog/catalog.routes.js';
 import {UPLOADS_ROUTE, createImageStorage} from './services/imageStorage.js';
 import {errorHandler, notFoundHandler} from './middlewares/errorHandler.js';
 
-// Construye la app Express con sus dependencias inyectadas (db, mailer, config)
+// Construye la app Express con sus dependencias inyectadas
 export const createApp = ({db, mailer, config, logger = console, images = createImageStorage(config.UPLOADS_DIR), clock = () => new Date()}) => {
   const app = express();
   app.disable('x-powered-by');

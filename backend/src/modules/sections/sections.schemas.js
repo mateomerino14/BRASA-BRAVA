@@ -8,6 +8,7 @@ const MIN_CAPACITY = 1;
 const MAX_CAPACITY = 30;
 const MAX_TABLES = 50;
 
+// Indica si los nombres no se repiten
 const hasUniqueNames = (items) => new Set(items.map((item) => item.nombre.toLowerCase())).size === items.length;
 
 const table = z.object({

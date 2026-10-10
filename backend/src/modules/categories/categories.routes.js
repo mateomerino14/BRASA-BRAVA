@@ -11,6 +11,7 @@ import {categorySchema, idParamSchema, listQuerySchema, statusSchema} from './ca
 export const createCategoriesRouter = ({db, config, images}) => {
   const service = createCategoriesService({
     repository: createCategoriesRepository(db),
+    // Ejecuta el trabajo con un repositorio dentro de una transacción
     transaction: (work) => db.transaction((tx) => work(createCategoriesRepository(tx))),
     images,
   });

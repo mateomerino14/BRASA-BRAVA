@@ -6,7 +6,7 @@ const MAX_SEARCH_LENGTH = 60;
 
 const DIRECTIONS = {asc: 'ASC', desc: 'DESC'};
 
-// Campos comunes de todos los listados: búsqueda, estado, página, tamaño y orden por una columna permitida
+// Campos comunes de los listados: búsqueda, estado, página y orden
 export const listQuerySchema = (sortKeys, extraFields = {}) => z.object({
   search: z.string().trim().max(MAX_SEARCH_LENGTH).optional().default(''),
   estado: z.enum(['todos', 'activos', 'inactivos']).optional().default('todos'),
@@ -17,7 +17,7 @@ export const listQuerySchema = (sortKeys, extraFields = {}) => z.object({
   ...extraFields,
 });
 
-// Arma el ORDER BY con columnas de una lista blanca; sin "sort" usa el orden por defecto del módulo
+// Arma el ORDER BY con columnas de una lista blanca
 export const orderClause = (sortColumns, {sort, dir}, defaultOrder) => {
   const columns = sortColumns[sort];
   if (!columns) {

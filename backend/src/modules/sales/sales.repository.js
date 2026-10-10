@@ -1,7 +1,7 @@
 // Placeholders $1, $2... para una lista de ids, empezando en "from"
 const placeholders = (ids, from = 1) => ids.map((_, index) => `$${index + from}`).join(', ');
 
-// Porciones que alcanzan con el stock (el insumo más escaso manda; uno de baja cuenta como sin stock)
+// Porciones que alcanzan con el stock de cada producto
 const portionsJoin = `LEFT JOIN (
     SELECT r.id_producto,
            MIN(CASE WHEN i.activo THEN FLOOR(i.stock_actual / r.cantidad) ELSE 0 END)::int AS porciones
@@ -17,9 +17,9 @@ const unitsJoin = `LEFT JOIN (
 const saleColumns = `v.id_venta, v.id_mesa, v.total, v.envios, v.abierta_en, v.cajero, v.id_mesero, v.modificado, v.modificado_por,
        e.nombre AS mesero_nombre, e.apellido AS mesero_apellido`;
 
-// Acceso a datos de Caja: mesas, catálogo de venta y ventas abiertas (solo SQL, sin reglas de negocio)
+// Acceso a datos de Caja
 export const createSalesRepository = (db) => ({
-  // Mesas activas de las secciones activas, con la venta abierta de cada una si la hay
+  // Mesas activas con su venta abierta, si la hay
   floor: async () => {
     const {rows} = await db.query(
       `SELECT s.id_seccion, s.nombre AS seccion, m.id_mesa, m.nombre, m.capacidad,
@@ -35,7 +35,7 @@ export const createSalesRepository = (db) => ({
     return rows;
   },
 
-  // Productos activos de categorías y subcategorías activas, con las porciones que alcanzan
+  // Productos a la venta con las porciones que alcanzan
   sellableProducts: async () => {
     const {rows} = await db.query(
       `SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.imagen_url, p.disponible, rp.porciones,
@@ -50,7 +50,7 @@ export const createSalesRepository = (db) => ({
     return rows;
   },
 
-  // Ingredientes de la receta de los productos indicados (para elegir cuáles quitar)
+  // Ingredientes de la receta de los productos indicados
   recipeIngredients: async (productIds) => {
     if (productIds.length === 0) {
       return [];
@@ -73,7 +73,7 @@ export const createSalesRepository = (db) => ({
     return rows;
   },
 
-  // Productos de las promociones indicadas, con su precio y si se pueden vender
+  // Productos de las promociones indicadas con su precio
   promotionProducts: async (promotionIds) => {
     if (promotionIds.length === 0) {
       return [];
@@ -115,7 +115,7 @@ export const createSalesRepository = (db) => ({
     return rows[0] ?? null;
   },
 
-  // Bloquea la fila de la mesa hasta el fin de la transacción para que dos envíos no abran dos ventas
+  // Bloquea la mesa hasta el fin de la transacción
   lockTable: async (idMesa) => {
     await db.query('SELECT id_mesa FROM mesa WHERE id_mesa = $1 FOR UPDATE', [idMesa]);
   },
@@ -143,7 +143,7 @@ export const createSalesRepository = (db) => ({
     return rows;
   },
 
-  // Ingredientes quitados de las líneas indicadas, con el nombre del producto y del insumo
+  // Ingredientes quitados de las líneas indicadas
   detailExclusions: async (detailIds) => {
     if (detailIds.length === 0) {
       return [];
@@ -160,7 +160,7 @@ export const createSalesRepository = (db) => ({
     return rows;
   },
 
-  // Abre una venta para la mesa y devuelve su id (que es también su número correlativo)
+  // Abre una venta para la mesa y devuelve su número
   insertSale: async ({idMesa, idMesero, idCajero, cajero, abiertaEn}) => {
     const {rows} = await db.query(
       `INSERT INTO venta (id_mesa, id_mesero, id_cajero, cajero, abierta_en)
@@ -214,7 +214,7 @@ export const createSalesRepository = (db) => ({
     await db.query('UPDATE venta SET modificado = TRUE, modificado_por = $2 WHERE id_venta = $1', [idVenta, cajero]);
   },
 
-  // Bloquea los insumos indicados hasta el fin de la transacción y devuelve su stock actual
+  // Bloquea los insumos indicados y devuelve su stock
   lockIngredients: async (ids) => {
     if (ids.length === 0) {
       return [];
@@ -247,7 +247,7 @@ export const createSalesRepository = (db) => ({
     return rows[0].pendientes;
   },
 
-  // Cierra una venta abierta como cobrada; devuelve null si ya no estaba abierta
+  // Cierra una venta abierta como cobrada
   closeSale: async ({idVenta, idCobrador, cobrador, recibido, cambio, cerradaEn}) => {
     const {rows} = await db.query(
       `UPDATE venta SET estado = 'cobrada', id_cobrador = $2, cobrador = $3, recibido = $4::numeric, cambio = $5::numeric, cerrada_en = $6

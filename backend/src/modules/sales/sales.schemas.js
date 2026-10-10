@@ -5,6 +5,7 @@ const MAX_QUANTITY = 99;
 const MAX_LINES = 50;
 const MAX_EXCLUSIONS = 30;
 
+// Id entero positivo con un mensaje de error
 const positiveId = (message) => z.coerce.number({error: message}).int(message).positive(message);
 
 const exclusion = z.object({

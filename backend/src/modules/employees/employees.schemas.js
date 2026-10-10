@@ -3,6 +3,7 @@ import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
 
 const minPasswordLength = 8;
 
+// Texto obligatorio con largo máximo
 const text = (label, max) => z.string({error: `Ingrese ${label}`}).trim().min(1, `Ingrese ${label}`).max(max, `${label} es demasiado largo`);
 
 const password = z

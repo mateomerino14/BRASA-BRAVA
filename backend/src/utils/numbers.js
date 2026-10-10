@@ -2,7 +2,7 @@ import {z} from 'zod';
 
 const ROUNDING_TOLERANCE = 1e-6;
 
-// Número decimal desde JSON o texto ("35", "35.5", "35,50") con máximo de decimales y rango
+// Número decimal desde JSON o texto, con decimales y rango
 export const decimalSchema = ({label, decimals, max, allowZero = false}) => {
   const factor = 10 ** decimals;
   let number = z.number({error: `Ingrese ${label} válido`}).max(max, `${capitalize(label)} es demasiado alto`);
@@ -20,4 +20,5 @@ export const decimalSchema = ({label, decimals, max, allowZero = false}) => {
     ));
 };
 
+// Pone en mayúscula la primera letra
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);

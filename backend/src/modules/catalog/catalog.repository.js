@@ -1,7 +1,7 @@
 // Placeholders $1, $2... para una lista de ids
 const placeholders = (ids) => ids.map((_, index) => `$${index + 1}`).join(', ');
 
-// Acceso a datos del catálogo (Familia): lo que el local ofrece, sin datos de gestión
+// Acceso a datos del catálogo de Familia
 export const createCatalogRepository = (db) => ({
   // Categorías y subcategorías activas
   categories: async () => {
@@ -14,7 +14,7 @@ export const createCatalogRepository = (db) => ({
     return rows;
   },
 
-  // Productos activos de categorías y subcategorías activas, con las porciones que alcanzan con el stock
+  // Productos a la venta con las porciones que alcanzan
   products: async () => {
     const {rows} = await db.query(
       `SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.imagen_url, p.disponible, rp.porciones,

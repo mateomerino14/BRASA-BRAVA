@@ -11,6 +11,7 @@ import {availabilitySchema, idParamSchema, listQuerySchema, productSchema, recip
 export const createProductsRouter = ({db, config, images}) => {
   const service = createProductsService({
     repository: createProductsRepository(db),
+    // Ejecuta el trabajo con un repositorio dentro de una transacción
     transaction: (work) => db.transaction((tx) => work(createProductsRepository(tx))),
     images,
   });
