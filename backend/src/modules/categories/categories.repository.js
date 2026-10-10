@@ -4,8 +4,17 @@ import {orderClause, pageClause} from '../../utils/listQuery.js';
 const SORT_COLUMNS = {
   nombre: ['c.nombre'],
   estado: ['c.activa'],
+  productos: ['COALESCE(pc.total, 0)'],
 };
 const DEFAULT_ORDER = 'c.activa DESC, c.nombre, c.id_categoria';
+
+// Productos activos de cada categoría (a través de sus subcategorías)
+const productCountJoin = `LEFT JOIN (
+    SELECT s.id_categoria, COUNT(*)::int AS total FROM producto p
+      JOIN subcategoria s ON s.id_subcategoria = p.id_subcategoria
+     WHERE p.activo = TRUE GROUP BY s.id_categoria
+  ) pc ON pc.id_categoria = c.id_categoria`;
+const categoryColumns = 'c.id_categoria, c.nombre, c.descripcion, c.imagen_url, c.activa, COALESCE(pc.total, 0) AS total_productos';
 
 // Arma el WHERE del listado: busca en el nombre de la categoría y de sus subcategorías
 const buildFilters = ({search, estado}) => {
@@ -36,8 +45,8 @@ export const createCategoriesRepository = (db) => ({
     const {where, params} = buildFilters(filters);
     const page = pageClause(params, filters);
     const {rows} = await db.query(
-      `SELECT c.id_categoria, c.nombre, c.descripcion, c.imagen_url, c.activa
-         FROM categoria c ${where}
+      `SELECT ${categoryColumns}
+         FROM categoria c ${productCountJoin} ${where}
         ${orderClause(SORT_COLUMNS, filters, DEFAULT_ORDER)}
         ${page.sql}`,
       page.params,
@@ -69,7 +78,8 @@ export const createCategoriesRepository = (db) => ({
   // Busca una categoría por id
   findById: async (id) => {
     const {rows} = await db.query(
-      'SELECT id_categoria, nombre, descripcion, imagen_url, activa FROM categoria WHERE id_categoria = $1',
+      `SELECT ${categoryColumns}
+         FROM categoria c ${productCountJoin} WHERE c.id_categoria = $1`,
       [id],
     );
     return rows[0] ?? null;
