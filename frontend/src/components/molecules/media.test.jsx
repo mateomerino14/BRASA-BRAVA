@@ -6,6 +6,8 @@ import {ImagePicker} from './ImagePicker';
 import {TagInput} from './TagInput';
 import {Textarea} from '../atoms/Textarea';
 import {Thumbnail} from '../atoms/Thumbnail';
+import {Switch} from '../atoms/Switch';
+import {MoneyInput} from '../atoms/MoneyInput';
 
 const pngFile = (name = 'foto.png', size = 1024) => new File([new Uint8Array(size)], name, {type: 'image/png'});
 
@@ -95,5 +97,26 @@ describe('TagInput', () => {
     await userEvent.type(input, 'Gaseosas{Enter}Cervezas{Enter}');
     expect(screen.getByRole('alert')).toHaveTextContent('Máximo 2 elementos');
     expect(screen.getByText('2/2')).toBeInTheDocument();
+  });
+});
+
+describe('Switch y MoneyInput', () => {
+  it('el interruptor informa su estado y respeta deshabilitado', async () => {
+    const onChange = vi.fn();
+    const {rerender} = render(<Switch label="Disponible" checked onChange={onChange} onText="Sí" offText="No" />);
+    const toggle = screen.getByRole('switch', {name: 'Disponible'});
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    await userEvent.click(toggle);
+    expect(onChange).toHaveBeenCalledWith(false);
+    rerender(<Switch label="Disponible" checked={false} onChange={onChange} disabled onText="Sí" offText="No" />);
+    await userEvent.click(screen.getByRole('switch'));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('No')).toBeInTheDocument();
+  });
+
+  it('el campo de precio abre el teclado decimal', () => {
+    render(<MoneyInput aria-label="Precio" defaultValue="35,50" />);
+    expect(screen.getByLabelText('Precio')).toHaveAttribute('inputmode', 'decimal');
+    expect(screen.getByText('Bs')).toBeInTheDocument();
   });
 });

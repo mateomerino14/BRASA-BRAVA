@@ -38,6 +38,38 @@ const CATEGORIES = [
 
 const INACTIVE_CATEGORIES = ['Combos Especiales'];
 
+// Productos demo: [nombre, descripción, precio, subcategoría, activo, disponible]
+const PRODUCTS = [
+  ['Hamburguesa Clásica', 'Carne a la parrilla, queso, lechuga y tomate', 35, 'Clásicas', true, true],
+  ['Cheeseburger', 'Doble queso cheddar y pepinillos', 38, 'Clásicas', true, true],
+  ['Brava BBQ', 'Salsa barbacoa, tocino y aros de cebolla', 48, 'Especiales', true, true],
+  ['Hamburguesa Hawaiana', 'Piña a la plancha y jamón', 45, 'Especiales', false, true],
+  ['Doble Brava', 'Dos carnes, doble queso y salsa de la casa', 58, 'Doble Carne', true, true],
+  ['Gaseosa 500 ml', 'Sabores surtidos', 10, 'Gaseosas', true, true],
+  ['Jugo de Naranja', 'Exprimido al momento', 15, 'Jugos Naturales', true, true],
+  ['Cerveza Artesanal', 'Rubia de la casa, 330 ml', 25, 'Cervezas', true, false],
+  ['Papas Fritas Clásicas', 'Porción mediana', 15, 'Papas Fritas', true, true],
+  ['Aros de Cebolla', 'Rebozados y crocantes', 18, 'Aros de Cebolla', true, true],
+  ['Salsa de la Casa', 'Porción extra', 5, 'Salsas Caseras', true, true],
+  ['Dúo Parrillero', 'Dos hamburguesas clásicas, papas y gaseosas', 85, 'Dúo Parrillero', true, true],
+];
+
+// Inserta los productos demo si la tabla está vacía
+const seedProducts = async (db) => {
+  const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM producto');
+  if (rows[0].total > 0) {
+    return false;
+  }
+  for (const [nombre, descripcion, precio, subcategory, activo, disponible] of PRODUCTS) {
+    await db.query(
+      `INSERT INTO producto (nombre, descripcion, precio, id_subcategoria, activo, disponible)
+       SELECT $1, $2, $3::numeric, id_subcategoria, $5::boolean, $6::boolean FROM subcategoria WHERE nombre = $4 LIMIT 1`,
+      [nombre, descripcion, precio, subcategory, activo, disponible],
+    );
+  }
+  return true;
+};
+
 // Inserta las categorías demo si la tabla está vacía
 const seedCategories = async (db) => {
   const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM categoria');
@@ -100,5 +132,6 @@ const seedStaff = async (
 export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026'} = {}) => {
   const staff = await seedStaff(db, {password, directorioPassword});
   const categories = await seedCategories(db);
-  return staff || categories;
+  const products = await seedProducts(db);
+  return staff || categories || products;
 };

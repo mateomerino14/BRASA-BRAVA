@@ -1,3 +1,5 @@
+import {createImageActions} from '../shared/imageActions.js';
+
 const notFound = {error: 'Categoría no encontrada', status: 404};
 const duplicateName = {error: 'Ya existe una categoría con ese nombre', status: 409};
 
@@ -11,7 +13,6 @@ const toCategory = (row, subcategories) => ({
   subcategorias: subcategories
     .filter((sub) => sub.id_categoria === row.id_categoria)
     .map((sub) => ({id: sub.id_subcategoria, nombre: sub.nombre})),
-  // Se completa cuando exista el módulo de productos
   totalProductos: row.total_productos ?? 0,
 });
 
@@ -89,31 +90,5 @@ export const createCategoriesService = ({repository, transaction, images}) => {
     return getById(id);
   };
 
-  // Reemplaza la imagen de una categoría y borra la anterior
-  const setImage = async (id, buffer) => {
-    const current = await repository.findById(id);
-    if (!current) {
-      return notFound;
-    }
-    const saved = await images.save(buffer);
-    if (saved.error) {
-      return saved;
-    }
-    await repository.setImage(id, saved.url);
-    await images.remove(current.imagen_url);
-    return getById(id);
-  };
-
-  // Quita la imagen de una categoría
-  const removeImage = async (id) => {
-    const current = await repository.findById(id);
-    if (!current) {
-      return notFound;
-    }
-    await repository.setImage(id, null);
-    await images.remove(current.imagen_url);
-    return getById(id);
-  };
-
-  return {list, getById, create, update, setStatus, setImage, removeImage};
+  return {list, getById, create, update, setStatus, ...createImageActions({repository, images, getById, notFound})};
 };

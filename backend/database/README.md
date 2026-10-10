@@ -8,12 +8,13 @@ Los archivos de `migrations/` se aplican en orden alfabetico, una sola vez cada 
 
 1. `001_autenticacion.sql` - cargos, permisos por pantalla, empleados, DIRECTORIO y codigos de recuperacion
 2. `002_categorias.sql` - categorias del menu y sus subcategorias
+3. `003_productos.sql` - productos del menu con precio, foto, estado y disponibilidad
 
 La tabla `schema_migrations` guarda cuales ya se aplicaron, asi que una base nueva y una existente quedan siempre en el mismo estado.
 
 ## Como agregar un cambio
 
-1. Crear un archivo nuevo con el siguiente numero (por ejemplo `003_productos.sql`).
+1. Crear un archivo nuevo con el siguiente numero (por ejemplo `004_stock.sql`).
 2. Nunca editar una migracion que ya se subio: los locales que la aplicaron no volverian a correrla.
 
 Se usan migraciones numeradas porque la aplicacion de escritorio se instala en cada local y se actualiza sola, sin que nadie corra scripts en la base.
@@ -24,7 +25,7 @@ Se usan migraciones numeradas porque la aplicacion de escritorio se instala en c
 npm run db:seed
 ```
 
-Carga los cargos, cinco empleados (uno de ellos dado de baja), el DIRECTORIO y cuatro categorias con sus subcategorias (una dada de baja). Cada bloque se carga solo si su tabla esta vacia. Contrasenia de los empleados: `Brasa2026`. Contrasenia del DIRECTORIO: `Directorio2026`.
+Carga los cargos, cinco empleados (uno de ellos dado de baja), el DIRECTORIO y cuatro categorias con sus subcategorias (una dada de baja) y doce productos (uno dado de baja y uno agotado). Cada bloque se carga solo si su tabla esta vacia. Contrasenia de los empleados: `Brasa2026`. Contrasenia del DIRECTORIO: `Directorio2026`.
 
 Solo para entornos de prueba, nunca en produccion.
 
@@ -39,4 +40,5 @@ Solo para entornos de prueba, nunca en produccion.
 | codigo_recuperacion | Codigos de 6 digitos para recuperar la contrasenia, guardados cifrados, con vencimiento e intentos |
 | categoria | Secciones del menu, con descripcion, foto y estado |
 | subcategoria | Subdivisiones de cada categoria; se dan de baja en vez de borrarse |
+| producto | Productos del menu: precio, foto, subcategoria, estado (activo) y disponibilidad (agotado) |
 | schema_migrations | Control interno de las migraciones aplicadas |
