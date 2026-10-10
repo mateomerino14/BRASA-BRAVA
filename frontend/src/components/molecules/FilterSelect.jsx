@@ -1,7 +1,7 @@
 import {Select} from '../atoms/Select';
 
 const styles = {
-  select: 'w-full sm:w-48',
+  select: 'w-full sm:w-44',
 };
 
 // Selector compacto con el ancho estándar de la barra de filtros

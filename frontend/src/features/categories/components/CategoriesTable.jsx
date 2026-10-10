@@ -39,7 +39,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
     wide: true,
     render: (category) => <SubcategoryChips categoryName={category.nombre} subcategories={category.subcategorias} />,
   },
-  {key: 'productos', header: 'Productos', align: 'center', render: (category) => <span className={styles.count}>{category.totalProductos}</span>},
+  {key: 'productos', header: 'Productos', sortKey: 'productos', align: 'center', render: (category) => <span className={styles.count}>{category.totalProductos}</span>},
   {
     key: 'estado',
     header: 'Estado',

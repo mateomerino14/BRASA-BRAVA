@@ -54,6 +54,7 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [actionError, setActionError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
 
   // Si la URL cambia desde afuera (atrás/adelante), el buscador la sigue
@@ -130,17 +131,21 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
   }, [fetchPage, queryKey, reloadKey]);
 
   useEffect(() => {
-    if (!notice) {
+    if (!notice && !actionError) {
       return undefined;
     }
-    const timer = setTimeout(() => setNotice(''), NOTICE_DURATION_MS);
+    const timer = setTimeout(() => {
+      setNotice('');
+      setActionError('');
+    }, NOTICE_DURATION_MS);
     return () => clearTimeout(timer);
-  }, [notice]);
+  }, [notice, actionError]);
 
   // Vuelve a pedir la página actual y, si se indica, muestra un aviso de éxito
   const reload = (message) => {
     if (message) {
       setNotice(message);
+      setActionError('');
     }
     setReloadKey((key) => key + 1);
   };
@@ -169,17 +174,23 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
     pageSize,
     totalPages: Math.max(1, Math.ceil(result.total / pageSize)),
     loading,
-    error,
+    error: error || actionError,
     notice,
     filters: {search, ...filters},
     sort,
     hasActiveFilters,
     changeSearch: setSearch,
     changeFilter: (name, value) => updateParams({[name]: value, page: 1}),
+    changeFilters: (changes) => updateParams({...changes, page: 1}),
     setPage: (value) => updateParams({page: value}),
     changePageSize: (value) => updateParams({pageSize: value, page: 1}),
     changeSort,
     clearFilters,
     reload,
+    // Muestra por unos segundos el error de una acción rápida (por ejemplo, un interruptor)
+    reportError: (message) => {
+      setNotice('');
+      setActionError(message);
+    },
   };
 }
