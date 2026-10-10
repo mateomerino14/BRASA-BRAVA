@@ -1,11 +1,13 @@
 import {motion} from 'motion/react';
-import {LogOut} from 'lucide-react';
+import {LogOut, Menu} from 'lucide-react';
 import {Avatar} from '../atoms/Avatar';
 
 const styles = {
-  header: 'flex flex-wrap items-center justify-between gap-4',
-  title: 'font-display text-5xl leading-none text-carbon',
-  actions: 'flex items-center gap-3',
+  header: 'flex flex-wrap items-center justify-between gap-x-4 gap-y-3',
+  heading: 'flex min-w-0 flex-1 items-center gap-3',
+  menuButton: 'flex size-11 shrink-0 items-center justify-center rounded-xl bg-brasa text-white shadow-brasa transition-colors hover:bg-brasa-oscuro',
+  title: 'min-w-0 font-display text-3xl leading-[0.95] text-carbon sm:text-5xl sm:leading-none',
+  actions: 'hidden items-center gap-3 sm:flex',
   profile: 'flex items-center gap-3 rounded-xl border-2 border-brasa bg-white py-1.5 pl-1.5 pr-4 shadow-card',
   profileText: 'leading-tight',
   alias: 'text-sm font-bold text-carbon',
@@ -18,12 +20,26 @@ const titleVisible = {opacity: 1, x: 0};
 const hoverLift = {y: -2};
 const tapPress = {scale: 0.95};
 
-export function Header({title, user, onLogout}) {
+export function Header({title, user, onLogout, onOpenMenu, menuOpen = false}) {
   return (
     <header className={styles.header}>
-      <motion.h1 key={title} initial={titleHidden} animate={titleVisible} className={styles.title}>
-        {title}
-      </motion.h1>
+      <div className={styles.heading}>
+        {onOpenMenu && (
+          <motion.button
+            type="button"
+            onClick={onOpenMenu}
+            aria-label="Abrir menú"
+            aria-expanded={menuOpen}
+            whileTap={tapPress}
+            className={styles.menuButton}
+          >
+            <Menu size={22} aria-hidden />
+          </motion.button>
+        )}
+        <motion.h1 key={title} initial={titleHidden} animate={titleVisible} className={styles.title}>
+          {title}
+        </motion.h1>
+      </div>
       <div className={styles.actions}>
         {user && (
           <div className={styles.profile}>

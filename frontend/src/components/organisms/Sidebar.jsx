@@ -1,12 +1,20 @@
 import {useState} from 'react';
 import {NavLink, useLocation, matchPath} from 'react-router';
 import {AnimatePresence, motion} from 'motion/react';
-import {ChevronDown, PanelLeftClose, PanelLeftOpen} from 'lucide-react';
+import {ChevronDown, LogOut, PanelLeftClose, PanelLeftOpen, X} from 'lucide-react';
 import {Logo} from '../atoms/Logo';
+import {Avatar} from '../atoms/Avatar';
 import {cn} from '../../lib/cn';
 
 const styles = {
   aside: 'relative flex h-full shrink-0 flex-col overflow-hidden bg-brasa bg-sidebar-glow px-4 py-6',
+  drawer: 'w-[280px] max-w-[85vw] shadow-float',
+  account: 'mt-4 flex items-center gap-3 rounded-2xl bg-white/15 p-2.5 sm:hidden',
+  accountText: 'min-w-0 flex-1 leading-tight text-white',
+  accountAlias: 'truncate text-sm font-bold',
+  accountRole: 'truncate text-xs uppercase tracking-wide text-white/85',
+  accountLogout: 'flex size-10 shrink-0 items-center justify-center rounded-xl bg-rojo text-white shadow-card transition-colors hover:bg-rojo-oscuro',
+  closeButton: 'ml-auto flex size-9 shrink-0 items-center justify-center rounded-xl text-white transition hover:rotate-90 hover:bg-white/15 focus-visible:outline-white',
   brand: 'flex items-center gap-3 px-1',
   brandCollapsed: 'justify-center',
   logo: 'shrink-0 ring-2 ring-white/70',
@@ -128,34 +136,63 @@ function MenuGroup({item, collapsed}) {
   );
 }
 
-export function Sidebar({items, collapsed = false, onToggleCollapsed}) {
+// Menú lateral: fijo y contraíble en escritorio ("rail") o panel deslizable en celular y tablet ("drawer")
+export function Sidebar({items, collapsed = false, onToggleCollapsed, variant = 'rail', onClose, user, onLogout}) {
+  const isDrawer = variant === 'drawer';
+  const compact = collapsed && !isDrawer;
+  let width;
+  if (compact) {
+    width = {width: collapsedWidth};
+  }
+  else if (!isDrawer) {
+    width = {width: expandedWidth};
+  }
+
   return (
     <motion.aside
       aria-label="Menú principal"
-      animate={{width: collapsed ? collapsedWidth : expandedWidth}}
+      animate={width}
       transition={SPRING}
-      className={styles.aside}
+      className={cn(styles.aside, isDrawer && styles.drawer)}
     >
-      <div className={cn(styles.brand, collapsed && styles.brandCollapsed)}>
+      <div className={cn(styles.brand, compact && styles.brandCollapsed)}>
         <Logo size={44} className={styles.logo} />
-        {!collapsed && (
+        {!compact && (
           <div className={styles.brandText}>
             <p className={styles.brandName}>Brasa Brava</p>
             <p className={styles.brandSubtitle}>Panel de Gestión</p>
           </div>
+        )}
+        {isDrawer && (
+          <button type="button" onClick={onClose} aria-label="Cerrar menú" className={styles.closeButton}>
+            <X size={20} aria-hidden />
+          </button>
         )}
       </div>
 
       <nav className={styles.nav}>
         {items.map((item) => {
           if (item.children) {
-            return <MenuGroup key={item.label} item={item} collapsed={collapsed} />;
+            return <MenuGroup key={item.label} item={item} collapsed={compact} />;
           }
-          return <MenuLink key={item.to} item={item} collapsed={collapsed} />;
+          return <MenuLink key={item.to} item={item} collapsed={compact} />;
         })}
       </nav>
 
-      {onToggleCollapsed && (
+      {isDrawer && user && (
+        <div className={styles.account}>
+          <Avatar name={user.nombre} src={user.fotoUrl} size={38} />
+          <div className={styles.accountText}>
+            <p className={styles.accountAlias}>{user.alias}</p>
+            <p className={styles.accountRole}>{user.cargo}</p>
+          </div>
+          <button type="button" onClick={onLogout} aria-label="Cerrar sesión" className={styles.accountLogout}>
+            <LogOut size={18} aria-hidden />
+          </button>
+        </div>
+      )}
+
+      {onToggleCollapsed && !isDrawer && (
         <button
           type="button"
           onClick={onToggleCollapsed}
