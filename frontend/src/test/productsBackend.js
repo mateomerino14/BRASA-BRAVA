@@ -4,13 +4,13 @@ export const PRODUCT_OPTIONS = [
 ];
 
 const product = (id, nombre, precio, categoria, subcategoria, extra = {}) => ({
-  id, nombre, descripcion: null, precio, imagenUrl: null, activo: true, disponible: true,
+  id, nombre, descripcion: null, precio, imagenUrl: null, activo: true, disponible: true, porciones: null,
   categoria: {activa: true, ...categoria}, subcategoria: {activa: true, ...subcategoria}, ...extra,
 });
 
 export const PRODUCTS = [
-  product(1, 'Hamburguesa Clásica', 35, {id: 1, nombre: 'Hamburguesas'}, {id: 1, nombre: 'Clásicas'}, {descripcion: 'Carne, queso y tomate', imagenUrl: '/uploads/clasica.png'}),
-  product(2, 'Gaseosa 500 ml', 10, {id: 2, nombre: 'Bebidas y Refrescos'}, {id: 6, nombre: 'Gaseosas'}, {disponible: false}),
+  product(1, 'Hamburguesa Clásica', 35, {id: 1, nombre: 'Hamburguesas'}, {id: 1, nombre: 'Clásicas'}, {descripcion: 'Carne, queso y tomate', imagenUrl: '/uploads/clasica.png', porciones: 25}),
+  product(2, 'Gaseosa 500 ml', 10, {id: 2, nombre: 'Bebidas y Refrescos'}, {id: 6, nombre: 'Gaseosas'}, {disponible: false, porciones: 0}),
   product(3, 'Dúo Parrillero', 85, {id: 4, nombre: 'Combos Especiales', activa: false}, {id: 10, nombre: 'Dúo Parrillero'}),
   product(4, 'Hamburguesa Hawaiana', 45, {id: 1, nombre: 'Hamburguesas'}, {id: 2, nombre: 'Especiales'}, {activo: false}),
 ];
@@ -28,7 +28,7 @@ const findSub = (idSubcategoria) => {
 // Backend falso en memoria para las pruebas de la pantalla de productos
 export const createProductsBackend = ({failAvailability = false} = {}) => {
   const store = PRODUCTS.map((item) => ({...item}));
-  const calls = {list: [], saved: [], uploads: [], availability: []};
+  const calls = {list: [], saved: [], uploads: [], availability: [], recipes: []};
   const find = (id) => store.find((item) => item.id === id);
   const matches = (item, query) => {
     if (query.search && !item.nombre.toLowerCase().includes(query.search.toLowerCase())) {
@@ -47,6 +47,24 @@ export const createProductsBackend = ({failAvailability = false} = {}) => {
   };
   const handlers = {
     'GET /products/options': () => [200, {categorias: PRODUCT_OPTIONS}],
+    'GET /products/recipe-options': () => [200, {insumos: [
+      {id: 1, nombre: 'Carne de res', unidad: 'kg', stockActual: 12},
+      {id: 2, nombre: 'Pan de hamburguesa', unidad: 'unidad', stockActual: 40},
+      {id: 3, nombre: 'Queso cheddar', unidad: 'kg', stockActual: 1.5},
+    ]}],
+    'GET /products/1/recipe': () => [200, {recipe: {porciones: 25, ingredientes: [
+      {idInsumo: 1, nombre: 'Carne de res', unidad: 'kg', cantidad: 0.15, stockActual: 12, activo: true},
+      {idInsumo: 9, nombre: 'Tocino', unidad: 'kg', cantidad: 0.05, stockActual: 1.5, activo: false},
+    ]}}],
+    'GET /products/2/recipe': () => [200, {recipe: {porciones: null, ingredientes: []}}],
+    'PUT /products/1/recipe': (body) => {
+      calls.recipes.push({id: 1, ...body});
+      return [200, {recipe: {porciones: 10, ingredientes: []}}];
+    },
+    'PUT /products/2/recipe': (body) => {
+      calls.recipes.push({id: 2, ...body});
+      return [200, {recipe: {porciones: 40, ingredientes: []}}];
+    },
     'GET /products': (_body, query) => {
       calls.list.push(query);
       const items = store.filter((item) => matches(item, query));
