@@ -21,6 +21,7 @@ const envSchema = z.object({
     .default('true')
     .transform((value) => value === 'true'),
   STATIC_DIR: z.string().optional(),
+  UPLOADS_DIR: z.string().min(1).default('uploads'),
 });
 
 // Valida las variables de entorno y devuelve la configuración tipada
