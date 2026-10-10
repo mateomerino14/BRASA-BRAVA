@@ -3,6 +3,8 @@ import {FloorView} from './components/FloorView';
 import {CatalogCard} from './components/CatalogCard';
 import {OrderPanel} from './components/OrderPanel';
 import {ItemPickerModal} from './components/ItemPickerModal';
+import {KitchenTicket} from './components/KitchenTicket';
+import {PrintPreview} from '../../components/organisms/PrintPreview';
 import {CATALOG} from '../../test/cashierBackend';
 
 export default {title: 'Pantallas/Caja', parameters: {layout: 'padded'}};
@@ -55,10 +57,12 @@ const mesero = {id: 1, nombre: 'Carlos Mendoza'};
 const ORDER = {
   mesa: {id: 2, nombre: 'Mesa 2', capacidad: 4, seccion: {id: 1, nombre: 'Salón principal'}},
   venta: {
-    id: 7, numero: 7, total: 105, envios: 1, abiertaEn: minutesAgo(25), cajero: 'a.romero', mesero,
+    id: 7, numero: 7, total: 140, envios: 2, abiertaEn: minutesAgo(25), cajero: 'a.romero', mesero, modificado: true, modificadoPor: 'admin',
+    comandas: [{envio: 1, cajero: 'a.romero', mesero, creadoEn: minutesAgo(25)}, {envio: 2, cajero: 'admin', mesero, creadoEn: minutesAgo(5)}],
     detalles: [
-      {id: 1, envio: 1, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, consumo: 'local', mesero, creadoEn: minutesAgo(25), exclusiones: [tomate]},
-      {id: 2, envio: 1, tipo: 'promocion', nombre: 'Combo Brava', precioUnitario: 70, cantidad: 1, subtotal: 70, consumo: 'local', mesero, creadoEn: minutesAgo(25), exclusiones: []},
+      {id: 1, envio: 1, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, consumo: 'local', mesero, creadoEn: minutesAgo(25), productos: [], exclusiones: [tomate]},
+      {id: 2, envio: 1, tipo: 'promocion', nombre: 'Combo Brava', precioUnitario: 70, cantidad: 1, subtotal: 70, consumo: 'local', mesero, creadoEn: minutesAgo(25), productos: [{nombre: 'Doble Brava', cantidad: 1}, {nombre: 'Gaseosa 500 ml', cantidad: 1}], exclusiones: []},
+      {id: 3, envio: 2, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, consumo: 'llevar', mesero, creadoEn: minutesAgo(5), productos: [], exclusiones: [tomate]},
     ],
   },
   lines: [
@@ -66,7 +70,7 @@ const ORDER = {
     {key: 'b', tipo: 'producto', id: 13, nombre: 'Gaseosa 500 ml', precio: 10, cantidad: 3, consumo: 'local', exclusiones: []},
   ],
   units: 5,
-  totals: {registered: 105, pending: 100, total: 205},
+  totals: {registered: 140, pending: 100, total: 240},
   waiters: [{id: 1, nombre: 'Carlos Mendoza', cargo: 'Mesero'}, {id: 2, nombre: 'Andrea Romero', cargo: 'Cajero'}],
   idMesero: '1',
   meseroError: '',
@@ -77,6 +81,7 @@ const ORDER = {
   saving: false,
   submitError: '',
   submit: fn(),
+  openPrint: fn(),
 };
 
 export const PedidoDeLaMesa = {render: () => <div className="max-w-md"><OrderPanel order={ORDER} /></div>};
@@ -86,3 +91,11 @@ const picker = (kind, item) => ({open: true, session: 1, kind, item, line: null}
 
 export const AgregarProducto = {render: () => <ItemPickerModal picker={picker('producto', clasica)} onConfirm={fn()} onClose={fn()} />};
 export const AgregarCombo = {render: () => <ItemPickerModal picker={picker('promocion', CATALOG.promociones[0])} onConfirm={fn()} onClose={fn()} />};
+
+export const ComandaDeCocina = {
+  render: () => (
+    <PrintPreview open title="Comanda de cocina" description="Envío 2 de Mesa 2: solo lo nuevo de este envío" onClose={fn()}>
+      <KitchenTicket mesa={ORDER.mesa} venta={ORDER.venta} envio={2} printedAt={new Date(NOW)} />
+    </PrintPreview>
+  ),
+};
