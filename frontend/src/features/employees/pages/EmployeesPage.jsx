@@ -1,22 +1,13 @@
-import {AnimatePresence} from 'motion/react';
 import {UserPlus} from 'lucide-react';
-import {FilterBar} from '../../../components/organisms/FilterBar';
-import {RegisterCallout} from '../../../components/organisms/RegisterCallout';
+import {ManagementPage} from '../../../components/templates/ManagementPage';
 import {ConfirmDialog} from '../../../components/organisms/ConfirmDialog';
-import {SearchInput} from '../../../components/molecules/SearchInput';
-import {Alert} from '../../../components/molecules/Alert';
-import {Select} from '../../../components/atoms/Select';
+import {FilterSelect} from '../../../components/molecules/FilterSelect';
 import {EmployeesTable} from '../components/EmployeesTable';
 import {EmployeeFormModal} from '../components/EmployeeFormModal';
 import {useEmployees} from '../hooks/useEmployees';
 import {useEmployeeForm} from '../hooks/useEmployeeForm';
 import {useEmployeeStatus} from '../hooks/useEmployeeStatus';
-import {PAGE_SIZE, STATUS_OPTIONS} from '../constants/employees';
-
-const styles = {
-  page: 'flex flex-col gap-6',
-  filter: 'w-full sm:w-48',
-};
+import {STATUS_OPTIONS} from '../constants/employees';
 
 const statusMessage = (employee) => {
   if (!employee) {
@@ -29,6 +20,13 @@ const statusMessage = (employee) => {
   return `${fullName} podrá volver a iniciar sesión con su usuario y contraseña.`;
 };
 
+const CALLOUT = {
+  icon: UserPlus,
+  title: '¿Desea registrar un nuevo empleado?',
+  subtitle: 'Agregue personal, asígnele un cargo y su usuario de ingreso.',
+  actionLabel: 'Registrar empleado',
+};
+
 export function EmployeesPage() {
   const list = useEmployees();
   const form = useEmployeeForm({onSaved: list.reload});
@@ -37,42 +35,19 @@ export function EmployeesPage() {
   const deactivating = Boolean(status.target?.activo);
 
   return (
-    <div className={styles.page}>
-      <FilterBar>
-        <SearchInput
-          value={list.filters.search}
-          onChange={list.changeSearch}
-          placeholder="Buscar empleado por nombre, usuario o CI"
-        />
-        <Select size="sm" aria-label="Filtrar por cargo" className={styles.filter} options={roleOptions} value={list.filters.idCargo} onChange={(event) => list.changeRole(event.target.value)} />
-        <Select size="sm" aria-label="Filtrar por estado" className={styles.filter} options={STATUS_OPTIONS} value={list.filters.estado} onChange={(event) => list.changeStatus(event.target.value)} />
-      </FilterBar>
-
-      <AnimatePresence>
-        {list.notice && <Alert key="notice" tone="success">{list.notice}</Alert>}
-      </AnimatePresence>
-      {list.error && <Alert tone="error">{list.error}</Alert>}
-
-      <EmployeesTable
-        employees={list.employees}
-        total={list.total}
-        page={list.page}
-        pageSize={PAGE_SIZE}
-        totalPages={list.totalPages}
-        loading={list.loading}
-        onPageChange={list.setPage}
-        onEdit={form.openEdit}
-        onToggleStatus={status.ask}
-      />
-
-      <RegisterCallout
-        icon={UserPlus}
-        title="¿Desea registrar un nuevo empleado?"
-        subtitle="Agregue personal, asígnele un cargo y su usuario de ingreso."
-        actionLabel="Registrar empleado"
-        onAction={form.openCreate}
-      />
-
+    <ManagementPage
+      search={{value: list.filters.search, onChange: list.changeSearch, placeholder: 'Buscar empleado por nombre, usuario o CI'}}
+      filters={
+        <>
+          <FilterSelect label="Filtrar por cargo" options={roleOptions} value={list.filters.idCargo} onChange={list.changeRole} />
+          <FilterSelect label="Filtrar por estado" options={STATUS_OPTIONS} value={list.filters.estado} onChange={list.changeStatus} />
+        </>
+      }
+      notice={list.notice}
+      error={list.error}
+      table={<EmployeesTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} />}
+      callout={{...CALLOUT, onAction: form.openCreate}}
+    >
       <EmployeeFormModal form={form} roles={list.roles} />
 
       <ConfirmDialog
@@ -86,6 +61,6 @@ export function EmployeesPage() {
         onConfirm={status.confirm}
         onCancel={status.cancel}
       />
-    </div>
+    </ManagementPage>
   );
 }
