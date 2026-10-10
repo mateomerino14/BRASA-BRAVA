@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {fn} from 'storybook/test';
 import {CategoriesTable} from './components/CategoriesTable';
-import {SubcategoryChips} from './components/SubcategoryChips';
+import {ChipList} from '../../components/molecules/ChipList';
 import {fakeList} from '../../stories/fakeList';
 
 export default {title: 'Pantallas/Categorías', parameters: {layout: 'padded'}};
@@ -23,5 +23,5 @@ function TableDemo({rows = CATEGORIES}) {
 export const Tabla = {render: () => <TableDemo />};
 export const TablaVacia = {render: () => <TableDemo rows={[]} />};
 export const ChipsDesplegables = {
-  render: () => <SubcategoryChips categoryName="Hamburguesas" subcategories={CATEGORIES[0].subcategorias} />,
+  render: () => <ChipList label="Subcategorías de Hamburguesas" items={CATEGORIES[0].subcategorias.map((sub) => ({id: sub.id, label: sub.nombre}))} />,
 };
