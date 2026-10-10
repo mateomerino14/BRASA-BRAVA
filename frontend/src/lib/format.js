@@ -98,3 +98,11 @@ export const formatDays = (days) => {
   }
   return selected.map((index) => DAY_SHORT[index]).join(', ');
 };
+
+const clockFormatter = new Intl.DateTimeFormat('es-BO', {hour: '2-digit', minute: '2-digit', hour12: false});
+
+// Hora del día de una fecha: "20:15"
+export const formatTime = (date) => clockFormatter.format(new Date(date));
+
+// Texto sin tildes y en minúsculas, para buscar "cafe" y encontrar "Café"
+export const normalizeText = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
