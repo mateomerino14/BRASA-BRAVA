@@ -30,12 +30,12 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
     setOpen(true);
   };
 
-  // Cambia varios campos a la vez y limpia sus errores
-  const setFields = (changes) => {
+  // Cambia varios campos a la vez y limpia sus errores (y los de "alsoClear", por ejemplo los de una fila)
+  const setFields = (changes, alsoClear = []) => {
     setValues((current) => ({...current, ...changes}));
     setErrors((current) => {
       const next = {...current};
-      Object.keys(changes).forEach((field) => {
+      [...Object.keys(changes), ...alsoClear].forEach((field) => {
         delete next[field];
       });
       return next;

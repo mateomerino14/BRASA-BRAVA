@@ -120,7 +120,8 @@ src/
 │   ├── categories/            Categorías, subcategorías e imagen
 │   ├── products/              Productos: precio, foto, disponibilidad y estado
 │   ├── ingredients/           Insumos de stock, movimientos e historial
-│   └── shared/                Acciones de foto reutilizables (subir, reemplazar y quitar)
+│   ├── sections/              Secciones del local y sus mesas
+│   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
 │   └── roles/                 Cargos para formularios y filtros
 ├── middlewares/
 │   ├── auth.js                Token de sesión y permisos por pantalla
@@ -181,10 +182,15 @@ tests/                       Pruebas de la API y unitarias
 | `PATCH` | `/api/ingredients/:id/status` | Da de baja o reactiva un insumo |
 | `POST` | `/api/ingredients/:id/movements` | Registra una entrada, salida o ajuste (`{tipo, cantidad, motivo}`) |
 | `GET` | `/api/ingredients/:id/movements` | Historial de movimientos, del más reciente al más antiguo (`page`, `pageSize`) |
+| `GET` | `/api/sections` | Secciones con sus mesas activas, total de mesas y personas; búsqueda (también por mesa) y los parámetros comunes. Orden: `nombre`, `mesas`, `capacidad`, `estado`. Incluye `summary` del local |
+| `GET` | `/api/sections/:id` | Detalle de una sección |
+| `POST` | `/api/sections` | Registra una sección con sus mesas |
+| `PUT` | `/api/sections/:id` | Modifica la sección y sincroniza sus mesas |
+| `PATCH` | `/api/sections/:id/status` | Da de baja o reactiva una sección |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`.
+Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`.
 
 ### Parámetros comunes de los listados
 
@@ -229,6 +235,12 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - Cantidades con hasta 3 decimales (acepta coma) en `kg`, `g`, `l`, `ml` o `unidad`. La unidad no se puede cambiar una vez que hay movimientos.
 - **Nivel**: sin stock (0), bajo (en o por debajo del mínimo) o suficiente. Los insumos dados de baja no cuentan en el resumen ni admiten movimientos.
 - El tipo `venta` queda reservado para los descuentos que hará Caja.
+
+### Reglas de secciones y mesas
+
+- El nombre de la sección no se repite. Cada sección tiene entre 1 y 50 mesas, sin nombres repetidos dentro de la sección, de 1 a 30 personas cada una.
+- Al modificar se envía la lista completa de mesas: las que traen `id` se actualizan, las nuevas se crean y las que faltan se dan de baja (no se borran, para conservar el historial de pedidos). La misma regla usan las subcategorías (`modules/shared/syncChildren.js`).
+- El resumen cuenta solo secciones activas y sus mesas activas.
 
 ## Autorización
 

@@ -196,6 +196,35 @@ const seedRecipes = async (db) => {
   return true;
 };
 
+// Mesas numeradas con una capacidad: tables('Mesa', 1, 3, 4) → Mesa 1..Mesa 3 de 4 personas
+const tables = (prefix, from, to, capacidad) => Array.from({length: to - from + 1}, (_, index) => [`${prefix} ${from + index}`, capacidad]);
+
+// Secciones demo: [nombre, descripción, activa, mesas]
+const SECTIONS = [
+  ['Salón principal', 'Planta baja, junto a la parrilla', true, [...tables('Mesa', 1, 8, 4), ...tables('Mesa', 9, 10, 6)]],
+  ['Terraza', 'Al aire libre, con vista a la calle', true, tables('Terraza', 1, 4, 4)],
+  ['Barra', 'Banquetas frente a la cocina', true, tables('Barra', 1, 3, 2)],
+  ['Salón VIP', 'Reservas para eventos', false, tables('VIP', 1, 2, 8)],
+];
+
+// Inserta las secciones demo con sus mesas si la tabla está vacía
+const seedSections = async (db) => {
+  const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM seccion');
+  if (rows[0].total > 0) {
+    return false;
+  }
+  for (const [nombre, descripcion, activa, items] of SECTIONS) {
+    const inserted = await db.query(
+      'INSERT INTO seccion (nombre, descripcion, activa) VALUES ($1, $2, $3) RETURNING id_seccion',
+      [nombre, descripcion, activa],
+    );
+    for (const [mesa, capacidad] of items) {
+      await db.query('INSERT INTO mesa (id_seccion, nombre, capacidad) VALUES ($1, $2, $3)', [inserted.rows[0].id_seccion, mesa, capacidad]);
+    }
+  }
+  return true;
+};
+
 // Carga cada bloque de datos demo que falte; devuelve true si insertó algo
 export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026'} = {}) => {
   const staff = await seedStaff(db, {password, directorioPassword});
@@ -203,5 +232,6 @@ export const seedDemoData = async (db, {password = 'Brasa2026', directorioPasswo
   const products = await seedProducts(db);
   const ingredients = await seedIngredients(db);
   const recipes = await seedRecipes(db);
-  return staff || categories || products || ingredients || recipes;
+  const sections = await seedSections(db);
+  return staff || categories || products || ingredients || recipes || sections;
 };
