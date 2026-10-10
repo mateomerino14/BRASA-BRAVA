@@ -90,7 +90,8 @@ BRASA-BRAVA/
 | Secciones y mesas (ambientes del local, mesas con capacidad y resumen) | Terminado |
 | Promociones (combos y descuentos con fechas, días y vigencia del día) | Terminado |
 | Caja: plano de mesas y armado del pedido (Local o Para llevar, quitar ingredientes, envíos a la mesa ocupada) | Terminado |
-| Caja: comanda de cocina, pedidos pendientes, cobro e impresión | Pendiente |
+| Caja: comanda de cocina por envío, descuento de stock por receta y marca de venta modificada | Terminado |
+| Caja: pedidos pendientes, cobro y ticket de venta | Pendiente |
 | Familia | Pendiente |
 
 ## Ramas y pruebas automáticas
