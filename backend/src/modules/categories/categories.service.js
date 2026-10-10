@@ -1,4 +1,5 @@
 import {createImageActions} from '../shared/imageActions.js';
+import {syncChildren} from '../shared/syncChildren.js';
 
 const notFound = {error: 'Categoría no encontrada', status: 404};
 const duplicateName = {error: 'Ya existe una categoría con ese nombre', status: 409};
@@ -63,19 +64,15 @@ export const createCategoriesService = ({repository, transaction, images}) => {
       return duplicateName;
     }
     const existing = await repository.activeSubcategories([id]);
-    const existingIds = new Set(existing.map((sub) => sub.id_subcategoria));
-    const keepIds = data.subcategorias.filter((sub) => sub.id && existingIds.has(sub.id)).map((sub) => sub.id);
     await transaction(async (tx) => {
       await tx.update(id, data);
-      await tx.deactivateSubcategoriesExcept(id, keepIds);
-      for (const subcategory of data.subcategorias) {
-        if (subcategory.id && existingIds.has(subcategory.id)) {
-          await tx.renameSubcategory(id, subcategory.id, subcategory.nombre);
-        }
-        else {
-          await tx.insertSubcategory(id, subcategory.nombre);
-        }
-      }
+      await syncChildren({
+        existingIds: existing.map((sub) => sub.id_subcategoria),
+        incoming: data.subcategorias,
+        update: (sub) => tx.renameSubcategory(id, sub.id, sub.nombre),
+        insert: (sub) => tx.insertSubcategory(id, sub.nombre),
+        deactivateExcept: (keepIds) => tx.deactivateSubcategoriesExcept(id, keepIds),
+      });
     });
     return getById(id);
   };
