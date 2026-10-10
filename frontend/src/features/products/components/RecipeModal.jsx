@@ -22,7 +22,7 @@ const styles = {
   inactive: 'text-rojo',
   error: 'col-span-full text-sm text-rojo',
   remove: 'mt-2',
-  empty: 'rounded-2xl border border-dashed border-arena bg-crema/60 px-4 py-6 text-center text-sm text-cafe',
+  empty: 'rounded-2xl border border-dashed border-arena bg-campo px-4 py-6 text-center text-sm text-cafe',
   summary: 'flex items-center gap-4 rounded-2xl border border-arena/60 bg-white px-5 py-4',
   summaryIcon: 'flex size-11 shrink-0 items-center justify-center rounded-xl bg-brasa/10 text-brasa',
   summaryLabel: 'text-sm text-cafe',

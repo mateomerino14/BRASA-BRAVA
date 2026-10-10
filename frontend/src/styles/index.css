@@ -23,6 +23,7 @@
   --color-arena: #dac2af; /* bordes */
   --color-hueso: #f4ede4; /* chips */
   --color-lienzo: #f7f8fa; /* fondo del área de contenido */
+  --color-campo: #ffffff; /* fondo de todo campo editable: resalta sobre el crema de modales y el lienzo */
 
   /* Tipografía: títulos/marca, interfaz y detalle de bienvenida */
   --font-display: 'Bebas Neue', 'Impact', sans-serif;
