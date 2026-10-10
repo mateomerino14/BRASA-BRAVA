@@ -40,6 +40,31 @@ export const rangeText = ({page, pageSize, count, total, itemLabel}) => {
 
 const priceFormatter = new Intl.NumberFormat('es-BO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
+const quantityFormatter = new Intl.NumberFormat('es-BO', {maximumFractionDigits: 3});
+
+const UNIT_LABELS = {kg: 'kg', g: 'g', l: 'L', ml: 'ml'};
+
+// Partes de una cantidad para mostrar número y unidad por separado: (40, 'unidad') → {amount: '40', unit: 'unidades'}
+export const quantityParts = (value, unit) => {
+  let label = UNIT_LABELS[unit] ?? unit;
+  if (unit === 'unidad' && Math.abs(value) !== 1) {
+    label = 'unidades';
+  }
+  return {amount: quantityFormatter.format(value), unit: label};
+};
+
+// Cantidad con su unidad: (1.5, 'kg') → "1,5 kg"; (1, 'unidad') → "1 unidad"; (40, 'unidad') → "40 unidades"
+export const formatQuantity = (value, unit) => {
+  const amount = quantityFormatter.format(value);
+  if (unit === 'unidad' && Math.abs(value) === 1) {
+    return `${amount} unidad`;
+  }
+  if (unit === 'unidad') {
+    return `${amount} unidades`;
+  }
+  return `${amount} ${UNIT_LABELS[unit] ?? unit}`;
+};
+
 // Monto con separadores bolivianos: 1234.5 → "1.234,50"
 export const formatAmount = (value) => priceFormatter.format(value);
 

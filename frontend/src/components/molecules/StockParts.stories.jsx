@@ -1,0 +1,45 @@
+import {useState} from 'react';
+import {fn} from 'storybook/test';
+import {AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Boxes, PackageX, Scale} from 'lucide-react';
+import {SegmentedControl} from './SegmentedControl';
+import {StatCard} from './StatCard';
+import {Amount} from '../atoms/Amount';
+import {LevelBar} from '../atoms/LevelBar';
+import {NumberInput} from '../atoms/NumberInput';
+
+export default {title: 'Moléculas/Resumen y cantidades'};
+
+function SegmentDemo() {
+  const [value, setValue] = useState('entrada');
+  const options = [
+    {value: 'entrada', label: 'Entrada', icon: ArrowDownToLine},
+    {value: 'salida', label: 'Salida', icon: ArrowUpFromLine},
+    {value: 'ajuste', label: 'Ajuste', icon: Scale},
+  ];
+  return <div className="w-96"><SegmentedControl label="Tipo de movimiento" options={options} value={value} onChange={setValue} /></div>;
+}
+
+export const SelectorSegmentado = {render: () => <SegmentDemo />};
+
+export const TarjetasDeResumen = {
+  parameters: {layout: 'padded'},
+  render: () => (
+    <div className="grid grid-cols-3 gap-4">
+      <StatCard icon={Boxes} label="Insumos activos" value={12} active onClick={fn()} />
+      <StatCard icon={AlertTriangle} tone="warning" label="Con stock bajo" value={1} onClick={fn()} />
+      <StatCard icon={PackageX} tone="danger" label="Sin stock" value={2} onClick={fn()} />
+    </div>
+  ),
+};
+
+export const MontosYNiveles = {
+  render: () => (
+    <div className="flex w-72 flex-col gap-4">
+      <Amount prefix="Bs" value="35,00" />
+      <div className="flex flex-col gap-1.5"><Amount value="12" suffix="kg" /><LevelBar value={12} minimum={5} /></div>
+      <div className="flex flex-col gap-1.5"><Amount value="1,5" suffix="kg" /><LevelBar value={1.5} minimum={2} tone="warning" /></div>
+      <div className="flex flex-col gap-1.5"><Amount value="0" suffix="unidades" /><LevelBar value={0} minimum={5} tone="danger" /></div>
+      <NumberInput aria-label="Cantidad" suffix="kg" defaultValue="3,5" />
+    </div>
+  ),
+};
