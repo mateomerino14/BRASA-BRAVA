@@ -3,6 +3,9 @@ import {syncChildren} from '../shared/syncChildren.js';
 const notFound = {error: 'Sección no encontrada', status: 404};
 const duplicateName = {error: 'Ya existe una sección con ese nombre', status: 409};
 
+// Mensaje para cuando se intenta quitar mesas que tienen una venta abierta
+const occupiedError = (names) => ({error: `No se puede dar de baja con mesas ocupadas: ${names.join(', ')}. Cobre o cierre sus ventas primero`, status: 409});
+
 // Convierte una fila de la base al formato que consume el frontend
 const toSection = (row, tables) => ({
   id: row.id_seccion,
@@ -60,6 +63,11 @@ export const createSectionsService = ({repository, transaction}) => {
       return duplicateName;
     }
     const existing = await repository.activeTables([id]);
+    const keptIds = new Set(data.mesas.map((item) => item.id).filter(Boolean));
+    const occupied = (await repository.occupiedTables(id)).filter((item) => !keptIds.has(item.id_mesa));
+    if (occupied.length > 0) {
+      return occupiedError(occupied.map((item) => item.nombre));
+    }
     await transaction(async (tx) => {
       await tx.update(id, data);
       await syncChildren({
@@ -77,6 +85,10 @@ export const createSectionsService = ({repository, transaction}) => {
   const setStatus = async (id, activa) => {
     if (!await repository.findById(id)) {
       return notFound;
+    }
+    const occupied = await repository.occupiedTables(id);
+    if (!activa && occupied.length > 0) {
+      return occupiedError(occupied.map((item) => item.nombre));
     }
     await repository.setActive(id, activa);
     return getById(id);
