@@ -1,4 +1,5 @@
 const MINUTE_MS = 60000;
+const MAX_TEST_SALE = 20;
 
 const ingredient = (id, nombre) => ({id, nombre});
 
@@ -83,8 +84,27 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       ],
     },
   };
-  const calls = {orders: []};
-  const control = {orderError: null, shortages: []};
+  const calls = {orders: [], checkouts: [], settings: []};
+  const control = {orderError: null, shortages: [], checkoutError: null};
+  const closed = [];
+  let taxLink = 'https://siat.impuestos.gob.bo/v2/launcher/';
+
+  // Ticket de una venta como lo arma la API: líneas iguales juntas, pagos, recibido y cambio
+  const ticketOf = (sale, table, payment = {pagos: [], recibido: null, cambio: null}) => {
+    const lines = new Map();
+    for (const item of sale.detalles) {
+      const key = `${item.nombre}|${item.precioUnitario}|${item.consumo}`;
+      const current = lines.get(key) ?? {nombre: item.nombre, consumo: item.consumo, precioUnitario: item.precioUnitario, cantidad: 0, subtotal: 0};
+      current.cantidad += item.cantidad;
+      current.subtotal = current.precioUnitario * current.cantidad;
+      lines.set(key, current);
+    }
+    return {
+      id: sale.id, numero: sale.numero, estado: 'cobrada', mesa: table.nombre, seccion: table.seccion.nombre, mesero: sale.mesero.nombre,
+      cajero: sale.cajero, cobrador: 'admin', modificadoPor: sale.modificadoPor, abiertaEn: sale.abiertaEn, cerradaEn: new Date(now).toISOString(),
+      total: sale.total, lineas: [...lines.values()], ...payment,
+    };
+  };
   let nextSale = 8;
   let nextDetail = 100;
 
@@ -111,7 +131,40 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
     'GET /sales/floor': () => [200, floor()],
     'GET /sales/catalog': () => [200, CATALOG],
     'GET /sales/waiters': () => [200, {meseros: WAITERS}],
+    'GET /sales/today': () => [200, {
+      hoy: '2026-10-13',
+      ventas: closed.map((ticket) => ({id: ticket.id, numero: ticket.numero, mesa: ticket.mesa, cobrador: ticket.cobrador, cerradaEn: ticket.cerradaEn, total: ticket.total, pagos: ticket.pagos})),
+      resumen: {
+        cantidad: closed.length,
+        total: closed.reduce((total, ticket) => total + ticket.total, 0),
+        efectivo: closed.flatMap((ticket) => ticket.pagos).filter((item) => item.metodo === 'efectivo').reduce((total, item) => total + item.monto, 0),
+        qr: closed.flatMap((ticket) => ticket.pagos).filter((item) => item.metodo === 'qr').reduce((total, item) => total + item.monto, 0),
+      },
+    }],
+    'GET /settings': () => [200, {enlaceImpuestos: taxLink}],
+    'PUT /settings': (body) => {
+      calls.settings.push(body);
+      if (!/^https?:\/\//.test(body.enlaceImpuestos)) {
+        return [400, {message: 'Ingrese un enlace que empiece con http:// o https://'}];
+      }
+      taxLink = body.enlaceImpuestos;
+      return [200, {enlaceImpuestos: taxLink}];
+    },
   };
+  // Tickets de las ventas cobradas (los ids de prueba son chicos)
+  for (let id = 1; id <= MAX_TEST_SALE; id += 1) {
+    handlers[`GET /sales/${id}/receipt`] = () => {
+      const ticket = closed.find((item) => item.id === id);
+      if (!ticket) {
+        return [404, {message: 'Pedido no encontrado'}];
+      }
+      return [200, {ticket}];
+    };
+  }
+  // Marca todo lo pedido como listo en cocina
+  control.readyAll = () => Object.values(sales).forEach((sale) => sale.detalles.forEach((item) => {
+    item.listos = item.cantidad;
+  }));
   for (const table of TABLES) {
     handlers[`GET /sales/tables/${table.id}`] = () => [200, {mesa: table, venta: sales[table.id] ?? null}];
     handlers[`POST /sales/tables/${table.id}/orders`] = (body) => {
@@ -139,6 +192,23 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
         sale.total += line.precio * line.cantidad;
       }
       return [201, {mesa: table, venta: structuredClone(sale), nueva: created, envio: sale.envios, sinStock: control.shortages}];
+    };
+    handlers[`POST /sales/tables/${table.id}/checkout`] = (body) => {
+      calls.checkouts.push({idMesa: table.id, body});
+      const sale = sales[table.id];
+      if (control.checkoutError) {
+        return [409, {message: control.checkoutError}];
+      }
+      const cash = body.pagos.find((item) => item.metodo === 'efectivo');
+      let payment = {pagos: body.pagos, recibido: null, cambio: null};
+      if (cash) {
+        const recibido = body.recibido ?? cash.monto;
+        payment = {pagos: body.pagos, recibido, cambio: recibido - cash.monto};
+      }
+      const ticket = ticketOf(sale, table, payment);
+      closed.unshift(ticket);
+      delete sales[table.id];
+      return [201, {ticket}];
     };
   }
   return {handlers, calls, control, sales};
