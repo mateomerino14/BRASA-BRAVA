@@ -92,7 +92,7 @@ BRASA-BRAVA/
 | Caja: plano de mesas y armado del pedido (Local o Para llevar, quitar ingredientes, envíos a la mesa ocupada) | Terminado |
 | Caja: comanda de cocina por envío, descuento de stock por receta y marca de venta modificada | Terminado |
 | Cocina: pedidos pendientes por envío, unidades listas (−1, +1, todas), avance y semáforo de espera | Terminado |
-| Caja: cobro y ticket de venta | Pendiente |
+| Caja: cobro (efectivo, QR o mixto con cambio), ticket de venta impreso al cobrar, ventas del día y enlace a impuestos | Terminado |
 | Familia | Pendiente |
 
 ## Ramas y pruebas automáticas
