@@ -1,0 +1,22 @@
+// Objeto con la forma de usePaginatedList para historias de Storybook (sin API ni URL)
+export const fakeList = ({items, total = items.length, page = 1, pageSize = 5, sort = {key: '', dir: 'asc'}, hasActiveFilters = false, handlers = {}}) => ({
+  items,
+  total,
+  page,
+  pageSize,
+  totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  loading: false,
+  error: '',
+  notice: '',
+  filters: {search: ''},
+  sort,
+  hasActiveFilters,
+  changeSearch: () => {},
+  changeFilter: () => {},
+  setPage: () => {},
+  changePageSize: () => {},
+  changeSort: () => {},
+  clearFilters: () => {},
+  reload: () => {},
+  ...handlers,
+});
