@@ -4,7 +4,7 @@ import {cn} from '../../lib/cn';
 const styles = {
   group: 'flex justify-center gap-2 rounded-xl bg-hueso p-3 sm:gap-3',
   shake: 'animate-shake',
-  digit: 'size-12 rounded-lg border bg-crema text-center font-display text-3xl text-carbon transition-[border-color,box-shadow,transform] duration-150 focus:-translate-y-0.5 focus:bg-white focus:outline-none focus:ring-4 sm:size-14',
+  digit: 'size-12 rounded-lg border bg-campo text-center font-display text-3xl text-carbon transition-[border-color,box-shadow,transform] duration-150 focus:-translate-y-0.5 focus:outline-none focus:ring-4 sm:size-14',
   empty: 'border-carbon/40 focus:border-brasa focus:ring-brasa/20',
   filled: 'border-brasa focus:ring-brasa/20',
   invalid: 'border-rojo focus:ring-rojo/15',

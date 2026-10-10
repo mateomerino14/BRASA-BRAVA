@@ -3,12 +3,12 @@ import {cn} from '../../lib/cn';
 
 const styles = {
   wrapper: 'relative',
-  base: 'w-full appearance-none rounded-lg border bg-crema pl-3 pr-9 text-carbon transition-[border-color,box-shadow] duration-200 focus:outline-none focus:ring-4 disabled:opacity-60',
+  base: 'w-full appearance-none rounded-lg border bg-campo pl-3 pr-9 text-carbon transition-[border-color,box-shadow] duration-200 focus:outline-none focus:ring-4 disabled:opacity-60',
   sizes: {
     sm: 'h-9 text-xs font-semibold',
     md: 'h-12 text-base',
   },
-  normal: 'border-arena/60 focus:border-brasa focus:ring-brasa/20',
+  normal: 'border-arena focus:border-brasa focus:ring-brasa/20',
   invalid: 'border-rojo focus:ring-rojo/15',
   icon: 'pointer-events-none absolute inset-y-0 right-3 my-auto text-cafe',
 };
