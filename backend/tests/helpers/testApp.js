@@ -1,7 +1,7 @@
 import {mkdtemp} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import {newDb} from 'pg-mem';
+import {DataType, newDb} from 'pg-mem';
 import pg from 'pg';
 import {createApp} from '../../src/app.js';
 import {loadConfig} from '../../src/config/env.js';
@@ -20,6 +20,10 @@ const createTestDb = async () => {
     return createDb(pool);
   }
   const memory = newDb();
+  // pg-mem no trae FLOOR; PostgreSQL real sí (se usa para calcular porciones)
+  for (const type of [DataType.float, DataType.decimal]) {
+    memory.public.registerFunction({name: 'floor', args: [type], returns: type, implementation: Math.floor});
+  }
   const {Pool} = memory.adapters.createPg();
   return createDb(new Pool());
 };
