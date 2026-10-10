@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from 'vitest';
-import {ApiError, apiRequest, setUnauthorizedHandler, tokenStorage} from './apiClient';
+import {ApiError, apiRequest, resolveAssetUrl, setUnauthorizedHandler, tokenStorage} from './apiClient';
 
 describe('apiRequest', () => {
   it('envía JSON con el token y devuelve los datos', async () => {
@@ -47,5 +47,21 @@ describe('apiRequest', () => {
       status: 0,
       message: 'No se pudo conectar con el servidor',
     });
+  });
+
+  it('envía FormData sin forzar content-type para que el navegador ponga el boundary', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ok: true, status: 200, json: async () => ({})});
+    vi.stubGlobal('fetch', fetchMock);
+    const form = new FormData();
+    form.append('imagen', new File(['x'], 'a.png', {type: 'image/png'}));
+    await apiRequest('/categories/1/image', {method: 'PUT', body: form});
+    const [, options] = fetchMock.mock.calls[0];
+    expect(options.body).toBe(form);
+    expect(options.headers['content-type']).toBeUndefined();
+  });
+
+  it('deja las rutas de archivos relativas cuando la API está en el mismo origen', () => {
+    expect(resolveAssetUrl('/uploads/a.png')).toBe('/uploads/a.png');
+    expect(resolveAssetUrl(null)).toBeNull();
   });
 });

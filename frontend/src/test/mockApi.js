@@ -34,6 +34,14 @@ export const USERS = {
 const json = (status, body) =>
   Promise.resolve({ok: status < 400, status, json: () => Promise.resolve(body)});
 
+// Los handlers reciben JSON ya parseado o el FormData tal cual (subida de archivos)
+const parseBody = (body) => {
+  if (body === undefined || body instanceof FormData) {
+    return body;
+  }
+  return JSON.parse(body);
+};
+
 export const mockApi = (handlers = {}) => {
   const defaults = {
     'GET /auth/login-users': () => [
@@ -61,7 +69,7 @@ export const mockApi = (handlers = {}) => {
     if (!handler) {
       return json(404, {message: `Sin mock para ${key}`});
     }
-    const [status, body] = handler(options.body ? JSON.parse(options.body) : undefined, query);
+    const [status, body] = handler(parseBody(options.body), query);
     return json(status, body);
   });
   vi.stubGlobal('fetch', fetchMock);
