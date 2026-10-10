@@ -7,6 +7,8 @@ import {KitchenTicket} from './components/KitchenTicket';
 import {ReceiptTicket} from './components/ReceiptTicket';
 import {CheckoutModal} from './components/CheckoutModal';
 import {TodaySalesModal} from './components/TodaySalesModal';
+import {PrintersModal} from './components/PrintersModal';
+import {PrinterTestTicket} from './components/PrinterTestTicket';
 import {PrintPreview} from '../../components/organisms/PrintPreview';
 import {CATALOG} from '../../test/cashierBackend';
 
@@ -140,3 +142,25 @@ const SALES = {
 };
 
 export const VentasDeHoy = {render: () => <TodaySalesModal sales={SALES} canEditLink />};
+
+const PRINTERS = {
+  open: true, close: fn(), loading: false, saving: false, error: '',
+  installed: [
+    {name: 'EPSON TM-T20III Cocina', displayName: 'EPSON TM-T20III Cocina', isDefault: false},
+    {name: 'XP-80C Caja', displayName: 'XP-80C Caja', isDefault: true},
+  ],
+  draft: {cocina: 'EPSON TM-T20III Cocina', caja: 'XP-80C Caja'},
+  tests: {cocina: {kind: 'ok', text: 'Se imprimió en EPSON TM-T20III Cocina'}},
+  change: fn(), test: fn(), save: fn(),
+};
+
+export const Impresoras = {render: () => <PrintersModal settings={PRINTERS} />};
+export const ImpresorasSinElegir = {render: () => <PrintersModal settings={{...PRINTERS, draft: {cocina: '', caja: ''}, tests: {}}} />};
+
+export const HojaDePrueba = {
+  render: () => (
+    <PrintPreview open title="Hoja de prueba" description="Así sale en la ticketera elegida" onClose={fn()}>
+      <PrinterTestTicket destino="cocina" printer="EPSON TM-T20III Cocina" printedAt={new Date(NOW)} />
+    </PrintPreview>
+  ),
+};

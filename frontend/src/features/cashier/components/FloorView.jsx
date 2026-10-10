@@ -1,4 +1,5 @@
-import {Armchair, HandCoins, ReceiptText, UtensilsCrossed} from 'lucide-react';
+import {Armchair, HandCoins, Printer, ReceiptText, UtensilsCrossed} from 'lucide-react';
+import {PrintersModal} from './PrintersModal';
 import {Button} from '../../../components/atoms/Button';
 import {TodaySalesModal} from './TodaySalesModal';
 import {AnimatePresence, motion} from 'motion/react';
@@ -14,6 +15,7 @@ const styles = {
   summary: 'grid grid-cols-3 gap-3 sm:gap-4',
   toolbar: 'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between',
   tabs: 'min-w-0 flex-1',
+  tools: 'flex flex-wrap gap-2',
   grid: 'grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-5',
   loading: 'flex justify-center py-16',
   empty: 'rounded-card border border-dashed border-arena bg-white px-4 py-10 text-center text-sm text-cafe',
@@ -37,7 +39,7 @@ const sectionOptions = (sections) => sections.map((section) => {
   return option;
 });
 
-export function FloorView({floor, sales, canEditLink, onOpenTable}) {
+export function FloorView({floor, sales, printerSettings, canEditLink, onOpenTable}) {
   const {summary, section} = floor;
   return (
     <div className={styles.page}>
@@ -63,7 +65,12 @@ export function FloorView({floor, sales, canEditLink, onOpenTable}) {
         <>
           <div className={styles.toolbar}>
             <ChipTabs label="Secciones" options={sectionOptions(floor.sections)} value={String(section.id)} onChange={floor.selectSection} className={styles.tabs} />
-            <Button variant="outline" size="sm" icon={<ReceiptText size={16} aria-hidden />} onClick={sales.show}>Ventas de hoy</Button>
+            <span className={styles.tools}>
+              {printerSettings?.isDesktop && (
+                <Button variant="outline" size="sm" icon={<Printer size={16} aria-hidden />} onClick={printerSettings.show}>Impresoras</Button>
+              )}
+              <Button variant="outline" size="sm" icon={<ReceiptText size={16} aria-hidden />} onClick={sales.show}>Ventas de hoy</Button>
+            </span>
           </div>
           <ul aria-label={`Mesas de ${section.nombre}`} className={styles.grid}>
             <AnimatePresence initial={false} mode="popLayout">
@@ -78,6 +85,7 @@ export function FloorView({floor, sales, canEditLink, onOpenTable}) {
       )}
 
       <TodaySalesModal sales={sales} canEditLink={canEditLink} />
+      {printerSettings?.isDesktop && <PrintersModal settings={printerSettings} />}
     </div>
   );
 }
