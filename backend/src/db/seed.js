@@ -28,10 +28,38 @@ const EMPLOYEES = [
 // Empleados de demostración que ya fueron dados de baja
 const INACTIVE_ALIASES = ['j.ortiz'];
 
+// Categorías del menú con sus subcategorías; las de la lista INACTIVE_CATEGORIES quedan de baja
+const CATEGORIES = [
+  ['Hamburguesas', 'Hamburguesas a la parrilla con pan artesanal', ['Clásicas', 'Especiales', 'Doble Carne']],
+  ['Bebidas y Refrescos', 'Gaseosas, jugos y cervezas bien frías', ['Gaseosas', 'Jugos Naturales', 'Cervezas']],
+  ['Guarniciones y Extras', 'Acompañamientos para completar el pedido', ['Papas Fritas', 'Aros de Cebolla', 'Salsas Caseras']],
+  ['Combos Especiales', 'Promociones armadas para compartir', ['Dúo Parrillero', 'Familiar Brava']],
+];
+
+const INACTIVE_CATEGORIES = ['Combos Especiales'];
+
+// Inserta las categorías demo si la tabla está vacía
+const seedCategories = async (db) => {
+  const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM categoria');
+  if (rows[0].total > 0) {
+    return false;
+  }
+  for (const [nombre, descripcion, subcategories] of CATEGORIES) {
+    const inserted = await db.query(
+      'INSERT INTO categoria (nombre, descripcion, activa) VALUES ($1, $2, $3) RETURNING id_categoria',
+      [nombre, descripcion, !INACTIVE_CATEGORIES.includes(nombre)],
+    );
+    for (const subcategory of subcategories) {
+      await db.query('INSERT INTO subcategoria (id_categoria, nombre) VALUES ($1, $2)', [inserted.rows[0].id_categoria, subcategory]);
+    }
+  }
+  return true;
+};
+
 // Inserta cargos, empleados y el DIRECTORIO de demostración si la base está vacía
-export const seedDemoData = async (
+const seedStaff = async (
   db,
-  {password = 'Brasa2026', directorioPassword = 'Directorio2026'} = {},
+  {password, directorioPassword},
 ) => {
   const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM cargo');
   if (rows[0].total > 0) {
@@ -66,4 +94,11 @@ export const seedDemoData = async (
     await hashSecret(directorioPassword),
   ]);
   return true;
+};
+
+// Carga cada bloque de datos demo que falte; devuelve true si insertó algo
+export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026'} = {}) => {
+  const staff = await seedStaff(db, {password, directorioPassword});
+  const categories = await seedCategories(db);
+  return staff || categories;
 };
