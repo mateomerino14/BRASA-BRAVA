@@ -4,6 +4,7 @@ import {renderApp} from '../../test/renderApp';
 import {mockApi} from '../../test/mockApi';
 import {createProductsBackend} from '../../test/productsBackend';
 import {buildCategoryOptions, toPayload, validateProduct} from './utils/productForm';
+import {computePortions, validateRecipe} from './utils/recipeForm';
 
 const openPage = async (options) => {
   const backend = createProductsBackend(options);
@@ -118,6 +119,53 @@ describe('Gestión de productos', () => {
     expect(await screen.findByText('Se dio de baja el producto Hamburguesa Clásica')).toBeInTheDocument();
   });
 
+  it('muestra cuántas porciones alcanzan según la receta', async () => {
+    const {table} = await openPage();
+    expect(within(rowOf(table, 'Hamburguesa Clásica')).getByText('25 porciones')).toBeInTheDocument();
+    expect(within(rowOf(table, 'Gaseosa 500 ml')).getByText('Sin insumos')).toBeInTheDocument();
+    expect(within(rowOf(table, 'Dúo Parrillero')).getByText('Sin receta')).toBeInTheDocument();
+  });
+
+  it('arma una receta nueva con porciones en vivo y la guarda', async () => {
+    const {backend, table, user} = await openPage();
+    await user.click(within(rowOf(table, 'Gaseosa 500 ml')).getByRole('button', {name: 'Receta de Gaseosa 500 ml'}));
+    const dialog = await screen.findByRole('dialog', {name: 'Receta'});
+    await within(dialog).findByLabelText('Insumo 1');
+    expect(within(dialog).getByText(/Agregue insumos con su cantidad/)).toBeInTheDocument();
+    await user.selectOptions(within(dialog).getByLabelText('Insumo 1'), 'Carne de res');
+    expect(within(dialog).getByText('Stock: 12 kg')).toBeInTheDocument();
+    await user.type(within(dialog).getByLabelText('Cantidad 1'), '0,15');
+    await user.click(within(dialog).getByRole('button', {name: 'Agregar insumo'}));
+    await user.selectOptions(within(dialog).getByLabelText('Insumo 2'), 'Queso cheddar');
+    await user.type(within(dialog).getByLabelText('Cantidad 2'), '0,06');
+    // Carne: 12 / 0,15 = 80; queso: 1,5 / 0,06 = 25 → manda el queso
+    expect(within(dialog).getByLabelText('25 porciones')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Guardar receta'}));
+    expect(await screen.findByText('Se guardó la receta de Gaseosa 500 ml')).toBeInTheDocument();
+    expect(backend.calls.recipes).toEqual([{id: 2, ingredientes: [{idInsumo: 1, cantidad: 0.15}, {idInsumo: 3, cantidad: 0.06}]}]);
+  });
+
+  it('carga la receta existente, marca el insumo de baja y valida repetidos', async () => {
+    const {backend, table, user} = await openPage();
+    await user.click(within(rowOf(table, 'Hamburguesa Clásica')).getByRole('button', {name: 'Receta de Hamburguesa Clásica'}));
+    const dialog = await screen.findByRole('dialog', {name: 'Receta'});
+    expect(await within(dialog).findByLabelText('Insumo 2')).toHaveDisplayValue('Tocino (de baja)');
+    expect(within(dialog).getByText('Insumo dado de baja')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('Cantidad 1')).toHaveValue('0,15');
+    // Un insumo de baja cuenta como sin stock
+    expect(within(dialog).getByLabelText('0 porciones')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Agregar insumo'}));
+    await user.selectOptions(within(dialog).getByLabelText('Insumo 3'), 'Carne de res');
+    await user.type(within(dialog).getByLabelText('Cantidad 3'), '1');
+    await user.click(within(dialog).getByRole('button', {name: 'Guardar receta'}));
+    expect(within(dialog).getByText('Este insumo ya está en la receta')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Quitar insumo 3'}));
+    await user.click(within(dialog).getByRole('button', {name: 'Quitar insumo 2'}));
+    await user.click(within(dialog).getByRole('button', {name: 'Guardar receta'}));
+    expect(await screen.findByText('Se guardó la receta de Hamburguesa Clásica')).toBeInTheDocument();
+    expect(backend.calls.recipes.at(-1)).toEqual({id: 1, ingredientes: [{idInsumo: 1, cantidad: 0.15}]});
+  });
+
   it('valida el formulario y arma el cuerpo sin la API', () => {
     expect(validateProduct({nombre: 'X', precio: '10,555', idCategoria: '', idSubcategoria: ''})).toEqual({
       nombre: 'Ingrese el nombre del producto (mínimo 2 letras)',
@@ -129,5 +177,9 @@ describe('Gestión de productos', () => {
     expect(toPayload({nombre: ' Té ', descripcion: ' ', precio: '7,5', idSubcategoria: '3'})).toEqual({nombre: 'Té', descripcion: '', precio: 7.5, idSubcategoria: 3});
     const options = buildCategoryOptions([{id: 1, nombre: 'A', subcategorias: [{id: 1, nombre: 'a'}]}], {categoria: {id: 1, nombre: 'A'}, subcategoria: {id: 9, nombre: 'z'}});
     expect(options[0].subcategorias.map((sub) => sub.nombre)).toEqual(['a', 'z (inactiva)']);
+    const stock = new Map([['1', {stockActual: 10, activo: true}], ['2', {stockActual: 3, activo: true}]]);
+    expect(computePortions([{idInsumo: '1', cantidad: '2'}, {idInsumo: '2', cantidad: '0,5'}], stock)).toBe(5);
+    expect(computePortions([{idInsumo: '', cantidad: ''}], stock)).toBeNull();
+    expect(validateRecipe([{key: 'a', idInsumo: '', cantidad: '1'}, {key: 'b', idInsumo: '1', cantidad: '0'}])).toEqual({a: 'Seleccione un insumo', b: 'La cantidad debe ser mayor a 0'});
   });
 });
