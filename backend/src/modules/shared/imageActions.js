@@ -1,7 +1,6 @@
 import {respond} from '../../utils/respond.js';
 
-// Acciones de foto reutilizables por cualquier módulo cuyo repositorio tenga findById y setImage;
-// "imageOf" lee la URL guardada de la fila (imagen_url en el catálogo, foto_url en empleados)
+// Acciones de foto reutilizables por cualquier módulo con findById y setImage
 export const createImageActions = ({repository, images, getById, notFound, imageOf = (row) => row.imagen_url}) => ({
   // Guarda la nueva foto, la asocia y recién entonces borra la anterior
   setImage: async (id, buffer) => {
@@ -30,7 +29,7 @@ export const createImageActions = ({repository, images, getById, notFound, image
   },
 });
 
-// Controladores HTTP de foto: responden el registro actualizado bajo la clave indicada
+// Controladores HTTP para subir y quitar la foto
 export const createImageHandlers = (service, key) => ({
   // Sube o reemplaza la foto
   setImage: async (req, res) => {

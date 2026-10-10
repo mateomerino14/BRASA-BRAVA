@@ -6,10 +6,10 @@ const inactive = {error: 'Reactive el insumo antes de registrar movimientos', st
 
 const QUANTITY_DECIMALS = 3;
 
-// Redondea a la precisión de la base para evitar restos como 0.30000000000000004
+// Redondea a la precisión de la base
 const round = (value) => Number(Number(value).toFixed(QUANTITY_DECIMALS));
 
-// Nivel del stock: sin stock, bajo (en o por debajo del mínimo) o suficiente
+// Nivel del stock: sin stock, bajo o suficiente
 export const levelOf = (actual, minimo) => {
   if (actual === 0) {
     return 'sin_stock';
@@ -35,6 +35,7 @@ const toIngredient = (row) => {
   };
 };
 
+// Convierte una fila del historial en un movimiento de la API
 const toMovement = (row) => ({
   id: row.id_movimiento,
   tipo: row.tipo,
@@ -78,7 +79,7 @@ export const createIngredientsService = ({repository, transaction}) => {
     };
   };
 
-  // Registra un insumo y, si trae stock inicial, lo deja como primera entrada del historial
+  // Registra un insumo con su stock inicial como primera entrada
   const create = async ({stockInicial, ...data}, user) => {
     if (await repository.findByName(data.nombre)) {
       return duplicateName;
@@ -94,7 +95,7 @@ export const createIngredientsService = ({repository, transaction}) => {
     return getById(id);
   };
 
-  // Modifica nombre, unidad y mínimo; la unidad queda fija una vez que hay movimientos
+  // Modifica nombre, unidad y mínimo de un insumo
   const update = async (id, data) => {
     const current = await repository.findById(id);
     if (!current) {
@@ -119,7 +120,7 @@ export const createIngredientsService = ({repository, transaction}) => {
     return getById(id);
   };
 
-  // Entrada suma, salida resta (sin quedar negativo) y ajuste fija el conteo real; todo queda en el historial
+  // Registra una entrada, salida o ajuste de stock
   const addMovement = async (id, {tipo, cantidad, motivo}, user) => {
     const current = await repository.findById(id);
     if (!current) {

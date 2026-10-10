@@ -1,4 +1,4 @@
-// Pantallas del sistema; el DIRECTORIO tiene todas y los cargos reciben un subconjunto
+// Pantallas del sistema que se asignan a los cargos
 export const SCREENS = Object.freeze([
   'home',
   'familia',
@@ -13,6 +13,6 @@ export const SCREENS = Object.freeze([
   'empleados',
 ]);
 
-// Normaliza los permisos de un cargo: solo pantallas válidas y siempre incluye home
+// Normaliza los permisos de un cargo e incluye siempre home
 export const normalizePermissions = (screens) =>
   SCREENS.filter((screen) => screen === 'home' || screens.includes(screen));

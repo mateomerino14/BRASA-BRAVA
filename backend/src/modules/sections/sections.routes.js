@@ -10,6 +10,7 @@ import {idParamSchema, listQuerySchema, sectionSchema, statusSchema} from './sec
 export const createSectionsRouter = ({db, config}) => {
   const service = createSectionsService({
     repository: createSectionsRepository(db),
+    // Ejecuta el trabajo con un repositorio dentro de una transacción
     transaction: (work) => db.transaction((tx) => work(createSectionsRepository(tx))),
   });
   const controller = createSectionsController(service);

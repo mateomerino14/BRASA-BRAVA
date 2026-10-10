@@ -37,7 +37,7 @@ const buildFilters = ({search, estado, nivel}) => {
   return {where, params};
 };
 
-// Acceso a datos de insumos y movimientos de stock (solo SQL, sin reglas de negocio)
+// Acceso a datos de insumos y movimientos de stock
 export const createIngredientsRepository = (db) => ({
   // Lista una página de insumos con los filtros dados
   list: async (filters) => {
@@ -113,7 +113,7 @@ export const createIngredientsRepository = (db) => ({
     await db.query('UPDATE insumo SET activo = $1 WHERE id_insumo = $2', [activo, id]);
   },
 
-  // Suma (o resta) al stock solo si no queda negativo; devuelve el stock nuevo o null si no alcanzó
+  // Suma o resta al stock sin dejarlo negativo
   addStock: async (id, delta) => {
     const {rows} = await db.query(
       `UPDATE insumo SET stock_actual = stock_actual + $1
@@ -133,7 +133,7 @@ export const createIngredientsRepository = (db) => ({
     );
   },
 
-  // Devuelve una página del historial de un insumo, del más reciente al más antiguo
+  // Devuelve una página del historial de un insumo
   movements: async (id, {page, pageSize}) => {
     const {rows} = await db.query(
       `SELECT id_movimiento, tipo, cantidad, stock_resultante, motivo, responsable, creado_en

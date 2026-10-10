@@ -39,7 +39,6 @@ export const createAuthService = ({repository, mailer, config, logger = console,
   // Autentica a un empleado activo y carga los permisos de su cargo
   const loginEmployee = async (alias, password) => {
     const employee = await repository.findActiveEmployeeByAlias(alias);
-    // Se compara contra un hash de relleno para no revelar por el tiempo si el usuario existe
     const valid = await verifySecret(password, employee?.contrasena_hash ?? DUMMY_HASH);
     if (!employee || !valid) {
       return {error: invalidCredentials, status: 401};
@@ -149,7 +148,7 @@ export const createAuthService = ({repository, mailer, config, logger = console,
     return {updated: true};
   };
 
-  // Perfil de la sesión con el nombre y la foto actuales del empleado (el resto viene del token)
+  // Perfil de la sesión con el nombre y la foto actuales
   const profile = async (user) => {
     if (user.isDirectorio) {
       return user;

@@ -1,4 +1,4 @@
-// Fecha de hoy (YYYY-MM-DD) y día de la semana (0 = domingo) en la zona horaria del local
+// Fecha de hoy y día de la semana en la zona del local
 export const localToday = (now, timeZone) => {
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat('en-CA', {timeZone, year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'})
@@ -9,7 +9,7 @@ export const localToday = (now, timeZone) => {
   return {date: `${parts.year}-${parts.month}-${parts.day}`, weekday: weekdays.indexOf(parts.weekday)};
 };
 
-// Normaliza una fecha de la base (texto en PostgreSQL, Date en pg-mem) a YYYY-MM-DD
+// Normaliza una fecha de la base a YYYY-MM-DD
 export const toIsoDate = (value) => {
   if (!value) {
     return null;
@@ -33,13 +33,13 @@ const zoneOffset = (instant, timeZone) => {
   return asUtc - instant.getTime();
 };
 
-// Instante UTC en que empieza un día de calendario YYYY-MM-DD en la zona del local
+// Instante UTC en que empieza un día del local
 const localMidnight = (isoDate, timeZone) => {
   const midnightUtc = Date.parse(`${isoDate}T00:00:00Z`);
   return new Date(midnightUtc - zoneOffset(new Date(midnightUtc), timeZone));
 };
 
-// Inicio y fin (UTC) de un día de calendario en la zona del local; el fin es el inicio del día siguiente
+// Inicio y fin (UTC) de un día de calendario del local
 export const localDayRange = (isoDate, timeZone) => {
   const nextDate = new Date(Date.parse(`${isoDate}T00:00:00Z`) + DAY_MS).toISOString().slice(0, 10);
   return {start: localMidnight(isoDate, timeZone), end: localMidnight(nextDate, timeZone)};
