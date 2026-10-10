@@ -52,6 +52,8 @@ npm test                  # pruebas automáticas (Vitest + Testing Library)
 | Página (`features/<modulo>/pages`) | Invocar hooks y componer organismos | No llama servicios directamente |
 | Componente (`components/`) | Presentar datos recibidos por props | No conoce hooks de negocio |
 
+Las pantallas de los módulos se cargan bajo demanda (`React.lazy` en `router/AppRoutes.jsx`): el inicio descarga solo login, menú y Home, y cada pantalla de administración se baja al abrirla.
+
 La sesión se maneja en `context/` (`AuthProvider` y `useAuth`). El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
 
 El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco). ### Pantallas de gestión estándar
