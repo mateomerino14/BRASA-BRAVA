@@ -6,8 +6,9 @@ const emptyImage = {file: null, url: null, removed: false};
 const hasErrors = (errors) => Object.keys(errors).length > 0;
 
 // Formulario estándar de registro y modificación: valores, validación, guardado, foto opcional y avisos.
-// "api" necesita create/update y, si el módulo tiene foto, uploadImage/removeImage; "entityKey" es la clave de la respuesta.
-export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayload, validate, messages, onSaved, withImage = false}) {
+// "api" necesita create/update y, si el módulo tiene foto, uploadImage/removeImage; "entityKey" es la clave de la respuesta
+// e "imageField" el campo con la URL de la foto (imagenUrl en el catálogo, fotoUrl en empleados).
+export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayload, validate, messages, onSaved, withImage = false, imageField = 'imagenUrl'}) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [values, setValues] = useState(emptyValues);
@@ -24,7 +25,7 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
       initialValues = toFormValues(entity);
     }
     setValues(initialValues);
-    setImage({...emptyImage, url: entity?.imagenUrl ?? null});
+    setImage({...emptyImage, url: entity?.[imageField] ?? null});
     setErrors({});
     setModalError('');
     setOpen(true);
@@ -60,7 +61,7 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
     if (image.file) {
       return (await api.uploadImage(entity.id, image.file))[entityKey];
     }
-    if (image.removed && entity.imagenUrl) {
+    if (image.removed && entity[imageField]) {
       return (await api.removeImage(entity.id))[entityKey];
     }
     return entity;

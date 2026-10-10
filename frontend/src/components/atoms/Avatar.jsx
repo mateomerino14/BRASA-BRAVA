@@ -1,5 +1,6 @@
 import {cn} from '../../lib/cn';
 import {getInitials} from '../../lib/format';
+import {resolveAssetUrl} from '../../lib/apiClient';
 
 const styles = {
   photo: 'rounded-full object-cover',
@@ -12,7 +13,7 @@ export function Avatar({name, src, size = 40, className}) {
   const sizeStyle = {width: size, height: size, fontSize: size * initialsScale};
 
   if (src) {
-    return <img src={src} alt={name} style={sizeStyle} className={cn(styles.photo, className)} />;
+    return <img src={resolveAssetUrl(src)} alt={name} style={sizeStyle} className={cn(styles.photo, className)} />;
   }
   return (
     <span role="img" aria-label={name} style={sizeStyle} className={cn(styles.initials, className)}>
