@@ -30,7 +30,7 @@ export const createSalesRepository = (db) => ({
          LEFT JOIN empleado e ON e.id_empleado = v.id_mesero
          ${unitsJoin}
         WHERE s.activa = TRUE
-        ORDER BY s.nombre, s.id_seccion, m.id_mesa`,
+        ORDER BY s.id_seccion, m.id_mesa`,
     );
     return rows;
   },
