@@ -22,7 +22,7 @@ const styles = {
   change: 'flex items-center justify-between rounded-card bg-verde/10 px-4 py-3 text-verde',
   changeLabel: 'text-sm font-semibold',
   qrPart: 'flex items-center justify-between rounded-card bg-hueso px-4 py-2 text-sm text-carbon',
-  actions: 'grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)]',
+  actions: 'flex flex-col-reverse gap-3',
   link: 'inline-flex items-center gap-1.5 self-start text-sm font-semibold text-brasa underline-offset-4 hover:underline',
 };
 
