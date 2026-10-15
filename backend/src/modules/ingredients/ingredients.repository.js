@@ -8,7 +8,9 @@ const SORT_COLUMNS = {
 };
 const DEFAULT_ORDER = 'i.activo DESC, i.nombre, i.id_insumo';
 
-const ingredientColumns = 'i.id_insumo, i.nombre, i.unidad, i.stock_actual, i.stock_minimo, i.activo';
+const ingredientColumns = `i.id_insumo, i.nombre, i.unidad, i.stock_actual, i.stock_minimo, i.activo,
+  (i.id_insumo IN (SELECT m.id_insumo FROM movimiento_stock m)
+    OR i.id_insumo IN (SELECT r.id_insumo FROM receta r)) AS unidad_fija`;
 
 // Arma el WHERE del listado según los filtros recibidos
 const buildFilters = ({search, estado, nivel}) => {
@@ -83,12 +85,6 @@ export const createIngredientsRepository = (db) => ({
       [nombre, excludeId],
     );
     return rows[0] ?? null;
-  },
-
-  // Indica si el insumo ya tiene movimientos registrados
-  hasMovements: async (id) => {
-    const {rows} = await db.query('SELECT 1 FROM movimiento_stock WHERE id_insumo = $1 LIMIT 1', [id]);
-    return rows.length > 0;
   },
 
   // Inserta un insumo sin stock y devuelve su id

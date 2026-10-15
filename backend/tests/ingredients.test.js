@@ -104,13 +104,16 @@ describe('Gestión de stock', () => {
     expect(rows[0]).toEqual({responsable: 'DIRECTORIO', id_empleado: null});
   });
 
-  it('no cambia la unidad si hay movimientos, pero sí el nombre y el mínimo', async () => {
+  it('fija la unidad de un insumo ya usado, pero deja cambiar el nombre y el mínimo', async () => {
     const id = await idOf('Tomate');
+    expect((await api('get', `/api/ingredients/${id}`)).body.ingredient.unidadFija).toBe(true);
     const unit = await api('put', `/api/ingredients/${id}`).send({nombre: 'Tomate', unidad: 'g', stockMinimo: 1});
     expect(unit.status).toBe(409);
+    expect(unit.body.message).toBe('No se puede cambiar la unidad porque el insumo ya se usó en recetas, ventas o correcciones');
     const ok = await api('put', `/api/ingredients/${id}`).send({nombre: 'Tomate perita', unidad: 'kg', stockMinimo: 4});
     expect(ok.body.ingredient).toMatchObject({nombre: 'Tomate perita', stockMinimo: 4, nivel: 'bajo'});
     const fresh = await api('post', '/api/ingredients').send({nombre: 'Sal', unidad: 'kg', stockMinimo: 1});
+    expect(fresh.body.ingredient.unidadFija).toBe(false);
     const changed = await api('put', `/api/ingredients/${fresh.body.ingredient.id}`).send({nombre: 'Sal', unidad: 'g', stockMinimo: 500});
     expect(changed.body.ingredient.unidad).toBe('g');
   });
