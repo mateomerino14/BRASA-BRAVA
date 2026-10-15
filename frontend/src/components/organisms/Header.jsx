@@ -1,13 +1,16 @@
 import {motion} from 'motion/react';
-import {LogOut, Menu} from 'lucide-react';
+import {LogOut} from 'lucide-react';
 import {Avatar} from '../atoms/Avatar';
+import {cn} from '../../lib/cn';
 
 const styles = {
   header: 'flex flex-wrap items-center justify-between gap-x-4 gap-y-3',
-  heading: 'flex min-w-0 flex-1 items-center gap-3',
-  menuButton: 'flex size-11 shrink-0 items-center justify-center rounded-xl bg-brasa text-white shadow-brasa transition-colors hover:bg-brasa-oscuro',
-  title: 'min-w-0 font-display text-3xl leading-[0.95] text-carbon sm:text-5xl sm:leading-none',
-  actions: 'hidden items-center gap-3 sm:flex',
+  heading: 'min-w-0 flex-1',
+  title: 'font-display text-5xl leading-none text-carbon',
+  marks: 'mt-2.5 flex gap-2.5',
+  mark: 'h-1.5 w-11 rounded-full',
+  markColors: ['bg-brasa', 'bg-mostaza', 'bg-carbon'],
+  actions: 'flex items-center gap-3',
   profile: 'flex items-center gap-3 rounded-xl border-2 border-brasa bg-white py-1.5 pl-1.5 pr-4 shadow-card',
   profileText: 'leading-tight',
   alias: 'text-sm font-bold text-carbon',
@@ -20,25 +23,22 @@ const titleVisible = {opacity: 1, x: 0};
 const hoverLift = {y: -2};
 const tapPress = {scale: 0.95};
 
-export function Header({title, user, onLogout, onOpenMenu, menuOpen = false}) {
+const markGrow = {hidden: {scaleX: 0}, visible: {scaleX: 1}};
+const marksStagger = {visible: {transition: {staggerChildren: 0.08, delayChildren: 0.15}}};
+
+// Encabezado de escritorio: título con las tres marcas de parrilla, usuario y cierre de sesión
+export function Header({title, user, onLogout}) {
   return (
     <header className={styles.header}>
       <div className={styles.heading}>
-        {onOpenMenu && (
-          <motion.button
-            type="button"
-            onClick={onOpenMenu}
-            aria-label="Abrir menú"
-            aria-expanded={menuOpen}
-            whileTap={tapPress}
-            className={styles.menuButton}
-          >
-            <Menu size={22} aria-hidden />
-          </motion.button>
-        )}
         <motion.h1 key={title} initial={titleHidden} animate={titleVisible} className={styles.title}>
           {title}
         </motion.h1>
+        <motion.span key={`marks-${title}`} aria-hidden initial="hidden" animate="visible" variants={marksStagger} className={styles.marks}>
+          {styles.markColors.map((color) => (
+            <motion.i key={color} variants={markGrow} style={{originX: 0}} className={cn(styles.mark, color)} />
+          ))}
+        </motion.span>
       </div>
       <div className={styles.actions}>
         {user && (

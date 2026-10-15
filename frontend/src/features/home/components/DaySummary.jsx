@@ -1,24 +1,35 @@
 import {Link} from 'react-router';
-import {motion} from 'motion/react';
-import {ArrowRight, Banknote, CheckCheck, ChefHat, Flame, QrCode, Receipt, Timer, Utensils} from 'lucide-react';
-import {StatCard} from '../../../components/molecules/StatCard';
-import {Amount} from '../../../components/atoms/Amount';
+import {CountUp} from '../../../components/atoms/CountUp';
 import {formatAmount} from '../../../lib/format';
+import {cn} from '../../../lib/cn';
 import {waitMinutes, waitTone} from '../../kitchen/utils/kitchen';
 
 const styles = {
-  section: 'flex flex-col gap-5',
-  header: 'flex flex-wrap items-end justify-between gap-2',
+  section: 'flex flex-col gap-3',
+  header: 'flex flex-wrap items-baseline justify-between gap-2',
   title: 'font-display text-3xl text-carbon',
   hint: 'text-sm text-cafe',
-  group: 'flex flex-col gap-3',
-  groupHeader: 'flex items-center justify-between gap-3',
-  groupTitle: 'font-display text-xl text-cafe',
-  link: 'inline-flex items-center gap-1 text-sm font-semibold text-brasa-oscuro underline-offset-4 hover:underline',
-  grid: 'grid grid-cols-2 gap-3 lg:grid-cols-4',
-  skeleton: 'h-[84px] animate-pulse rounded-card bg-hueso',
+  board: 'overflow-hidden rounded-2xl border border-arena/60 bg-white shadow-card',
+  row: 'grid grid-cols-2 lg:grid-cols-[150px_repeat(4,minmax(0,1fr))]',
+  divided: 'border-t border-dashed border-arena',
+  head: 'col-span-2 flex items-center justify-between gap-3 bg-hueso px-5 py-3 lg:col-span-1 lg:flex-col lg:items-start lg:justify-between lg:py-4',
+  headTitle: 'font-display text-3xl leading-none text-carbon',
+  headLink: 'text-sm font-semibold text-brasa-oscuro underline underline-offset-4 transition-colors hover:text-carbon',
+  cell: 'min-w-0 border-t border-arena/50 px-5 py-4 [&:nth-child(odd)]:border-l lg:border-l lg:border-t-0',
+  value: 'flex items-baseline gap-1.5 whitespace-nowrap font-display text-4xl leading-[0.9] tabular-nums text-carbon lg:text-[2.75rem]',
+  affix: 'font-sans text-[13px] font-semibold text-cafe',
+  label: 'mt-1.5 text-[13px] leading-snug text-cafe',
+  bar: 'mt-3 block h-1 overflow-hidden rounded-full bg-hueso',
+  fill: 'block h-full rounded-full',
+  fills: {brand: 'bg-brasa', success: 'bg-verde', warning: 'bg-mostaza'},
+  tones: {success: 'text-verde', warning: 'text-brasa-oscuro', danger: 'text-error'},
+  skeleton: 'h-[106px] animate-pulse bg-hueso',
   error: 'text-sm font-medium text-error',
 };
+
+const MINUTES_PER_HOUR = 60;
+const MINUTES_PER_DAY = 1440;
+const FULL = 100;
 
 const pluralWord = (count, one, many) => {
   if (count === 1) {
@@ -27,85 +38,94 @@ const pluralWord = (count, one, many) => {
   return many;
 };
 
-const plural = (count, one, many) => `${count} ${pluralWord(count, one, many)}`;
-
-const reveal = {hidden: {opacity: 0, y: 12}, visible: {opacity: 1, y: 0}};
-const stagger = {visible: {transition: {staggerChildren: 0.08}}};
-const SKELETON_CARDS = 4;
-const MINUTES_PER_HOUR = 60;
-const MINUTES_PER_DAY = 1440;
-const bigValue = 'text-3xl sm:text-4xl';
+const share = (part, total) => {
+  if (!total) {
+    return 0;
+  }
+  return Math.round((part / total) * FULL);
+};
 
 const waitParts = (minutes) => {
   if (minutes < MINUTES_PER_HOUR) {
-    return {value: String(minutes), suffix: 'min'};
+    return {value: minutes, suffix: 'min', format: Math.round};
   }
   if (minutes < MINUTES_PER_DAY) {
-    const rest = String(minutes % MINUTES_PER_HOUR).padStart(2, '0');
-    return {value: `${Math.floor(minutes / MINUTES_PER_HOUR)}:${rest}`, suffix: 'h'};
+    return {value: minutes / MINUTES_PER_HOUR, suffix: 'h', format: (hours) => hours.toFixed(1).replace('.', ',')};
   }
   const days = Math.floor(minutes / MINUTES_PER_DAY);
-  return {value: String(days), suffix: pluralWord(days, 'día', 'días')};
+  return {value: days, suffix: pluralWord(days, 'día', 'días'), format: Math.round};
 };
 
-function Money({value}) {
-  return <Amount prefix="Bs" value={formatAmount(value)} valueClassName={bigValue} />;
+const money = (value) => formatAmount(value);
+const whole = (value) => String(Math.round(value));
+
+function Cell({value, format = whole, prefix, suffix, label, bar, barTone = 'brand', tone}) {
+  const spoken = [prefix, format(value), suffix].filter(Boolean).join(' ');
+  return (
+    <div className={styles.cell}>
+      <p aria-label={spoken} className={cn(styles.value, tone && styles.tones[tone])}>
+        {prefix && <span aria-hidden className={styles.affix}>{prefix}</span>}
+        <span aria-hidden><CountUp value={value} format={format} /></span>
+        {suffix && <span aria-hidden className={styles.affix}>{suffix}</span>}
+      </p>
+      <p className={styles.label}>{label}</p>
+      {bar !== undefined && (
+        <span aria-hidden className={styles.bar}>
+          <span className={cn(styles.fill, styles.fills[barTone])} style={{width: `${bar}%`}} />
+        </span>
+      )}
+    </div>
+  );
 }
 
-function Group({title, to, linkLabel, children}) {
+function Row({title, to, linkLabel, divided, children}) {
   return (
-    <motion.div variants={reveal} className={styles.group}>
-      <div className={styles.groupHeader}>
-        <h3 className={styles.groupTitle}>{title}</h3>
-        <Link to={to} className={styles.link}>
-          {linkLabel}
-          <ArrowRight size={15} aria-hidden />
-        </Link>
+    <div role="group" aria-label={title} className={cn(styles.row, divided && styles.divided)}>
+      <div className={styles.head}>
+        <h3 className={styles.headTitle}>{title}</h3>
+        <Link to={to} className={styles.headLink}>{linkLabel}</Link>
       </div>
-      <div className={styles.grid}>{children}</div>
-    </motion.div>
+      {children}
+    </div>
   );
 }
 
-function CashierGroup({data}) {
+function CashierRow({data}) {
   return (
-    <Group title="Caja" to="/caja" linkLabel="Ir a Caja">
-      <StatCard icon={Receipt} value={<Money value={data.total} />} label={`Vendido hoy · ${plural(data.cantidad, 'venta', 'ventas')}`} />
-      <StatCard icon={Banknote} tone="success" value={<Money value={data.efectivo} />} label="Cobrado en efectivo" />
-      <StatCard icon={QrCode} tone="success" value={<Money value={data.qr} />} label="Cobrado por QR" />
-      <StatCard
-        icon={Utensils}
-        tone="warning"
-        value={<Amount value={String(data.ocupadas)} suffix={`de ${data.mesas}`} valueClassName={bigValue} />}
-        label={`Mesas ocupadas · Bs ${formatAmount(data.porCobrar)} por cobrar`}
+    <Row title="Caja" to="/caja" linkLabel="Abrir caja">
+      <Cell value={data.total} format={money} prefix="Bs" label={`vendido en ${data.cantidad} ${pluralWord(data.cantidad, 'venta', 'ventas')}`} />
+      <Cell value={data.efectivo} format={money} prefix="Bs" label="en efectivo" bar={share(data.efectivo, data.total)} />
+      <Cell value={data.qr} format={money} prefix="Bs" label="por QR" bar={share(data.qr, data.total)} barTone="success" />
+      <Cell
+        value={data.ocupadas}
+        suffix={`de ${data.mesas} mesas`}
+        label={`ocupadas, Bs ${formatAmount(data.porCobrar)} por cobrar`}
+        bar={share(data.ocupadas, data.mesas)}
+        barTone="warning"
       />
-    </Group>
+    </Row>
   );
 }
 
-function KitchenGroup({data, now}) {
-  let waitValue = '—';
-  let waitLabel = 'Nada esperando';
-  let waitColor = 'success';
+function KitchenRow({data, now, divided}) {
+  let wait = <Cell value={0} format={() => '—'} label="nada esperando" tone="success" />;
   if (data.waiting) {
     const minutes = waitMinutes(data.waiting.creadoEn, now);
     const parts = waitParts(minutes);
-    waitValue = <Amount value={parts.value} suffix={parts.suffix} valueClassName={bigValue} />;
-    waitLabel = `Espera más larga · ${data.waiting.mesa}`;
-    waitColor = waitTone(minutes);
+    wait = <Cell value={parts.value} format={parts.format} suffix={parts.suffix} label={`espera más larga, ${data.waiting.mesa}`} tone={waitTone(minutes)} />;
   }
   return (
-    <Group title="Cocina" to="/cocina" linkLabel="Ir a Cocina">
-      <StatCard icon={Flame} value={data.preparacion} label="Envíos en preparación" />
-      <StatCard icon={ChefHat} tone="warning" value={data.unidadesPendientes} label="Unidades por preparar" />
-      <StatCard icon={CheckCheck} tone="success" value={data.listos} label="Envíos listos para entregar" />
-      <StatCard icon={Timer} tone={waitColor} value={waitValue} label={waitLabel} />
-    </Group>
+    <Row title="Cocina" to="/cocina" linkLabel="Abrir cocina" divided={divided}>
+      <Cell value={data.preparacion} label={pluralWord(data.preparacion, 'envío en preparación', 'envíos en preparación')} />
+      <Cell value={data.unidadesPendientes} label="unidades por preparar" />
+      <Cell value={data.listos} label={pluralWord(data.listos, 'envío listo para entregar', 'envíos listos para entregar')} />
+      {wait}
+    </Row>
   );
 }
 
 export function DaySummary({summary, showCashier, showKitchen}) {
-  const groups = [showCashier, showKitchen].filter(Boolean).length;
+  const rows = [showCashier, showKitchen].filter(Boolean).length;
   return (
     <section aria-labelledby="day-summary-title" className={styles.section}>
       <div className={styles.header}>
@@ -113,17 +133,11 @@ export function DaySummary({summary, showCashier, showKitchen}) {
         <p className={styles.hint}>Se actualiza solo cada 30 segundos</p>
       </div>
       {summary.error && <p role="alert" className={styles.error}>No se pudo cargar el resumen: {summary.error}</p>}
-      {summary.loading && (
-        <div className={styles.grid} aria-label="Cargando resumen">
-          {Array.from({length: SKELETON_CARDS * groups}, (_, index) => <div key={index} className={styles.skeleton} />)}
-        </div>
-      )}
-      {!summary.loading && (
-        <motion.div initial="hidden" animate="visible" variants={stagger} className={styles.section}>
-          {showCashier && summary.cashier && <CashierGroup data={summary.cashier} />}
-          {showKitchen && summary.kitchen && <KitchenGroup data={summary.kitchen} now={summary.now} />}
-        </motion.div>
-      )}
+      <div className={styles.board}>
+        {summary.loading && Array.from({length: rows}, (_, index) => <div key={index} aria-label="Cargando resumen" className={cn(styles.skeleton, index > 0 && styles.divided)} />)}
+        {!summary.loading && showCashier && summary.cashier && <CashierRow data={summary.cashier} />}
+        {!summary.loading && showKitchen && summary.kitchen && <KitchenRow data={summary.kitchen} now={summary.now} divided={showCashier} />}
+      </div>
     </section>
   );
 }
