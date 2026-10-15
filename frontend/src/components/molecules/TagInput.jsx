@@ -6,13 +6,13 @@ import {cn} from '../../lib/cn';
 const styles = {
   box: 'flex min-h-12 flex-wrap items-center gap-2 rounded-lg border bg-campo px-3 py-2 transition-[border-color,box-shadow] duration-200 focus-within:ring-4',
   normal: 'border-arena focus-within:border-brasa focus-within:ring-brasa/20',
-  invalid: 'border-rojo focus-within:ring-rojo/15',
+  invalid: 'border-error focus-within:ring-error/15',
   chip: 'inline-flex items-center gap-1 rounded-full border border-brasa/40 bg-brasa/10 py-1 pl-3 pr-1 text-sm font-semibold text-carbon',
   chipRemove: 'flex size-5 items-center justify-center rounded-full text-cafe transition-colors hover:bg-rojo hover:text-white',
   input: 'min-w-36 flex-1 bg-transparent py-1 text-base text-carbon placeholder:text-cafe/60 focus:outline-none',
   add: 'flex size-7 items-center justify-center rounded-md bg-brasa text-white transition-colors hover:bg-brasa-oscuro disabled:opacity-40',
   footer: 'mt-1 flex justify-between text-xs text-cafe',
-  warning: 'text-rojo',
+  warning: 'text-error',
 };
 
 const chipIn = {opacity: 0, scale: 0.6};
