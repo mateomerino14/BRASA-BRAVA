@@ -19,7 +19,7 @@ export const createIngredientsController = (service) => ({
 
   // Modifica un insumo
   update: async (req, res) => {
-    const result = await service.update(req.validated.params.id, req.validated.body);
+    const result = await service.update(req.validated.params.id, req.validated.body, req.user);
     return respond(res, result, ({ingredient}) => res.json({ingredient}));
   },
 

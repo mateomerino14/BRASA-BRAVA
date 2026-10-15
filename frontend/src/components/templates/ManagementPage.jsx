@@ -1,4 +1,3 @@
-import {AnimatePresence} from 'motion/react';
 import {FilterBar} from '../organisms/FilterBar';
 import {RegisterCallout} from '../organisms/RegisterCallout';
 import {SearchInput} from '../molecules/SearchInput';
@@ -9,8 +8,8 @@ const styles = {
   summary: 'grid grid-cols-3 gap-3 sm:gap-4',
 };
 
-// Estructura común de toda pantalla de gestión: resumen opcional, buscador y filtros, avisos, tabla, llamada a registrar y modales
-export function ManagementPage({summary, search, filters, notice, error, table, callout, children}) {
+// Estructura común de toda pantalla de gestión: resumen opcional, buscador y filtros, error de carga, tabla, llamada a registrar y modales
+export function ManagementPage({summary, search, filters, error, table, callout, children}) {
   return (
     <div className={styles.page}>
       {summary && <section aria-label="Resumen" className={styles.summary}>{summary}</section>}
@@ -20,9 +19,6 @@ export function ManagementPage({summary, search, filters, notice, error, table, 
         {filters}
       </FilterBar>
 
-      <AnimatePresence>
-        {notice && <Alert key="notice" tone="success">{notice}</Alert>}
-      </AnimatePresence>
       {error && <Alert tone="error">{error}</Alert>}
 
       {table}

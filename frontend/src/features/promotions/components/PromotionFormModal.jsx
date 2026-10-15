@@ -14,7 +14,6 @@ import {SegmentedControl} from '../../../components/molecules/SegmentedControl';
 import {Stepper} from '../../../components/molecules/Stepper';
 import {DayPicker} from '../../../components/molecules/DayPicker';
 import {PriceTag} from '../../../components/molecules/PriceTag';
-import {Alert} from '../../../components/molecules/Alert';
 import {formatAmount} from '../../../lib/format';
 import {cn} from '../../../lib/cn';
 import {DESCRIPTION_MAX_LENGTH, MAX_PRODUCTS, MAX_QUANTITY, NAME_MAX_LENGTH, TYPE_OPTIONS} from '../constants/promotions';
@@ -26,12 +25,12 @@ const styles = {
   fields: 'flex flex-col gap-4',
   pair: 'grid gap-4 sm:grid-cols-2',
   sectionTitle: 'text-base font-semibold text-carbon',
-  required: 'text-rojo',
+  required: 'text-error',
   rows: 'flex flex-col gap-2',
   row: 'grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2',
   rowSingle: 'grid-cols-[minmax(0,1fr)_auto]',
-  rowError: 'col-span-full text-xs text-rojo',
-  error: 'text-sm text-rojo',
+  rowError: 'col-span-full text-xs text-error',
+  error: 'text-sm text-error',
   preview: 'flex items-center justify-between gap-4 rounded-2xl border border-arena/60 bg-white px-5 py-4',
   previewLeft: 'flex items-center gap-3',
   previewIcon: 'flex size-11 shrink-0 items-center justify-center rounded-xl bg-brasa/10 text-brasa',
@@ -158,8 +157,6 @@ export function PromotionFormModal({form}) {
         <FormField label="Descripción" hint="Opcional. Se mostrará al cliente en Familia.">
           {(control) => <Textarea {...control} maxLength={DESCRIPTION_MAX_LENGTH} placeholder="Breve descripción de la promoción" value={form.values.descripcion} onChange={(event) => form.setField('descripcion', event.target.value)} />}
         </FormField>
-
-        {form.modalError && <Alert tone="error">{form.modalError}</Alert>}
 
         <div className={styles.actions}>
           <Button variant="outline" onClick={form.close} disabled={form.saving}>

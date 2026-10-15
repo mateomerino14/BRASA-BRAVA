@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {useToast} from '../context/useToast';
 
 // Estado de la foto: archivo nuevo, URL guardada y si el usuario la quitó
 const emptyImage = {file: null, url: null, removed: false};
@@ -14,7 +15,7 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
   const [values, setValues] = useState(emptyValues);
   const [image, setImage] = useState(emptyImage);
   const [errors, setErrors] = useState({});
-  const [modalError, setModalError] = useState('');
+  const toast = useToast();
   const [saving, setSaving] = useState(false);
   const isEdit = Boolean(editing);
 
@@ -27,7 +28,6 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
     setValues(initialValues);
     setImage({...emptyImage, url: entity?.[imageField] ?? null});
     setErrors({});
-    setModalError('');
     setOpen(true);
   };
 
@@ -41,7 +41,6 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
       });
       return next;
     });
-    setModalError('');
   };
 
   const changeImage = (file) => {
@@ -77,6 +76,10 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
   const submit = async (event) => {
     event?.preventDefault();
     const nextErrors = validate(values, {isEdit, editing});
+    let errorTitle = 'No se pudo registrar';
+    if (isEdit) {
+      errorTitle = 'No se pudo guardar';
+    }
     setErrors(nextErrors);
     if (hasErrors(nextErrors)) {
       return;
@@ -97,11 +100,11 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
       if (saved) {
         // Los datos ya se guardaron: el siguiente intento modifica en vez de duplicar y vuelve a subir la foto
         setEditing(saved);
-        setModalError(`${messages.imageFailed}: ${requestError.message}`);
+        toast.error(`${messages.imageFailed}: ${requestError.message}`, errorTitle);
         onSaved?.();
       }
       else {
-        setModalError(requestError.message);
+        toast.error(requestError.message, errorTitle);
       }
     }
     setSaving(false);
@@ -119,7 +122,6 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
     values,
     image: {file: image.file, url: visibleImageUrl},
     errors,
-    modalError,
     saving,
     openCreate: () => reset(null),
     openEdit: (entity) => reset(entity),

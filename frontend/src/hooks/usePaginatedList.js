@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router';
-import {NOTICE_DURATION_MS, PAGE_SIZE, PAGE_SIZE_OPTIONS, SEARCH_DELAY_MS} from '../config/lists';
+import {useToast} from '../context/useToast';
+import {PAGE_SIZE, PAGE_SIZE_OPTIONS, SEARCH_DELAY_MS} from '../config/lists';
 
 const emptyResult = {items: [], total: 0};
 const SORT_DIRECTIONS = ['asc', 'desc'];
@@ -43,6 +44,7 @@ const nextSort = (current, key) => {
 // Estado estándar de una tabla de gestión guardado en la URL: búsqueda con espera, filtros, página, filas por página y orden
 export function usePaginatedList({fetchPage, filterDefaults = {}}) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const toast = useToast();
   const defaults = {...BASE_DEFAULTS, ...filterDefaults};
   const defaultsKey = JSON.stringify(defaults);
   const read = (key) => searchParams.get(key) ?? defaults[key];
@@ -53,8 +55,6 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
   const [result, setResult] = useState(emptyResult);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
-  const [actionError, setActionError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
 
   // Si la URL cambia desde afuera (atrás/adelante), el buscador la sigue
@@ -130,22 +130,10 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
     };
   }, [fetchPage, queryKey, reloadKey]);
 
-  useEffect(() => {
-    if (!notice && !actionError) {
-      return undefined;
-    }
-    const timer = setTimeout(() => {
-      setNotice('');
-      setActionError('');
-    }, NOTICE_DURATION_MS);
-    return () => clearTimeout(timer);
-  }, [notice, actionError]);
-
-  // Vuelve a pedir la página actual y, si se indica, muestra un aviso de éxito
+  // Vuelve a pedir la página actual y, si se indica, muestra el aviso emergente de éxito
   const reload = (message) => {
     if (message) {
-      setNotice(message);
-      setActionError('');
+      toast.success(message);
     }
     setReloadKey((key) => key + 1);
   };
@@ -176,8 +164,7 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
     pageSize,
     totalPages: Math.max(1, Math.ceil(result.total / pageSize)),
     loading,
-    error: error || actionError,
-    notice,
+    error,
     filters: {search, ...filters},
     sort,
     hasActiveFilters,
@@ -189,10 +176,7 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
     changeSort,
     clearFilters,
     reload,
-    // Muestra por unos segundos el error de una acción rápida (por ejemplo, un interruptor)
-    reportError: (message) => {
-      setNotice('');
-      setActionError(message);
-    },
+    // Muestra en un aviso emergente el error de una acción rápida (por ejemplo, un interruptor)
+    reportError: (message) => toast.error(message),
   };
 }

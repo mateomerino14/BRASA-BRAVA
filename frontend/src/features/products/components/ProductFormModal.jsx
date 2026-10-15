@@ -6,7 +6,6 @@ import {Select} from '../../../components/atoms/Select';
 import {Textarea} from '../../../components/atoms/Textarea';
 import {FormField} from '../../../components/molecules/FormField';
 import {ImagePicker} from '../../../components/molecules/ImagePicker';
-import {Alert} from '../../../components/molecules/Alert';
 import {DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH} from '../constants/products';
 import {buildCategoryOptions} from '../utils/productForm';
 
@@ -76,8 +75,6 @@ export function ProductFormModal({form, categories}) {
             <Textarea {...control} maxLength={DESCRIPTION_MAX_LENGTH} placeholder="Breve descripción del producto" value={form.values.descripcion} onChange={(event) => form.setField('descripcion', event.target.value)} />
           )}
         </FormField>
-
-        {form.modalError && <Alert tone="error">{form.modalError}</Alert>}
 
         <div className={styles.actions}>
           <Button variant="outline" onClick={form.close} disabled={form.saving}>

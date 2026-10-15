@@ -1,26 +1,22 @@
-import {ArrowDownUp, Ban, History, Pencil, RotateCcw} from 'lucide-react';
+import {Ban, Pencil, RotateCcw} from 'lucide-react';
 import {ListTable} from '../../../components/organisms/ListTable';
 import {Badge} from '../../../components/atoms/Badge';
 import {IconButton} from '../../../components/atoms/IconButton';
-import {LevelBar} from '../../../components/atoms/LevelBar';
 import {cn} from '../../../lib/cn';
 import {formatQuantity} from '../../../lib/format';
 import {QuantityAmount} from './QuantityAmount';
-import {LEVEL_META} from '../constants/stock';
+import {LEVEL_TONES, UNIT_NAMES} from '../constants/stock';
 
 const styles = {
   name: 'truncate font-semibold text-carbon',
   inactiveName: 'text-cafe line-through',
   unit: 'text-xs text-cafe',
-  stock: 'flex min-w-36 flex-col gap-1.5',
   minimum: 'whitespace-nowrap text-sm text-cafe',
   actions: 'inline-flex gap-2',
   inactiveRow: 'bg-hueso/40',
 };
 
-const UNIT_NAMES = {kg: 'Kilogramos', g: 'Gramos', l: 'Litros', ml: 'Mililitros', unidad: 'Unidades'};
-
-const buildColumns = ({onEdit, onToggleStatus, onMove, onHistory}) => [
+const buildColumns = ({onEdit, onToggleStatus}) => [
   {
     key: 'insumo',
     header: 'Insumo',
@@ -34,23 +30,12 @@ const buildColumns = ({onEdit, onToggleStatus, onMove, onHistory}) => [
     ),
   },
   {
-    key: 'stock',
-    header: 'Stock actual',
+    key: 'cantidad',
+    header: 'Cantidad',
     sortKey: 'stock',
-    render: (ingredient) => (
-      <div className={styles.stock}>
-        <QuantityAmount value={ingredient.stockActual} unit={ingredient.unidad} />
-        <LevelBar value={ingredient.stockActual} minimum={ingredient.stockMinimo} tone={LEVEL_META[ingredient.nivel].tone} />
-      </div>
-    ),
+    render: (ingredient) => <QuantityAmount value={ingredient.stockActual} unit={ingredient.unidad} valueClassName={LEVEL_TONES[ingredient.nivel]} />,
   },
-  {key: 'minimo', header: 'Mínimo', align: 'center', render: (ingredient) => <span className={styles.minimum}>{formatQuantity(ingredient.stockMinimo, ingredient.unidad)}</span>},
-  {
-    key: 'nivel',
-    header: 'Nivel',
-    align: 'center',
-    render: (ingredient) => <Badge dot tone={LEVEL_META[ingredient.nivel].tone}>{LEVEL_META[ingredient.nivel].label}</Badge>,
-  },
+  {key: 'minimo', header: 'Mínimo', render: (ingredient) => <span className={styles.minimum}>{formatQuantity(ingredient.stockMinimo, ingredient.unidad)}</span>},
   {
     key: 'estado',
     header: 'Estado',
@@ -69,9 +54,7 @@ const buildColumns = ({onEdit, onToggleStatus, onMove, onHistory}) => [
     mobile: 'actions',
     render: (ingredient) => (
       <span className={styles.actions}>
-        <IconButton icon={ArrowDownUp} tone="edit" label={`Registrar movimiento de ${ingredient.nombre}`} disabled={!ingredient.activo} onClick={() => onMove(ingredient)} />
-        <IconButton icon={History} tone="neutral" label={`Ver historial de ${ingredient.nombre}`} onClick={() => onHistory(ingredient)} />
-        <IconButton icon={Pencil} tone="neutral" label={`Modificar ${ingredient.nombre}`} onClick={() => onEdit(ingredient)} />
+        <IconButton icon={Pencil} tone="edit" label={`Modificar ${ingredient.nombre}`} onClick={() => onEdit(ingredient)} />
         <IconButton
           icon={ingredient.activo ? Ban : RotateCcw}
           tone={ingredient.activo ? 'danger' : 'success'}
@@ -83,13 +66,13 @@ const buildColumns = ({onEdit, onToggleStatus, onMove, onHistory}) => [
   },
 ];
 
-export function IngredientsTable({list, onEdit, onToggleStatus, onMove, onHistory}) {
+export function IngredientsTable({list, onEdit, onToggleStatus}) {
   return (
     <ListTable
       list={list}
       caption="Insumos"
       itemLabel="insumos"
-      columns={buildColumns({onEdit, onToggleStatus, onMove, onHistory})}
+      columns={buildColumns({onEdit, onToggleStatus})}
       emptyMessage="No se encontraron insumos con esos filtros"
       rowClassName={(ingredient) => !ingredient.activo && styles.inactiveRow}
     />

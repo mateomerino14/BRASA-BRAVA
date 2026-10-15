@@ -60,7 +60,6 @@ export function PromotionsPage() {
           <FilterSelect label="Filtrar por estado" options={STATUS_OPTIONS} value={list.filters.estado} onChange={list.changeStatus} />
         </>
       }
-      notice={list.notice}
       error={list.error}
       table={<PromotionsTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} />}
       callout={{...CALLOUT, onAction: form.openCreate}}
@@ -74,7 +73,6 @@ export function PromotionsPage() {
         confirmLabel={deactivating ? 'Dar de baja' : 'Reactivar'}
         tone={deactivating ? 'danger' : 'primary'}
         loading={status.saving}
-        error={status.modalError}
         onConfirm={status.confirm}
         onCancel={status.cancel}
       />

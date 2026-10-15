@@ -1,6 +1,7 @@
 import {useRef, useState} from 'react';
 import {productsApi} from '../services/productsApi';
 import {computePortions, toRecipePayload, validateRecipe} from '../utils/recipeForm';
+import {useToast} from '../../../context/useToast';
 
 const toText = (value) => String(value).replace('.', ',');
 
@@ -22,7 +23,7 @@ export function useRecipe({onSaved, api = productsApi} = {}) {
   const [ingredients, setIngredients] = useState(new Map());
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [modalError, setModalError] = useState('');
+  const toast = useToast();
   const [saving, setSaving] = useState(false);
   const nextKey = useRef(0);
 
@@ -35,7 +36,6 @@ export function useRecipe({onSaved, api = productsApi} = {}) {
     setTarget(product);
     setRows([]);
     setErrors({});
-    setModalError('');
     setLoading(true);
     try {
       const [{insumos}, {recipe}] = await Promise.all([api.recipeOptions(), api.recipe(product.id)]);
@@ -47,14 +47,13 @@ export function useRecipe({onSaved, api = productsApi} = {}) {
       setRows(initial);
     }
     catch (requestError) {
-      setModalError(requestError.message);
+      toast.error(requestError.message, 'No se pudo cargar la receta');
     }
     setLoading(false);
   };
 
   const clearErrors = () => {
     setErrors({});
-    setModalError('');
   };
 
   const addRow = () => {
@@ -95,7 +94,7 @@ export function useRecipe({onSaved, api = productsApi} = {}) {
       onSaved?.(message);
     }
     catch (requestError) {
-      setModalError(requestError.message);
+      toast.error(requestError.message, 'No se pudo guardar la receta');
     }
     setSaving(false);
   };
@@ -106,7 +105,6 @@ export function useRecipe({onSaved, api = productsApi} = {}) {
     ingredients,
     loading,
     errors,
-    modalError,
     saving,
     portions: computePortions(rows, ingredients),
     open,
