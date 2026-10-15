@@ -29,11 +29,24 @@ describe('Autenticación: recuperación de contraseña', () => {
     expect(lastCode(ctx.mailer)).toMatch(/^\d{6}$/);
   });
 
-  it('responde igual con un correo no registrado y no envía nada', async () => {
+  it('avisa que no existe una cuenta con ese correo y no envía nada', async () => {
     const res = await requestCode('nadie@brasabrava.bo');
-    expect(res.status).toBe(200);
-    expect(res.body.message).toMatch(/Si el correo está registrado/);
+    expect(res.status).toBe(404);
+    expect(res.body.message).toMatch(/No hay ninguna cuenta registrada/);
     expect(ctx.mailer.outbox).toHaveLength(0);
+  });
+
+  it('avisa que la cuenta está dada de baja y no envía nada', async () => {
+    const res = await requestCode('j.ortiz@brasabrava.bo');
+    expect(res.status).toBe(403);
+    expect(res.body.message).toMatch(/dada de baja/);
+    expect(ctx.mailer.outbox).toHaveLength(0);
+  });
+
+  it('confirma el envío del código', async () => {
+    const res = await requestCode('C.Mendoza@BrasaBrava.bo');
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('Le enviamos un código de verificación a su correo');
   });
 
   it('guarda el código hasheado, nunca en texto plano', async () => {

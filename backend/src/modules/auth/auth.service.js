@@ -8,6 +8,8 @@ const directorioUsername = 'DIRECTORIO';
 const invalidCredentials = 'Usuario o contraseña incorrectos';
 const invalidCode = 'El código es inválido o ya expiró';
 const lockedCode = 'Código bloqueado por demasiados intentos. Solicite uno nuevo';
+const unknownAccount = {error: 'No hay ninguna cuenta registrada con ese correo. Revise que esté bien escrito', status: 404};
+const inactiveAccount = {error: 'La cuenta de ese correo está dada de baja. Pida a administración que la reactive', status: 403};
 const msPerMinute = 60_000;
 
 // Reglas de negocio del inicio de sesión y la recuperación de contraseña
@@ -75,11 +77,14 @@ export const createAuthService = ({repository, mailer, config, logger = console,
     return {users};
   };
 
-  // Genera y envía un código si el correo existe; responde igual en ambos casos
+  // Genera y envía un código al correo de un empleado activo
   const requestPasswordReset = async ({email}) => {
-    const employee = await repository.findActiveEmployeeByEmail(email);
+    const employee = await repository.findEmployeeByEmail(email);
     if (!employee) {
-      return {sent: false};
+      return unknownAccount;
+    }
+    if (!employee.activo) {
+      return inactiveAccount;
     }
     const code = generateCode();
     const expiresAt = new Date(now().getTime() + config.RESET_CODE_TTL_MINUTES * msPerMinute);
