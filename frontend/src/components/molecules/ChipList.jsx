@@ -13,7 +13,7 @@ const STAGGER_SECONDS = 0.04;
 const DEFAULT_VISIBLE = 3;
 
 // Lista de chips que muestra los primeros y despliega el resto con "+N más" y entrada escalonada
-export function ChipList({label, items, visible = DEFAULT_VISIBLE}) {
+export function ChipList({label, items, visible = DEFAULT_VISIBLE, chipClassName = styles.chip}) {
   const [expanded, setExpanded] = useState(false);
   const hidden = items.length - visible;
   let shown = items;
@@ -32,7 +32,7 @@ export function ChipList({label, items, visible = DEFAULT_VISIBLE}) {
             animate={chipVisible}
             exit={chipIn}
             transition={{delay: Math.max(0, index - visible) * STAGGER_SECONDS}}
-            className={styles.chip}
+            className={chipClassName}
           >
             {item.label}
           </motion.li>
