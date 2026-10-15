@@ -42,7 +42,7 @@ export function CheckoutModal({checkout, venta, mesa}) {
   };
   const cash = parseCashSplit(values, total);
   return (
-    <Modal open={checkout.open} onClose={checkout.close} title={`Cobrar ${mesa.nombre}`} description={`Pedido Nº ${venta.numero}`} size="lg">
+    <Modal closeButton={false} open={checkout.open} onClose={checkout.close} title={`Cobrar ${mesa.nombre}`} description={`Pedido Nº ${venta.numero}`} size="lg">
       <div className={styles.layout}>
         <section aria-label="Vista previa del ticket" className={styles.paper}>
           <ReceiptTicket ticket={preview} printedAt={new Date()} />

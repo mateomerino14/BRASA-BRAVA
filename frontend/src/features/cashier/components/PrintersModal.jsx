@@ -32,7 +32,7 @@ export function PrintersModal({settings}) {
     return {value: item.name, label};
   });
   return (
-    <Modal open={settings.open} onClose={settings.close} title="Impresoras" description="Solo para esta computadora de caja." size="md">
+    <Modal closeButton={false} open={settings.open} onClose={settings.close} title="Impresoras" description="Solo para esta computadora de caja." size="md">
       <div className={styles.body}>
         <p className={styles.intro}>
           Elija la ticketera de cada lugar. Las que no elija se imprimen con el diálogo de impresión, como en el navegador.

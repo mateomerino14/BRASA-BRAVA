@@ -129,7 +129,7 @@ export function ItemPickerModal({picker, onConfirm, onClose}) {
     }
   }
   return (
-    <Modal open={picker.open} onClose={onClose} title={picker.item?.nombre ?? ''} description={description || undefined} size="lg">
+    <Modal open={picker.open} closeButton={false} onClose={onClose} title={picker.item?.nombre ?? ''} description={description || undefined} size="lg">
       {picker.item && <PickerForm key={picker.session} picker={picker} onConfirm={onConfirm} onClose={onClose} />}
     </Modal>
   );
