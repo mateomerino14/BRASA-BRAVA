@@ -11,7 +11,8 @@ const styles = {
   panel: 'relative max-h-[90dvh] w-full overflow-y-auto rounded-3xl bg-crema p-5 shadow-float sm:p-8',
   sizes: {sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl'},
   close: 'absolute right-4 top-4 rounded-full p-1.5 text-cafe transition hover:rotate-90 hover:bg-hueso hover:text-carbon',
-  title: 'pr-8 font-display text-3xl leading-none text-carbon sm:text-4xl',
+  title: 'font-display text-3xl leading-none text-carbon sm:text-4xl',
+  titleWithClose: 'pr-8',
   description: 'mt-2 text-base text-cafe',
   body: 'mt-6',
   footer: 'mt-6 flex flex-col gap-3',
@@ -24,7 +25,7 @@ const panelVisible = {opacity: 1, scale: 1, y: 0};
 const panelExit = {opacity: 0, scale: 0.95, y: 12};
 const panelSpring = {type: 'spring', stiffness: 320, damping: 26};
 
-export function Modal({open, onClose, title, description, size = 'md', children, footer}) {
+export function Modal({open, onClose, title, description, size = 'md', closeButton = true, children, footer}) {
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef(null);
@@ -47,12 +48,12 @@ export function Modal({open, onClose, title, description, size = 'md', children,
             transition={panelSpring}
             className={cn(styles.panel, styles.sizes[size])}
           >
-            {onClose && (
+            {onClose && closeButton && (
               <button type="button" onClick={onClose} aria-label="Cerrar" className={styles.close}>
                 <X size={20} />
               </button>
             )}
-            <h2 id={titleId} className={styles.title}>
+            <h2 id={titleId} className={cn(styles.title, closeButton && styles.titleWithClose)}>
               {title}
             </h2>
             {description && (
