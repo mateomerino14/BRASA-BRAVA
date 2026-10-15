@@ -26,7 +26,10 @@ export const createIngredientSchema = z.object({
   stockInicial: quantity('el stock inicial').optional().default(0),
 });
 
-export const updateIngredientSchema = z.object(baseFields);
+export const updateIngredientSchema = z.object({
+  ...baseFields,
+  stockActual: quantity('la cantidad en stock').optional(),
+});
 
 // Movimiento de stock: entrada, salida o ajuste
 export const movementSchema = z.object({

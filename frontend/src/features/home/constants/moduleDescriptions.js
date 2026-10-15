@@ -4,7 +4,7 @@ export const MODULE_DESCRIPTIONS = {
   cocina: 'Pedidos por preparar y unidades listas',
   productos: 'Registrar y modificar el menú',
   secciones: 'Salones y mesas del local',
-  stock: 'Ingredientes e inventario',
+  stock: 'Ingredientes y bebidas en el local',
   categorias: 'Categorías y subcategorías',
   promociones: 'Combos y horarios especiales',
   empleados: 'Personal, cargos y accesos',

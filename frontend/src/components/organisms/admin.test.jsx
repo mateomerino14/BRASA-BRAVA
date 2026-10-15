@@ -103,9 +103,9 @@ describe('RegisterCallout y ConfirmDialog', () => {
   it('la confirmación muestra el mensaje y responde a ambos botones', async () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
-    render(<ConfirmDialog open title="Dar de baja" message="¿Seguro?" confirmLabel="Dar de baja" error="Falló" onConfirm={onConfirm} onCancel={onCancel} />);
+    render(<ConfirmDialog open title="Dar de baja" message="¿Seguro?" confirmLabel="Dar de baja" onConfirm={onConfirm} onCancel={onCancel} />);
     const dialog = screen.getByRole('dialog', {name: 'Dar de baja'});
-    expect(within(dialog).getByRole('alert')).toHaveTextContent('Falló');
+    expect(within(dialog).getByText('¿Seguro?')).toBeInTheDocument();
     await userEvent.click(within(dialog).getByRole('button', {name: 'Dar de baja'}));
     await userEvent.click(within(dialog).getByRole('button', {name: 'Cancelar'}));
     expect(onConfirm).toHaveBeenCalledOnce();

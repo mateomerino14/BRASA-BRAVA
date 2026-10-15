@@ -38,9 +38,9 @@ export const NAVIGATION = [
         permission: 'secciones',
       },
       {
-        label: 'Stock',
-        title: 'Gestión de stock',
-        to: '/stock',
+        label: 'Inventario',
+        title: 'Inventario de insumos',
+        to: '/inventario',
         icon: Database,
         permission: 'stock',
       },

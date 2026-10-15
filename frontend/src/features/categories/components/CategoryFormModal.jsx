@@ -5,7 +5,6 @@ import {Textarea} from '../../../components/atoms/Textarea';
 import {FormField} from '../../../components/molecules/FormField';
 import {ImagePicker} from '../../../components/molecules/ImagePicker';
 import {TagInput} from '../../../components/molecules/TagInput';
-import {Alert} from '../../../components/molecules/Alert';
 import {DESCRIPTION_MAX_LENGTH, MAX_SUBCATEGORIES, NAME_MAX_LENGTH} from '../constants/categories';
 
 const styles = {
@@ -51,8 +50,6 @@ export function CategoryFormModal({form}) {
             <TagInput {...control} tags={tags} max={MAX_SUBCATEGORIES} placeholder="Clásicas, Especiales…" onAdd={form.addSubcategory} onRemove={form.removeSubcategory} />
           )}
         </FormField>
-
-        {form.modalError && <Alert tone="error">{form.modalError}</Alert>}
 
         <div className={styles.actions}>
           <Button variant="outline" onClick={form.close} disabled={form.saving}>

@@ -73,7 +73,7 @@ describe('Gestión de secciones y mesas', () => {
     await user.click(within(dialog).getByRole('button', {name: 'Quitar mesa 1'}));
     await waitFor(() => expect(within(dialog).queryByText('Ya hay una mesa con ese nombre')).not.toBeInTheDocument());
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
-    expect(await within(dialog).findByText('Ya existe una sección con ese nombre')).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Ya existe una sección con ese nombre');
   });
 
   it('modifica mesas conservando sus ids', async () => {

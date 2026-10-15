@@ -53,7 +53,6 @@ export function ProductsPage() {
           <FilterSelect label="Filtrar por disponibilidad" options={AVAILABILITY_OPTIONS} value={list.filters.disponibilidad} onChange={list.changeAvailability} />
         </>
       }
-      notice={list.notice}
       error={list.error}
       table={<ProductsTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} onRecipe={recipe.open} availability={availability} />}
       callout={{...CALLOUT, onAction: form.openCreate}}
@@ -68,7 +67,6 @@ export function ProductsPage() {
         confirmLabel={deactivating ? 'Dar de baja' : 'Reactivar'}
         tone={deactivating ? 'danger' : 'primary'}
         loading={status.saving}
-        error={status.modalError}
         onConfirm={status.confirm}
         onCancel={status.cancel}
       />

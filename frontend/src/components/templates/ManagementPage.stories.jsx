@@ -31,7 +31,7 @@ const toggleDirection = (sort, key) => {
   return 'asc';
 };
 
-function Demo({rows = ROWS, notice = ''}) {
+function Demo({rows = ROWS}) {
   const [search, setSearch] = useState('');
   const [estado, setEstado] = useState('todos');
   const [sort, setSort] = useState({key: '', dir: 'asc'});
@@ -52,14 +52,13 @@ function Demo({rows = ROWS, notice = ''}) {
     <ManagementPage
       search={{value: search, onChange: setSearch, placeholder: 'Buscar producto'}}
       filters={<FilterSelect label="Filtrar por estado" options={STATUS_OPTIONS} value={estado} onChange={setEstado} />}
-      notice={notice}
       table={<ListTable list={list} columns={COLUMNS} caption="Productos" itemLabel="productos" emptyMessage="No se encontraron productos con esos filtros" />}
       callout={{icon: Package, title: '¿Desea registrar un nuevo producto?', subtitle: 'Agregue un producto al menú.', actionLabel: 'Registrar producto', onAction: fn()}}
     />
   );
 }
 
-export const Completa = {render: () => <Demo notice="Se registró el producto Hamburguesa Clásica" />};
+export const Completa = {render: () => <Demo />};
 export const SinResultados = {render: () => <Demo rows={[]} />};
 export const EnCelular = {globals: {viewport: {value: 'mobile2'}}, render: () => <Demo />};
 export const FilasPorPagina = {render: () => <PageSizeSelect value={10} onChange={fn()} />};

@@ -44,7 +44,6 @@ export function SectionsPage() {
       }
       search={{value: list.filters.search, onChange: list.changeSearch, placeholder: 'Buscar sección o mesa'}}
       filters={<FilterSelect label="Filtrar por estado" options={STATUS_OPTIONS} value={list.filters.estado} onChange={list.changeStatus} />}
-      notice={list.notice}
       error={list.error}
       table={<SectionsTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} />}
       callout={{...CALLOUT, onAction: form.openCreate}}
@@ -58,7 +57,6 @@ export function SectionsPage() {
         confirmLabel={deactivating ? 'Dar de baja' : 'Reactivar'}
         tone={deactivating ? 'danger' : 'primary'}
         loading={status.saving}
-        error={status.modalError}
         onConfirm={status.confirm}
         onCancel={status.cancel}
       />

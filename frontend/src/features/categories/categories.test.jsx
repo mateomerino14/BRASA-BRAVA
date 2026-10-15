@@ -74,7 +74,8 @@ describe('Gestión de categorías', () => {
     await user.type(within(dialog).getByLabelText(/^Nombre/), 'hamburguesas');
     await user.type(within(dialog).getByLabelText(/^Subcategorías/), 'Otra{Enter}');
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
-    expect(await within(dialog).findByText('Ya existe una categoría con ese nombre')).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Ya existe una categoría con ese nombre');
+    expect(dialog).toBeInTheDocument();
   });
 
   it('si falla la foto conserva la categoría y el reintento modifica en vez de duplicar', async () => {
@@ -85,7 +86,7 @@ describe('Gestión de categorías', () => {
     await user.type(within(dialog).getByLabelText(/^Subcategorías/), 'Helados{Enter}');
     await user.upload(within(dialog).getByLabelText('Foto de la categoría', {selector: 'input'}), pngFile());
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
-    expect(await within(dialog).findByText(/La categoría se guardó, pero la imagen no/)).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent(/La categoría se guardó, pero la imagen no/);
     expect(within(dialog).getByRole('button', {name: 'Guardar'})).toBeInTheDocument();
     expect(backend.store.filter((category) => category.nombre === 'Postres')).toHaveLength(1);
   });
