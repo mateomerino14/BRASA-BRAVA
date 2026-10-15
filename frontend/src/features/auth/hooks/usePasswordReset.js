@@ -5,6 +5,14 @@ import {authApi} from '../services/authApi';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_PATTERN = /^\d{6}$/;
 const minPasswordLength = 8;
+const ERROR_TITLES = {
+  403: 'Cuenta inhabilitada',
+  404: 'Cuenta inexistente',
+  429: 'Demasiados intentos',
+  502: 'Correo no enviado',
+};
+
+const errorTitle = (error, fallback) => ERROR_TITLES[error.status] ?? fallback;
 
 export const passwordError = (password) => {
   if (password.length < minPasswordLength) {
@@ -28,14 +36,16 @@ export function usePasswordReset({api = authApi} = {}) {
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const run = async (work) => {
+  const run = async (work, fallbackTitle) => {
     setLoading(true);
     setErrors({});
     try {
-      return await work();
+      const result = await work();
+      toast.clear();
+      return result;
     }
     catch (requestError) {
-      toast.error(requestError.message);
+      toast.error(requestError.message, errorTitle(requestError, fallbackTitle));
       return undefined;
     }
     finally {
@@ -65,7 +75,7 @@ export function usePasswordReset({api = authApi} = {}) {
       setErrors({email: 'Ingrese un correo válido'});
       return;
     }
-    const ok = await run(() => api.requestResetCode(email.trim()));
+    const ok = await run(() => api.requestResetCode(email.trim()), 'No se pudo enviar el código');
     if (ok) {
       setCode('');
       setStep('code');
@@ -74,7 +84,7 @@ export function usePasswordReset({api = authApi} = {}) {
   };
 
   const resendCode = async () => {
-    const ok = await run(() => api.requestResetCode(email.trim()));
+    const ok = await run(() => api.requestResetCode(email.trim()), 'No se pudo enviar el código');
     if (ok) {
       setCode('');
       setNotice('Le enviamos un código nuevo.');
@@ -87,7 +97,7 @@ export function usePasswordReset({api = authApi} = {}) {
       return;
     }
     setNotice('');
-    const ok = await run(() => api.verifyResetCode(email.trim(), code));
+    const ok = await run(() => api.verifyResetCode(email.trim(), code), 'Código no válido');
     if (ok) {
       setStep('password');
     }
@@ -106,7 +116,7 @@ export function usePasswordReset({api = authApi} = {}) {
       setErrors({confirmation: 'Las contraseñas no coinciden'});
       return;
     }
-    const ok = await run(() => api.confirmPasswordReset(email.trim(), code, password));
+    const ok = await run(() => api.confirmPasswordReset(email.trim(), code, password), 'No se pudo cambiar la contraseña');
     if (ok) {
       setStep('done');
     }
