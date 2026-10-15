@@ -1,23 +1,15 @@
 import {Link} from 'react-router';
-import {motion} from 'motion/react';
-import {ArrowUpRight} from 'lucide-react';
 import {MODULE_DESCRIPTIONS} from '../constants/moduleDescriptions';
 
 const styles = {
-  title: 'mb-4 font-display text-3xl text-carbon',
-  grid: 'grid gap-4 sm:grid-cols-2 xl:grid-cols-4',
-  card: 'group flex h-full flex-col gap-4 rounded-2xl border border-arena/50 bg-white p-5 shadow-card transition-shadow hover:shadow-float',
-  top: 'flex items-start justify-between',
-  iconBox: 'flex size-12 items-center justify-center rounded-xl bg-brasa/10 text-brasa transition-colors group-hover:bg-brasa group-hover:text-white',
-  arrow: 'text-arena transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brasa',
-  label: 'font-display text-2xl leading-none text-carbon',
-  description: 'mt-1 text-sm text-cafe',
+  title: 'mb-1 font-display text-3xl text-carbon',
+  list: 'grid lg:grid-cols-2 lg:gap-x-12',
+  link: 'group grid grid-cols-[2rem_auto_minmax(1rem,1fr)] items-baseline gap-x-3 border-b border-arena/60 px-1 py-3.5 transition-colors hover:bg-crema/70 focus-visible:bg-crema/70 sm:grid-cols-[2rem_auto_minmax(1rem,1fr)_auto]',
+  icon: 'self-center text-brasa transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110',
+  name: 'font-display text-2xl leading-none text-carbon transition-colors group-hover:text-brasa-oscuro',
+  dots: 'hidden -translate-y-1 border-b-2 border-dotted border-arena sm:block',
+  description: 'col-start-2 col-end-4 text-[13px] text-cafe sm:col-start-auto sm:col-end-auto sm:text-right',
 };
-
-const gridStagger = {visible: {transition: {staggerChildren: 0.06, delayChildren: 0.15}}};
-const cardReveal = {hidden: {opacity: 0, y: 18}, visible: {opacity: 1, y: 0}};
-const hoverLift = {y: -6};
-const cardSpring = {type: 'spring', stiffness: 300, damping: 20};
 
 export function QuickAccessGrid({items}) {
   return (
@@ -25,24 +17,18 @@ export function QuickAccessGrid({items}) {
       <h2 id="quick-access-title" className={styles.title}>
         Accesos rápidos
       </h2>
-      <motion.ul initial="hidden" animate="visible" variants={gridStagger} className={styles.grid}>
+      <ul className={styles.list}>
         {items.map(({to, label, icon: Icon, permission}) => (
-          <motion.li key={to} variants={cardReveal} whileHover={hoverLift} transition={cardSpring}>
-            <Link to={to} className={styles.card}>
-              <div className={styles.top}>
-                <span className={styles.iconBox}>
-                  <Icon size={24} aria-hidden />
-                </span>
-                <ArrowUpRight size={20} aria-hidden className={styles.arrow} />
-              </div>
-              <div>
-                <p className={styles.label}>{label}</p>
-                <p className={styles.description}>{MODULE_DESCRIPTIONS[permission]}</p>
-              </div>
+          <li key={to}>
+            <Link to={to} className={styles.link}>
+              <Icon size={22} aria-hidden className={styles.icon} />
+              <span className={styles.name}>{label}</span>
+              <span aria-hidden className={styles.dots} />
+              <span className={styles.description}>{MODULE_DESCRIPTIONS[permission]}</span>
             </Link>
-          </motion.li>
+          </li>
         ))}
-      </motion.ul>
+      </ul>
     </section>
   );
 }

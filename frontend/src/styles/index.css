@@ -43,6 +43,15 @@
 
   --animate-shake: shake 0.4s ease-in-out;
   --animate-ember: ember 3.5s ease-in-out infinite;
+  --animate-coal: coal 4s ease-in-out infinite;
+
+  /* Brasa que respira en la pizarra de la página principal */
+  @keyframes coal {
+    50% {
+      opacity: 0.55;
+      transform: translateY(6px) scale(1.06);
+    }
+  }
 
   @keyframes shake {
     0%,
@@ -74,6 +83,11 @@
 /* Fondos decorativos reutilizables */
 @utility bg-sidebar-glow {
   background-image: radial-gradient(120% 60% at 0% 0%, rgb(255 255 255 / 0.18), transparent 60%);
+}
+
+/* Rayas suaves de parrilla sobre fondos oscuros */
+@utility bg-grill {
+  background-image: repeating-linear-gradient(-28deg, rgb(255 255 255 / 0.035) 0 2px, transparent 2px 26px);
 }
 
 @utility bg-auth-glow {
