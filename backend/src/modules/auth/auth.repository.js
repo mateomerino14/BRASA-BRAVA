@@ -19,6 +19,15 @@ export const createAuthRepository = (db) => ({
     return rows[0] ?? null;
   },
 
+  // Busca un empleado por correo, activo o dado de baja
+  findEmployeeByEmail: async (email) => {
+    const {rows} = await db.query(
+      'SELECT id_empleado, nombre, correo, activo FROM empleado WHERE LOWER(correo) = LOWER($1)',
+      [email],
+    );
+    return rows[0] ?? null;
+  },
+
   // Busca un empleado activo por correo
   findActiveEmployeeByEmail: async (email) => {
     const {rows} = await db.query(

@@ -59,8 +59,8 @@ La sesión se maneja en `context/` (`AuthProvider` y `useAuth`).
 ### Estándar de mensajes de error
 
 - **Error de un campo** (vacío, formato, regla): texto rojo debajo del campo con `FormField` y el borde del campo en rojo. No abre avisos.
-- **Error de una operación** (lo que responde el servidor o la red: credenciales incorrectas, código vencido, nombre repetido): aviso emergente con `useToast().error(mensaje, título?)`. Aparece arriba al centro, por encima de los modales, se cierra solo a los 5 segundos o con la X, y no repite el mismo mensaje.
-- `useToast().success(mensaje)` sirve para confirmaciones breves con el mismo formato.
+- **Error de una operación** (lo que responde el servidor o la red: credenciales incorrectas, código vencido, nombre repetido): aviso emergente con `useToast().error(mensaje, título?)`. Aparece arriba a la derecha, por encima de los modales, con una barra que muestra el tiempo que le queda; se cierra solo a los 5 segundos o con la X, y no repite el mismo mensaje.
+- `useToast().success(mensaje)` sirve para confirmaciones breves con el mismo formato, y `useToast().clear()` quita los avisos anteriores cuando la operación sale bien.
 - El proveedor (`ToastProvider`) está en `App.jsx`, en `renderApp` de las pruebas y en Storybook.
 
 El inicio de sesión y la recuperación de contraseña ya siguen este estándar. El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
