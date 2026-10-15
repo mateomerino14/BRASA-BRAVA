@@ -12,7 +12,7 @@ const levelOf = (stockActual, stockMinimo) => {
 const ingredient = (id, nombre, unidad, stockActual, stockMinimo, extra = {}) => ({id, nombre, unidad, stockActual, stockMinimo, nivel: levelOf(stockActual, stockMinimo), activo: true, ...extra});
 
 export const INGREDIENTS = [
-  ingredient(1, 'Carne de res', 'kg', 12, 5),
+  ingredient(1, 'Carne de res', 'kg', 12, 5, {unidadFija: true}),
   ingredient(2, 'Queso cheddar', 'kg', 1.5, 2),
   ingredient(3, 'Lechuga', 'unidad', 0, 5),
   ingredient(4, 'Aceite', 'l', 6, 4, {activo: false}),
@@ -36,8 +36,8 @@ export const createStockBackend = () => {
     },
     'PUT /ingredients/1': (body) => {
       calls.saved.push(body);
-      if (body.unidad !== 'kg') {
-        return [409, {message: 'No se puede cambiar la unidad de un insumo que ya tiene movimientos'}];
+      if (body.nombre === 'Lechuga') {
+        return [409, {message: 'Ya existe un insumo con ese nombre'}];
       }
       const item = Object.assign(find(1), body);
       item.nivel = levelOf(item.stockActual, item.stockMinimo);

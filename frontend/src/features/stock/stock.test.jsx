@@ -44,20 +44,25 @@ describe('Inventario', () => {
     expect(backend.calls.saved.at(-1)).toEqual({nombre: 'Jalapeños', unidad: 'kg', stockMinimo: 0.5, stockInicial: 2});
   });
 
-  it('al modificar corrige la cantidad y avisa en emergente si el servidor rechaza', async () => {
+  it('al modificar fija la unidad si ya se usó, corrige la cantidad y avisa en emergente si el servidor rechaza', async () => {
     const {backend, table, user} = await openPage();
     await user.click(within(rowOf(table, 'Carne de res')).getByRole('button', {name: 'Modificar Carne de res'}));
     const dialog = await screen.findByRole('dialog', {name: 'Modificar insumo'});
     const quantity = within(dialog).getByLabelText(/^Cantidad en stock/);
     expect(quantity).toHaveValue('12');
-    await user.selectOptions(within(dialog).getByLabelText(/^Unidad/), 'g');
+    expect(within(dialog).getByLabelText(/^Unidad/)).toBeDisabled();
+    expect(within(dialog).getByText(/ya se usó en recetas, ventas o correcciones/)).toBeInTheDocument();
+    const name = within(dialog).getByLabelText(/^Nombre/);
+    await user.clear(name);
+    await user.type(name, 'Lechuga');
     await user.click(within(dialog).getByRole('button', {name: 'Guardar'}));
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('No se pudo guardar');
-    expect(alert).toHaveTextContent('No se puede cambiar la unidad de un insumo que ya tiene movimientos');
+    expect(alert).toHaveTextContent('Ya existe un insumo con ese nombre');
     expect(dialog).toBeInTheDocument();
 
-    await user.selectOptions(within(dialog).getByLabelText(/^Unidad/), 'kg');
+    await user.clear(name);
+    await user.type(name, 'Carne de res');
     await user.clear(quantity);
     await user.type(quantity, '4,5');
     await user.click(within(dialog).getByRole('button', {name: 'Guardar'}));

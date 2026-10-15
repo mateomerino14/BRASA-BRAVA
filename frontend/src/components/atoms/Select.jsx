@@ -3,7 +3,7 @@ import {cn} from '../../lib/cn';
 
 const styles = {
   wrapper: 'select-wrap relative',
-  base: 'select-field w-full rounded-lg border bg-campo pl-3 pr-9 text-carbon transition-[border-color,box-shadow] duration-200 focus:outline-none focus:ring-4 disabled:opacity-60',
+  base: 'select-field w-full rounded-lg border bg-campo pl-3 pr-9 text-carbon transition-[border-color,box-shadow] duration-200 focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:bg-hueso disabled:text-cafe',
   sizes: {
     sm: 'h-9 text-xs font-semibold',
     md: 'h-12 text-base',
