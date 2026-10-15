@@ -22,24 +22,26 @@ describe('Home', () => {
     mockApi(SUMMARY_HANDLERS);
     renderApp('/', {token: 't'});
     const summary = await screen.findByRole('region', {name: 'Resumen de hoy'});
-    expect(await within(summary).findByText('Vendido hoy · 3 ventas')).toBeInTheDocument();
-    expect(within(summary).getByLabelText('Bs 412,50')).toBeInTheDocument();
-    expect(within(summary).getByLabelText('Bs 300,00')).toBeInTheDocument();
-    expect(within(summary).getByLabelText('2 de 18')).toBeInTheDocument();
-    expect(within(summary).getByText(/Bs 263,00 por cobrar/)).toBeInTheDocument();
-    expect(within(summary).getByText('Unidades por preparar')).toBeInTheDocument();
-    expect(within(summary).getByLabelText('25 min')).toBeInTheDocument();
-    expect(within(summary).getByText('Espera más larga · Mesa 2')).toBeInTheDocument();
-    expect(within(summary).getByRole('link', {name: 'Ir a Caja'})).toHaveAttribute('href', '/caja');
-    expect(within(summary).getByRole('link', {name: 'Ir a Cocina'})).toHaveAttribute('href', '/cocina');
+    const cashier = await within(summary).findByRole('group', {name: 'Caja'});
+    expect(within(cashier).getByText('vendido en 3 ventas')).toBeInTheDocument();
+    expect(within(cashier).getByLabelText('Bs 412,50')).toBeInTheDocument();
+    expect(within(cashier).getByLabelText('Bs 300,00')).toBeInTheDocument();
+    expect(within(cashier).getByLabelText('2 de 18 mesas')).toBeInTheDocument();
+    expect(within(cashier).getByText('ocupadas, Bs 263,00 por cobrar')).toBeInTheDocument();
+    const kitchen = within(summary).getByRole('group', {name: 'Cocina'});
+    expect(within(kitchen).getByText('unidades por preparar')).toBeInTheDocument();
+    expect(within(kitchen).getByLabelText('25 min')).toBeInTheDocument();
+    expect(within(kitchen).getByText('espera más larga, Mesa 2')).toBeInTheDocument();
+    expect(within(cashier).getByRole('link', {name: 'Abrir caja'})).toHaveAttribute('href', '/caja');
+    expect(within(kitchen).getByRole('link', {name: 'Abrir cocina'})).toHaveAttribute('href', '/cocina');
   });
 
   it('cada cargo ve solo el resumen de lo suyo', async () => {
     const fetchMock = mockApi({...SUMMARY_HANDLERS, 'GET /auth/me': () => [200, {user: COCINERO}]});
     renderApp('/', {token: 't'});
     const summary = await screen.findByRole('region', {name: 'Resumen de hoy'});
-    expect(await within(summary).findByText('Envíos en preparación')).toBeInTheDocument();
-    expect(within(summary).queryByText(/Vendido hoy/)).not.toBeInTheDocument();
+    expect(await within(summary).findByText('envío en preparación')).toBeInTheDocument();
+    expect(within(summary).queryByRole('group', {name: 'Caja'})).not.toBeInTheDocument();
     expect(fetchMock.mock.calls.some(([url]) => url.includes('/sales/'))).toBe(false);
   });
 
@@ -53,7 +55,7 @@ describe('Home', () => {
     mockApi();
     renderApp('/', {token: 't'});
     expect(
-      await screen.findByRole('heading', {name: /Bienvenido de vuelta, Marco/}),
+      await screen.findByRole('heading', {name: /^(Buenos días|Buenas tardes|Buenas noches), Marco$/}),
     ).toBeInTheDocument();
     const shortcuts = screen.getByRole('region', {name: 'Accesos rápidos'});
     expect(shortcuts.querySelectorAll('a')).toHaveLength(9);

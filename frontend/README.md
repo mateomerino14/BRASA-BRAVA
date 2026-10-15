@@ -141,7 +141,10 @@ Los colores y fuentes salen del prototipo de Figma y se definen una sola vez en 
 
 ### Efectos visuales
 
-- Menú lateral con el grupo Administración desplegable, una píldora crema que se desliza hasta la pantalla activa y modo compacto de solo íconos.
+- Menú lateral con el grupo Administración desplegable, una píldora crema que se desliza hasta la pantalla activa y modo compacto de solo íconos, que se activa con la pestaña redonda del borde.
+- En celular y tablet, barra naranja fija arriba (`MobileTopBar`) y menú tipo persiana (`MobileMenu`) que baja desde la barra tablilla por tablilla, con Administración desplegable, el usuario y «Salir» abajo.
+- Títulos de pantalla con tres marcas de parrilla (naranja, mostaza y carbón) que crecen al entrar.
+- Página principal: pizarra carbón con rayas de parrilla, una brasa que respira y la hora del local; resumen del día como marcador con números que suben una vez (`CountUp`) y barras de proporción; accesos rápidos como una carta de restaurante con línea de puntos.
 - Modales con fondo desenfocado y entrada con rebote; los pasos de la recuperación de contraseña se deslizan.
 - Botones que se elevan al pasar el mouse y se hunden al presionar.
 - Código de verificación que avanza solo, acepta pegar y tiembla si es incorrecto.
