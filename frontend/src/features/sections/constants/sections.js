@@ -8,7 +8,7 @@ export const MIN_CAPACITY = 1;
 export const MAX_CAPACITY = 30;
 export const DEFAULT_CAPACITY = 4;
 export const DEFAULT_TABLE_PREFIX = 'Mesa';
-// Mesas visibles en la tabla antes del botón "+N más"
-export const VISIBLE_TABLES = 4;
+// Sillas dibujadas como máximo en el plano de una mesa (las demás se cuentan en el número)
+export const MAX_DRAWN_SEATS = 12;
 
 export const EMPTY_FORM = {nombre: '', descripcion: '', mesas: []};

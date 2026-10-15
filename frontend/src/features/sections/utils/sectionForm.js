@@ -66,3 +66,14 @@ export const toPayload = (values) => ({
   descripcion: values.descripcion.trim(),
   mesas: values.mesas.map(({id, nombre, capacidad}) => ({id, nombre: nombre.trim(), capacidad})),
 });
+
+// Agrupa las mesas por capacidad: [{capacidad: 4, mesas: 6}, ...], de la más repetida a la menos
+export const capacityGroups = (tables) => {
+  const counts = new Map();
+  for (const table of tables) {
+    counts.set(table.capacidad, (counts.get(table.capacidad) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([capacidad, mesas]) => ({capacidad, mesas}))
+    .sort((a, b) => b.mesas - a.mesas || b.capacidad - a.capacidad);
+};
