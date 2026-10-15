@@ -9,7 +9,7 @@ const styles = {
     md: 'h-12 text-base',
   },
   normal: 'border-arena focus:border-brasa focus:ring-brasa/20',
-  invalid: 'border-rojo focus:ring-rojo/15',
+  invalid: 'border-error focus:ring-error/15',
   icon: 'pointer-events-none absolute inset-y-0 right-3 my-auto text-cafe',
 };
 

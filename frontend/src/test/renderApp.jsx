@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import {MemoryRouter, useLocation} from 'react-router';
 import {MotionConfig} from 'motion/react';
 import {AuthProvider} from '../context/AuthContext';
+import {ToastProvider} from '../context/ToastContext';
 import {AppRoutes} from '../router/AppRoutes';
 
 // Registra la ubicación actual para que las pruebas lean la URL (búsqueda, filtros, página)
@@ -27,10 +28,12 @@ export const renderApp = (route = '/', {token} = {}) => {
   const result = render(
     <MotionConfig reducedMotion="always">
       <MemoryRouter initialEntries={[route]}>
-        <AuthProvider>
-          <AppRoutes />
-          <LocationSpy onChange={trackLocation} />
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <AppRoutes />
+            <LocationSpy onChange={trackLocation} />
+          </AuthProvider>
+        </ToastProvider>
       </MemoryRouter>
     </MotionConfig>,
   );

@@ -29,7 +29,7 @@ describe('Textarea', () => {
     const {rerender} = render(<Textarea aria-label="Descripción" maxLength={10} value="Hola" onChange={() => {}} />);
     expect(screen.getByText('4/10')).toBeInTheDocument();
     rerender(<Textarea aria-label="Descripción" maxLength={10} value="0123456789" onChange={() => {}} />);
-    expect(screen.getByText('10/10')).toHaveClass('text-rojo');
+    expect(screen.getByText('10/10')).toHaveClass('text-error');
   });
 });
 

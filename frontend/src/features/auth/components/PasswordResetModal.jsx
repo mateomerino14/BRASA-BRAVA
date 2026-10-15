@@ -14,6 +14,7 @@ const styles = {
   form: 'flex flex-col gap-6',
   codeStep: 'flex flex-col gap-3',
   codeLabel: 'font-display text-2xl text-carbon',
+  fieldError: 'text-sm font-medium text-error',
   passwordStep: 'flex flex-col gap-4',
   success: 'flex justify-center py-4 text-verde',
   actions: 'flex flex-col gap-3',
@@ -30,7 +31,7 @@ const checkSpring = {type: 'spring', stiffness: 260, damping: 14};
 
 function EmailStep({reset}) {
   return (
-    <FormField label="Correo" error={reset.error}>
+    <FormField label="Correo" error={reset.errors.email}>
       {(field) => (
         <Input
           {...field}
@@ -49,9 +50,9 @@ function CodeStep({reset}) {
   return (
     <div className={styles.codeStep}>
       <p className={styles.codeLabel}>Código</p>
-      <CodeInput value={reset.code} onChange={reset.changeCode} invalid={Boolean(reset.error)} focusOnMount />
-      {reset.error && <Alert tone="error">{reset.error}</Alert>}
-      {!reset.error && reset.notice && <Alert tone="info">{reset.notice}</Alert>}
+      <CodeInput value={reset.code} onChange={reset.changeCode} invalid={Boolean(reset.errors.code)} focusOnMount />
+      {reset.errors.code && <p role="alert" className={styles.fieldError}>{reset.errors.code}</p>}
+      {!reset.errors.code && reset.notice && <Alert tone="info">{reset.notice}</Alert>}
     </div>
   );
 }
@@ -59,7 +60,7 @@ function CodeStep({reset}) {
 function PasswordStep({reset, values, onChange}) {
   return (
     <div className={styles.passwordStep}>
-      <FormField label="Nueva contraseña" hint="Mínimo 8 caracteres, con letras y números.">
+      <FormField label="Nueva contraseña" hint="Mínimo 8 caracteres, con letras y números." error={reset.errors.password}>
         {(field) => (
           <PasswordInput
             {...field}
@@ -69,7 +70,7 @@ function PasswordStep({reset, values, onChange}) {
           />
         )}
       </FormField>
-      <FormField label="Confirmar contraseña">
+      <FormField label="Confirmar contraseña" error={reset.errors.confirmation}>
         {(field) => (
           <PasswordInput
             {...field}
@@ -79,7 +80,6 @@ function PasswordStep({reset, values, onChange}) {
           />
         )}
       </FormField>
-      {reset.error && <Alert tone="error">{reset.error}</Alert>}
     </div>
   );
 }
@@ -103,6 +103,7 @@ export function PasswordResetModal({reset}) {
 
   const changePassword = (field, value) => {
     setPasswords((current) => ({...current, [field]: value}));
+    reset.clearErrors();
   };
 
   const handleSubmit = (event) => {

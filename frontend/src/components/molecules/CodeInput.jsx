@@ -7,7 +7,7 @@ const styles = {
   digit: 'size-12 rounded-lg border bg-campo text-center font-display text-3xl text-carbon transition-[border-color,box-shadow,transform] duration-150 focus:-translate-y-0.5 focus:outline-none focus:ring-4 sm:size-14',
   empty: 'border-carbon/40 focus:border-brasa focus:ring-brasa/20',
   filled: 'border-brasa focus:ring-brasa/20',
-  invalid: 'border-rojo focus:ring-rojo/15',
+  invalid: 'border-error focus:ring-error/15',
 };
 
 const getDigitStyle = (digit, invalid) => {
