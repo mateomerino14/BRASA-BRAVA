@@ -3,7 +3,7 @@ import {screen, waitFor, within} from '@testing-library/react';
 import {renderApp} from '../../test/renderApp';
 import {mockApi} from '../../test/mockApi';
 import {createSectionsBackend} from '../../test/sectionsBackend';
-import {nextTableName, toPayload, validateSection} from './utils/sectionForm';
+import {capacityGroups, nextTableName, toPayload, validateSection} from './utils/sectionForm';
 
 const openPage = async () => {
   const backend = createSectionsBackend();
@@ -17,18 +17,16 @@ const openPage = async () => {
 const rowOf = (table, name) => within(table).getByText(name, {selector: 'p'}).closest('tr');
 
 describe('Gestión de secciones y mesas', () => {
-  it('muestra resumen, mesas desplegables, totales y estado', async () => {
-    const {table, user} = await openPage();
+  it('muestra resumen, mesas agrupadas por tamaño, totales y estado', async () => {
+    const {table} = await openPage();
     expect(screen.getByRole('heading', {name: 'Gestión de secciones y mesas'})).toBeInTheDocument();
     const summary = screen.getByRole('region', {name: 'Resumen'});
     expect(within(summary).getByText('Mesas disponibles')).toBeInTheDocument();
     const salon = rowOf(table, 'Salón principal');
     expect(within(salon).getByLabelText('6 mesas')).toBeInTheDocument();
     expect(within(salon).getByLabelText('24 personas')).toBeInTheDocument();
-    const chips = within(salon).getByRole('list', {name: 'Mesas de Salón principal'});
-    expect(within(chips).queryByText('Mesa 6 · 4')).not.toBeInTheDocument();
-    await user.click(within(chips).getByRole('button', {name: '+2 más'}));
-    expect(within(chips).getByText('Mesa 6 · 4')).toBeInTheDocument();
+    const groups = within(salon).getByRole('list', {name: 'Mesas de Salón principal'});
+    expect(within(groups).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['6 mesas de 4 personas']);
     expect(within(rowOf(table, 'Salón VIP')).getByText('Inactiva')).toBeInTheDocument();
   });
 
@@ -99,6 +97,7 @@ describe('Gestión de secciones y mesas', () => {
   });
 
   it('propone nombres y valida sin la API', () => {
+    expect(capacityGroups([{capacidad: 2}, {capacidad: 4}, {capacidad: 4}, {capacidad: 6}])).toEqual([{capacidad: 4, mesas: 2}, {capacidad: 6, mesas: 1}, {capacidad: 2, mesas: 1}]);
     expect(nextTableName([])).toBe('Mesa 1');
     expect(nextTableName([{nombre: 'Terraza 4'}])).toBe('Terraza 5');
     expect(nextTableName([{nombre: 'B1'}, {nombre: 'B2'}])).toBe('B3');
