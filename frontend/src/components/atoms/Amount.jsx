@@ -2,7 +2,7 @@ import {cn} from '../../lib/cn';
 
 const styles = {
   wrapper: 'inline-flex items-baseline gap-1 whitespace-nowrap',
-  affix: 'text-xs font-semibold text-cafe',
+  affix: 'font-sans text-xs font-semibold text-cafe',
   value: 'font-display leading-none tabular-nums text-carbon',
   sizes: {
     md: 'text-2xl',
