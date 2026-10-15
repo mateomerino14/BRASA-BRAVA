@@ -153,7 +153,7 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/auth/login` | Inicio de sesión. Con usuario `DIRECTORIO` entra el dueño del local |
 | `GET` | `/api/auth/me` | Perfil de la sesión actual, con el nombre y la foto al día del empleado |
 | `GET` | `/api/auth/login-users` | Empleados activos para el carrusel del login (alias, nombre, cargo y foto) |
-| `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo del empleado |
+| `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo de un empleado activo; responde 404 si no hay cuenta con ese correo y 403 si está dada de baja |
 | `POST` | `/api/auth/password-reset/verify` | Verifica el código sin consumirlo |
 | `POST` | `/api/auth/password-reset/confirm` | Cambia la contraseña con el código verificado |
 | `GET` | `/api/employees` | Empleados con búsqueda (`search`, por nombre, usuario o CI), filtro por cargo (`idCargo`) y los parámetros comunes de listado. Orden: `nombre`, `ci`, `cargo`, `usuario`, `estado` |
@@ -325,7 +325,7 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 - Ante usuario o contraseña incorrectos se responde siempre el mismo mensaje, y el tiempo de respuesta no revela si el usuario existe.
 - Pedir un código responde igual exista o no el correo.
 - El código vence a los 10 minutos, se bloquea tras 5 intentos fallidos y pedir uno nuevo anula el anterior.
-- Límite de intentos por IP en el ingreso y en la recuperación de contraseña.
+- Límite de intentos por IP en el ingreso y en la recuperación de contraseña, con el mensaje «Demasiados intentos» en español.
 - Las respuestas de error nunca exponen detalles internos.
 
 ## Pruebas
