@@ -5,14 +5,16 @@ import {Avatar} from '../atoms/Avatar';
 import {cn} from '../../lib/cn';
 
 const styles = {
-  section: 'relative flex items-center gap-2 rounded-2xl bg-mostaza px-2 py-3 shadow-card',
+  section: 'relative flex items-center gap-2 rounded-2xl bg-mostaza px-2 py-1 shadow-card',
   arrow: 'flex size-10 shrink-0 items-center justify-center rounded-full text-white transition hover:bg-white/20',
-  track: 'flex flex-1 snap-x gap-4 overflow-x-auto scroll-smooth px-1 py-1 [scrollbar-width:none]',
+  track: 'flex flex-1 snap-x gap-4 overflow-x-auto scroll-smooth px-2 pb-3 pt-4 [scrollbar-width:none]',
   skeleton: 'h-[108px] w-24 shrink-0 animate-pulse rounded-xl bg-white/50',
   empty: 'w-full py-8 text-center text-sm font-semibold text-carbon/80',
-  card: 'flex w-24 shrink-0 snap-start flex-col items-center gap-1.5 rounded-xl bg-white px-2 pb-2 pt-3 shadow-card ring-offset-2 ring-offset-mostaza transition-shadow',
-  selected: 'ring-4 ring-carbon',
+  card: 'flex w-24 shrink-0 snap-start flex-col items-center gap-1.5 rounded-xl border-2 px-2 pb-2 pt-3 transition-colors',
+  idle: 'border-transparent bg-white shadow-card',
+  selected: 'border-brasa bg-crema shadow-brasa',
   alias: 'w-full truncate text-xs font-semibold text-carbon',
+  aliasSelected: 'text-brasa-oscuro',
 };
 
 const skeletonCount = 6;
@@ -20,7 +22,7 @@ const pageRatio = 0.8;
 const staggerSeconds = 0.05;
 const cardHidden = {opacity: 0, y: 12};
 const cardVisible = {opacity: 1, y: 0};
-const hoverLift = {y: -4};
+const hoverLift = {y: -3};
 const tapPress = {scale: 0.95};
 
 export function EmployeeCarousel({users, selectedAlias, onSelect, loading = false}) {
@@ -50,10 +52,10 @@ export function EmployeeCarousel({users, selectedAlias, onSelect, loading = fals
             transition={{delay: index * staggerSeconds}}
             whileHover={hoverLift}
             whileTap={tapPress}
-            className={cn(styles.card, user.alias === selectedAlias && styles.selected)}
+            className={cn(styles.card, user.alias === selectedAlias ? styles.selected : styles.idle)}
           >
             <Avatar name={user.nombre} src={user.fotoUrl} size={56} />
-            <span className={styles.alias}>{user.alias}</span>
+            <span className={cn(styles.alias, user.alias === selectedAlias && styles.aliasSelected)}>{user.alias}</span>
           </motion.button>
         ))}
       </div>

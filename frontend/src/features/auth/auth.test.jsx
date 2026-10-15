@@ -26,8 +26,21 @@ describe('Login', () => {
     await user.type(await screen.findByLabelText('Usuario'), 'admin');
     await user.type(screen.getByLabelText('Contraseña'), 'mala');
     await user.click(screen.getByRole('button', {name: 'Ingresar'}));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Usuario o contraseña incorrectos');
+    const toast = await screen.findByRole('alert');
+    expect(toast).toHaveTextContent('No se pudo ingresar');
+    expect(toast).toHaveTextContent('Usuario o contraseña incorrectos');
     expect(screen.getByLabelText('Contraseña')).toHaveValue('');
+    await user.click(within(toast).getByRole('button', {name: 'Cerrar aviso'}));
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+  });
+
+  it('los campos vacíos se marcan debajo de cada uno, sin aviso emergente', async () => {
+    mockApi();
+    const {user} = renderApp('/login');
+    await user.click(await screen.findByRole('button', {name: 'Ingresar'}));
+    expect(screen.getByText('Ingrese su usuario')).toBeInTheDocument();
+    expect(screen.getByText('Ingrese su contraseña')).toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Cerrar aviso'})).not.toBeInTheDocument();
   });
 
   it('elegir un empleado del carrusel completa el usuario e inicia sesión', async () => {
@@ -93,7 +106,8 @@ describe('Recuperación de contraseña', () => {
     await user.click(await within(codeDialog).findByLabelText('Dígito 1'));
     await user.paste('999999');
     await user.click(within(codeDialog).getByRole('button', {name: 'Verificar'}));
-    expect(await within(codeDialog).findByRole('alert')).toHaveTextContent('Le quedan 4');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Le quedan 4');
+    expect(within(codeDialog).queryByRole('alert')).not.toBeInTheDocument();
 
     await user.click(within(codeDialog).getByLabelText('Dígito 1'));
     await user.paste('123456');
@@ -118,6 +132,20 @@ describe('Recuperación de contraseña', () => {
       code: '123456',
       newPassword: 'NuevaClave99',
     });
+  });
+
+  it('al cerrar y volver a abrir, el formulario empieza vacío', async () => {
+    mockApi();
+    const {user} = renderApp('/login');
+    let dialog = await openReset(user);
+    await user.type(within(dialog).getByLabelText('Correo'), 'no-es-correo');
+    await user.click(within(dialog).getByRole('button', {name: 'Enviar código'}));
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('Ingrese un correo válido');
+    await user.click(within(dialog).getByRole('button', {name: 'Cancelar'}));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    dialog = await openReset(user);
+    expect(within(dialog).getByLabelText('Correo')).toHaveValue('');
+    expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('valida el correo antes de enviarlo', async () => {

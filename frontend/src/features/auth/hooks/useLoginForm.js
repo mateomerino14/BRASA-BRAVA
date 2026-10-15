@@ -1,20 +1,20 @@
 import {useState} from 'react';
 import {useAuth} from '../../../context/useAuth';
+import {useToast} from '../../../context/useToast';
 
 export const DIRECTORIO_USERNAME = 'DIRECTORIO';
 
 export function useLoginForm({onSuccess} = {}) {
   const {login} = useAuth();
+  const toast = useToast();
   const [values, setValues] = useState({username: '', password: ''});
   const [errors, setErrors] = useState({});
-  const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const isDirectorio = values.username.toUpperCase() === DIRECTORIO_USERNAME;
 
   const setField = (field, value) => {
     setValues((current) => ({...current, [field]: value}));
     setErrors((current) => ({...current, [field]: undefined}));
-    setFormError('');
   };
 
   const validate = () => {
@@ -40,7 +40,7 @@ export function useLoginForm({onSuccess} = {}) {
       onSuccess?.(user);
     }
     catch (error) {
-      setFormError(error.message);
+      toast.error(error.message, 'No se pudo ingresar');
       setValues((current) => ({...current, password: ''}));
     }
     finally {
@@ -60,7 +60,6 @@ export function useLoginForm({onSuccess} = {}) {
   return {
     values,
     errors,
-    formError,
     submitting,
     isDirectorio,
     setField,
