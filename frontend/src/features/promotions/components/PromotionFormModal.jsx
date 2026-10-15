@@ -97,6 +97,7 @@ export function PromotionFormModal({form}) {
 
   return (
     <Modal
+      closeButton={false}
       open={form.open}
       onClose={form.close}
       size="lg"

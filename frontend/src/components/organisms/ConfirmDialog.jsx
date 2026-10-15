@@ -8,7 +8,7 @@ const styles = {
 
 export function ConfirmDialog({open, title, message, confirmLabel, tone = 'danger', loading = false, onConfirm, onCancel}) {
   return (
-    <Modal open={open} onClose={onCancel} title={title} size="sm">
+    <Modal open={open} closeButton={false} onClose={onCancel} title={title} size="sm">
       <p className={styles.message}>{message}</p>
       <div className={styles.actions}>
         <Button variant="outline" onClick={onCancel} disabled={loading}>

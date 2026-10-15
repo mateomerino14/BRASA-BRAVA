@@ -198,7 +198,7 @@ export function PasswordResetModal({reset}) {
   };
 
   return (
-    <Modal open={reset.step !== 'closed'} onClose={close} title={step.title} description={step.description}>
+    <Modal open={reset.step !== 'closed'} closeButton={false} onClose={close} title={step.title} description={step.description}>
       <form onSubmit={handleSubmit} noValidate className={styles.form}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={reset.step} initial={stepHidden} animate={stepVisible} exit={stepExit} transition={stepTransition}>
