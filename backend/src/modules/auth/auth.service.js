@@ -6,8 +6,9 @@ import {resetCodeEmail} from './resetCodeEmail.js';
 
 const directorioUsername = 'DIRECTORIO';
 const invalidCredentials = 'Usuario o contraseña incorrectos';
-const invalidCode = 'El código es inválido o ya expiró';
-const lockedCode = 'Código bloqueado por demasiados intentos. Solicite uno nuevo';
+const invalidCode = {error: 'El código es inválido. Solicite uno nuevo', status: 400, detail: {motivo: 'codigo_invalido'}};
+const lockedCode = {error: 'Código bloqueado por demasiados intentos. Solicite uno nuevo', status: 400, detail: {motivo: 'codigo_bloqueado'}};
+const expiredCode = {error: 'El código venció. Solicite uno nuevo', status: 400, detail: {motivo: 'codigo_vencido'}};
 const unknownAccount = {error: 'No hay ninguna cuenta registrada con ese correo. Revise que esté bien escrito', status: 404};
 const inactiveAccount = {error: 'La cuenta de ese correo está dada de baja. Pida a administración que la reactive', status: 403};
 const msPerMinute = 60_000;
@@ -103,32 +104,45 @@ export const createAuthService = ({repository, mailer, config, logger = console,
       logger.error?.(`Error enviando el código a ${employee.correo}: ${error.message}`);
       return {error: 'No se pudo enviar el correo. Intente nuevamente', status: 502};
     }
-    return {sent: true};
+    return {sent: true, expiresAt: expiresAt.toISOString()};
   };
 
-  // Arma el mensaje de error según los intentos que le quedan al código
-  const failedAttemptMessage = (record) => {
+  // Arma el error de un código incorrecto según los intentos que le quedan
+  const failedAttempt = (record) => {
     const remaining = config.RESET_CODE_MAX_ATTEMPTS - record.intentos - 1;
     if (remaining > 0) {
-      return `Código incorrecto. Le quedan ${remaining} intento(s)`;
+      return {
+        error: `Código incorrecto. Le quedan ${remaining} intento(s)`,
+        status: 400,
+        detail: {motivo: 'codigo_incorrecto', intentosRestantes: remaining},
+      };
     }
     return lockedCode;
   };
 
-  // Comprueba el código vigente y cuenta los intentos fallidos
+  // Comprueba el código más reciente: bloqueado, vencido, ya usado o incorrecto
   const checkCode = async ({email, code}) => {
     const employee = await repository.findActiveEmployeeByEmail(email);
     if (!employee) {
-      return {error: invalidCode, status: 400};
+      return invalidCode;
     }
-    const record = await repository.findLatestActiveCode(employee.id_empleado);
-    if (!record || new Date(record.expira_en) <= now()) {
-      return {error: invalidCode, status: 400};
+    const record = await repository.findLatestCode(employee.id_empleado);
+    if (!record) {
+      return invalidCode;
+    }
+    if (record.intentos >= config.RESET_CODE_MAX_ATTEMPTS) {
+      return lockedCode;
+    }
+    if (record.usado) {
+      return invalidCode;
+    }
+    if (new Date(record.expira_en) <= now()) {
+      return expiredCode;
     }
     const valid = await verifySecret(code, record.codigo_hash);
     if (!valid) {
       await repository.registerFailedAttempt(record.id_codigo, config.RESET_CODE_MAX_ATTEMPTS);
-      return {error: failedAttemptMessage(record), status: 400};
+      return failedAttempt(record);
     }
     return {employee, record};
   };
