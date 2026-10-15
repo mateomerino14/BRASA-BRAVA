@@ -33,7 +33,7 @@ export function ToastProvider({children}) {
     const id = nextId.current;
     nextId.current += 1;
     setToasts((current) => {
-      const others = current.filter((toast) => toast.message !== message);
+      const others = current.filter((toast) => toast.message !== message && (!title || toast.title !== title));
       return [...others, {id, tone, message, title}].slice(-MAX_TOASTS);
     });
     timers.current.set(id, setTimeout(() => dismiss(id), VISIBLE_MS));
