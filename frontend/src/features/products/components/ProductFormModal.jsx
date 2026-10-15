@@ -26,6 +26,7 @@ export function ProductFormModal({form, categories}) {
 
   return (
     <Modal
+      closeButton={false}
       open={form.open}
       onClose={form.close}
       size="lg"

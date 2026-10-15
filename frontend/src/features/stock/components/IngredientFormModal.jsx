@@ -26,6 +26,7 @@ export function IngredientFormModal({form}) {
 
   return (
     <Modal
+      closeButton={false}
       open={form.open}
       onClose={form.close}
       title={form.isEdit ? 'Modificar insumo' : 'Registrar nuevo insumo'}

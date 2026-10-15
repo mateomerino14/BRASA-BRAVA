@@ -3,10 +3,10 @@ import {SocialIcon} from '../atoms/SocialIcon';
 import {SOCIAL_LINKS} from '../../config/socialLinks';
 
 const styles = {
-  footer: 'flex flex-wrap items-center justify-between gap-3 bg-carbon px-4 py-3 text-crema sm:gap-4 sm:px-10 sm:py-4',
-  copyright: 'text-xs font-semibold sm:text-base',
-  list: 'flex gap-3 sm:gap-4',
-  link: 'flex size-9 items-center sm:size-11 justify-center rounded-full bg-crema text-carbon transition-colors hover:bg-brasa hover:text-white',
+  footer: 'flex flex-wrap items-center justify-between gap-3 bg-carbon px-4 py-2 text-crema sm:px-10 sm:py-2.5',
+  copyright: 'text-xs font-semibold text-crema/90 sm:text-sm',
+  list: 'flex gap-2.5',
+  link: 'flex size-8 items-center justify-center rounded-full bg-crema text-carbon transition-colors hover:bg-brasa hover:text-white',
 };
 
 const SOCIALS = [
@@ -36,7 +36,7 @@ export function Footer({links = SOCIAL_LINKS}) {
               whileTap={tapPress}
               className={styles.link}
             >
-              <SocialIcon name={name} size={20} />
+              <SocialIcon name={name} size={16} />
             </motion.a>
           </li>
         ))}
