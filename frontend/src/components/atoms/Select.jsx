@@ -2,15 +2,15 @@ import {ChevronDown} from 'lucide-react';
 import {cn} from '../../lib/cn';
 
 const styles = {
-  wrapper: 'relative',
-  base: 'w-full appearance-none rounded-lg border bg-campo pl-3 pr-9 text-carbon transition-[border-color,box-shadow] duration-200 focus:outline-none focus:ring-4 disabled:opacity-60',
+  wrapper: 'select-wrap relative',
+  base: 'select-field w-full rounded-lg border bg-campo pl-3 pr-9 text-carbon transition-[border-color,box-shadow] duration-200 focus:outline-none focus:ring-4 disabled:opacity-60',
   sizes: {
     sm: 'h-9 text-xs font-semibold',
     md: 'h-12 text-base',
   },
   normal: 'border-arena focus:border-brasa focus:ring-brasa/20',
   invalid: 'border-error focus:ring-error/15',
-  icon: 'pointer-events-none absolute inset-y-0 right-3 my-auto text-cafe',
+  icon: 'select-chevron pointer-events-none absolute inset-y-0 right-3 my-auto text-cafe transition-transform duration-200',
 };
 
 export function Select({options, placeholder, size = 'md', invalid = false, className, ref, ...props}) {
