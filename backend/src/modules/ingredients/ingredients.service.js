@@ -1,6 +1,6 @@
 const notFound = {error: 'Insumo no encontrado', status: 404};
 const duplicateName = {error: 'Ya existe un insumo con ese nombre', status: 409};
-const unitLocked = {error: 'No se puede cambiar la unidad de un insumo que ya tiene movimientos', status: 409};
+const unitLocked = {error: 'No se puede cambiar la unidad porque el insumo ya se usó en recetas, ventas o correcciones', status: 409};
 const notEnough = {error: 'No hay suficiente stock para esa salida', status: 400};
 const inactive = {error: 'Reactive el insumo antes de registrar movimientos', status: 400};
 
@@ -33,6 +33,7 @@ const toIngredient = (row) => {
     stockMinimo,
     nivel: levelOf(stockActual, stockMinimo),
     activo: row.activo,
+    unidadFija: Boolean(row.unidad_fija),
   };
 };
 
@@ -105,7 +106,7 @@ export const createIngredientsService = ({repository, transaction}) => {
     if (await repository.findByName(data.nombre, id)) {
       return duplicateName;
     }
-    if (data.unidad !== current.unidad && await repository.hasMovements(id)) {
+    if (data.unidad !== current.unidad && current.unidad_fija) {
       return unitLocked;
     }
     const corrects = stockActual !== undefined && round(stockActual) !== round(current.stock_actual);
