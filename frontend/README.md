@@ -56,6 +56,8 @@ Las pantallas de los módulos se cargan bajo demanda (`React.lazy` en `router/Ap
 
 La sesión se maneja en `context/` (`AuthProvider` y `useAuth`).
 
+Las redes sociales del pie (Facebook, Instagram y TikTok de Brasa Brava Tiquipaya) están en `config/socialLinks.js` y se abren en una pestaña nueva; en la app de escritorio se abren en el navegador predeterminado (Chrome, si es el elegido en Windows).
+
 ### Estándar de mensajes de error
 
 - **Error de un campo** (vacío, formato, regla): texto rojo debajo del campo con `FormField` y el borde del campo en rojo. No abre avisos.

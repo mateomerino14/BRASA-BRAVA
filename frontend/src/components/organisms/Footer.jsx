@@ -1,5 +1,6 @@
 import {motion} from 'motion/react';
 import {SocialIcon} from '../atoms/SocialIcon';
+import {SOCIAL_LINKS} from '../../config/socialLinks';
 
 const styles = {
   footer: 'flex flex-wrap items-center justify-between gap-3 bg-carbon px-4 py-3 text-crema sm:gap-4 sm:px-10 sm:py-4',
@@ -17,7 +18,7 @@ const SOCIALS = [
 const hoverTilt = {y: -3, rotate: -6};
 const tapPress = {scale: 0.9};
 
-export function Footer({links = {}}) {
+export function Footer({links = SOCIAL_LINKS}) {
   const year = new Date().getFullYear();
 
   return (
@@ -27,10 +28,10 @@ export function Footer({links = {}}) {
         {SOCIALS.map(({name, label}) => (
           <li key={name}>
             <motion.a
-              href={links[name] ?? '#'}
+              href={links[name]}
               target="_blank"
-              rel="noreferrer"
-              aria-label={label}
+              rel="noopener noreferrer"
+              aria-label={`${label} de Brasa Brava`}
               whileHover={hoverTilt}
               whileTap={tapPress}
               className={styles.link}
