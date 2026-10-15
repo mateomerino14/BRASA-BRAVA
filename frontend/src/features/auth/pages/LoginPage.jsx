@@ -12,8 +12,9 @@ import {useLoginUsers} from '../hooks/useLoginUsers';
 import {usePasswordReset} from '../hooks/usePasswordReset';
 
 const styles = {
-  content: 'mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-6 py-8',
-  title: 'font-display text-6xl leading-none text-carbon',
+  content: 'mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-6 py-8 short:gap-4 short:py-5 xshort:gap-3 xshort:py-3',
+  title: 'font-display text-6xl leading-none text-carbon short:text-5xl xshort:text-4xl',
+  logo: 'short:size-32 xshort:size-24',
 };
 
 const contentHidden = {opacity: 0, y: 20};
@@ -48,7 +49,7 @@ export function LoginPage() {
       <motion.div initial={contentHidden} animate={contentVisible} transition={contentTransition} className={styles.content}>
         <h1 className={styles.title}>Inicio de sesión</h1>
         <motion.div initial={logoHidden} animate={logoVisible} transition={logoSpring}>
-          <Logo size={170} glow />
+          <Logo size={170} glow className={styles.logo} />
         </motion.div>
         <LoginForm form={form} onForgotPassword={reset.open} passwordRef={passwordRef} />
       </motion.div>
