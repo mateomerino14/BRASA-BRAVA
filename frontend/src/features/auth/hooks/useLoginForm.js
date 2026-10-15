@@ -37,6 +37,7 @@ export function useLoginForm({onSuccess} = {}) {
     setSubmitting(true);
     try {
       const user = await login(values.username.trim(), values.password);
+      toast.clear();
       onSuccess?.(user);
     }
     catch (error) {
