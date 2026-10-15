@@ -25,7 +25,7 @@ export const createAuthController = (service) => ({
   // Envía el código de verificación al correo indicado
   requestReset: async (req, res) => {
     const result = await service.requestPasswordReset(req.validated.body);
-    return respond(res, result, () => res.json({message: resetRequested}));
+    return respond(res, result, () => res.json({message: resetRequested, venceEn: result.expiresAt}));
   },
 
   // Verifica el código ingresado sin consumirlo

@@ -162,6 +162,60 @@ describe('Recuperación de contraseña', () => {
     expect(toast).toHaveTextContent('dada de baja');
   });
 
+  const reachCode = async (user) => {
+    const dialog = await openReset(user);
+    await user.type(within(dialog).getByLabelText('Correo'), 'c.mendoza@brasabrava.bo');
+    await user.click(within(dialog).getByRole('button', {name: 'Enviar código'}));
+    const codeDialog = await screen.findByRole('dialog', {name: 'Verificación de identidad'});
+    await user.click(await within(codeDialog).findByLabelText('Dígito 1'));
+    return codeDialog;
+  };
+
+  it('muestra el tiempo y los intentos que le quedan al código', async () => {
+    const venceEn = new Date(Date.now() + 9 * 60000 + 30000).toISOString();
+    mockApi({
+      'POST /auth/password-reset/request': () => [200, {message: 'ok', venceEn}],
+      'POST /auth/password-reset/verify': () => [400, {message: 'Código incorrecto. Le quedan 1 intento(s)', motivo: 'codigo_incorrecto', intentosRestantes: 1}],
+    });
+    const {user} = renderApp('/login');
+    const codeDialog = await reachCode(user);
+    expect(within(codeDialog).getByText(/Vence en 9:(29|30)/)).toBeInTheDocument();
+    await user.paste('111111');
+    await user.click(within(codeDialog).getByRole('button', {name: 'Verificar'}));
+    expect(await within(codeDialog).findByText('Último intento')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('Le quedan 1 intento(s)');
+  });
+
+  it('bloquea el código en el modal y pide uno nuevo', async () => {
+    mockApi({
+      'POST /auth/password-reset/request': () => [200, {message: 'ok'}],
+      'POST /auth/password-reset/verify': () => [400, {message: 'Código bloqueado por demasiados intentos. Solicite uno nuevo', motivo: 'codigo_bloqueado'}],
+    });
+    const {user} = renderApp('/login');
+    const codeDialog = await reachCode(user);
+    await user.paste('111111');
+    await user.click(within(codeDialog).getByRole('button', {name: 'Verificar'}));
+    expect(await within(codeDialog).findByText('Código bloqueado')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(within(codeDialog).queryByRole('button', {name: 'Verificar'})).not.toBeInTheDocument();
+    expect(within(codeDialog).getByLabelText('Dígito 1')).toBeDisabled();
+    expect(within(codeDialog).getAllByRole('button', {name: 'Reenviar código'})).toHaveLength(1);
+
+    await user.click(within(codeDialog).getByRole('button', {name: 'Reenviar código'}));
+    await waitFor(() => expect(within(codeDialog).queryByText('Código bloqueado')).not.toBeInTheDocument());
+    expect(within(codeDialog).getByText(/Le enviamos un código nuevo/)).toBeInTheDocument();
+    expect(within(codeDialog).getByRole('button', {name: 'Verificar'})).toBeInTheDocument();
+  });
+
+  it('marca el código como vencido cuando se acaba el tiempo', async () => {
+    const venceEn = new Date(Date.now() - 1000).toISOString();
+    mockApi({'POST /auth/password-reset/request': () => [200, {message: 'ok', venceEn}]});
+    const {user} = renderApp('/login');
+    const codeDialog = await reachCode(user);
+    expect(within(codeDialog).getByText('Código vencido')).toBeInTheDocument();
+    expect(within(codeDialog).queryByRole('button', {name: 'Verificar'})).not.toBeInTheDocument();
+  });
+
   it('al cerrar y volver a abrir, el formulario empieza vacío', async () => {
     mockApi();
     const {user} = renderApp('/login');

@@ -82,11 +82,11 @@ export const createAuthRepository = (db) => ({
     );
   },
 
-  // Obtiene el código vigente más reciente de un empleado
-  findLatestActiveCode: async (idEmpleado) => {
+  // Obtiene el código más reciente de un empleado, con su estado
+  findLatestCode: async (idEmpleado) => {
     const {rows} = await db.query(
-      `SELECT id_codigo, codigo_hash, intentos, expira_en FROM codigo_recuperacion
-        WHERE id_empleado = $1 AND usado = FALSE
+      `SELECT id_codigo, codigo_hash, intentos, usado, expira_en FROM codigo_recuperacion
+        WHERE id_empleado = $1
         ORDER BY id_codigo DESC LIMIT 1`,
       [idEmpleado],
     );

@@ -2,11 +2,12 @@ const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 const TOKEN_KEY = 'brasa.token';
 
 export class ApiError extends Error {
-  constructor(status, message, details) {
+  constructor(status, message, details, body = {}) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.details = details;
+    this.body = body;
   }
 }
 
@@ -70,6 +71,7 @@ export const apiRequest = async (path, {method = 'GET', body, auth = true} = {})
       response.status,
       data.message ?? 'Ocurrió un error inesperado',
       data.details,
+      data,
     );
   }
   return data;

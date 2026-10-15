@@ -47,6 +47,7 @@ describe('Autenticación: recuperación de contraseña', () => {
     const res = await requestCode('C.Mendoza@BrasaBrava.bo');
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Le enviamos un código de verificación a su correo');
+    expect(new Date(res.body.venceEn).getTime()).toBeGreaterThan(Date.now());
   });
 
   it('guarda el código hasheado, nunca en texto plano', async () => {
@@ -75,10 +76,26 @@ describe('Autenticación: recuperación de contraseña', () => {
     }
     expect(res.status).toBe(400);
     expect(res.body.message).toMatch(/bloqueado/);
+    expect(res.body.motivo).toBe('codigo_bloqueado');
     const after = await request(ctx.app)
       .post('/api/auth/password-reset/verify')
       .send({email: EMAIL, code: good});
     expect(after.status).toBe(400);
+    expect(after.body.motivo).toBe('codigo_bloqueado');
+    await requestCode();
+    const fresh = await request(ctx.app)
+      .post('/api/auth/password-reset/verify')
+      .send({email: EMAIL, code: lastCode(ctx.mailer)});
+    expect(fresh.status).toBe(200);
+  });
+
+  it('indica cuántos intentos quedan tras un código incorrecto', async () => {
+    await requestCode();
+    const res = await request(ctx.app)
+      .post('/api/auth/password-reset/verify')
+      .send({email: EMAIL, code: wrongCode(lastCode(ctx.mailer))});
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({motivo: 'codigo_incorrecto', intentosRestantes: 4});
   });
 
   it('reenviar invalida el código anterior', async () => {
@@ -105,7 +122,7 @@ describe('Autenticación: recuperación de contraseña', () => {
       .post('/api/auth/password-reset/verify')
       .send({email: EMAIL, code: lastCode(ctx.mailer)});
     expect(res.status).toBe(400);
-    expect(res.body.message).toMatch(/expiró/);
+    expect(res.body).toMatchObject({message: 'El código venció. Solicite uno nuevo', motivo: 'codigo_vencido'});
   });
 
   it('cambia la contraseña, consume el código y permite el nuevo login', async () => {

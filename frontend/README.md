@@ -63,7 +63,7 @@ La sesión se maneja en `context/` (`AuthProvider` y `useAuth`).
 - `useToast().success(mensaje)` sirve para confirmaciones breves con el mismo formato, y `useToast().clear()` quita los avisos anteriores cuando la operación sale bien.
 - El proveedor (`ToastProvider`) está en `App.jsx`, en `renderApp` de las pruebas y en Storybook.
 
-El inicio de sesión y la recuperación de contraseña ya siguen este estándar. El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
+El inicio de sesión y la recuperación de contraseña ya siguen este estándar. Un aviso con el mismo título reemplaza al anterior en lugar de apilarse. En la verificación, el modal muestra cuánto falta para que venza el código y los intentos que quedan; si el código se bloquea, vence o queda anulado, las casillas se desactivan y el único paso es «Reenviar código». El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
 
 El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco). ### Pantallas de gestión estándar
 
