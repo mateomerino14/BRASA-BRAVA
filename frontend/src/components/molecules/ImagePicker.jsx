@@ -8,7 +8,7 @@ const styles = {
   zone: 'group relative flex h-44 w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-dashed bg-campo text-center transition-[border-color,background-color] duration-200',
   idle: 'border-arena hover:border-brasa hover:bg-brasa/5',
   dragging: 'border-brasa bg-brasa/10',
-  invalid: 'border-rojo',
+  invalid: 'border-error',
   icon: 'text-brasa transition-transform duration-300 group-hover:-translate-y-1',
   title: 'text-sm font-semibold text-carbon',
   hint: 'text-xs text-cafe',
@@ -17,7 +17,7 @@ const styles = {
   action: 'inline-flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-semibold text-carbon shadow-pill transition-colors hover:bg-white',
   remove: 'text-rojo',
   input: 'sr-only',
-  error: 'text-sm text-rojo',
+  error: 'text-sm font-medium text-error',
 };
 
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];

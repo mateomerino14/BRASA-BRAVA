@@ -3,6 +3,10 @@
 @import '@fontsource/playfair-display-sc/400.css';
 @import 'tailwindcss';
 
+/* Pantallas bajas (laptops, app de escritorio con zoom de Windows): compacta lo que no entra sin scroll */
+@custom-variant short (@media (max-height: 860px));
+@custom-variant xshort (@media (max-height: 720px));
+
 /*
  * Design tokens de Brasa Brava (tomados de "PALETA DE COLORES" y "TIPOGRAFIA" del Figma).
  * Tailwind genera utilidades a partir de estas variables: bg-brasa, text-carbon, font-display...
@@ -15,6 +19,7 @@
   --color-crema: #faf3ea; /* fondos suaves, ítem activo, modales */
   --color-rojo: #c1272d; /* peligro, cancelar, errores */
   --color-verde: #2fa84f; /* éxito, estado activo */
+  --color-error: #d91a22; /* mensajes de error: más vivo que el rojo de los botones y con contraste AA sobre crema */
 
   /* Derivados usados en las pantallas del Figma */
   --color-brasa-oscuro: #d97c0b;

@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {useToast} from '../../../context/useToast';
 import {authApi} from '../services/authApi';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,21 +20,22 @@ export const passwordError = (password) => {
 };
 
 export function usePasswordReset({api = authApi} = {}) {
+  const toast = useToast();
   const [step, setStep] = useState('closed');
-  const [email, setEmail] = useState('');
+  const [email, setEmailValue] = useState('');
   const [code, setCode] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
 
   const run = async (work) => {
     setLoading(true);
-    setError('');
+    setErrors({});
     try {
       return await work();
     }
     catch (requestError) {
-      setError(requestError.message);
+      toast.error(requestError.message);
       return undefined;
     }
     finally {
@@ -41,23 +43,26 @@ export function usePasswordReset({api = authApi} = {}) {
     }
   };
 
-  const open = () => {
-    setStep('email');
+  const restart = (nextStep) => {
+    setStep(nextStep);
+    setEmailValue('');
     setCode('');
-    setError('');
+    setErrors({});
     setNotice('');
   };
 
-  const close = () => {
-    setStep('closed');
-    setCode('');
-    setError('');
-    setNotice('');
+  const open = () => restart('email');
+
+  const close = () => restart('closed');
+
+  const setEmail = (value) => {
+    setEmailValue(value);
+    setErrors({});
   };
 
   const sendCode = async () => {
     if (!EMAIL_PATTERN.test(email.trim())) {
-      setError('Ingrese un correo válido');
+      setErrors({email: 'Ingrese un correo válido'});
       return;
     }
     const ok = await run(() => api.requestResetCode(email.trim()));
@@ -78,7 +83,7 @@ export function usePasswordReset({api = authApi} = {}) {
 
   const verifyCode = async () => {
     if (!CODE_PATTERN.test(code)) {
-      setError('Complete los 6 dígitos del código');
+      setErrors({code: 'Complete los 6 dígitos del código'});
       return;
     }
     setNotice('');
@@ -94,11 +99,11 @@ export function usePasswordReset({api = authApi} = {}) {
   const savePassword = async (password, confirmation) => {
     const rule = passwordError(password);
     if (rule) {
-      setError(rule);
+      setErrors({password: rule});
       return;
     }
     if (password !== confirmation) {
-      setError('Las contraseñas no coinciden');
+      setErrors({confirmation: 'Las contraseñas no coinciden'});
       return;
     }
     const ok = await run(() => api.confirmPasswordReset(email.trim(), code, password));
@@ -109,18 +114,21 @@ export function usePasswordReset({api = authApi} = {}) {
 
   const changeCode = (value) => {
     setCode(value);
-    setError('');
+    setErrors({});
   };
+
+  const clearErrors = () => setErrors({});
 
   return {
     step,
     email,
     code,
-    error,
+    errors,
     notice,
     loading,
     setEmail,
     changeCode,
+    clearErrors,
     open,
     close,
     sendCode,

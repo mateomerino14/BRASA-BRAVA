@@ -6,7 +6,7 @@ const styles = {
   base: 'flex items-start gap-2 rounded-lg border px-3 py-2 text-sm font-medium',
   icon: 'mt-px shrink-0',
   tones: {
-    error: 'border-rojo/40 bg-rojo/10 text-rojo',
+    error: 'border-error/40 bg-error/10 text-error',
     success: 'border-verde/40 bg-verde/10 text-verde',
     info: 'border-brasa/40 bg-brasa/10 text-carbon',
   },

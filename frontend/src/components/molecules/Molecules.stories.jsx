@@ -3,6 +3,9 @@ import {CodeInput} from './CodeInput';
 import {FormField} from './FormField';
 import {Alert} from './Alert';
 import {LiveClock} from './LiveClock';
+import {Toast} from './Toast';
+import {Button} from '../atoms/Button';
+import {useToast} from '../../context/useToast';
 import {Input} from '../atoms/Input';
 
 export default {title: 'Moléculas'};
@@ -36,3 +39,24 @@ export const Avisos = {
   ),
 };
 export const Reloj = {render: () => <LiveClock />};
+
+export const AvisosEmergentes = {
+  render: () => (
+    <div className="flex w-[28rem] flex-col gap-3">
+      <Toast tone="error" title="No se pudo ingresar" message="Usuario o contraseña incorrectos" onClose={() => {}} />
+      <Toast tone="success" message="Se guardaron los cambios" onClose={() => {}} />
+    </div>
+  ),
+};
+
+function ToastDemo() {
+  const toast = useToast();
+  return (
+    <div className="flex gap-3">
+      <Button variant="danger" onClick={() => toast.error('Código incorrecto. Le quedan 4 intento(s)')}>Mostrar error</Button>
+      <Button onClick={() => toast.success('Se guardaron los cambios')}>Mostrar éxito</Button>
+    </div>
+  );
+}
+
+export const AvisosEmergentesEnVivo = {render: () => <ToastDemo />};
