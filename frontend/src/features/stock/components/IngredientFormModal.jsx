@@ -14,6 +14,11 @@ const styles = {
 
 export function IngredientFormModal({form}) {
   const suffix = UNIT_SUFFIX[form.values.unidad];
+  const unitLocked = Boolean(form.isEdit && form.editing?.unidadFija);
+  let unitHint;
+  if (unitLocked) {
+    unitHint = 'No se puede cambiar porque el insumo ya se usó en recetas, ventas o correcciones. Si la unidad está mal, registre un insumo nuevo.';
+  }
   let quantityHint = 'Lo que hay hoy. Si lo deja vacío empieza en 0.';
   if (form.isEdit) {
     quantityHint = 'Corríjala si el conteo real es distinto.';
@@ -31,8 +36,8 @@ export function IngredientFormModal({form}) {
           {(control) => <Input {...control} maxLength={NAME_MAX_LENGTH} placeholder="Carne de res" value={form.values.nombre} onChange={(event) => form.setField('nombre', event.target.value)} />}
         </FormField>
 
-        <FormField label="Unidad de medida" required error={form.errors.unidad} hint={form.isEdit ? 'No se puede cambiar si el insumo ya tiene movimientos.' : undefined}>
-          {(control) => <Select {...control} placeholder="Seleccione la unidad" options={UNIT_OPTIONS} value={form.values.unidad} onChange={(event) => form.setField('unidad', event.target.value)} />}
+        <FormField label="Unidad de medida" required error={form.errors.unidad} hint={unitHint}>
+          {(control) => <Select {...control} disabled={unitLocked} placeholder="Seleccione la unidad" options={UNIT_OPTIONS} value={form.values.unidad} onChange={(event) => form.setField('unidad', event.target.value)} />}
         </FormField>
 
         <div className={styles.grid}>

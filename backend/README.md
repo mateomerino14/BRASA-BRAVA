@@ -264,7 +264,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 
 - El stock solo cambia con movimientos, y cada uno queda en el historial con la cantidad (con signo), el stock resultante, el motivo y quién lo hizo (el empleado de la sesión o el DIRECTORIO).
 - **Entrada** suma, **salida** resta y **ajuste** fija el conteo real (registra la diferencia). Una salida nunca deja el stock negativo: la resta se hace en una sola sentencia que falla si no alcanza, así dos ventas simultáneas no pueden pasarse.
-- Cantidades con hasta 3 decimales (acepta coma) en `kg`, `g`, `l`, `ml` o `unidad`. La unidad no se puede cambiar una vez que hay movimientos.
+- Cantidades con hasta 3 decimales (acepta coma) en `kg`, `g`, `l`, `ml` o `unidad`. La unidad queda fija (`unidadFija`) cuando el insumo ya se usó en una receta o tiene movimientos (ventas, correcciones o stock inicial): cambiarla dejaría mal las cantidades y las recetas.
 - **Nivel**: sin stock (0), bajo (en o por debajo del mínimo) o suficiente. Los insumos dados de baja no cuentan en el resumen ni admiten movimientos.
 - El tipo `venta` lo registra Caja al enviar cada pedido a cocina (ver Reglas de Caja).
 
