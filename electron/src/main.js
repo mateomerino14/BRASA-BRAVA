@@ -33,7 +33,9 @@ const createWindow = (url) => {
   window.once('ready-to-show', () => window.show());
   // Los enlaces externos (redes sociales) se abren en el navegador del sistema
   window.webContents.setWindowOpenHandler(({url: target}) => {
-    shell.openExternal(target);
+    if (/^https:\/\//.test(target)) {
+      shell.openExternal(target);
+    }
     return {action: 'deny'};
   });
   window.loadURL(url);
