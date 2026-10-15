@@ -1,8 +1,11 @@
 import {describe, expect, it} from 'vitest';
-import {screen, waitFor, within} from '@testing-library/react';
+import {render, screen, waitFor, within} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {renderApp} from '../../test/renderApp';
 import {mockApi} from '../../test/mockApi';
 import {createSectionsBackend} from '../../test/sectionsBackend';
+import {SectionsTable} from './components/SectionsTable';
+import {fakeList} from '../../stories/fakeList';
 import {capacityGroups, nextTableName, toPayload, validateSection} from './utils/sectionForm';
 
 const openPage = async () => {
@@ -28,6 +31,17 @@ describe('Gestión de secciones y mesas', () => {
     const groups = within(salon).getByRole('list', {name: 'Mesas de Salón principal'});
     expect(within(groups).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['6 mesas de 4 personas']);
     expect(within(rowOf(table, 'Salón VIP')).getByText('Inactiva')).toBeInTheDocument();
+  });
+
+  it('muestra dos grupos de mesas y despliega el resto con "+N más"', async () => {
+    const mesas = [30, 26, 19, 7, 4, 4].map((capacidad, index) => ({id: index + 1, nombre: `Mesa ${index + 1}`, capacidad}));
+    const section = {id: 1, nombre: 'Patio', descripcion: null, mesas, totalMesas: 6, capacidad: 90, activa: true};
+    render(<SectionsTable list={fakeList({items: [section]})} onEdit={() => {}} onToggleStatus={() => {}} />);
+    const groups = screen.getByRole('list', {name: 'Mesas de Patio'});
+    expect(within(groups).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['2 mesas de 4 personas', '1 mesa de 30 personas', '+3 más']);
+    await userEvent.click(within(groups).getByRole('button', {name: '+3 más'}));
+    expect(within(groups).getByText('Ver menos')).toBeInTheDocument();
+    expect(within(groups).getAllByRole('listitem')).toHaveLength(6);
   });
 
   it('registra una sección agregando mesas numeradas con su capacidad', async () => {

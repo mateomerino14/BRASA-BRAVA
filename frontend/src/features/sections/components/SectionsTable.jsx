@@ -1,10 +1,12 @@
 import {Ban, Pencil, RotateCcw} from 'lucide-react';
 import {ListTable} from '../../../components/organisms/ListTable';
+import {ChipList} from '../../../components/molecules/ChipList';
 import {Badge} from '../../../components/atoms/Badge';
 import {IconButton} from '../../../components/atoms/IconButton';
 import {Amount} from '../../../components/atoms/Amount';
 import {cn} from '../../../lib/cn';
 import {capacityGroups} from '../utils/sectionForm';
+import {VISIBLE_GROUPS} from '../constants/sections';
 
 const styles = {
   section: 'min-w-0',
@@ -12,8 +14,7 @@ const styles = {
   inactiveName: 'text-cafe line-through',
   description: 'truncate text-xs text-cafe lg:max-w-60',
   actions: 'inline-flex gap-2',
-  groups: 'flex flex-wrap gap-2',
-  group: 'inline-flex items-baseline gap-1 whitespace-nowrap rounded-lg bg-hueso px-3 py-1.5 text-[13px] font-semibold text-carbon',
+  group: 'whitespace-nowrap rounded-lg bg-hueso px-3 py-1 text-[13px] font-semibold text-carbon',
   groupCount: 'font-display text-xl leading-none text-brasa-oscuro',
   groupPeople: 'font-display text-xl leading-none',
   groupWord: 'font-medium text-cafe',
@@ -26,6 +27,15 @@ const pluralize = (count, singular, plural) => {
   }
   return plural;
 };
+
+function GroupLabel({tables, capacity}) {
+  return (
+    <>
+      <span className={styles.groupCount}>{tables}</span> {pluralize(tables, 'mesa', 'mesas')} <span className={styles.groupWord}>de</span>{' '}
+      <span className={styles.groupPeople}>{capacity}</span> <span className={styles.groupWord}>{pluralize(capacity, 'persona', 'personas')}</span>
+    </>
+  );
+}
 
 const buildColumns = ({onEdit, onToggleStatus}) => [
   {
@@ -45,16 +55,12 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
     header: 'Mesas',
     wide: true,
     render: (section) => (
-      <ul aria-label={`Mesas de ${section.nombre}`} className={styles.groups}>
-        {capacityGroups(section.mesas).map(({capacidad, mesas}) => (
-          <li key={capacidad} className={styles.group}>
-            <span className={styles.groupCount}>{mesas}</span> {pluralize(mesas, 'mesa', 'mesas')}{' '}
-            <span className={styles.groupWord}>de</span>{' '}
-            <span className={styles.groupPeople}>{capacidad}</span>{' '}
-            <span className={styles.groupWord}>{pluralize(capacidad, 'persona', 'personas')}</span>
-          </li>
-        ))}
-      </ul>
+      <ChipList
+        label={`Mesas de ${section.nombre}`}
+        items={capacityGroups(section.mesas).map(({capacidad, mesas}) => ({id: capacidad, label: <GroupLabel tables={mesas} capacity={capacidad} />}))}
+        visible={VISIBLE_GROUPS}
+        chipClassName={styles.group}
+      />
     ),
   },
   {key: 'mesas', header: 'Total', sortKey: 'mesas', align: 'center', render: (section) => <Amount value={String(section.totalMesas)} suffix={pluralize(section.totalMesas, 'mesa', 'mesas')} />},
