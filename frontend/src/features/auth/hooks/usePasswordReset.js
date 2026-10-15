@@ -12,6 +12,12 @@ const ERROR_TITLES = {
   502: 'Correo no enviado',
 };
 
+const BLOCKING_REASONS = {
+  codigo_bloqueado: 'bloqueado',
+  codigo_vencido: 'vencido',
+  codigo_invalido: 'invalido',
+};
+
 const errorTitle = (error, fallback) => ERROR_TITLES[error.status] ?? fallback;
 
 export const passwordError = (password) => {
@@ -35,8 +41,11 @@ export function usePasswordReset({api = authApi} = {}) {
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
+  const [codeStatus, setCodeStatus] = useState('activo');
+  const [attemptsLeft, setAttemptsLeft] = useState(null);
+  const [expiresAt, setExpiresAt] = useState(null);
 
-  const run = async (work, fallbackTitle) => {
+  const run = async (work, fallbackTitle, handleError) => {
     setLoading(true);
     setErrors({});
     try {
@@ -45,12 +54,21 @@ export function usePasswordReset({api = authApi} = {}) {
       return result;
     }
     catch (requestError) {
-      toast.error(requestError.message, errorTitle(requestError, fallbackTitle));
+      if (!handleError?.(requestError)) {
+        toast.error(requestError.message, errorTitle(requestError, fallbackTitle));
+      }
       return undefined;
     }
     finally {
       setLoading(false);
     }
+  };
+
+  const startCode = (response) => {
+    setCode('');
+    setCodeStatus('activo');
+    setAttemptsLeft(null);
+    setExpiresAt(response.venceEn ?? null);
   };
 
   const restart = (nextStep) => {
@@ -59,6 +77,24 @@ export function usePasswordReset({api = authApi} = {}) {
     setCode('');
     setErrors({});
     setNotice('');
+    setCodeStatus('activo');
+    setAttemptsLeft(null);
+    setExpiresAt(null);
+  };
+
+  const handleCodeError = (requestError) => {
+    const blocked = BLOCKING_REASONS[requestError.body?.motivo];
+    if (blocked) {
+      toast.clear();
+      setCode('');
+      setNotice('');
+      setCodeStatus(blocked);
+      return true;
+    }
+    if (requestError.body?.motivo === 'codigo_incorrecto') {
+      setAttemptsLeft(requestError.body.intentosRestantes);
+    }
+    return false;
   };
 
   const open = () => restart('email');
@@ -77,7 +113,7 @@ export function usePasswordReset({api = authApi} = {}) {
     }
     const ok = await run(() => api.requestResetCode(email.trim()), 'No se pudo enviar el código');
     if (ok) {
-      setCode('');
+      startCode(ok);
       setStep('code');
       setNotice('Le enviamos un código de 6 dígitos. Revise su bandeja de entrada.');
     }
@@ -86,8 +122,8 @@ export function usePasswordReset({api = authApi} = {}) {
   const resendCode = async () => {
     const ok = await run(() => api.requestResetCode(email.trim()), 'No se pudo enviar el código');
     if (ok) {
-      setCode('');
-      setNotice('Le enviamos un código nuevo.');
+      startCode(ok);
+      setNotice('Le enviamos un código nuevo. El anterior ya no sirve.');
     }
   };
 
@@ -97,7 +133,7 @@ export function usePasswordReset({api = authApi} = {}) {
       return;
     }
     setNotice('');
-    const ok = await run(() => api.verifyResetCode(email.trim(), code), 'Código no válido');
+    const ok = await run(() => api.verifyResetCode(email.trim(), code), 'Código no válido', handleCodeError);
     if (ok) {
       setStep('password');
     }
@@ -116,7 +152,14 @@ export function usePasswordReset({api = authApi} = {}) {
       setErrors({confirmation: 'Las contraseñas no coinciden'});
       return;
     }
-    const ok = await run(() => api.confirmPasswordReset(email.trim(), code, password), 'No se pudo cambiar la contraseña');
+    const backToCode = (requestError) => {
+      const handled = handleCodeError(requestError);
+      if (handled) {
+        setStep('code');
+      }
+      return handled;
+    };
+    const ok = await run(() => api.confirmPasswordReset(email.trim(), code, password), 'No se pudo cambiar la contraseña', backToCode);
     if (ok) {
       setStep('done');
     }
@@ -136,6 +179,9 @@ export function usePasswordReset({api = authApi} = {}) {
     errors,
     notice,
     loading,
+    codeStatus,
+    attemptsLeft,
+    expiresAt,
     setEmail,
     changeCode,
     clearErrors,

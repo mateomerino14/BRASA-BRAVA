@@ -20,3 +20,18 @@ export const RESET_STEPS = {
     action: 'Volver al inicio de sesión',
   },
 };
+
+export const CODE_PROBLEMS = {
+  bloqueado: {
+    title: 'Código bloqueado',
+    text: 'Se agotaron los intentos de este código. Pida uno nuevo con «Reenviar código» para continuar.',
+  },
+  vencido: {
+    title: 'Código vencido',
+    text: 'Este código ya no está vigente. Pida uno nuevo con «Reenviar código» para continuar.',
+  },
+  invalido: {
+    title: 'Código anulado',
+    text: 'Este código ya no sirve, quizá porque pidió otro después. Pida uno nuevo con «Reenviar código».',
+  },
+};
