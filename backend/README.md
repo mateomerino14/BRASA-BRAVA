@@ -153,8 +153,8 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/auth/login` | Inicio de sesión. Con usuario `DIRECTORIO` entra el dueño del local |
 | `GET` | `/api/auth/me` | Perfil de la sesión actual, con el nombre y la foto al día del empleado |
 | `GET` | `/api/auth/login-users` | Empleados activos para el carrusel del login (alias, nombre, cargo y foto) |
-| `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo de un empleado activo; responde 404 si no hay cuenta con ese correo y 403 si está dada de baja |
-| `POST` | `/api/auth/password-reset/verify` | Verifica el código sin consumirlo |
+| `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo de un empleado activo; responde `venceEn`, 404 si no hay cuenta con ese correo y 403 si está dada de baja |
+| `POST` | `/api/auth/password-reset/verify` | Verifica el código sin consumirlo. Los errores incluyen `motivo` (`codigo_incorrecto` con `intentosRestantes`, `codigo_bloqueado`, `codigo_vencido` o `codigo_invalido`) |
 | `POST` | `/api/auth/password-reset/confirm` | Cambia la contraseña con el código verificado |
 | `GET` | `/api/employees` | Empleados con búsqueda (`search`, por nombre, usuario o CI), filtro por cargo (`idCargo`) y los parámetros comunes de listado. Orden: `nombre`, `ci`, `cargo`, `usuario`, `estado` |
 | `GET` | `/api/employees/:id` | Detalle de un empleado |
