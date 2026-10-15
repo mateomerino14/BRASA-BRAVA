@@ -85,7 +85,7 @@ BRASA-BRAVA/
 | Interfaz adaptable a celular y tablet (menú deslizable y tablas en tarjetas) | Terminado |
 | Pantallas de gestión estándar (filtros en la URL, orden por columna, filas por página, limpiar filtros) | Terminado |
 | Gestión de productos (precio, foto, categoría, disponible/agotado, baja y reactivación) | Terminado |
-| Gestión de stock (insumos, alertas de nivel, entradas, salidas, ajustes e historial) | Terminado |
+| Inventario de insumos (cantidad, mínimo y corrección de la cantidad) | Terminado |
 | Recetas de productos (insumos por porción y porciones que alcanzan con el stock) | Terminado |
 | Secciones y mesas (ambientes del local, mesas con capacidad y resumen) | Terminado |
 | Promociones (combos y descuentos con fechas, días y vigencia del día) | Terminado |

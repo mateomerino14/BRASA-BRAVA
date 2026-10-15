@@ -7,7 +7,6 @@ import {Textarea} from '../../../components/atoms/Textarea';
 import {IconButton} from '../../../components/atoms/IconButton';
 import {FormField} from '../../../components/molecules/FormField';
 import {Stepper} from '../../../components/molecules/Stepper';
-import {Alert} from '../../../components/molecules/Alert';
 import {cn} from '../../../lib/cn';
 import {DESCRIPTION_MAX_LENGTH, MAX_CAPACITY, MAX_TABLES, MIN_CAPACITY, NAME_MAX_LENGTH, TABLE_NAME_MAX_LENGTH} from '../constants/sections';
 import {tableErrorKey} from '../utils/sectionForm';
@@ -16,7 +15,7 @@ const styles = {
   form: 'flex flex-col gap-5',
   tablesHeader: 'flex items-end justify-between gap-3',
   tablesTitle: 'text-base font-semibold text-carbon',
-  required: 'text-rojo',
+  required: 'text-error',
   tablesCount: 'text-xs text-cafe',
   grid: 'grid gap-3 sm:grid-cols-2',
   card: 'flex flex-col gap-2 rounded-2xl border bg-white p-3',
@@ -27,8 +26,8 @@ const styles = {
   tableName: 'h-10',
   cardBottom: 'flex items-center justify-between gap-2',
   people: 'text-xs text-cafe',
-  error: 'text-xs text-rojo',
-  generalError: 'text-sm text-rojo',
+  error: 'text-xs text-error',
+  generalError: 'text-sm text-error',
   actions: 'grid gap-3 sm:grid-cols-2',
 };
 
@@ -88,8 +87,6 @@ export function SectionFormModal({form}) {
             Agregar mesa
           </Button>
         </section>
-
-        {form.modalError && <Alert tone="error">{form.modalError}</Alert>}
 
         <div className={styles.actions}>
           <Button variant="outline" onClick={form.close} disabled={form.saving}>

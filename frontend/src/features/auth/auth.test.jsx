@@ -7,7 +7,7 @@ import {passwordError} from './hooks/usePasswordReset';
 describe('Login', () => {
   it('sin sesión, cualquier ruta protegida lleva al login', async () => {
     mockApi();
-    renderApp('/stock');
+    renderApp('/inventario');
     expect(await screen.findByRole('heading', {name: 'Inicio de sesión'})).toBeInTheDocument();
   });
 
@@ -69,8 +69,8 @@ describe('Login', () => {
 
   it('restaura la sesión guardada y vuelve a la ruta pedida', async () => {
     mockApi();
-    renderApp('/stock', {token: 'guardado'});
-    expect(await screen.findByRole('heading', {name: 'Gestión de stock'})).toBeInTheDocument();
+    renderApp('/inventario', {token: 'guardado'});
+    expect(await screen.findByRole('heading', {name: 'Inventario de insumos'})).toBeInTheDocument();
   });
 
   it('un token vencido cierra la sesión', async () => {

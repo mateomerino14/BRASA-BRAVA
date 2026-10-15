@@ -186,7 +186,7 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/api/ingredients` | Insumos con su nivel (`suficiente`, `bajo`, `sin_stock`); búsqueda, `nivel` (`todos`, `bajo`, `sin_stock`) y los parámetros comunes. Orden: `nombre`, `stock`, `estado`. Incluye `summary` con totales de alertas |
 | `GET` | `/api/ingredients/:id` | Detalle de un insumo |
 | `POST` | `/api/ingredients` | Registra un insumo con `stockInicial` opcional (queda como primera entrada del historial) |
-| `PUT` | `/api/ingredients/:id` | Modifica nombre, unidad y stock mínimo |
+| `PUT` | `/api/ingredients/:id` | Modifica nombre, unidad y stock mínimo; con `stockActual` corrige la cantidad y la registra como ajuste ("Corrección de cantidad") |
 | `PATCH` | `/api/ingredients/:id/status` | Da de baja o reactiva un insumo |
 | `POST` | `/api/ingredients/:id/movements` | Registra una entrada, salida o ajuste (`{tipo, cantidad, motivo}`) |
 | `GET` | `/api/ingredients/:id/movements` | Historial de movimientos, del más reciente al más antiguo (`page`, `pageSize`) |
