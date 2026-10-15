@@ -106,13 +106,16 @@ describe('Recuperación de contraseña', () => {
     await user.click(await within(codeDialog).findByLabelText('Dígito 1'));
     await user.paste('999999');
     await user.click(within(codeDialog).getByRole('button', {name: 'Verificar'}));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Le quedan 4');
+    const codeToast = await screen.findByRole('alert');
+    expect(codeToast).toHaveTextContent('Código no válido');
+    expect(codeToast).toHaveTextContent('Le quedan 4');
     expect(within(codeDialog).queryByRole('alert')).not.toBeInTheDocument();
 
     await user.click(within(codeDialog).getByLabelText('Dígito 1'));
     await user.paste('123456');
     await user.click(within(codeDialog).getByRole('button', {name: 'Verificar'}));
     const passDialog = await screen.findByRole('dialog', {name: 'Nueva contraseña'});
+    await waitFor(() => expect(screen.queryByText(/Le quedan 4/)).not.toBeInTheDocument());
 
     await user.type(await within(passDialog).findByLabelText('Nueva contraseña'), 'NuevaClave99');
     await user.type(within(passDialog).getByLabelText('Confirmar contraseña'), 'Distinta99');
@@ -132,6 +135,31 @@ describe('Recuperación de contraseña', () => {
       code: '123456',
       newPassword: 'NuevaClave99',
     });
+  });
+
+  it('avisa cuando el correo no es de una cuenta registrada o activa', async () => {
+    mockApi({
+      'POST /auth/password-reset/request': ({email}) =>
+        email === 'j.ortiz@brasabrava.bo'
+          ? [403, {message: 'La cuenta de ese correo está dada de baja. Pida a administración que la reactive'}]
+          : [404, {message: 'No hay ninguna cuenta registrada con ese correo. Revise que esté bien escrito'}],
+    });
+    const {user} = renderApp('/login');
+    const dialog = await openReset(user);
+    await user.type(within(dialog).getByLabelText('Correo'), 'nadie@brasabrava.bo');
+    await user.click(within(dialog).getByRole('button', {name: 'Enviar código'}));
+    let toast = await screen.findByRole('alert');
+    expect(toast).toHaveTextContent('Cuenta inexistente');
+    expect(toast).toHaveTextContent('No hay ninguna cuenta registrada');
+    expect(screen.getByRole('dialog', {name: 'Recuperar contraseña'})).toBeInTheDocument();
+
+    await user.clear(within(dialog).getByLabelText('Correo'));
+    await user.type(within(dialog).getByLabelText('Correo'), 'j.ortiz@brasabrava.bo');
+    await user.click(within(dialog).getByRole('button', {name: 'Enviar código'}));
+    await waitFor(() => expect(screen.getAllByRole('alert')).toHaveLength(2));
+    toast = screen.getAllByRole('alert').at(-1);
+    expect(toast).toHaveTextContent('Cuenta inhabilitada');
+    expect(toast).toHaveTextContent('dada de baja');
   });
 
   it('al cerrar y volver a abrir, el formulario empieza vacío', async () => {
