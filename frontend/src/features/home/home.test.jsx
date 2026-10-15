@@ -3,6 +3,8 @@ import {render, screen, within} from '@testing-library/react';
 import {renderApp} from '../../test/renderApp';
 import {USERS, mockApi} from '../../test/mockApi';
 import {LiveClock} from '../../components/molecules/LiveClock';
+import {MotionConfig} from 'motion/react';
+import {WelcomeCard} from './components/WelcomeCard';
 
 const minutesAgo = (minutes) => new Date(Date.now() - minutes * 60000).toISOString();
 
@@ -79,6 +81,21 @@ describe('Home', () => {
     await user.click(await screen.findByRole('button', {name: 'Cerrar sesión'}));
     expect(await screen.findByRole('heading', {name: 'Inicio de sesión'})).toBeInTheDocument();
     expect(localStorage.getItem('brasa.token')).toBeNull();
+  });
+
+  it('muestra el video del local mudo y en bucle', () => {
+    const {container} = render(<MotionConfig reducedMotion="never"><WelcomeCard name="Marco Vargas" clockDate={new Date(2026, 9, 15, 10, 47)} /></MotionConfig>);
+    const video = container.querySelector('video');
+    expect(video.muted).toBe(true);
+    expect(video).toHaveAttribute('loop');
+    expect(video).toHaveAttribute('playsinline');
+    expect(screen.getByText('10:47')).toBeInTheDocument();
+  });
+
+  it('con animaciones reducidas muestra una foto fija del local', () => {
+    const {container} = render(<MotionConfig reducedMotion="always"><WelcomeCard name="Marco Vargas" clockDate={new Date(2026, 9, 15, 10, 47)} /></MotionConfig>);
+    expect(container.querySelector('video')).toBeNull();
+    expect(container.querySelector('img')).toBeInTheDocument();
   });
 
   it('el reloj avanza cada segundo', async () => {
