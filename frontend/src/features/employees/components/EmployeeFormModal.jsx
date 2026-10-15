@@ -5,7 +5,6 @@ import {PasswordInput} from '../../../components/atoms/PasswordInput';
 import {Select} from '../../../components/atoms/Select';
 import {Avatar} from '../../../components/atoms/Avatar';
 import {FormField} from '../../../components/molecules/FormField';
-import {Alert} from '../../../components/molecules/Alert';
 import {ImagePicker} from '../../../components/molecules/ImagePicker';
 import {useImagePreview} from '../../../hooks/useImagePreview';
 
@@ -96,8 +95,6 @@ export function EmployeeFormModal({form, roles}) {
         <FormField label="Foto del empleado" hint="Se muestra en el inicio de sesión y en la lista de empleados.">
           {() => <ImagePicker label="Foto del empleado" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
         </FormField>
-
-        {form.modalError && <Alert tone="error">{form.modalError}</Alert>}
 
         <div className={styles.actions}>
           <Button variant="outline" onClick={form.close} disabled={form.saving}>

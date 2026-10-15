@@ -7,7 +7,6 @@ import {NumberInput} from '../../../components/atoms/NumberInput';
 import {Select} from '../../../components/atoms/Select';
 import {Spinner} from '../../../components/atoms/Spinner';
 import {Amount} from '../../../components/atoms/Amount';
-import {Alert} from '../../../components/molecules/Alert';
 import {formatQuantity} from '../../../lib/format';
 import {cn} from '../../../lib/cn';
 import {UNIT_SUFFIX} from '../../../config/units';
@@ -20,7 +19,7 @@ const styles = {
   ingredient: 'col-span-2 sm:col-span-1',
   stock: 'mt-1 text-xs text-cafe',
   inactive: 'text-rojo',
-  error: 'col-span-full text-sm text-rojo',
+  error: 'col-span-full text-sm text-error',
   remove: 'mt-2',
   empty: 'rounded-2xl border border-dashed border-arena bg-campo px-4 py-6 text-center text-sm text-cafe',
   summary: 'flex items-center gap-4 rounded-2xl border border-arena/60 bg-white px-5 py-4',
@@ -99,7 +98,6 @@ export function RecipeModal({recipe}) {
       <form onSubmit={recipe.submit} noValidate className={styles.form}>
         <p className={styles.hint}>Cantidad de cada insumo que lleva una porción. Caja la descontará del stock en cada venta.</p>
         {body}
-        {recipe.modalError && <Alert tone="error">{recipe.modalError}</Alert>}
         <div className={styles.actions}>
           <Button variant="outline" onClick={recipe.close} disabled={recipe.saving}>
             Cancelar

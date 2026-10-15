@@ -5,6 +5,7 @@ const notEnough = {error: 'No hay suficiente stock para esa salida', status: 400
 const inactive = {error: 'Reactive el insumo antes de registrar movimientos', status: 400};
 
 const QUANTITY_DECIMALS = 3;
+const CORRECTION_REASON = 'Corrección de cantidad';
 
 // Redondea a la precisión de la base
 const round = (value) => Number(Number(value).toFixed(QUANTITY_DECIMALS));
@@ -95,8 +96,8 @@ export const createIngredientsService = ({repository, transaction}) => {
     return getById(id);
   };
 
-  // Modifica nombre, unidad y mínimo de un insumo
-  const update = async (id, data) => {
+  // Modifica nombre, unidad y mínimo; si la cantidad cambia la registra como ajuste
+  const update = async (id, {stockActual, ...data}, user) => {
     const current = await repository.findById(id);
     if (!current) {
       return notFound;
@@ -107,7 +108,14 @@ export const createIngredientsService = ({repository, transaction}) => {
     if (data.unidad !== current.unidad && await repository.hasMovements(id)) {
       return unitLocked;
     }
+    const corrects = stockActual !== undefined && round(stockActual) !== round(current.stock_actual);
+    if (corrects && !current.activo) {
+      return inactive;
+    }
     await repository.update(id, data);
+    if (corrects) {
+      return addMovement(id, {tipo: 'ajuste', cantidad: stockActual, motivo: CORRECTION_REASON}, user);
+    }
     return getById(id);
   };
 

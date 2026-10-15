@@ -69,7 +69,7 @@ describe('Gestión de empleados', () => {
     expect(await screen.findByText('l.flores')).toBeInTheDocument();
   });
 
-  it('muestra en el modal el error del servidor', async () => {
+  it('muestra en un aviso emergente el error del servidor y deja el modal abierto', async () => {
     const {user} = await openPage();
     await user.click(screen.getByRole('button', {name: 'Registrar empleado'}));
     const dialog = await screen.findByRole('dialog');
@@ -81,7 +81,7 @@ describe('Gestión de empleados', () => {
     await user.selectOptions(within(dialog).getByLabelText(/^Cargo/), 'Cajero');
     await fillField(user, dialog, 'Contraseña inicial', 'Inicial2026');
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
-    expect(await within(dialog).findByRole('alert')).toHaveTextContent('Ese nombre de usuario ya está en uso');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Ese nombre de usuario ya está en uso');
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 

@@ -94,7 +94,7 @@ describe('Gestión de productos', () => {
     await user.type(within(dialog).getByLabelText(/^Precio/), '10');
     await user.selectOptions(within(dialog).getByLabelText(/^Categoría/), 'Bebidas y Refrescos');
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
-    expect(await within(dialog).findByText('Ya existe un producto con ese nombre')).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Ya existe un producto con ese nombre');
   });
 
   it('modifica un producto cuya categoría está de baja sin perderla', async () => {

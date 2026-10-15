@@ -4,7 +4,6 @@ import {Input} from '../../../components/atoms/Input';
 import {NumberInput} from '../../../components/atoms/NumberInput';
 import {Select} from '../../../components/atoms/Select';
 import {FormField} from '../../../components/molecules/FormField';
-import {Alert} from '../../../components/molecules/Alert';
 import {NAME_MAX_LENGTH, UNIT_OPTIONS, UNIT_SUFFIX} from '../constants/stock';
 
 const styles = {
@@ -15,13 +14,17 @@ const styles = {
 
 export function IngredientFormModal({form}) {
   const suffix = UNIT_SUFFIX[form.values.unidad];
+  let quantityHint = 'Lo que hay hoy. Si lo deja vacío empieza en 0.';
+  if (form.isEdit) {
+    quantityHint = 'Corríjala si el conteo real es distinto.';
+  }
 
   return (
     <Modal
       open={form.open}
       onClose={form.close}
       title={form.isEdit ? 'Modificar insumo' : 'Registrar nuevo insumo'}
-      description={form.isEdit ? 'Actualice el nombre, la unidad o el stock mínimo.' : 'Agregue un ingrediente o bebida que se controla en stock.'}
+      description={form.isEdit ? 'Actualice los datos o la cantidad que hay en el local.' : 'Agregue un ingrediente o bebida del inventario.'}
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <FormField label="Nombre" required error={form.errors.nombre}>
@@ -33,17 +36,13 @@ export function IngredientFormModal({form}) {
         </FormField>
 
         <div className={styles.grid}>
+          <FormField label="Cantidad en stock" required={form.isEdit} error={form.errors.stockActual} hint={quantityHint}>
+            {(control) => <NumberInput {...control} suffix={suffix} value={form.values.stockActual} onChange={(event) => form.setField('stockActual', event.target.value)} />}
+          </FormField>
           <FormField label="Stock mínimo" required error={form.errors.stockMinimo} hint="Debajo de este número se avisa stock bajo.">
             {(control) => <NumberInput {...control} suffix={suffix} value={form.values.stockMinimo} onChange={(event) => form.setField('stockMinimo', event.target.value)} />}
           </FormField>
-          {!form.isEdit && (
-            <FormField label="Stock inicial" error={form.errors.stockInicial} hint="Lo que hay hoy. Queda como primera entrada.">
-              {(control) => <NumberInput {...control} suffix={suffix} value={form.values.stockInicial} onChange={(event) => form.setField('stockInicial', event.target.value)} />}
-            </FormField>
-          )}
         </div>
-
-        {form.modalError && <Alert tone="error">{form.modalError}</Alert>}
 
         <div className={styles.actions}>
           <Button variant="outline" onClick={form.close} disabled={form.saving}>

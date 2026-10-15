@@ -115,6 +115,19 @@ describe('Gestión de stock', () => {
     expect(changed.body.ingredient.unidad).toBe('g');
   });
 
+  it('al modificar corrige la cantidad en stock como un ajuste', async () => {
+    const id = await idOf('Carne de res');
+    const res = await api('put', `/api/ingredients/${id}`).send({nombre: 'Carne de res', unidad: 'kg', stockMinimo: 5, stockActual: 9.5});
+    expect(res.body.ingredient).toMatchObject({stockActual: 9.5, nivel: 'suficiente'});
+    const history = await api('get', `/api/ingredients/${id}/movements`);
+    expect(history.body.items[0]).toMatchObject({tipo: 'ajuste', cantidad: -2.5, stockResultante: 9.5, motivo: 'Corrección de cantidad'});
+    await api('put', `/api/ingredients/${id}`).send({nombre: 'Carne de res', unidad: 'kg', stockMinimo: 6, stockActual: 9.5});
+    expect((await api('get', `/api/ingredients/${id}/movements`)).body.total).toBe(history.body.total);
+    await api('patch', `/api/ingredients/${id}/status`).send({activo: false});
+    const blocked = await api('put', `/api/ingredients/${id}`).send({nombre: 'Carne de res', unidad: 'kg', stockMinimo: 5, stockActual: 3});
+    expect(blocked.status).toBe(400);
+  });
+
   it('da de baja, no admite movimientos en insumos de baja y responde 404', async () => {
     const id = await idOf('Aceite');
     const off = await api('patch', `/api/ingredients/${id}/status`).send({activo: false});

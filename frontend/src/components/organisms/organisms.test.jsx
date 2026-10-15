@@ -26,7 +26,7 @@ describe('navegación', () => {
   it('mantiene el grupo con los hijos permitidos', () => {
     const items = filterNavigation(NAVIGATION, ['home', 'stock']);
     const group = items.find((item) => item.children);
-    expect(group.children.map((child) => child.label)).toEqual(['Stock']);
+    expect(group.children.map((child) => child.label)).toEqual(['Inventario']);
   });
 
   it('aplana todas las rutas', () => {
@@ -39,23 +39,23 @@ describe('Sidebar', () => {
     renderSidebar(['home', 'productos', 'stock']);
     const toggle = screen.getByRole('button', {name: 'Administración'});
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('link', {name: 'Stock'})).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', {name: 'Inventario'})).not.toBeInTheDocument();
     await userEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('link', {name: 'Stock'})).toBeInTheDocument();
+    expect(screen.getByRole('link', {name: 'Inventario'})).toBeInTheDocument();
     await userEvent.click(toggle);
     await waitFor(() =>
-      expect(screen.queryByRole('link', {name: 'Stock'})).not.toBeInTheDocument(),
+      expect(screen.queryByRole('link', {name: 'Inventario'})).not.toBeInTheDocument(),
     );
   });
 
   it('abre el grupo y marca activo el ítem de la ruta actual', () => {
-    renderSidebar(['home', 'stock'], '/stock');
+    renderSidebar(['home', 'stock'], '/inventario');
     expect(screen.getByRole('button', {name: 'Administración'})).toHaveAttribute(
       'aria-expanded',
       'true',
     );
-    expect(screen.getByRole('link', {name: 'Stock'})).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', {name: 'Inventario'})).toHaveAttribute('aria-current', 'page');
   });
 
   it('no muestra módulos sin permiso', () => {
