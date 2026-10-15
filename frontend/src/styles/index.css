@@ -113,6 +113,99 @@
   }
 }
 
+/*
+ * Listas desplegables: el <select> nativo con el menú propio del sistema (Chrome 135+ y la app de escritorio).
+ * Se conserva el teclado y la accesibilidad del control nativo; los navegadores sin soporte muestran su menú.
+ */
+.select-field {
+  appearance: none;
+}
+
+@supports (appearance: base-select) {
+  .select-field,
+  .select-field::picker(select) {
+    appearance: base-select;
+  }
+
+  .select-field {
+    display: flex;
+    align-items: center;
+    padding-block: 0;
+  }
+
+  .select-field::picker-icon {
+    display: none;
+  }
+
+  .select-wrap:has(.select-field:open) .select-chevron {
+    rotate: 180deg;
+  }
+
+  .select-field:open {
+    border-color: var(--color-brasa);
+  }
+
+  .select-field::picker(select) {
+    margin-block: 6px;
+    padding: 6px;
+    border: 1px solid rgb(218 194 175 / 0.55);
+    border-radius: 14px;
+    background: var(--color-campo);
+    box-shadow: var(--shadow-float);
+    max-block-size: 18rem;
+    opacity: 1;
+    translate: 0 0;
+    transition: opacity 0.16s ease, translate 0.16s ease, overlay 0.16s allow-discrete, display 0.16s allow-discrete;
+  }
+
+  @starting-style {
+    .select-field::picker(select):popover-open {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+
+  .select-field option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-carbon);
+    cursor: pointer;
+  }
+
+  .select-field option[value=''] {
+    color: rgb(84 68 53 / 0.7);
+  }
+
+  .select-field option:hover,
+  .select-field option:focus-visible {
+    background: var(--color-hueso);
+    outline: none;
+  }
+
+  .select-field option:checked {
+    background: var(--color-crema);
+    color: var(--color-brasa-oscuro);
+    font-weight: 700;
+  }
+
+  .select-field option::checkmark {
+    order: 1;
+    margin-inline-start: auto;
+    content: '';
+    inline-size: 12px;
+    block-size: 7px;
+    border-inline-start: 2.5px solid var(--color-brasa-oscuro);
+    border-block-end: 2.5px solid var(--color-brasa-oscuro);
+    rotate: -45deg;
+    translate: 0 -2px;
+  }
+}
+
 /* Impresión: solo se imprime el contenido de .print-only (comandas y tickets), con márgenes de ticketera */
 .print-only {
   display: none;
