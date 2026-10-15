@@ -25,7 +25,7 @@ npm run dist                 # instalador .exe en release/
 |---|---|
 | `src/settings.js` | Crea la primera vez `brasa-brava.json` en `%APPDATA%/Brasa Brava`, con un secreto de sesión y una contraseña de base aleatorios para esa PC |
 | `src/services.js` | Arranca PostgreSQL embebido en `pgdata/` en un puerto libre, crea la base si no existe, levanta la API (que aplica las migraciones) y sirve la interfaz |
-| `src/main.js` | Abre la ventana y, al cerrarla, detiene la API y la base de forma ordenada |
+| `src/main.js` | Abre la ventana y, al cerrarla, detiene la API y la base de forma ordenada; los enlaces externos `https` (redes sociales) se abren en el navegador predeterminado |
 | `src/printers.js` | Lista las impresoras instaladas en Windows, guarda la de cocina y la de caja en `impresoras.json` e imprime sin diálogo en una ventana oculta |
 | `src/preload.cjs` | Expone a la interfaz `window.brasaDesktop` (`listPrinters`, `getPrinters`, `savePrinters`, `print`) sin dar acceso a Node |
 

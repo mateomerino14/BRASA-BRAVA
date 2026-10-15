@@ -5,6 +5,7 @@ import {MemoryRouter} from 'react-router';
 import {MotionConfig} from 'motion/react';
 import {Sidebar} from './Sidebar';
 import {Modal} from './Modal';
+import {Footer} from './Footer';
 import {NAVIGATION, filterNavigation, flattenNavigation} from '../../config/navigation';
 
 const renderSidebar = (permissions, route = '/') =>
@@ -81,5 +82,22 @@ describe('Modal', () => {
   it('no renderiza nada cerrado', () => {
     render(<Modal open={false} title="Oculto" />);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+describe('Footer', () => {
+  it('enlaza las redes sociales del local en una pestaña nueva', () => {
+    render(<Footer />);
+    const links = {
+      'Facebook de Brasa Brava': 'https://www.facebook.com/BrasaBravaTiquipaya/?locale=es_LA',
+      'Instagram de Brasa Brava': 'https://www.instagram.com/brasabrava_tiquipaya/',
+      'TikTok de Brasa Brava': 'https://www.tiktok.com/@brasa.brava.tiqui',
+    };
+    for (const [name, href] of Object.entries(links)) {
+      const link = screen.getByRole('link', {name});
+      expect(link).toHaveAttribute('href', href);
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
   });
 });
