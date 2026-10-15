@@ -13,6 +13,7 @@ const styles = {
     brand: 'bg-brasa/10 text-brasa',
     warning: 'bg-mostaza/20 text-cafe',
     danger: 'bg-rojo/10 text-rojo',
+    success: 'bg-verde/10 text-verde',
   },
 };
 
