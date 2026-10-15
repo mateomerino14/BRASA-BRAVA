@@ -54,7 +54,16 @@ npm test                  # pruebas automáticas (Vitest + Testing Library)
 
 Las pantallas de los módulos se cargan bajo demanda (`React.lazy` en `router/AppRoutes.jsx`): el inicio descarga solo login, menú y Home, y cada pantalla de administración se baja al abrirla.
 
-La sesión se maneja en `context/` (`AuthProvider` y `useAuth`). El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
+La sesión se maneja en `context/` (`AuthProvider` y `useAuth`).
+
+### Estándar de mensajes de error
+
+- **Error de un campo** (vacío, formato, regla): texto rojo debajo del campo con `FormField` y el borde del campo en rojo. No abre avisos.
+- **Error de una operación** (lo que responde el servidor o la red: credenciales incorrectas, código vencido, nombre repetido): aviso emergente con `useToast().error(mensaje, título?)`. Aparece arriba al centro, por encima de los modales, se cierra solo a los 5 segundos o con la X, y no repite el mismo mensaje.
+- `useToast().success(mensaje)` sirve para confirmaciones breves con el mismo formato.
+- El proveedor (`ToastProvider`) está en `App.jsx`, en `renderApp` de las pruebas y en Storybook.
+
+El inicio de sesión y la recuperación de contraseña ya siguen este estándar. El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
 
 El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco). ### Pantallas de gestión estándar
 
@@ -81,7 +90,7 @@ src/
 │   ├── atoms/           Button, IconButton, Input, PasswordInput, NumberInput, MoneyInput, Textarea, Select, Switch,
 │   │                    Amount, LevelBar, Avatar, Thumbnail,
 │   │                    Badge, Logo, Spinner, SocialIcon
-│   ├── molecules/       FormField, CodeInput, Alert, LiveClock, SearchInput, Pagination, PageSizeSelect,
+│   ├── molecules/       FormField, CodeInput, Alert, Toast, LiveClock, SearchInput, Pagination, PageSizeSelect,
 │   │                    FilterSelect, ImagePicker, TagInput, SegmentedControl, StatCard, Stepper, ChipList,
 │   │                    DayPicker, PriceTag
 │   ├── organisms/       Sidebar, MobileMenu, Header, Footer, Modal, EmployeeCarousel, DataTable, ListTable, FilterBar,
@@ -119,7 +128,8 @@ Los colores y fuentes salen del prototipo de Figma y se definen una sola vez en 
 | `carbon` | `#1C1A18` | Texto, footer y botón Ingresar |
 | `mostaza` | `#E8B23D` | Acentos y carrusel del login |
 | `crema` | `#FAF3EA` | Superficies: modales, ítem activo del menú y encabezados de tabla (nunca campos) |
-| `rojo` | `#C1272D` | Cancelar, cerrar sesión y errores |
+| `rojo` | `#C1272D` | Cancelar, cerrar sesión y estados de baja |
+| `error` | `#D91A22` | Mensajes de error: campos, avisos emergentes y bordes de campos inválidos |
 | `verde` | `#2FA84F` | Éxito y estado activo |
 | `campo` | `#FFFFFF` | Fondo de todo campo editable (texto, listas, fechas, cantidades): resalta sobre el crema de los modales |
 
