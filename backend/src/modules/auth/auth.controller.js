@@ -1,6 +1,6 @@
 import {respond} from '../../utils/respond.js';
 
-const resetRequested = 'Si el correo está registrado, recibirá un código de verificación';
+const resetRequested = 'Le enviamos un código de verificación a su correo';
 
 // Controladores HTTP del módulo de autenticación
 export const createAuthController = (service) => ({

@@ -10,13 +10,14 @@ import {loginSchema, resetConfirmSchema, resetRequestSchema, resetVerifySchema} 
 const limitWindowMs = 15 * 60_000;
 const loginAttemptsLimit = 20;
 const resetAttemptsLimit = 10;
+const tooManyAttempts = {message: 'Demasiados intentos. Espere unos minutos e intente de nuevo'};
 
 // Limita los intentos por IP en rutas sensibles
 const createLimiter = (enabled, limit) => {
   if (!enabled) {
     return (_req, _res, next) => next();
   }
-  return rateLimit({windowMs: limitWindowMs, limit, standardHeaders: 'draft-8', legacyHeaders: false});
+  return rateLimit({windowMs: limitWindowMs, limit, standardHeaders: 'draft-8', legacyHeaders: false, message: tooManyAttempts});
 };
 
 // Declara las rutas /api/auth con sus validaciones y límites
