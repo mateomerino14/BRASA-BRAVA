@@ -106,8 +106,8 @@ export function PromotionFormModal({form}) {
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <div className={styles.grid}>
-          <FormField label="Foto de la promoción">
-            {() => <ImagePicker label="Foto de la promoción" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
+          <FormField label="Foto de la promoción" className="h-full">
+            {() => <ImagePicker fill label="Foto de la promoción" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
           </FormField>
           <div className={styles.fields}>
             <FormField label="Nombre" required error={form.errors.nombre}>
