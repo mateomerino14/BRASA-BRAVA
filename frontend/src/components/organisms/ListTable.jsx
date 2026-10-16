@@ -1,4 +1,4 @@
-import {FilterX} from 'lucide-react';
+import {FilterX, RotateCw} from 'lucide-react';
 import {DataTable} from './DataTable';
 import {Pagination} from '../molecules/Pagination';
 import {PageSizeSelect} from '../molecules/PageSizeSelect';
@@ -14,7 +14,16 @@ const styles = {
 // Recibe el resultado de usePaginatedList en "list".
 export function ListTable({list, columns, caption, itemLabel, emptyMessage, rowKey = (row) => row.id, rowClassName}) {
   let emptyAction;
-  if (list.hasActiveFilters) {
+  let empty = emptyMessage;
+  if (list.error) {
+    empty = 'No se pudo cargar la lista';
+    emptyAction = (
+      <Button size="sm" variant="outline" icon={<RotateCw size={16} aria-hidden />} onClick={() => list.reload()}>
+        Reintentar
+      </Button>
+    );
+  }
+  else if (list.hasActiveFilters) {
     emptyAction = (
       <Button size="sm" variant="outline" icon={<FilterX size={16} aria-hidden />} onClick={list.clearFilters}>
         Limpiar filtros
@@ -29,7 +38,7 @@ export function ListTable({list, columns, caption, itemLabel, emptyMessage, rowK
       rows={list.items}
       rowKey={rowKey}
       loading={list.loading}
-      emptyMessage={emptyMessage}
+      emptyMessage={empty}
       emptyAction={emptyAction}
       rowClassName={rowClassName}
       sort={list.sort}

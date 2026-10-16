@@ -18,6 +18,29 @@ const openEmployees = async (route = '/empleados') => {
 const params = (location) => Object.fromEntries(new URLSearchParams(location.current.search));
 
 describe('Pantallas de gestión estándar', () => {
+  it('si la lista no carga avisa en emergente y la tabla ofrece reintentar', async () => {
+    const backend = createEmployeesBackend();
+    let failures = 1;
+    const list = backend.handlers['GET /employees'];
+    mockApi({...backend.handlers, 'GET /employees': (...args) => {
+      if (failures > 0) {
+        failures -= 1;
+        return [500, {message: 'No se pudo conectar con la base de datos'}];
+      }
+      return list(...args);
+    }});
+    const {user} = renderApp('/empleados', {token: 't'});
+    const toast = await screen.findByRole('alert');
+    expect(toast).toHaveTextContent('No se pudo cargar la lista');
+    expect(toast).toHaveTextContent('No se pudo conectar con la base de datos');
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('No se pudo cargar la lista')).toBeInTheDocument();
+    expect(within(table).queryByText(/No se encontraron/)).not.toBeInTheDocument();
+    await user.click(within(table).getByRole('button', {name: 'Reintentar'}));
+    expect(await within(table).findAllByRole('row')).not.toHaveLength(1);
+    expect(within(table).queryByText('No se pudo cargar la lista')).not.toBeInTheDocument();
+  });
+
   it('lee búsqueda, filtros y página desde la URL', async () => {
     const {backend} = await openEmployees('/empleados?search=ortiz&estado=inactivos&pageSize=10');
     await waitFor(() => expect(backend.calls.at(-1)).toMatchObject({search: 'ortiz', estado: 'inactivos', page: '1', pageSize: '10'}));

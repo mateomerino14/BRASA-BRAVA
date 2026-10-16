@@ -36,7 +36,6 @@ export function StockPage() {
     <ManagementPage
       search={{value: list.filters.search, onChange: list.changeSearch, placeholder: 'Buscar insumo'}}
       filters={<FilterSelect label="Filtrar por estado" options={STATUS_OPTIONS} value={list.filters.estado} onChange={list.changeStatus} />}
-      error={list.error}
       table={<IngredientsTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} />}
       callout={{...CALLOUT, onAction: form.openCreate}}
     >

@@ -20,7 +20,7 @@ const styles = {
 const hoverLift = {y: -2};
 const tapPress = {scale: 0.98};
 
-// Tarjeta de resumen con número grande; si recibe onClick funciona como filtro rápido
+// Tarjeta de resumen con número grande ("—" mientras no hay dato); si recibe onClick funciona como filtro rápido
 export function StatCard({icon: Icon, label, value, tone = 'brand', active = false, onClick}) {
   const content = (
     <>
@@ -28,7 +28,7 @@ export function StatCard({icon: Icon, label, value, tone = 'brand', active = fal
         <Icon size={22} aria-hidden />
       </span>
       <span className={styles.text}>
-        <span className={styles.value}>{value}</span>
+        <span className={styles.value}>{value ?? '—'}</span>
         <span className={cn(styles.label, 'block')}>{label}</span>
       </span>
     </>
