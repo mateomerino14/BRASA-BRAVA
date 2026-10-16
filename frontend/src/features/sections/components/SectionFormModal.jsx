@@ -28,7 +28,7 @@ const styles = {
   tableName: 'h-9 w-full rounded-lg border border-dashed border-arena bg-transparent px-2 text-center text-sm font-bold text-carbon transition-colors hover:border-solid hover:bg-campo focus:border-solid focus:border-brasa focus:bg-campo focus:outline-none focus:ring-4 focus:ring-brasa/20',
   tableNameInvalid: 'border-error',
   addTile: 'flex h-full min-h-44 w-full flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-arena text-sm font-bold text-brasa-oscuro transition-colors hover:border-brasa hover:bg-white disabled:cursor-not-allowed disabled:opacity-50',
-  error: 'text-xs text-error',
+  error: 'text-sm font-medium text-error',
   generalError: 'text-sm text-error',
   actions: 'grid gap-3 sm:grid-cols-2',
 };

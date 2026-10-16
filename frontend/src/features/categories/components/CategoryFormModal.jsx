@@ -23,7 +23,7 @@ const styles = {
   rows: 'flex flex-col gap-2',
   row: 'grid grid-cols-[1.5rem_1fr_auto] items-center gap-2',
   number: 'text-center font-display text-xl leading-none text-brasa-oscuro',
-  rowError: 'col-start-2 col-end-4 text-xs font-medium text-error',
+  rowError: 'col-start-2 col-end-4 text-sm font-medium text-error',
   add: 'flex h-11 w-full items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-arena text-sm font-bold text-brasa-oscuro transition-colors hover:border-brasa hover:bg-white disabled:cursor-not-allowed disabled:opacity-50',
   generalError: 'text-sm font-medium text-error',
 };
