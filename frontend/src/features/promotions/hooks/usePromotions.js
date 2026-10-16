@@ -3,7 +3,7 @@ import {promotionsApi} from '../services/promotionsApi';
 import {usePaginatedList} from '../../../hooks/usePaginatedList';
 
 const filterDefaults = {estado: 'todos', tipo: 'todos', vigencia: 'todos'};
-const emptySummary = {vigentes: 0, programadas: 0, vencidas: 0};
+const emptySummary = {vigentes: null, programadas: null, vencidas: null};
 
 export function usePromotions({api = promotionsApi} = {}) {
   const list = usePaginatedList({fetchPage: api.list, filterDefaults});

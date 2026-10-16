@@ -2,7 +2,7 @@ import {sectionsApi} from '../services/sectionsApi';
 import {usePaginatedList} from '../../../hooks/usePaginatedList';
 
 const filterDefaults = {estado: 'todos'};
-const emptySummary = {secciones: 0, mesas: 0, capacidad: 0};
+const emptySummary = {secciones: null, mesas: null, capacidad: null};
 
 export function useSections({api = sectionsApi} = {}) {
   const list = usePaginatedList({fetchPage: api.list, filterDefaults});
