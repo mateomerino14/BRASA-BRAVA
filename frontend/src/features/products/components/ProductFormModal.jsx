@@ -35,8 +35,8 @@ export function ProductFormModal({form, categories}) {
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <div className={styles.grid}>
-          <FormField label="Foto del producto">
-            {() => <ImagePicker label="Foto del producto" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
+          <FormField label="Foto del producto" className="h-full">
+            {() => <ImagePicker fill label="Foto del producto" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
           </FormField>
 
           <div className={styles.fields}>
