@@ -58,7 +58,7 @@ describe('Gestión de productos', () => {
   it('avisa si no se pudo cambiar la disponibilidad', async () => {
     const {table, user} = await openPage({failAvailability: true});
     await user.click(within(rowOf(table, 'Gaseosa 500 ml')).getByRole('switch'));
-    expect(await screen.findByText('No se pudo cambiar la disponibilidad')).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cambiar la disponibilidad');
   });
 
   it('valida y registra un producto con subcategoría dependiente y foto', async () => {

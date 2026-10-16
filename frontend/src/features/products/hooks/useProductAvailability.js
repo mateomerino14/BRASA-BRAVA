@@ -19,7 +19,7 @@ export function useProductAvailability({onChanged, onError, api = productsApi} =
       onChanged?.(successMessage(updated));
     }
     catch (requestError) {
-      onError?.(requestError.message);
+      onError?.(requestError.message, 'No se pudo cambiar la disponibilidad');
     }
     setPendingIds((ids) => ids.filter((id) => id !== product.id));
   };
