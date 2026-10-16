@@ -1,6 +1,9 @@
-import {NAME_MAX_LENGTH} from '../constants/categories';
+import {NAME_MAX_LENGTH, SUBCATEGORY_NAME_MAX_LENGTH} from '../constants/categories';
 
 const MIN_NAME_LENGTH = 2;
+
+// Clave del error de una subcategoría dentro del objeto de errores del formulario
+export const subcategoryErrorKey = (key) => `sub:${key}`;
 
 // Valida el formulario con las mismas reglas que la API
 export const validateCategory = (values) => {
@@ -14,6 +17,21 @@ export const validateCategory = (values) => {
   }
   if (values.subcategorias.length === 0) {
     errors.subcategorias = 'Agregue al menos una subcategoría';
+  }
+  const seen = new Set();
+  for (const sub of values.subcategorias) {
+    const name = sub.nombre.trim();
+    const key = subcategoryErrorKey(sub.key);
+    if (name.length < MIN_NAME_LENGTH) {
+      errors[key] = 'Ingrese el nombre (mínimo 2 letras)';
+    }
+    else if (name.length > SUBCATEGORY_NAME_MAX_LENGTH) {
+      errors[key] = 'El nombre es demasiado largo';
+    }
+    else if (seen.has(name.toLowerCase())) {
+      errors[key] = 'Ya hay una subcategoría con ese nombre';
+    }
+    seen.add(name.toLowerCase());
   }
   return errors;
 };
@@ -29,5 +47,5 @@ export const toFormValues = (category) => ({
 export const toPayload = (values) => ({
   nombre: values.nombre.trim(),
   descripcion: values.descripcion.trim(),
-  subcategorias: values.subcategorias.map(({id, nombre}) => ({id, nombre})),
+  subcategorias: values.subcategorias.map(({id, nombre}) => ({id, nombre: nombre.trim()})),
 });
