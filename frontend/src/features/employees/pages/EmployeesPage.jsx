@@ -43,7 +43,6 @@ export function EmployeesPage() {
           <FilterSelect label="Filtrar por estado" options={STATUS_OPTIONS} value={list.filters.estado} onChange={list.changeStatus} />
         </>
       }
-      error={list.error}
       table={<EmployeesTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} />}
       callout={{...CALLOUT, onAction: form.openCreate}}
     >
