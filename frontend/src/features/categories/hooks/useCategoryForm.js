@@ -1,7 +1,7 @@
-import {useRef} from 'react';
+import {useRef, useState} from 'react';
 import {categoriesApi} from '../services/categoriesApi';
 import {EMPTY_FORM} from '../constants/categories';
-import {toFormValues, toPayload, validateCategory} from '../utils/categoryForm';
+import {subcategoryErrorKey, toFormValues, toPayload, validateCategory} from '../utils/categoryForm';
 import {useEntityForm} from '../../../hooks/useEntityForm';
 
 const MESSAGES = {
@@ -23,15 +23,30 @@ export function useCategoryForm({onSaved, api = categoriesApi} = {}) {
     withImage: true,
   });
   const nextKey = useRef(0);
+  const [focusKey, setFocusKey] = useState(null);
+  const subcategories = form.values.subcategorias;
 
-  const addSubcategory = (nombre) => {
+  // Suma una fila vacía al final y la deja con el cursor para escribir
+  const addSubcategory = () => {
     nextKey.current += 1;
-    form.setField('subcategorias', [...form.values.subcategorias, {key: `nueva-${nextKey.current}`, nombre}]);
+    const key = `nueva-${nextKey.current}`;
+    form.setFields({subcategorias: [...subcategories, {key, nombre: ''}]}, ['subcategorias']);
+    setFocusKey(key);
+  };
+
+  const renameSubcategory = (key, nombre) => {
+    const renamed = subcategories.map((sub) => {
+      if (sub.key === key) {
+        return {...sub, nombre};
+      }
+      return sub;
+    });
+    form.setFields({subcategorias: renamed}, [subcategoryErrorKey(key)]);
   };
 
   const removeSubcategory = (key) => {
-    form.setField('subcategorias', form.values.subcategorias.filter((sub) => sub.key !== key));
+    form.setFields({subcategorias: subcategories.filter((sub) => sub.key !== key)}, [subcategoryErrorKey(key)]);
   };
 
-  return {...form, addSubcategory, removeSubcategory};
+  return {...form, focusKey, addSubcategory, renameSubcategory, removeSubcategory};
 }
