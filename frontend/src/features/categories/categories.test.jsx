@@ -53,11 +53,20 @@ describe('Gestión de categorías', () => {
     const dialog = await screen.findByRole('dialog', {name: 'Registrar nueva categoría'});
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(within(dialog).getByText('Ingrese el nombre de la categoría (mínimo 2 letras)')).toBeInTheDocument();
+    expect(await within(dialog).findByText('Ingrese el nombre (mínimo 2 letras)')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Quitar subcategoría 1'}));
+    expect(within(dialog).getByText('0 de 20')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(await within(dialog).findByText('Agregue al menos una subcategoría')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Agregar subcategoría'}));
+    await waitFor(() => expect(within(dialog).getAllByLabelText('Subcategoría 1')).toHaveLength(1));
+    expect(within(dialog).getByLabelText('Subcategoría 1')).toHaveFocus();
 
     await user.type(within(dialog).getByLabelText(/^Nombre/), 'Postres');
     await user.type(within(dialog).getByLabelText(/^Descripción/), 'Dulces de la casa');
-    await user.type(within(dialog).getByLabelText(/^Subcategorías/), 'Helados{Enter}Tortas{Enter}');
+    await user.type(within(dialog).getByLabelText('Subcategoría 1'), 'Helados{Enter}');
+    expect(within(dialog).getByLabelText('Subcategoría 2')).toHaveFocus();
+    await user.keyboard('Tortas');
     await user.upload(within(dialog).getByLabelText('Foto de la categoría', {selector: 'input'}), pngFile());
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
 
@@ -72,7 +81,7 @@ describe('Gestión de categorías', () => {
     await user.click(screen.getByRole('button', {name: 'Registrar categoría'}));
     const dialog = await screen.findByRole('dialog', {name: 'Registrar nueva categoría'});
     await user.type(within(dialog).getByLabelText(/^Nombre/), 'hamburguesas');
-    await user.type(within(dialog).getByLabelText(/^Subcategorías/), 'Otra{Enter}');
+    await user.type(within(dialog).getByLabelText('Subcategoría 1'), 'Otra');
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(await screen.findByRole('alert')).toHaveTextContent('Ya existe una categoría con ese nombre');
     expect(dialog).toBeInTheDocument();
@@ -83,7 +92,7 @@ describe('Gestión de categorías', () => {
     await user.click(screen.getByRole('button', {name: 'Registrar categoría'}));
     const dialog = await screen.findByRole('dialog', {name: 'Registrar nueva categoría'});
     await user.type(within(dialog).getByLabelText(/^Nombre/), 'Postres');
-    await user.type(within(dialog).getByLabelText(/^Subcategorías/), 'Helados{Enter}');
+    await user.type(within(dialog).getByLabelText('Subcategoría 1'), 'Helados');
     await user.upload(within(dialog).getByLabelText('Foto de la categoría', {selector: 'input'}), pngFile());
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(await screen.findByRole('alert')).toHaveTextContent(/La categoría se guardó, pero la imagen no/);
@@ -91,19 +100,24 @@ describe('Gestión de categorías', () => {
     expect(backend.store.filter((category) => category.nombre === 'Postres')).toHaveLength(1);
   });
 
-  it('modifica subcategorías conservando ids y quita la foto', async () => {
+  it('renombra, agrega y quita subcategorías conservando ids y quita la foto', async () => {
     const {backend, user} = await openPage();
     await user.click(screen.getByRole('button', {name: 'Modificar Hamburguesas'}));
     const dialog = await screen.findByRole('dialog', {name: 'Modificar categoría'});
     expect(within(dialog).getByRole('img', {name: 'Vista previa de foto de la categoría'})).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', {name: 'Quitar Picantes'}));
-    await user.type(within(dialog).getByLabelText(/^Subcategorías/), 'Pollo{Enter}');
+    const veggie = within(dialog).getByDisplayValue('Veggie');
+    await user.clear(veggie);
+    await user.type(veggie, 'Vegetariana');
+    await user.click(within(dialog).getByRole('button', {name: 'Agregar subcategoría'}));
+    await user.keyboard('Pollo');
     await user.click(within(dialog).getByRole('button', {name: /Quitar$/}));
     await user.click(within(dialog).getByRole('button', {name: 'Guardar'}));
 
     expect(await screen.findByText('Se actualizó la categoría Hamburguesas')).toBeInTheDocument();
     const payload = backend.calls.saved.at(-1);
-    expect(payload.subcategorias.map((sub) => sub.nombre)).toEqual(['Clásicas', 'Especiales', 'Doble Carne', 'Veggie', 'Pollo']);
+    expect(payload.subcategorias.map((sub) => sub.nombre)).toEqual(['Clásicas', 'Especiales', 'Doble Carne', 'Vegetariana', 'Pollo']);
+    expect(payload.subcategorias[3].id).toBeDefined();
     expect(payload.subcategorias[0]).toEqual({id: 1, nombre: 'Clásicas'});
     expect(payload.subcategorias.at(-1).id).toBeUndefined();
     expect(backend.calls.removed).toEqual([1]);
@@ -123,6 +137,10 @@ describe('Gestión de categorías', () => {
       nombre: 'Ingrese el nombre de la categoría (mínimo 2 letras)',
       subcategorias: 'Agregue al menos una subcategoría',
     });
-    expect(validateCategory({nombre: 'Postres', subcategorias: [{nombre: 'Helados'}]})).toEqual({});
+    expect(validateCategory({nombre: 'Postres', subcategorias: [{key: 'a', nombre: 'Helados'}]})).toEqual({});
+    expect(validateCategory({nombre: 'Postres', subcategorias: [{key: 'a', nombre: 'Helados'}, {key: 'b', nombre: ' helados '}, {key: 'c', nombre: ''}]})).toEqual({
+      'sub:b': 'Ya hay una subcategoría con ese nombre',
+      'sub:c': 'Ingrese el nombre (mínimo 2 letras)',
+    });
   });
 });
