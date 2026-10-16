@@ -4,7 +4,7 @@ import {cn} from '../../lib/cn';
 const styles = {
   wrapper: 'inline-flex h-10 items-center rounded-lg border bg-campo',
   normal: 'border-arena',
-  invalid: 'border-rojo',
+  invalid: 'border-error',
   button: 'flex size-10 items-center justify-center text-cafe transition-colors hover:text-brasa disabled:cursor-not-allowed disabled:opacity-40',
   value: 'w-10 bg-transparent text-center text-base font-semibold tabular-nums text-carbon focus:outline-none',
 };
