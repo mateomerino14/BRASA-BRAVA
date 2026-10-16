@@ -53,7 +53,6 @@ export function ProductsPage() {
           <FilterSelect label="Filtrar por disponibilidad" options={AVAILABILITY_OPTIONS} value={list.filters.disponibilidad} onChange={list.changeAvailability} />
         </>
       }
-      error={list.error}
       table={<ProductsTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} onRecipe={recipe.open} availability={availability} />}
       callout={{...CALLOUT, onAction: form.openCreate}}
     >

@@ -118,6 +118,7 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
         if (!cancelled) {
           setResult(emptyResult);
           setError(requestError.message);
+          toast.error(requestError.message, 'No se pudo cargar la lista');
         }
       }
       if (!cancelled) {
@@ -128,7 +129,7 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
     return () => {
       cancelled = true;
     };
-  }, [fetchPage, queryKey, reloadKey]);
+  }, [fetchPage, queryKey, reloadKey, toast]);
 
   // Vuelve a pedir la página actual y, si se indica, muestra el aviso emergente de éxito
   const reload = (message) => {
