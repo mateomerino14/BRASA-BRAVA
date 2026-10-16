@@ -4,11 +4,11 @@ import {cn} from '../../lib/cn';
 const styles = {
   wrapper: 'inline-flex items-center gap-2',
   track: 'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent px-0.5 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brasa disabled:cursor-not-allowed disabled:opacity-50',
-  on: 'bg-verde',
+  on: 'bg-brasa',
   off: 'bg-arena',
   thumb: 'size-4 rounded-full bg-white shadow-pill',
   label: 'text-xs font-semibold',
-  labelOn: 'text-verde',
+  labelOn: 'text-brasa-oscuro',
   labelOff: 'text-cafe',
 };
 
