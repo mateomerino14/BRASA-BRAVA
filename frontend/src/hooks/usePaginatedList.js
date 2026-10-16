@@ -178,6 +178,6 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
     clearFilters,
     reload,
     // Muestra en un aviso emergente el error de una acción rápida (por ejemplo, un interruptor)
-    reportError: (message) => toast.error(message),
+    reportError: (message, title) => toast.error(message, title),
   };
 }
