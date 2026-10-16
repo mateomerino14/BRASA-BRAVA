@@ -16,6 +16,8 @@ const styles = {
   overlay: 'absolute inset-x-0 bottom-0 flex justify-end gap-2 bg-gradient-to-t from-carbon/80 to-transparent p-3',
   action: 'inline-flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-semibold text-carbon shadow-pill transition-colors hover:bg-white',
   remove: 'text-rojo',
+  fillRoot: 'flex min-h-0 flex-1 flex-col',
+  fillZone: 'md:h-auto md:min-h-32 md:flex-1',
   input: 'sr-only',
   error: 'text-sm font-medium text-error',
 };
@@ -37,7 +39,8 @@ const validateFile = (file, maxMb) => {
   return '';
 };
 
-export function ImagePicker({label = 'Imagen', file = null, url = null, onChange, maxMb = DEFAULT_MAX_MB, error, className}) {
+// fill: en pantallas medianas la zona crece hasta igualar el alto de los campos que tiene al lado
+export function ImagePicker({label = 'Imagen', file = null, url = null, onChange, maxMb = DEFAULT_MAX_MB, error, fill = false, className}) {
   const inputId = useId();
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -87,13 +90,13 @@ export function ImagePicker({label = 'Imagen', file = null, url = null, onChange
   }
 
   return (
-    <div className={className}>
+    <div className={cn(fill && styles.fillRoot, className)}>
       <label
         htmlFor={inputId}
         onDragOver={handleDragOver}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
-        className={cn(styles.zone, zoneState)}
+        className={cn(styles.zone, fill && styles.fillZone, zoneState)}
       >
         <ImagePlus size={30} aria-hidden className={styles.icon} />
         <span className={styles.title}>Arrastre una foto o haga clic para elegirla</span>

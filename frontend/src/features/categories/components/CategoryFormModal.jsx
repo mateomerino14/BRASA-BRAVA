@@ -89,8 +89,8 @@ export function CategoryFormModal({form}) {
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <div className={styles.grid}>
-          <FormField label="Foto de la categoría">
-            {() => <ImagePicker label="Foto de la categoría" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
+          <FormField label="Foto de la categoría" className="h-full">
+            {() => <ImagePicker fill label="Foto de la categoría" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
           </FormField>
 
           <div className={styles.fields}>
