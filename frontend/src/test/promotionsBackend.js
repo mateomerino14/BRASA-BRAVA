@@ -12,8 +12,8 @@ export const PROMOTIONS = [
     productos: [item(1, 'Doble Brava', 58), item(2, 'Papas Fritas Clásicas', 15), item(3, 'Gaseosa 500 ml', 10)], precioRegular: 83, precioPromocion: 70, ahorro: 13,
   },
   {
-    id: 2, nombre: 'Martes de Hamburguesas', descripcion: null, tipo: 'descuento', valor: 20, fechaInicio: '2026-09-10', fechaFin: null, dias: '0010000', imagenUrl: null, activa: true, vigencia: 'otro_dia',
-    productos: [item(9, 'Hamburguesa Hawaiana', 45, 1, false)], precioRegular: 45, precioPromocion: 36, ahorro: 9,
+    id: 2, nombre: 'Martes de Hamburguesas', descripcion: null, tipo: 'combo', valor: 80, fechaInicio: '2026-09-10', fechaFin: null, dias: '0010000', imagenUrl: null, activa: true, vigencia: 'otro_dia',
+    productos: [item(9, 'Hamburguesa Hawaiana', 45, 2, false)], precioRegular: 90, precioPromocion: 80, ahorro: 10,
   },
 ];
 

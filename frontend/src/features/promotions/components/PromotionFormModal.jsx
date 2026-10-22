@@ -4,19 +4,16 @@ import {Modal} from '../../../components/organisms/Modal';
 import {Button} from '../../../components/atoms/Button';
 import {Input} from '../../../components/atoms/Input';
 import {MoneyInput} from '../../../components/atoms/MoneyInput';
-import {NumberInput} from '../../../components/atoms/NumberInput';
 import {Select} from '../../../components/atoms/Select';
 import {Textarea} from '../../../components/atoms/Textarea';
 import {IconButton} from '../../../components/atoms/IconButton';
 import {FormField} from '../../../components/molecules/FormField';
 import {ImagePicker} from '../../../components/molecules/ImagePicker';
-import {SegmentedControl} from '../../../components/molecules/SegmentedControl';
 import {Stepper} from '../../../components/molecules/Stepper';
 import {DayPicker} from '../../../components/molecules/DayPicker';
 import {PriceTag} from '../../../components/molecules/PriceTag';
 import {formatAmount} from '../../../lib/format';
-import {cn} from '../../../lib/cn';
-import {DESCRIPTION_MAX_LENGTH, MAX_PRODUCTS, MAX_QUANTITY, NAME_MAX_LENGTH, TYPE_OPTIONS} from '../constants/promotions';
+import {DESCRIPTION_MAX_LENGTH, MAX_PRODUCTS, MAX_QUANTITY, NAME_MAX_LENGTH} from '../constants/promotions';
 import {previewPricing, productErrorKey} from '../utils/promotionForm';
 
 const styles = {
@@ -28,7 +25,6 @@ const styles = {
   required: 'text-error',
   rows: 'flex flex-col gap-2',
   row: 'grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2',
-  rowSingle: 'grid-cols-[minmax(0,1fr)_auto]',
   rowError: 'col-span-full text-xs text-error',
   error: 'text-sm text-error',
   preview: 'flex items-center justify-between gap-4 rounded-2xl border border-arena/60 bg-white px-5 py-4',
@@ -56,12 +52,11 @@ const productOptions = (productsById) => [...productsById.values()]
 
 function ProductRow({form, row, index, options}) {
   const error = form.errors[productErrorKey(row.key)];
-  const isCombo = form.values.tipo === 'combo';
   const product = form.productsById.get(row.idProducto);
   return (
-    <motion.li layout initial={rowIn} animate={rowVisible} exit={rowIn} className={cn(styles.row, !isCombo && styles.rowSingle)}>
+    <motion.li layout initial={rowIn} animate={rowVisible} exit={rowIn} className={styles.row}>
       <Select aria-label={`Producto ${index + 1}`} placeholder="Seleccione un producto" options={options} invalid={Boolean(error)} value={row.idProducto} onChange={(event) => form.setProduct(row.key, 'idProducto', event.target.value)} />
-      {isCombo && <Stepper label={`Cantidad de ${product?.nombre ?? `producto ${index + 1}`}`} min={1} max={MAX_QUANTITY} value={row.cantidad} onChange={(value) => form.setProduct(row.key, 'cantidad', value)} />}
+      <Stepper label={`Cantidad de ${product?.nombre ?? `producto ${index + 1}`}`} min={1} max={MAX_QUANTITY} value={row.cantidad} onChange={(value) => form.setProduct(row.key, 'cantidad', value)} />
       <IconButton icon={Trash2} tone="danger" label={`Quitar producto ${index + 1}`} onClick={() => form.removeProduct(row.key)} />
       {error && <p role="alert" className={styles.rowError}>{error}</p>}
     </motion.li>
@@ -93,7 +88,6 @@ function PricePreview({form}) {
 
 export function PromotionFormModal({form}) {
   const options = productOptions(form.productsById);
-  const isCombo = form.values.tipo === 'combo';
 
   return (
     <Modal
@@ -102,7 +96,7 @@ export function PromotionFormModal({form}) {
       onClose={form.close}
       size="lg"
       title={form.isEdit ? 'Modificar promoción' : 'Registrar nueva promoción'}
-      description="Arme un combo a precio fijo o un descuento sobre productos, con sus fechas y días."
+      description="Arme un combo de productos a precio fijo, con sus fechas y días."
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <div className={styles.grid}>
@@ -113,14 +107,8 @@ export function PromotionFormModal({form}) {
             <FormField label="Nombre" required error={form.errors.nombre}>
               {(control) => <Input {...control} maxLength={NAME_MAX_LENGTH} placeholder="Combo Brava" value={form.values.nombre} onChange={(event) => form.setField('nombre', event.target.value)} />}
             </FormField>
-            <SegmentedControl label="Tipo de promoción" options={TYPE_OPTIONS} value={form.values.tipo} onChange={form.changeType} />
-            <FormField label={isCombo ? 'Precio del combo' : 'Porcentaje de descuento'} required error={form.errors.valor}>
-              {(control) => {
-                if (isCombo) {
-                  return <MoneyInput {...control} value={form.values.valor} onChange={(event) => form.setField('valor', event.target.value)} />;
-                }
-                return <NumberInput {...control} suffix="%" inputMode="numeric" value={form.values.valor} onChange={(event) => form.setField('valor', event.target.value)} />;
-              }}
+            <FormField label="Precio del combo" required error={form.errors.valor} hint="Debe ser menor que comprar los productos por separado.">
+              {(control) => <MoneyInput {...control} value={form.values.valor} onChange={(event) => form.setField('valor', event.target.value)} />}
             </FormField>
           </div>
         </div>

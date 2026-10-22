@@ -234,11 +234,11 @@ const shiftDate = (now, days) => localToday(new Date(now.getTime() + days * DAY_
 
 // Promociones demo con fechas relativas a hoy
 const PROMOTIONS = [
-  ['Martes de Hamburguesas', 'descuento', 20, -30, null, '0010000', true, [['Hamburguesa Clásica', 1], ['Cheeseburger', 1]]],
+  ['Martes de Hamburguesas', 'combo', 58, -30, null, '0010000', true, [['Hamburguesa Clásica', 1], ['Cheeseburger', 1]]],
   ['Combo Brava', 'combo', 70, -7, 30, '1111111', true, [['Doble Brava', 1], ['Papas Fritas Clásicas', 1], ['Gaseosa 500 ml', 1]]],
-  ['Happy Hour Cervecero', 'descuento', 15, 5, 60, '0111110', true, [['Cerveza Artesanal', 1]]],
+  ['Happy Hour Cervecero', 'combo', 42, 5, 60, '0111110', true, [['Cerveza Artesanal', 2]]],
   ['Promo Aniversario', 'combo', 99, -40, -3, '1111111', true, [['Brava BBQ', 2], ['Aros de Cebolla', 1]]],
-  ['Jueves de Jugos', 'descuento', 10, -20, null, '0000100', false, [['Jugo de Naranja', 1]]],
+  ['Jueves de Jugos', 'combo', 26, -20, null, '0000100', false, [['Jugo de Naranja', 2]]],
 ];
 
 // Inserta las promociones demo si la tabla está vacía

@@ -29,13 +29,6 @@ const dateRange = (promotion) => {
   return `Desde ${formatDate(promotion.fechaInicio)}`;
 };
 
-const typeLabel = (promotion) => {
-  if (promotion.tipo === 'descuento') {
-    return `−${promotion.valor}%`;
-  }
-  return 'Combo';
-};
-
 const productChips = (promotion) => promotion.productos.map((item) => ({id: item.idProducto, label: `${item.cantidad}× ${item.nombre}`}));
 
 const buildColumns = ({onEdit, onToggleStatus}) => [
@@ -49,7 +42,6 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
         <Thumbnail src={promotion.imagenUrl} alt={promotion.nombre} size={52} muted={!promotion.activa} />
         <div className={styles.text}>
           <p className={cn(styles.name, !promotion.activa && styles.inactiveName)}>{promotion.nombre}</p>
-          <Badge tone="brand">{typeLabel(promotion)}</Badge>
         </div>
       </div>
     ),
