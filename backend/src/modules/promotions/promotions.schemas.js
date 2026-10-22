@@ -7,8 +7,6 @@ const DESCRIPTION_MAX = 200;
 const MAX_PRODUCTS = 10;
 const MAX_QUANTITY = 20;
 const MAX_VALUE = 99999.99;
-const MIN_DISCOUNT = 1;
-const MAX_DISCOUNT = 90;
 const MIN_COMBO_ITEMS = 2;
 
 const productItem = z.object({
@@ -24,7 +22,7 @@ const optionalDate = z.union([z.iso.date({error: 'Ingrese una fecha válida'}), 
 export const promotionSchema = z.object({
   nombre: z.string({error: 'Ingrese el nombre de la promoción'}).trim().min(2, 'Ingrese el nombre de la promoción (mínimo 2 letras)').max(NAME_MAX, 'El nombre es demasiado largo'),
   descripcion: z.string().trim().max(DESCRIPTION_MAX, `La descripción admite hasta ${DESCRIPTION_MAX} caracteres`).optional().or(z.literal('')).transform((value) => value || null),
-  tipo: z.enum(['descuento', 'combo'], {error: 'Seleccione el tipo de promoción'}),
+  tipo: z.enum(['combo'], {error: 'Por ahora solo se pueden registrar combos'}),
   valor: decimalSchema({label: 'el valor', decimals: 2, max: MAX_VALUE}),
   fechaInicio: z.iso.date({error: 'Ingrese la fecha de inicio'}),
   fechaFin: optionalDate,
@@ -38,10 +36,7 @@ export const promotionSchema = z.object({
   if (data.fechaFin && data.fechaFin < data.fechaInicio) {
     ctx.addIssue({code: 'custom', path: ['fechaFin'], message: 'La fecha de fin no puede ser anterior al inicio'});
   }
-  if (data.tipo === 'descuento' && (!Number.isInteger(data.valor) || data.valor < MIN_DISCOUNT || data.valor > MAX_DISCOUNT)) {
-    ctx.addIssue({code: 'custom', path: ['valor'], message: `El descuento debe ser un porcentaje entero de ${MIN_DISCOUNT} a ${MAX_DISCOUNT}`});
-  }
-  if (data.tipo === 'combo' && data.productos.reduce((total, item) => total + item.cantidad, 0) < MIN_COMBO_ITEMS) {
+  if (data.productos.reduce((total, item) => total + item.cantidad, 0) < MIN_COMBO_ITEMS) {
     ctx.addIssue({code: 'custom', path: ['productos'], message: 'Un combo necesita al menos 2 productos'});
   }
 });
