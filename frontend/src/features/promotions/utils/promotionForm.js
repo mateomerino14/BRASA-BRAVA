@@ -1,9 +1,8 @@
-import {ALL_DAYS, MAX_DISCOUNT, MIN_DISCOUNT, NAME_MAX_LENGTH} from '../constants/promotions';
+import {ALL_DAYS, NAME_MAX_LENGTH} from '../constants/promotions';
 
 const MIN_NAME_LENGTH = 2;
 const MIN_COMBO_ITEMS = 2;
 const PRICE_PATTERN = /^\d{1,5}([.,]\d{1,2})?$/;
-const PERCENT_PATTERN = /^\d{1,2}$/;
 const PERCENT = 100;
 
 const parseNumber = (text) => Number(String(text).trim().replace(',', '.'));
@@ -35,24 +34,13 @@ export const previewPricing = (values, productsById) => {
   if (!String(values.valor).trim() || Number.isNaN(value)) {
     return {regular, promo: null, ahorro: null};
   }
-  let promo = value;
-  if (values.tipo === 'descuento') {
-    promo = round2(regular * (1 - value / PERCENT));
-  }
-  return {regular, promo, ahorro: round2(regular - promo)};
+  return {regular, promo: value, ahorro: round2(regular - value)};
 };
 
 const validateValue = (values, pricing) => {
   const text = String(values.valor).trim();
   if (!text) {
-    return 'Ingrese el valor de la promoción';
-  }
-  if (values.tipo === 'descuento') {
-    const percent = Number(text);
-    if (!PERCENT_PATTERN.test(text) || percent < MIN_DISCOUNT || percent > MAX_DISCOUNT) {
-      return `El descuento debe ser un porcentaje entero de ${MIN_DISCOUNT} a ${MAX_DISCOUNT}`;
-    }
-    return '';
+    return 'Ingrese el precio del combo';
   }
   if (!PRICE_PATTERN.test(text) || parseNumber(text) <= 0) {
     return 'Ingrese un precio válido, con hasta 2 decimales';
@@ -89,7 +77,7 @@ export const validatePromotion = (values, {productsById = new Map()} = {}) => {
   if (values.productos.length === 0) {
     errors.productos = 'Agregue al menos un producto';
   }
-  else if (values.tipo === 'combo' && values.productos.reduce((total, row) => total + row.cantidad, 0) < MIN_COMBO_ITEMS) {
+  else if (values.productos.reduce((total, row) => total + row.cantidad, 0) < MIN_COMBO_ITEMS) {
     errors.productos = 'Un combo necesita al menos 2 productos';
   }
   const seen = new Set();
@@ -107,31 +95,33 @@ export const validatePromotion = (values, {productsById = new Map()} = {}) => {
 
 const toText = (value) => String(value).replace('.', ',');
 
+// Por ahora solo hay combos: una promoción antigua de descuento se abre como combo y pide su precio
+const comboPrice = (promotion) => {
+  if (promotion.tipo === 'combo') {
+    return toText(promotion.valor);
+  }
+  return '';
+};
+
 export const toFormValues = (promotion) => ({
   nombre: promotion.nombre,
   descripcion: promotion.descripcion ?? '',
-  tipo: promotion.tipo,
-  valor: toText(promotion.valor),
+  tipo: 'combo',
+  valor: comboPrice(promotion),
   fechaInicio: promotion.fechaInicio,
   fechaFin: promotion.fechaFin ?? '',
   dias: promotion.dias,
   productos: promotion.productos.map((item) => ({key: `producto-${item.idProducto}`, idProducto: String(item.idProducto), cantidad: item.cantidad})),
 });
 
-// El cuerpo para la API; en un descuento cada producto cuenta una vez
+// El cuerpo para la API (por ahora siempre combo)
 export const toPayload = (values) => ({
   nombre: values.nombre.trim(),
   descripcion: values.descripcion.trim(),
-  tipo: values.tipo,
+  tipo: 'combo',
   valor: parseNumber(values.valor),
   fechaInicio: values.fechaInicio,
   fechaFin: values.fechaFin,
   dias: values.dias,
-  productos: values.productos.map((row) => {
-    let cantidad = row.cantidad;
-    if (values.tipo === 'descuento') {
-      cantidad = 1;
-    }
-    return {idProducto: Number(row.idProducto), cantidad};
-  }),
+  productos: values.productos.map((row) => ({idProducto: Number(row.idProducto), cantidad: row.cantidad})),
 });

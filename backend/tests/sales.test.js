@@ -69,7 +69,7 @@ describe('Caja: mesas y registro de pedidos', () => {
     expect(byName['Aros de Cebolla']).toMatchObject({porciones: null, ingredientes: []});
     const promotions = Object.fromEntries(res.body.promociones.map((item) => [item.nombre, item]));
     expect(Object.keys(promotions).sort()).toEqual(['Combo Brava', 'Martes de Hamburguesas']);
-    expect(promotions['Martes de Hamburguesas']).toMatchObject({tipo: 'descuento', precio: 58.4, precioRegular: 73, ahorro: 14.6});
+    expect(promotions['Martes de Hamburguesas']).toMatchObject({tipo: 'combo', precio: 58, precioRegular: 73, ahorro: 15});
     expect(promotions['Combo Brava'].productos.map((item) => item.nombre)).toEqual(['Doble Brava', 'Gaseosa 500 ml', 'Papas Fritas Clásicas']);
     expect(promotions['Combo Brava'].productos[0].ingredientes.map((item) => item.nombre)).toEqual(['Carne de res', 'Pan de hamburguesa', 'Queso cheddar']);
   });
@@ -118,10 +118,10 @@ describe('Caja: mesas y registro de pedidos', () => {
     ]);
     expect(res.status).toBe(201);
     expect(res.body.nueva).toBe(true);
-    expect(res.body.venta).toMatchObject({total: 128.4, envios: 1, cajero: 'a.romero', mesero: {nombre: 'Carlos Mendoza'}});
+    expect(res.body.venta).toMatchObject({total: 128, envios: 1, cajero: 'a.romero', mesero: {nombre: 'Carlos Mendoza'}});
     expect(res.body.venta.detalles).toEqual([
       expect.objectContaining({nombre: 'Hamburguesa Clásica', cantidad: 2, subtotal: 70, consumo: 'local', envio: 1, exclusiones: [expect.objectContaining({insumo: 'Lechuga'})]}),
-      expect.objectContaining({tipo: 'promocion', nombre: 'Martes de Hamburguesas', precioUnitario: 58.4, consumo: 'llevar', exclusiones: [expect.objectContaining({producto: 'Cheeseburger', insumo: 'Queso cheddar'})]}),
+      expect.objectContaining({tipo: 'promocion', nombre: 'Martes de Hamburguesas', precioUnitario: 58, consumo: 'llevar', exclusiones: [expect.objectContaining({producto: 'Cheeseburger', insumo: 'Queso cheddar'})]}),
     ]);
     expect(await countSales()).toBe(before + 1);
     expect((await api('get', '/api/sales/floor')).body.summary).toMatchObject({ocupadas: 3, libres: 14});
