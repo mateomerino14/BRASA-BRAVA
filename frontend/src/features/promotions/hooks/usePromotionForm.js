@@ -61,12 +61,5 @@ export function usePromotionForm({onSaved, today, products = [], api = promotion
     }, rowErrors);
   };
 
-  // Al cambiar de tipo el valor anterior deja de tener sentido (Bs o %)
-  const changeType = (tipo) => {
-    if (tipo !== form.values.tipo) {
-      form.setFields({tipo, valor: ''});
-    }
-  };
-
-  return {...form, productsById, addProduct, removeProduct, setProduct, changeType};
+  return {...form, productsById, addProduct, removeProduct, setProduct};
 }

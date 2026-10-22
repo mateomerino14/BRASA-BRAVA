@@ -70,29 +70,25 @@ describe('Gestión de promociones', () => {
     });
   });
 
-  it('arma un descuento por días y valida porcentaje y días', async () => {
+  it('solo arma combos y valida los días', async () => {
     const {backend, user} = await openPage();
     const dialog = await openCreate(user);
+    expect(within(dialog).queryByRole('radio', {name: /Descuento/})).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Filtrar por tipo')).not.toBeInTheDocument();
     await user.type(within(dialog).getByLabelText(/^Nombre/), 'Viernes de Papas');
-    await user.click(within(dialog).getByRole('radio', {name: 'Descuento %'}));
-    await user.type(within(dialog).getByLabelText(/^Porcentaje de descuento/), '95');
+    await user.type(within(dialog).getByLabelText(/^Precio del combo/), '25');
     await user.click(within(dialog).getByRole('button', {name: 'Agregar producto'}));
     await user.selectOptions(within(dialog).getByLabelText('Producto 1'), 'Papas Fritas Clásicas — Bs 15,00');
-    expect(within(dialog).queryByRole('button', {name: /Sumar cantidad/})).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', {name: 'Sumar cantidad de Papas Fritas Clásicas'}));
     for (const day of ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']) {
       await user.click(within(dialog).getByRole('button', {name: day}));
     }
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
-    expect(await within(dialog).findByText('El descuento debe ser un porcentaje entero de 1 a 90')).toBeInTheDocument();
-    expect(within(dialog).getByText('Elija al menos un día de la semana')).toBeInTheDocument();
-    const percent = within(dialog).getByLabelText(/^Porcentaje de descuento/);
-    await user.clear(percent);
-    await user.type(percent, '20');
+    expect(await within(dialog).findByText('Elija al menos un día de la semana')).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', {name: 'Viernes'}));
-    expect(within(dialog).getByLabelText('Bs 12,00')).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(await screen.findByText('Se registró la promoción Viernes de Papas')).toBeInTheDocument();
-    expect(backend.calls.saved.at(-1)).toMatchObject({tipo: 'descuento', valor: 20, dias: '0000010', productos: [{idProducto: 2, cantidad: 1}]});
+    expect(backend.calls.saved.at(-1)).toMatchObject({tipo: 'combo', valor: 25, dias: '0000010', productos: [{idProducto: 2, cantidad: 2}]});
   });
 
   it('al modificar conserva un producto dado de baja', async () => {
@@ -103,7 +99,7 @@ describe('Gestión de promociones', () => {
     expect(within(dialog).getByRole('button', {name: 'Martes'})).toHaveAttribute('aria-pressed', 'true');
     await user.click(within(dialog).getByRole('button', {name: 'Guardar'}));
     expect(await screen.findByText('Se actualizó la promoción Martes de Hamburguesas')).toBeInTheDocument();
-    expect(backend.calls.saved.at(-1)).toMatchObject({valor: 20, productos: [{idProducto: 9, cantidad: 1}]});
+    expect(backend.calls.saved.at(-1)).toMatchObject({tipo: 'combo', valor: 80, productos: [{idProducto: 9, cantidad: 2}]});
   });
 
   it('confirma antes de dar de baja', async () => {
@@ -116,11 +112,11 @@ describe('Gestión de promociones', () => {
 
   it('calcula y valida sin la API', () => {
     const byId = new Map([['1', {precio: 58}], ['2', {precio: 15}]]);
-    const values = {tipo: 'descuento', valor: '10', productos: [{idProducto: '1', cantidad: 1}, {idProducto: '2', cantidad: 1}]};
-    expect(previewPricing(values, byId)).toEqual({regular: 73, promo: 65.7, ahorro: 7.3});
+    const values = {tipo: 'combo', valor: '65,5', productos: [{idProducto: '1', cantidad: 1}, {idProducto: '2', cantidad: 1}]};
+    expect(previewPricing(values, byId)).toEqual({regular: 73, promo: 65.5, ahorro: 7.5});
     expect(previewPricing({...values, productos: []}, byId)).toBeNull();
     const errors = validatePromotion({nombre: 'X', tipo: 'combo', valor: '', fechaInicio: '2026-10-10', fechaFin: '2026-10-01', dias: '1111111', productos: [{key: 'a', idProducto: '1', cantidad: 1}]}, {productsById: byId});
-    expect(errors).toMatchObject({nombre: expect.any(String), valor: 'Ingrese el valor de la promoción', fechaFin: 'La fecha de fin no puede ser anterior al inicio', productos: 'Un combo necesita al menos 2 productos'});
-    expect(toPayload({...values, nombre: ' A ', descripcion: '', fechaInicio: '2026-10-10', fechaFin: '', dias: '1111111', productos: [{idProducto: '1', cantidad: 3}]}).productos).toEqual([{idProducto: 1, cantidad: 1}]);
+    expect(errors).toMatchObject({nombre: expect.any(String), valor: 'Ingrese el precio del combo', fechaFin: 'La fecha de fin no puede ser anterior al inicio', productos: 'Un combo necesita al menos 2 productos'});
+    expect(toPayload({...values, nombre: ' A ', descripcion: '', fechaInicio: '2026-10-10', fechaFin: '', dias: '1111111', productos: [{idProducto: '1', cantidad: 3}]})).toMatchObject({tipo: 'combo', valor: 65.5, productos: [{idProducto: 1, cantidad: 3}]});
   });
 });

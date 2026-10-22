@@ -88,7 +88,7 @@ BRASA-BRAVA/
 | Inventario de insumos (cantidad, mínimo y corrección de la cantidad) | Terminado |
 | Recetas de productos (insumos por porción y porciones que alcanzan con el stock) | Terminado |
 | Secciones y mesas (ambientes del local, mesas con capacidad y resumen) | Terminado |
-| Promociones (combos y descuentos con fechas, días y vigencia del día) | Terminado |
+| Promociones (combos a precio fijo con fechas, días y vigencia del día) | Terminado |
 | Caja: plano de mesas y armado del pedido (Local o Para llevar, quitar ingredientes, envíos a la mesa ocupada) | Terminado |
 | Caja: comanda de cocina por envío, descuento de stock por receta y marca de venta modificada | Terminado |
 | Cocina: pedidos pendientes por envío, unidades listas (−1, +1, todas), avance y semáforo de espera | Terminado |

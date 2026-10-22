@@ -56,7 +56,7 @@ describe('Gestión de promociones', () => {
     expect(res.body.hoy).toBe('2026-10-13');
     expect(res.body.summary).toEqual({vigentes: 2, programadas: 1, vencidas: 1});
     const byName = Object.fromEntries(res.body.items.map((item) => [item.nombre, item]));
-    expect(byName['Martes de Hamburguesas']).toMatchObject({tipo: 'descuento', valor: 20, vigencia: 'vigente', precioRegular: 73, precioPromocion: 58.4, ahorro: 14.6, dias: '0010000', fechaFin: null});
+    expect(byName['Martes de Hamburguesas']).toMatchObject({tipo: 'combo', valor: 58, vigencia: 'vigente', precioRegular: 73, precioPromocion: 58, ahorro: 15, dias: '0010000', fechaFin: null});
     expect(byName['Combo Brava']).toMatchObject({tipo: 'combo', precioRegular: 83, precioPromocion: 70, ahorro: 13, vigencia: 'vigente', fechaInicio: '2026-10-06', fechaFin: '2026-11-12'});
     expect(byName['Combo Brava'].productos.map((item) => [item.nombre, item.cantidad])).toEqual([['Doble Brava', 1], ['Gaseosa 500 ml', 1], ['Papas Fritas Clásicas', 1]]);
     expect(byName['Happy Hour Cervecero'].vigencia).toBe('programada');
@@ -80,7 +80,7 @@ describe('Gestión de promociones', () => {
     const scheduled = await api('get', '/api/promotions?vigencia=programadas');
     expect(scheduled.body.items.map((item) => item.nombre)).toEqual(['Happy Hour Cervecero']);
     const combos = await api('get', '/api/promotions?tipo=combo');
-    expect(combos.body.total).toBe(2);
+    expect(combos.body.total).toBe(5);
     const byProduct = await api('get', '/api/promotions?search=cheeseburger');
     expect(byProduct.body.items.map((item) => item.nombre)).toEqual(['Martes de Hamburguesas']);
     expect((await api('get', '/api/promotions?vigencia=siempre')).status).toBe(400);
@@ -102,14 +102,14 @@ describe('Gestión de promociones', () => {
     expect(res.body.promotion).toMatchObject({nombre: 'Combo Familiar', precioRegular: 146, precioPromocion: 120, ahorro: 26, fechaFin: null, vigencia: 'vigente'});
   });
 
-  it('valida reglas de combo, descuento, fechas, días y productos', async () => {
+  it('valida reglas de combo, fechas, días y productos y no admite descuentos', async () => {
     await start();
     const expensive = await api('post', '/api/promotions').send(await combo({valor: 200}));
     expect(expensive.body.message).toBe('El precio del combo debe ser menor que comprar los productos por separado');
     const single = await api('post', '/api/promotions').send(await combo({productos: [{idProducto: await productId('Doble Brava'), cantidad: 1}]}));
     expect(single.body.message).toBe('Un combo necesita al menos 2 productos');
-    const percent = await api('post', '/api/promotions').send(await combo({tipo: 'descuento', valor: 95}));
-    expect(percent.body.message).toBe('El descuento debe ser un porcentaje entero de 1 a 90');
+    const percent = await api('post', '/api/promotions').send(await combo({tipo: 'descuento', valor: 20}));
+    expect(percent.body.message).toBe('Por ahora solo se pueden registrar combos');
     const dates = await api('post', '/api/promotions').send(await combo({fechaFin: '2026-10-01'}));
     expect(dates.body.message).toBe('La fecha de fin no puede ser anterior al inicio');
     const days = await api('post', '/api/promotions').send(await combo({dias: '0000000'}));
@@ -125,15 +125,15 @@ describe('Gestión de promociones', () => {
     const id = await promotionId('Martes de Hamburguesas');
     const res = await api('put', `/api/promotions/${id}`).send({
       nombre: 'Martes y Jueves de Hamburguesas',
-      tipo: 'descuento',
-      valor: 25,
+      tipo: 'combo',
+      valor: 60,
       fechaInicio: '2026-09-13',
       fechaFin: '2026-12-31',
       dias: '0010100',
-      productos: [{idProducto: await productId('Hamburguesa Clásica')}],
+      productos: [{idProducto: await productId('Hamburguesa Clásica'), cantidad: 2}],
     });
     expect(res.status).toBe(200);
-    expect(res.body.promotion).toMatchObject({valor: 25, precioRegular: 35, precioPromocion: 26.25, dias: '0010100', fechaFin: '2026-12-31'});
+    expect(res.body.promotion).toMatchObject({valor: 60, precioRegular: 70, precioPromocion: 60, dias: '0010100', fechaFin: '2026-12-31'});
     const off = await api('patch', `/api/promotions/${id}/status`).send({activo: false});
     expect(off.body.promotion.vigencia).toBe('inactiva');
     expect((await api('get', '/api/promotions/999')).status).toBe(404);

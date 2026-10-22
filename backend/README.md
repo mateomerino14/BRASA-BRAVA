@@ -122,7 +122,7 @@ src/
 │   ├── products/              Productos: precio, foto, disponibilidad y estado
 │   ├── ingredients/           Insumos de stock, movimientos e historial
 │   ├── sections/              Secciones del local y sus mesas
-│   ├── promotions/            Promociones: combos y descuentos con vigencia
+│   ├── promotions/            Promociones: combos con vigencia
 │   ├── sales/                 Caja: plano de mesas, catálogo del día y registro de pedidos
 │   ├── kitchen/               Cocina: envíos de las ventas abiertas y unidades listas
 │   ├── settings/              Ajustes del local (enlace a la página de impuestos)
@@ -276,7 +276,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 
 ### Reglas de promociones
 
-- **Combo**: varios productos con cantidad (al menos 2 unidades en total) a un precio fijo, que debe ser menor que comprarlos por separado. **Descuento**: porcentaje entero de 1 a 90 sobre uno o más productos.
+- **Combo**: varios productos con cantidad (al menos 2 unidades en total) a un precio fijo, que debe ser menor que comprarlos por separado. Por ahora solo se registran combos (`tipo: combo`); la base conserva el tipo `descuento` para retomarlo más adelante, y una promoción de descuento que ya existiera se sigue calculando con su porcentaje.
 - Vigencia por fechas (`fechaInicio`, `fechaFin` opcional) y días de la semana (`dias`: siete dígitos 1/0 de domingo a sábado, por ejemplo `0010000` = solo martes).
 - Estados del día: `vigente`, `otro_dia` (dentro de fechas pero hoy no aplica), `programada`, `vencida` o `inactiva`. "Hoy" se calcula en la zona horaria del local (`TIMEZONE`), no en la del servidor: a las 23:30 del miércoles en La Paz sigue siendo miércoles aunque en UTC ya sea jueves.
 - Los precios se calculan con el precio actual de cada producto. Los productos nuevos deben estar activos; uno dado de baja que ya estaba se puede conservar.

@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {promotionsApi} from '../services/promotionsApi';
 import {usePaginatedList} from '../../../hooks/usePaginatedList';
 
-const filterDefaults = {estado: 'todos', tipo: 'todos', vigencia: 'todos'};
+const filterDefaults = {estado: 'todos', vigencia: 'todos'};
 const emptySummary = {vigentes: null, programadas: null, vencidas: null};
 
 export function usePromotions({api = promotionsApi} = {}) {
@@ -38,7 +38,6 @@ export function usePromotions({api = promotionsApi} = {}) {
     // Fecha de hoy según el servidor (zona horaria del local)
     today: list.response.hoy,
     changeStatus: (value) => list.changeFilter('estado', value),
-    changeType: (value) => list.changeFilter('tipo', value),
     changeVigencia: (value) => list.changeFilter('vigencia', value),
   };
 }
