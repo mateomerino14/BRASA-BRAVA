@@ -30,7 +30,7 @@ describe('navegación', () => {
   });
 
   it('aplana todas las rutas', () => {
-    expect(flattenNavigation(NAVIGATION)).toHaveLength(10);
+    expect(flattenNavigation(NAVIGATION)).toHaveLength(11);
   });
 });
 

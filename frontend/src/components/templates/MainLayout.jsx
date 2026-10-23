@@ -23,7 +23,7 @@ const pageExit = {opacity: 0, y: -8};
 const pageTransition = {duration: 0.25, ease: 'easeOut'};
 
 // Plantilla de las pantallas con sesión: menú fijo en escritorio; en celular o tablet, barra naranja con menú tipo persiana
-export function MainLayout({sidebarItems, user, title, onLogout, collapsed, onToggleCollapsed, pageKey, children}) {
+export function MainLayout({sidebarItems, user, title, onLogout, onChangePassword, collapsed, onToggleCollapsed, pageKey, children}) {
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastPage, setLastPage] = useState(pageKey);
@@ -32,6 +32,15 @@ export function MainLayout({sidebarItems, user, title, onLogout, collapsed, onTo
   if (pageKey !== lastPage) {
     setLastPage(pageKey);
     setMenuOpen(false);
+  }
+
+  // En celular la persiana se cierra antes de abrir el modal de contraseña
+  let changePasswordFromMenu;
+  if (onChangePassword) {
+    changePasswordFromMenu = () => {
+      setMenuOpen(false);
+      onChangePassword();
+    };
   }
 
   return (
@@ -45,7 +54,7 @@ export function MainLayout({sidebarItems, user, title, onLogout, collapsed, onTo
             </div>
           )}
           <div className={styles.inner}>
-            {isDesktop && <Header title={title} user={user} onLogout={onLogout} />}
+            {isDesktop && <Header title={title} user={user} onLogout={onLogout} onChangePassword={onChangePassword} />}
             <AnimatePresence mode="wait">
               <motion.main
                 key={pageKey}
@@ -63,7 +72,7 @@ export function MainLayout({sidebarItems, user, title, onLogout, collapsed, onTo
         </div>
       </div>
       {isDesktop && <Footer />}
-      <MobileMenu open={menuOpen && !isDesktop} onClose={() => setMenuOpen(false)} items={sidebarItems} user={user} onLogout={onLogout} title={title} />
+      <MobileMenu open={menuOpen && !isDesktop} onClose={() => setMenuOpen(false)} items={sidebarItems} user={user} onLogout={onLogout} onChangePassword={changePasswordFromMenu} title={title} />
     </div>
   );
 }

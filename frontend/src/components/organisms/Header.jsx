@@ -1,5 +1,5 @@
 import {motion} from 'motion/react';
-import {LogOut} from 'lucide-react';
+import {KeyRound, LogOut} from 'lucide-react';
 import {Avatar} from '../atoms/Avatar';
 import {cn} from '../../lib/cn';
 
@@ -15,6 +15,7 @@ const styles = {
   profileText: 'leading-tight',
   alias: 'text-sm font-bold text-carbon',
   role: 'text-xs font-semibold uppercase tracking-wide text-rojo',
+  password: 'flex size-11 items-center justify-center rounded-xl border-2 border-brasa bg-white text-brasa-oscuro shadow-card transition-colors hover:bg-brasa hover:text-white',
   logout: 'flex h-11 items-center gap-2 rounded-xl bg-rojo px-4 text-sm font-semibold text-white shadow-card transition-colors hover:bg-rojo-oscuro',
 };
 
@@ -26,8 +27,8 @@ const tapPress = {scale: 0.95};
 const markGrow = {hidden: {scaleX: 0}, visible: {scaleX: 1}};
 const marksStagger = {visible: {transition: {staggerChildren: 0.08, delayChildren: 0.15}}};
 
-// Encabezado de escritorio: título con las tres marcas de parrilla, usuario y cierre de sesión
-export function Header({title, user, onLogout}) {
+// Encabezado de escritorio: título con las tres marcas de parrilla, usuario, cambio de contraseña (solo DIRECTORIO) y cierre de sesión
+export function Header({title, user, onLogout, onChangePassword}) {
   return (
     <header className={styles.header}>
       <div className={styles.heading}>
@@ -49,6 +50,11 @@ export function Header({title, user, onLogout}) {
               <p className={styles.role}>{user.cargo}</p>
             </div>
           </div>
+        )}
+        {onChangePassword && (
+          <motion.button type="button" onClick={onChangePassword} whileHover={hoverLift} whileTap={tapPress} aria-label="Cambiar contraseña" title="Cambiar contraseña" className={styles.password}>
+            <KeyRound size={18} aria-hidden />
+          </motion.button>
         )}
         <motion.button type="button" onClick={onLogout} whileHover={hoverLift} whileTap={tapPress} className={styles.logout}>
           <LogOut size={17} aria-hidden />

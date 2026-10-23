@@ -7,5 +7,6 @@ export const MODULE_DESCRIPTIONS = {
   stock: 'Ingredientes y bebidas en el local',
   categorias: 'Categorías y subcategorías',
   promociones: 'Combos y horarios especiales',
-  empleados: 'Personal, cargos y accesos',
+  empleados: 'Personal y sus datos de acceso',
+  cargos: 'Puestos y pantallas que ve cada uno',
 };
