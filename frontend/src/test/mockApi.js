@@ -19,7 +19,17 @@ export const USERS = {
       'categorias',
       'promociones',
       'empleados',
+      'cargos',
     ],
+  },
+  directorio: {
+    id: 1,
+    alias: 'DIRECTORIO',
+    nombre: 'DIRECTORIO',
+    cargo: 'Directorio',
+    fotoUrl: null,
+    isDirectorio: true,
+    permissions: ['home', 'familia', 'caja', 'cocina', 'administracion', 'productos', 'secciones', 'stock', 'categorias', 'promociones', 'empleados', 'cargos'],
   },
   cajero: {
     id: 2,

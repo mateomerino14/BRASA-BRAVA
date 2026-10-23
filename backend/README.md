@@ -128,7 +128,7 @@ src/
 │   ├── settings/              Ajustes del local (enlace a la página de impuestos)
 │   ├── catalog/               Familia: catálogo del local con receta y stock
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
-│   └── roles/                 Cargos para formularios y filtros
+│   └── roles/                 Cargos y sus pantallas: gestión y opciones para empleados
 ├── middlewares/
 │   ├── auth.js                Token de sesión y permisos por pantalla
 │   ├── validate.js            Validación de la petición con Zod
@@ -156,6 +156,7 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo de un empleado activo; responde `venceEn`, 404 si no hay cuenta con ese correo y 403 si está dada de baja |
 | `POST` | `/api/auth/password-reset/verify` | Verifica el código sin consumirlo. Los errores incluyen `motivo` (`codigo_incorrecto` con `intentosRestantes`, `codigo_bloqueado`, `codigo_vencido` o `codigo_invalido`) |
 | `POST` | `/api/auth/password-reset/confirm` | Cambia la contraseña con el código verificado |
+| `PUT` | `/api/auth/directorio/password` | El DIRECTORIO cambia su contraseña con `actual`, `nueva` y `confirmacion`; si la actual no es correcta responde 400 con `campo: 'actual'` |
 | `GET` | `/api/employees` | Empleados con búsqueda (`search`, por nombre, usuario o CI), filtro por cargo (`idCargo`) y los parámetros comunes de listado. Orden: `nombre`, `ci`, `cargo`, `usuario`, `estado` |
 | `GET` | `/api/employees/:id` | Detalle de un empleado |
 | `POST` | `/api/employees` | Registra un empleado con su contraseña inicial |
@@ -163,7 +164,12 @@ tests/                       Pruebas de la API y unitarias
 | `PATCH` | `/api/employees/:id/status` | Da de baja (`{activo: false}`) o reactiva a un empleado |
 | `PUT` | `/api/employees/:id/image` | Sube o reemplaza la foto del empleado (campo `imagen`) |
 | `DELETE` | `/api/employees/:id/image` | Quita la foto del empleado |
-| `GET` | `/api/roles` | Cargos activos |
+| `GET` | `/api/roles/options` | Cargos activos para el formulario y el filtro de empleados (permiso `empleados`) |
+| `GET` | `/api/roles` | Cargos con sus pantallas y empleados activos; búsqueda, estado y los parámetros comunes de listado. Orden: `nombre`, `empleados`, `pantallas`, `estado`. Resumen: cargos activos, de baja y empleados con cargo |
+| `GET` | `/api/roles/:id` | Detalle de un cargo |
+| `POST` | `/api/roles` | Registra un cargo con sus pantallas |
+| `PUT` | `/api/roles/:id` | Cambia el nombre y reemplaza las pantallas de un cargo |
+| `PATCH` | `/api/roles/:id/status` | Da de baja o reactiva un cargo |
 | `GET` | `/api/categories` | Categorías con sus subcategorías activas; búsqueda (`search`, también por subcategoría) y los parámetros comunes de listado. Orden: `nombre`, `productos`, `estado` |
 | `GET` | `/api/categories/:id` | Detalle de una categoría |
 | `POST` | `/api/categories` | Registra una categoría con sus subcategorías |
@@ -221,7 +227,7 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y cargos exigen el permiso `empleados`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja, el permiso `caja`; las de cocina, el permiso `cocina`; las del catálogo, el permiso `familia`.
+Las rutas de empleados y las opciones de cargos exigen el permiso `empleados`; la gestión de cargos, el permiso `cargos`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja, el permiso `caja`; las de cocina, el permiso `cocina`; las del catálogo, el permiso `familia`.
 
 ### Parámetros comunes de los listados
 
@@ -244,6 +250,13 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - Un empleado dado de baja no puede iniciar sesión ni aparece en el carrusel del login, pero conserva su historial y se puede reactivar.
 - La foto sigue las mismas reglas que las de categorías, productos y promociones (`modules/shared/imageActions.js`, con `imageOf` para leer la columna `foto_url`) y se muestra en el carrusel del login, en la lista y en el encabezado.
 - Nadie puede darse de baja a sí mismo; el DIRECTORIO sí puede dar de baja a cualquier empleado.
+
+### Reglas de la gestión de cargos
+
+- El nombre del cargo no se repite (sin distinguir mayúsculas) y cada cargo marca al menos una pantalla; `home` se agrega siempre.
+- Al modificar se reemplaza la lista completa de pantallas. Los empleados ven los cambios en su próximo inicio de sesión, porque el token lleva los permisos.
+- No se puede dar de baja un cargo que tienen empleados activos. Un cargo de baja no aparece al registrar empleados.
+- La pantalla `cargos` es nueva: la migración se la da a los cargos que ya gestionaban empleados.
 
 ### Reglas de la gestión de categorías
 
@@ -317,7 +330,8 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 |---|---|
 | Home | `home` (todos los cargos) |
 | Familia, Caja, Cocina | `familia`, `caja`, `cocina` |
-| Administración | `productos`, `secciones`, `stock`, `categorias`, `promociones`, `empleados` |
+| Administración | `productos`, `secciones`, `stock`, `categorias`, `promociones`, `empleados`, `cargos` |
+| Enlace de impuestos en Caja | `administracion` |
 
 ## Sesión y seguridad
 
@@ -327,6 +341,7 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 - El código vence a los 10 minutos, se bloquea tras 5 intentos fallidos y pedir uno nuevo anula el anterior.
 - Límite de intentos por IP en el ingreso y en la recuperación de contraseña, con el mensaje «Demasiados intentos» en español.
 - Las respuestas de error nunca exponen detalles internos.
+- El DIRECTORIO cambia su contraseña desde el sistema comprobando la actual; la ruta usa el mismo límite de intentos que la recuperación.
 
 ## Pruebas
 

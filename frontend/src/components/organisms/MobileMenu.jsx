@@ -1,7 +1,7 @@
 import {useRef, useState} from 'react';
 import {NavLink, matchPath, useLocation} from 'react-router';
 import {AnimatePresence, motion} from 'motion/react';
-import {ChevronDown, LogOut} from 'lucide-react';
+import {ChevronDown, KeyRound, LogOut} from 'lucide-react';
 import {Avatar} from '../atoms/Avatar';
 import {MobileTopBar} from './MobileTopBar';
 import {useDialogFocus} from '../../hooks/useDialogFocus';
@@ -24,6 +24,7 @@ const styles = {
   accountText: 'min-w-0 flex-1 leading-tight',
   alias: 'truncate text-sm font-bold',
   role: 'truncate text-xs font-bold uppercase tracking-wide text-mostaza',
+  password: 'flex size-11 shrink-0 items-center justify-center rounded-xl border border-crema/30 text-crema transition-colors hover:bg-crema/10',
   logout: 'flex items-center gap-2 rounded-xl bg-rojo px-3.5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rojo-oscuro',
   stripes: 'h-2.5 shrink-0 bg-[repeating-linear-gradient(90deg,var(--color-brasa)_0_18px,var(--color-mostaza)_18px_36px)]',
 };
@@ -77,7 +78,7 @@ function SlatGroup({item}) {
 }
 
 // Menú de celular y tablet tipo persiana: baja desde la barra naranja; se cierra con Escape, la X o al navegar
-export function MobileMenu({open, onClose, items, user, onLogout, title}) {
+export function MobileMenu({open, onClose, items, user, onLogout, onChangePassword, title}) {
   const panelRef = useRef(null);
   useDialogFocus({open, panelRef, onClose, initialFocus: 'a[aria-current="page"], a[href]'});
 
@@ -102,6 +103,11 @@ export function MobileMenu({open, onClose, items, user, onLogout, title}) {
                   <p className={styles.alias}>{user.alias}</p>
                   <p className={styles.role}>{user.cargo}</p>
                 </div>
+                {onChangePassword && (
+                  <button type="button" onClick={onChangePassword} aria-label="Cambiar contraseña" className={styles.password}>
+                    <KeyRound size={18} aria-hidden />
+                  </button>
+                )}
                 <button type="button" onClick={onLogout} aria-label="Cerrar sesión" className={styles.logout}>
                   <LogOut size={17} aria-hidden />
                   Salir

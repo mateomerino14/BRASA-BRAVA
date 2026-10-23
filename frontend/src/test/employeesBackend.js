@@ -46,7 +46,7 @@ export const createEmployeesBackend = () => {
         const employee = Object.assign(store.find((item) => item.id === 1), {fotoUrl: null});
         return [200, {employee}];
       },
-      'GET /roles': () => [200, {roles: ROLES}],
+      'GET /roles/options': () => [200, {roles: ROLES}],
       'GET /employees': (_body, query) => {
         calls.push(query);
         const items = store.filter((employee) => matches(employee, query));

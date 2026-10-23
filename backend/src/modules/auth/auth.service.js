@@ -12,6 +12,8 @@ const expiredCode = {error: 'El código venció. Solicite uno nuevo', status: 40
 const unknownAccount = {error: 'No hay ninguna cuenta registrada con ese correo. Revise que esté bien escrito', status: 404};
 const inactiveAccount = {error: 'La cuenta de ese correo está dada de baja. Pida a administración que la reactive', status: 403};
 const msPerMinute = 60_000;
+const onlyDirectorio = {error: 'Solo el DIRECTORIO puede cambiar esta contraseña', status: 403};
+const wrongCurrent = {error: 'La contraseña actual no es correcta', status: 400, detail: {campo: 'actual'}};
 
 // Reglas de negocio del inicio de sesión y la recuperación de contraseña
 export const createAuthService = ({repository, mailer, config, logger = console, now = () => new Date()}) => {
@@ -179,5 +181,18 @@ export const createAuthService = ({repository, mailer, config, logger = console,
     return {...user, nombre: `${row.nombre} ${row.apellido}`, fotoUrl: row.foto_url};
   };
 
-  return {login, listLoginUsers, requestPasswordReset, verifyResetCode, confirmPasswordReset, profile};
+  // Cambia la contraseña del DIRECTORIO comprobando la actual
+  const changeDirectorioPassword = async (user, {actual, nueva}) => {
+    if (!user.isDirectorio) {
+      return onlyDirectorio;
+    }
+    const directorio = await repository.findDirectorio();
+    if (!directorio || !await verifySecret(actual, directorio.contrasena_hash)) {
+      return wrongCurrent;
+    }
+    await repository.updateDirectorioPassword(directorio.id_directorio, await hashSecret(nueva));
+    return {updated: true};
+  };
+
+  return {login, listLoginUsers, requestPasswordReset, verifyResetCode, confirmPasswordReset, profile, changeDirectorioPassword};
 };

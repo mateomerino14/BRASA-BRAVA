@@ -164,7 +164,7 @@ describe('Gestión de empleados', () => {
   });
 
   it('lista los cargos activos para el formulario', async () => {
-    const res = await api('get', '/api/roles');
+    const res = await api('get', '/api/roles/options');
     expect(res.status).toBe(200);
     expect(res.body.roles.map((role) => role.nombre)).toEqual(['Administrador', 'Cajero', 'Cocinero', 'Mesero']);
   });

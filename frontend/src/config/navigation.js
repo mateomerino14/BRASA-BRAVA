@@ -8,6 +8,7 @@ import {
   Package,
   Percent,
   Settings,
+  ShieldCheck,
   ShoppingCart,
   UsersRound,
 } from 'lucide-react';
@@ -64,6 +65,13 @@ export const NAVIGATION = [
         to: '/empleados',
         icon: UsersRound,
         permission: 'empleados',
+      },
+      {
+        label: 'Cargos',
+        title: 'Gestión de cargos',
+        to: '/cargos',
+        icon: ShieldCheck,
+        permission: 'cargos',
       },
     ],
   },
