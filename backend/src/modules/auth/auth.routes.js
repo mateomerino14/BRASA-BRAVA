@@ -5,7 +5,7 @@ import {authenticate} from '../../middlewares/auth.js';
 import {createAuthRepository} from './auth.repository.js';
 import {createAuthService} from './auth.service.js';
 import {createAuthController} from './auth.controller.js';
-import {loginSchema, resetConfirmSchema, resetRequestSchema, resetVerifySchema} from './auth.schemas.js';
+import {directorioPasswordSchema, loginSchema, resetConfirmSchema, resetRequestSchema, resetVerifySchema} from './auth.schemas.js';
 
 const limitWindowMs = 15 * 60_000;
 const loginAttemptsLimit = 20;
@@ -30,6 +30,7 @@ export const createAuthRouter = ({db, mailer, config, logger}) => {
 
   router.post('/login', loginLimiter, validate(loginSchema), controller.login);
   router.get('/me', authenticate(config.JWT_SECRET), controller.me);
+  router.put('/directorio/password', authenticate(config.JWT_SECRET), resetLimiter, validate(directorioPasswordSchema), controller.changeDirectorioPassword);
   router.get('/login-users', controller.loginUsers);
   router.post('/password-reset/request', resetLimiter, validate(resetRequestSchema), controller.requestReset);
   router.post('/password-reset/verify', resetLimiter, validate(resetVerifySchema), controller.verifyReset);

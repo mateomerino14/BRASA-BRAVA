@@ -1,6 +1,6 @@
 # Brasa Brava — Sistema de Gestión
 
-Sistema interno del restaurante Brasa Brava: inicio de sesión por empleado, caja, cocina, catálogo y administración de productos, categorías, stock, secciones y mesas, promociones y empleados.
+Sistema interno del restaurante Brasa Brava: inicio de sesión por empleado, caja, cocina, catálogo y administración de productos, categorías, stock, secciones y mesas, promociones, empleados y cargos.
 
 Funciona de dos formas con el mismo código:
 
@@ -81,6 +81,7 @@ BRASA-BRAVA/
 | Página principal | Terminado |
 | Aplicación de escritorio | Terminado |
 | Gestión de empleados (listado, filtros, registro, modificación y baja) | Terminado |
+| Gestión de cargos (pantallas que ve cada cargo, baja y reactivación) y cambio de contraseña del DIRECTORIO | Terminado |
 | Gestión de categorías (subcategorías, foto, filtros, baja y reactivación) | Terminado |
 | Interfaz adaptable a celular y tablet (menú deslizable y tablas en tarjetas) | Terminado |
 | Pantallas de gestión estándar (filtros en la URL, orden por columna, filas por página, limpiar filtros) | Terminado |

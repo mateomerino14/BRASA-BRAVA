@@ -39,4 +39,10 @@ export const createAuthController = (service) => ({
     const result = await service.confirmPasswordReset(req.validated.body);
     return respond(res, result, () => res.json({message: 'Contraseña actualizada correctamente'}));
   },
+
+  // Cambia la contraseña del DIRECTORIO
+  changeDirectorioPassword: async (req, res) => {
+    const result = await service.changeDirectorioPassword(req.user, req.validated.body);
+    return respond(res, result, () => res.json({message: 'Contraseña del DIRECTORIO actualizada'}));
+  },
 });
