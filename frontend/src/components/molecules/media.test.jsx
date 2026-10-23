@@ -3,6 +3,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {ImagePicker} from './ImagePicker';
+import {AvatarPicker} from './AvatarPicker';
 import {TagInput} from './TagInput';
 import {Textarea} from '../atoms/Textarea';
 import {Thumbnail} from '../atoms/Thumbnail';
@@ -72,6 +73,24 @@ describe('ImagePicker', () => {
     const file = pngFile();
     fireEvent.drop(screen.getByText(/Arrastre una foto/).closest('label'), {dataTransfer: {files: [file]}});
     expect(onChange).toHaveBeenCalledWith(file);
+  });
+});
+
+describe('AvatarPicker', () => {
+  it('elige la foto con la cámara, la valida y permite quitarla', async () => {
+    const onChange = vi.fn();
+    const {rerender} = render(<AvatarPicker name="Ana Paz" label="Foto" onChange={onChange} />);
+    expect(screen.getByRole('img', {name: 'Ana Paz'})).toHaveTextContent('AP');
+    expect(screen.queryByRole('button', {name: /Quitar foto/})).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Foto'), {target: {files: [new File(['x'], 'doc.pdf', {type: 'application/pdf'})]}});
+    expect(screen.getByRole('alert')).toHaveTextContent('La imagen debe ser PNG, JPG o WEBP');
+    const file = pngFile();
+    fireEvent.change(screen.getByLabelText('Foto'), {target: {files: [file]}});
+    expect(onChange).toHaveBeenCalledWith(file);
+    rerender(<AvatarPicker name="Ana Paz" label="Foto" file={file} onChange={onChange} />);
+    expect(screen.getByRole('img', {name: 'Ana Paz'})).toHaveAttribute('src', expect.stringMatching(/^blob:/));
+    await userEvent.click(screen.getByRole('button', {name: /Quitar foto/}));
+    expect(onChange).toHaveBeenLastCalledWith(null);
   });
 });
 

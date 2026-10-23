@@ -4,6 +4,7 @@ import {renderApp} from '../../test/renderApp';
 import {USERS, mockApi} from '../../test/mockApi';
 import {createEmployeesBackend} from '../../test/employeesBackend';
 import {validateEmployee} from './utils/validateEmployee';
+import {suggestAlias} from './utils/suggestAlias';
 
 const openPage = async () => {
   const backend = createEmployeesBackend();
@@ -53,17 +54,22 @@ describe('Gestión de empleados', () => {
 
     await fillField(user, dialog, 'Nombre', 'Lucía');
     await fillField(user, dialog, 'Apellido', 'Flores');
+    expect(within(dialog).getByLabelText(/^Usuario/)).toHaveValue('l.flores');
+    expect(within(dialog).getByText('Sin cargo')).toBeInTheDocument();
     await fillField(user, dialog, 'CI', '7123456 CB');
     await fillField(user, dialog, 'Usuario', 'L.Flores');
+    await fillField(user, dialog, 'Nombre', 'Lucía Belén');
+    expect(within(dialog).getByLabelText(/^Usuario/)).toHaveValue('L.Flores');
     await fillField(user, dialog, 'Correo', 'l.flores@brasabrava.bo');
     await user.selectOptions(within(dialog).getByLabelText(/^Cargo/), 'Cajero');
     await fillField(user, dialog, 'Contraseña inicial', 'Inicial2026');
-    expect(within(dialog).getByText('Lucía Flores')).toBeInTheDocument();
+    expect(within(dialog).getByText('Lucía Belén Flores')).toBeInTheDocument();
+    expect(within(dialog).getByText('Cajero', {selector: 'span'})).toBeInTheDocument();
     await user.upload(within(dialog).getByLabelText('Foto del empleado', {selector: 'input'}), new File([new Uint8Array(64)], 'lucia.png', {type: 'image/png'}));
-    expect(within(dialog).getByRole('img', {name: 'Lucía Flores'}).getAttribute('src')).toMatch(/^blob:/);
+    expect(within(dialog).getByRole('img', {name: 'Lucía Belén Flores'}).getAttribute('src')).toMatch(/^blob:/);
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
 
-    expect(await screen.findByText('Se registró a Lucía Flores')).toBeInTheDocument();
+    expect(await screen.findByText('Se registró a Lucía Belén Flores')).toBeInTheDocument();
     expect(backend.images.uploads[0].file.name).toBe('lucia.png');
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(await screen.findByText('l.flores')).toBeInTheDocument();
@@ -91,9 +97,11 @@ describe('Gestión de empleados', () => {
     const dialog = await screen.findByRole('dialog', {name: 'Modificar empleado'});
     expect(within(dialog).getByLabelText(/^CI/)).toHaveValue('4920114 LP');
     expect(within(dialog).getByLabelText(/^Cargo/)).toHaveValue('4');
-    expect(within(dialog).getByRole('img', {name: 'Vista previa de foto del empleado'})).toHaveAttribute('src', '/uploads/carlos.png');
+    expect(within(dialog).getByRole('img', {name: 'Carlos Mendoza'})).toHaveAttribute('src', '/uploads/carlos.png');
+    const alias = within(dialog).getByLabelText(/^Usuario/).value;
     await fillField(user, dialog, 'Nombre', 'Carlos Andrés');
-    await user.click(within(dialog).getByRole('button', {name: 'Quitar'}));
+    expect(within(dialog).getByLabelText(/^Usuario/)).toHaveValue(alias);
+    await user.click(within(dialog).getByRole('button', {name: 'Quitar foto'}));
     await user.click(within(dialog).getByRole('button', {name: 'Guardar'}));
     expect(await screen.findByText('Se actualizaron los datos de Carlos Andrés Mendoza')).toBeInTheDocument();
     expect(backend.images.removals).toEqual([1]);
@@ -141,5 +149,14 @@ describe('validateEmployee', () => {
   it('rechaza CI, teléfono y usuario con formato inválido', () => {
     const errors = validateEmployee({...valid, ci: 'abc', telefono: '12', alias: 'A B'}, {isEdit: false});
     expect(Object.keys(errors).sort()).toEqual(['alias', 'ci', 'telefono']);
+  });
+});
+
+describe('suggestAlias', () => {
+  it('usa la inicial del nombre y el primer apellido, sin tildes', () => {
+    expect(suggestAlias('Carlos Andrés', 'Mendoza Rojas')).toBe('c.mendoza');
+    expect(suggestAlias('Íñigo', 'Núñez')).toBe('i.nunez');
+    expect(suggestAlias('Lucía', '')).toBe('lucia');
+    expect(suggestAlias('', '')).toBe('');
   });
 });
