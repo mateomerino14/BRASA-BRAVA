@@ -3,16 +3,21 @@ import {Button} from '../../../components/atoms/Button';
 import {Input} from '../../../components/atoms/Input';
 import {PasswordInput} from '../../../components/atoms/PasswordInput';
 import {Select} from '../../../components/atoms/Select';
-import {Avatar} from '../../../components/atoms/Avatar';
 import {FormField} from '../../../components/molecules/FormField';
-import {ImagePicker} from '../../../components/molecules/ImagePicker';
-import {useImagePreview} from '../../../hooks/useImagePreview';
+import {AvatarPicker} from '../../../components/molecules/AvatarPicker';
+import {cn} from '../../../lib/cn';
 
 const styles = {
   form: 'flex flex-col gap-5',
-  preview: 'flex items-center gap-4 rounded-2xl border border-arena/60 bg-white p-4',
-  previewName: 'font-semibold text-carbon',
-  previewRole: 'text-xs uppercase tracking-wide text-rojo',
+  preview: 'flex items-center gap-5 rounded-2xl border border-arena/60 bg-hueso/50 p-4',
+  previewText: 'min-w-0',
+  previewName: 'truncate font-display text-2xl leading-tight tracking-wide text-carbon',
+  role: 'mt-1 inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide',
+  noRole: 'bg-arena/40 text-cafe',
+  chosenRole: 'bg-brasa/10 text-brasa-oscuro',
+  photoHint: 'mt-2 text-xs text-cafe',
+  section: 'flex flex-col gap-3',
+  sectionTitle: 'flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-cafe after:h-px after:flex-1 after:bg-arena/60',
   grid: 'grid gap-4 sm:grid-cols-2',
   actions: 'grid gap-3 sm:grid-cols-2',
 };
@@ -25,9 +30,9 @@ const previewName = (values) => {
   return 'Nuevo empleado';
 };
 
-function TextField({form, field, label, required, ...props}) {
+function TextField({form, field, label, required, hint, ...props}) {
   return (
-    <FormField label={label} required={required} error={form.errors[field]}>
+    <FormField label={label} required={required} hint={hint} error={form.errors[field]}>
       {(control) => (
         <Input {...control} {...props} value={form.values[field]} onChange={(event) => form.setField(field, event.target.value)} />
       )}
@@ -37,8 +42,12 @@ function TextField({form, field, label, required, ...props}) {
 
 export function EmployeeFormModal({form, roles}) {
   const roleOptions = roles.map((role) => ({value: String(role.id), label: role.nombre}));
-  const roleName = roles.find((role) => String(role.id) === form.values.idCargo)?.nombre ?? 'Sin cargo';
-  const photo = useImagePreview(form.image.file, form.image.url);
+  const roleName = roles.find((role) => String(role.id) === form.values.idCargo)?.nombre;
+  const name = previewName(form.values);
+  let aliasHint;
+  if (!form.isEdit) {
+    aliasHint = 'Se sugiere con el nombre; puede cambiarlo.';
+  }
 
   return (
     <Modal
@@ -51,51 +60,57 @@ export function EmployeeFormModal({form, roles}) {
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <div className={styles.preview}>
-          <Avatar name={previewName(form.values)} src={photo} size={56} />
-          <div>
-            <p className={styles.previewName}>{previewName(form.values)}</p>
-            <p className={styles.previewRole}>{roleName}</p>
+          <AvatarPicker name={name} label="Foto del empleado" file={form.image.file} url={form.image.url} onChange={form.changeImage} />
+          <div className={styles.previewText}>
+            <p className={styles.previewName}>{name}</p>
+            <span className={cn(styles.role, roleName ? styles.chosenRole : styles.noRole)}>{roleName ?? 'Sin cargo'}</span>
+            <p className={styles.photoHint}>La foto se muestra al iniciar sesión y en la lista de empleados.</p>
           </div>
         </div>
 
-        <div className={styles.grid}>
-          <TextField form={form} field="nombre" label="Nombre" required autoComplete="given-name" />
-          <TextField form={form} field="apellido" label="Apellido" required autoComplete="family-name" />
-          <TextField form={form} field="ci" label="CI" required placeholder="4920114 LP" />
-          <TextField form={form} field="telefono" label="Teléfono" inputMode="numeric" placeholder="71234567" />
-          <TextField form={form} field="alias" label="Usuario" required placeholder="c.mendoza" autoComplete="off" />
-          <TextField form={form} field="correo" label="Correo" required type="email" placeholder="nombre@brasabrava.bo" />
-          <FormField label="Cargo" required error={form.errors.idCargo}>
-            {(control) => (
-              <Select
-                {...control}
-                placeholder="Seleccione un cargo"
-                options={roleOptions}
-                value={form.values.idCargo}
-                onChange={(event) => form.setField('idCargo', event.target.value)}
-              />
-            )}
-          </FormField>
-          <FormField
-            label={form.isEdit ? 'Nueva contraseña' : 'Contraseña inicial'}
-            required={!form.isEdit}
-            hint={form.isEdit ? 'Déjela vacía para mantener la actual.' : 'Mínimo 8 caracteres, con letras y números.'}
-            error={form.errors.contrasena}
-          >
-            {(control) => (
-              <PasswordInput
-                {...control}
-                autoComplete="new-password"
-                value={form.values.contrasena}
-                onChange={(event) => form.setField('contrasena', event.target.value)}
-              />
-            )}
-          </FormField>
-        </div>
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Datos personales</h3>
+          <div className={styles.grid}>
+            <TextField form={form} field="nombre" label="Nombre" required autoComplete="given-name" />
+            <TextField form={form} field="apellido" label="Apellido" required autoComplete="family-name" />
+            <TextField form={form} field="ci" label="CI" required placeholder="4920114 LP" />
+            <TextField form={form} field="telefono" label="Teléfono" inputMode="numeric" placeholder="71234567" />
+          </div>
+        </section>
 
-        <FormField label="Foto del empleado" hint="Se muestra en el inicio de sesión y en la lista de empleados.">
-          {() => <ImagePicker label="Foto del empleado" file={form.image.file} url={form.image.url} onChange={form.changeImage} />}
-        </FormField>
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Acceso al sistema</h3>
+          <div className={styles.grid}>
+            <FormField label="Cargo" required error={form.errors.idCargo}>
+              {(control) => (
+                <Select
+                  {...control}
+                  placeholder="Seleccione un cargo"
+                  options={roleOptions}
+                  value={form.values.idCargo}
+                  onChange={(event) => form.setField('idCargo', event.target.value)}
+                />
+              )}
+            </FormField>
+            <TextField form={form} field="alias" label="Usuario" required hint={aliasHint} placeholder="c.mendoza" autoComplete="off" />
+            <TextField form={form} field="correo" label="Correo" required type="email" placeholder="nombre@brasabrava.bo" />
+            <FormField
+              label={form.isEdit ? 'Nueva contraseña' : 'Contraseña inicial'}
+              required={!form.isEdit}
+              hint={form.isEdit ? 'Déjela vacía para mantener la actual.' : 'Mínimo 8 caracteres, con letras y números.'}
+              error={form.errors.contrasena}
+            >
+              {(control) => (
+                <PasswordInput
+                  {...control}
+                  autoComplete="new-password"
+                  value={form.values.contrasena}
+                  onChange={(event) => form.setField('contrasena', event.target.value)}
+                />
+              )}
+            </FormField>
+          </div>
+        </section>
 
         <div className={styles.actions}>
           <Button variant="outline" onClick={form.close} disabled={form.saving}>
