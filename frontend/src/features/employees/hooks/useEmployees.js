@@ -1,12 +1,14 @@
 import {useEffect, useState} from 'react';
 import {employeesApi} from '../services/employeesApi';
 import {usePaginatedList} from '../../../hooks/usePaginatedList';
+import {useToast} from '../../../context/useToast';
 
 const filterDefaults = {idCargo: '', estado: 'todos'};
 
 export function useEmployees({api = employeesApi} = {}) {
   const list = usePaginatedList({fetchPage: api.list, filterDefaults});
   const [roles, setRoles] = useState([]);
+  const toast = useToast();
 
   useEffect(() => {
     let cancelled = false;
@@ -17,9 +19,10 @@ export function useEmployees({api = employeesApi} = {}) {
           setRoles(data.roles);
         }
       }
-      catch {
+      catch (requestError) {
         if (!cancelled) {
           setRoles([]);
+          toast.error(requestError.message, 'No se pudieron cargar los cargos');
         }
       }
     };
@@ -27,7 +30,7 @@ export function useEmployees({api = employeesApi} = {}) {
     return () => {
       cancelled = true;
     };
-  }, [api]);
+  }, [api, toast]);
 
   return {
     ...list,

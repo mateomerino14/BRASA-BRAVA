@@ -3,6 +3,7 @@ import {AnimatePresence, motion} from 'motion/react';
 import {ImagePlus, RefreshCw, Trash2} from 'lucide-react';
 import {cn} from '../../lib/cn';
 import {useImagePreview} from '../../hooks/useImagePreview';
+import {ACCEPTED_IMAGE_TYPES, DEFAULT_MAX_MB, validateImageFile} from '../../lib/imageFile';
 
 const styles = {
   zone: 'group relative flex h-44 w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-dashed bg-campo text-center transition-[border-color,background-color] duration-200',
@@ -22,22 +23,8 @@ const styles = {
   error: 'text-sm font-medium text-error',
 };
 
-const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
-const BYTES_PER_MB = 1024 * 1024;
-const DEFAULT_MAX_MB = 5;
-
 const fadeIn = {opacity: 0, scale: 1.04};
 const fadeVisible = {opacity: 1, scale: 1};
-
-const validateFile = (file, maxMb) => {
-  if (!ACCEPTED_TYPES.includes(file.type)) {
-    return 'La imagen debe ser PNG, JPG o WEBP';
-  }
-  if (file.size > maxMb * BYTES_PER_MB) {
-    return `La imagen no puede pesar más de ${maxMb} MB`;
-  }
-  return '';
-};
 
 // fill: en pantallas medianas la zona crece hasta igualar el alto de los campos que tiene al lado
 export function ImagePicker({label = 'Imagen', file = null, url = null, onChange, maxMb = DEFAULT_MAX_MB, error, fill = false, className}) {
@@ -52,7 +39,7 @@ export function ImagePicker({label = 'Imagen', file = null, url = null, onChange
     if (!selected) {
       return;
     }
-    const problem = validateFile(selected, maxMb);
+    const problem = validateImageFile(selected, maxMb);
     setLocalError(problem);
     if (!problem) {
       onChange(selected);
@@ -122,7 +109,7 @@ export function ImagePicker({label = 'Imagen', file = null, url = null, onChange
         id={inputId}
         type="file"
         aria-label={label}
-        accept={ACCEPTED_TYPES.join(',')}
+        accept={ACCEPTED_IMAGE_TYPES.join(',')}
         className={styles.input}
         onChange={(event) => {
           pick(event.target.files?.[0]);
