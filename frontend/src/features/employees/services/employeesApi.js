@@ -6,6 +6,6 @@ export const employeesApi = {
   create: (data) => apiRequest('/employees', {method: 'POST', body: data}),
   update: (id, data) => apiRequest(`/employees/${id}`, {method: 'PUT', body: data}),
   setStatus: (id, activo) => apiRequest(`/employees/${id}/status`, {method: 'PATCH', body: {activo}}),
-  roles: () => apiRequest('/roles'),
+  roles: () => apiRequest('/roles/options'),
   ...imageEndpoints('/employees'),
 };

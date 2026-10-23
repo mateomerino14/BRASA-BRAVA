@@ -54,6 +54,11 @@ export const createAuthRepository = (db) => ({
     return rows[0] ?? null;
   },
 
+  // Guarda la nueva contraseña del DIRECTORIO
+  updateDirectorioPassword: async (idDirectorio, passwordHash) => {
+    await db.query('UPDATE directorio SET contrasena_hash = $1 WHERE id_directorio = $2', [passwordHash, idDirectorio]);
+  },
+
   // Lista los empleados activos para el carrusel del login
   listLoginUsers: async () => {
     const {rows} = await db.query(

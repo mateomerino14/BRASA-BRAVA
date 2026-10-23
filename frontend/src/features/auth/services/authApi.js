@@ -19,4 +19,6 @@ export const authApi = {
       body: {email, code, newPassword},
       auth: false,
     }),
+  changeDirectorioPassword: (values) =>
+    apiRequest('/auth/directorio/password', {method: 'PUT', body: values}),
 };
