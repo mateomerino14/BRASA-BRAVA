@@ -102,9 +102,9 @@ describe('Home', () => {
     vi.useFakeTimers({toFake: ['setInterval', 'clearInterval', 'Date']});
     vi.setSystemTime(new Date(2026, 9, 9, 13, 45, 0));
     render(<LiveClock />);
-    expect(screen.getByText('13:45:00')).toBeInTheDocument();
+    expect(screen.getByText('1:45:00 PM')).toBeInTheDocument();
     await vi.advanceTimersByTimeAsync(2000);
-    expect(screen.getByText('13:45:02')).toBeInTheDocument();
+    expect(screen.getByText('1:45:02 PM')).toBeInTheDocument();
   });
 
   it('una ruta desconocida muestra 404', () => {

@@ -1,4 +1,4 @@
-import {formatDate, formatDays, formatHours, normalizeText} from '../../../lib/format';
+import {formatClock, formatDate, formatDays, formatHours, normalizeText} from '../../../lib/format';
 import {ALL, LOW_PORTIONS} from '../constants/family';
 
 // Estado de un producto en el catálogo: agotado (lo marcó el local), sin stock, quedan pocas o disponible
@@ -30,12 +30,12 @@ export const promotionBand = (promotion) => {
   if (promotion.vigencia === 'vigente') {
     let label = 'Hoy';
     if (promotion.horaFin) {
-      label = `Ahora, hasta las ${promotion.horaFin}`;
+      label = `Ahora, hasta las ${formatClock(promotion.horaFin)}`;
     }
     return {key: 'hoy', label, hint: formatDays(promotion.dias)};
   }
   if (promotion.vigencia === 'mas_tarde') {
-    return {key: 'programada', label: `Hoy desde las ${promotion.horaInicio}`, hint: whenHint(promotion)};
+    return {key: 'programada', label: `Hoy desde las ${formatClock(promotion.horaInicio)}`, hint: whenHint(promotion)};
   }
   if (promotion.vigencia === 'termino_hoy') {
     return {key: 'otroDia', label: 'Terminó por hoy', hint: whenHint(promotion)};

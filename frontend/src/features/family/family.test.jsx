@@ -117,7 +117,7 @@ describe('Familia: catálogo del local', () => {
     await waitFor(() => expect(within(list).getAllByRole('button')).toHaveLength(1));
     await user.click(within(list).getByRole('button', {name: 'Ver Happy Hour Cervecero'}));
     const dialog = await screen.findByRole('dialog', {name: 'Happy Hour Cervecero'});
-    expect(within(dialog).getByText('Se vende de lunes a viernes de 18:00 a 21:00, desde el 18 oct 2026.')).toBeInTheDocument();
+    expect(within(dialog).getByText('Se vende de lunes a viernes de 6:00 PM a 9:00 PM, desde el 18 oct 2026.')).toBeInTheDocument();
     expect(within(dialog).getByText('No se vende hoy')).toBeInTheDocument();
     const included = within(dialog).getByRole('region', {name: 'Productos de la promoción'});
     expect(within(included).getByRole('listitem')).toHaveTextContent('1 cerveza artesanal · agotadoBs 25,00');
@@ -135,8 +135,8 @@ describe('Familia: catálogo del local', () => {
     expect(promotionBand({disponible: true, vigencia: 'otro_dia', dias: '0010000'})).toEqual({key: 'otroDia', label: 'Martes', hint: 'Hoy no aplica'});
     expect(promotionBand({disponible: false, agotados: []})).toMatchObject({key: 'noSeVende', hint: 'Tiene un producto agotado'});
     const happyHour = {disponible: true, dias: '0111110', horaInicio: '18:00', horaFin: '21:00'};
-    expect(promotionBand({...happyHour, vigencia: 'vigente'})).toMatchObject({label: 'Ahora, hasta las 21:00', hint: 'Lun a vie'});
-    expect(promotionBand({...happyHour, vigencia: 'mas_tarde'})).toMatchObject({label: 'Hoy desde las 18:00', hint: 'Lun a vie · 18:00 a 21:00'});
+    expect(promotionBand({...happyHour, vigencia: 'vigente'})).toMatchObject({label: 'Ahora, hasta las 9:00 PM', hint: 'Lun a vie'});
+    expect(promotionBand({...happyHour, vigencia: 'mas_tarde'})).toMatchObject({label: 'Hoy desde las 6:00 PM', hint: 'Lun a vie · 6:00 PM a 9:00 PM'});
     expect(promotionBand({...happyHour, vigencia: 'termino_hoy'})).toMatchObject({label: 'Terminó por hoy'});
     const items = [{nombre: 'Café', descripcion: null, idCategoria: 1, idSubcategoria: 2}];
     expect(filterProducts(items, {categoria: 'todas', subcategoria: 'todas', search: 'cafe'})).toHaveLength(1);
