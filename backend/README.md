@@ -262,7 +262,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 
 - El nombre de la categoría no se repite (sin distinguir mayúsculas). Cada categoría tiene entre 1 y 20 subcategorías sin nombres repetidos.
 - Al modificar se envía la lista completa de subcategorías: las que traen `id` se renombran, las nuevas se crean y las que faltan se dan de baja (no se borran, para no perder el historial de productos).
-- Las imágenes se aceptan solo si sus primeros bytes son de PNG, JPG o WEBP (no se confía en la extensión), pesan hasta 5 MB y se guardan con un nombre aleatorio. Al reemplazar o quitar una foto se borra el archivo anterior.
+- Las imágenes se aceptan solo si sus primeros bytes son de PNG, JPG o WEBP (no se confía en la extensión), pesan hasta 5 MB y se guardan con un nombre aleatorio. Al reemplazar o quitar una foto se borra el archivo anterior; si la foto nueva no se pudo asociar al registro, también se borra. La base solo guarda la URL: los archivos viven en `UPLOADS_DIR` (en la app de escritorio, la carpeta `uploads` dentro de los datos de la app). Al arrancar, la API borra de esa carpeta las fotos que ya no usa ningún registro (`services/imageCleanup.js`).
 
 ### Reglas de la gestión de productos
 

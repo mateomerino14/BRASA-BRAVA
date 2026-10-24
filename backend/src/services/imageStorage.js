@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import {mkdir, unlink, writeFile} from 'node:fs/promises';
+import {mkdir, readdir, unlink, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 
 export const UPLOADS_ROUTE = '/uploads';
@@ -10,6 +10,9 @@ const SIGNATURES = [
   {ext: 'jpg', matches: (bytes) => bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff},
   {ext: 'webp', matches: (bytes) => bytes.subarray(0, 4).toString('ascii') === 'RIFF' && bytes.subarray(8, 12).toString('ascii') === 'WEBP'},
 ];
+
+// Nombre con que el sistema guarda cada foto: un UUID con su extensión
+const STORED_NAME = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp)$/;
 
 // Detecta el formato real de una imagen a partir de sus primeros bytes
 export const detectImageType = (buffer) => SIGNATURES.find((signature) => signature.matches(buffer))?.ext ?? null;
@@ -47,5 +50,21 @@ export const createImageStorage = (directory) => {
     }
   };
 
-  return {root, save, remove};
+  // Borra las fotos de la carpeta que ya no usa ningún registro (solo las que guardó el sistema)
+  const removeUnused = async (usedUrls) => {
+    const used = new Set([...usedUrls].filter(Boolean).map((url) => path.basename(url)));
+    const files = await readdir(root).catch((error) => {
+      if (error.code === 'ENOENT') {
+        return [];
+      }
+      throw error;
+    });
+    const unused = files.filter((file) => STORED_NAME.test(file) && !used.has(file));
+    for (const file of unused) {
+      await remove(`${UPLOADS_ROUTE}/${file}`);
+    }
+    return unused.length;
+  };
+
+  return {root, save, remove, removeUnused};
 };
