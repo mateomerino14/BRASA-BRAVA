@@ -123,3 +123,11 @@ export const parseDecimal = (text) => {
   }
   return Number(clean);
 };
+
+// Horario de una promoción: "18:00 a 20:00" (vacío si vale todo el día)
+export const formatHours = (start, end) => {
+  if (!start || !end) {
+    return '';
+  }
+  return `${start} a ${end}`;
+};

@@ -1,12 +1,12 @@
-// Fecha de hoy y día de la semana en la zona del local
+// Fecha de hoy, día de la semana y hora (HH:MM) en la zona del local
 export const localToday = (now, timeZone) => {
   const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-CA', {timeZone, year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'})
+    new Intl.DateTimeFormat('en-CA', {timeZone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short', hour: '2-digit', minute: '2-digit'})
       .formatToParts(now)
       .map((part) => [part.type, part.value]),
   );
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  return {date: `${parts.year}-${parts.month}-${parts.day}`, weekday: weekdays.indexOf(parts.weekday)};
+  return {date: `${parts.year}-${parts.month}-${parts.day}`, weekday: weekdays.indexOf(parts.weekday), time: `${parts.hour}:${parts.minute}`};
 };
 
 // Normaliza una fecha de la base a YYYY-MM-DD

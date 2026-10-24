@@ -6,7 +6,7 @@ import {Thumbnail} from '../../../components/atoms/Thumbnail';
 import {Badge} from '../../../components/atoms/Badge';
 import {IconButton} from '../../../components/atoms/IconButton';
 import {cn} from '../../../lib/cn';
-import {formatDate, formatDays} from '../../../lib/format';
+import {formatDate, formatDays, formatHours} from '../../../lib/format';
 import {VIGENCIA_META} from '../constants/promotions';
 
 const styles = {
@@ -56,7 +56,7 @@ const buildColumns = ({onEdit, onToggleStatus}) => [
       <div className={styles.vigencia}>
         <Badge dot tone={VIGENCIA_META[promotion.vigencia].tone}>{VIGENCIA_META[promotion.vigencia].label}</Badge>
         <span className={styles.dates}>{dateRange(promotion)}</span>
-        <span className={styles.days}>{formatDays(promotion.dias)}</span>
+        <span className={styles.days}>{[formatDays(promotion.dias), formatHours(promotion.horaInicio, promotion.horaFin)].filter(Boolean).join(' · ')}</span>
       </div>
     ),
   },

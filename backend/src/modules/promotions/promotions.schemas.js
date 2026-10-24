@@ -17,6 +17,8 @@ const productItem = z.object({
 // Indica si los productos de la promoción no se repiten
 const hasUniqueProducts = (items) => new Set(items.map((item) => item.idProducto)).size === items.length;
 
+const optionalTime = z.union([z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Ingrese una hora válida (HH:MM)'), z.literal(''), z.null()]).optional().transform((value) => value || null);
+
 const optionalDate = z.union([z.iso.date({error: 'Ingrese una fecha válida'}), z.literal(''), z.null()]).optional().transform((value) => value || null);
 
 export const promotionSchema = z.object({
@@ -26,6 +28,8 @@ export const promotionSchema = z.object({
   valor: decimalSchema({label: 'el valor', decimals: 2, max: MAX_VALUE}),
   fechaInicio: z.iso.date({error: 'Ingrese la fecha de inicio'}),
   fechaFin: optionalDate,
+  horaInicio: optionalTime,
+  horaFin: optionalTime,
   dias: z.string({error: 'Elija los días'}).regex(/^[01]{7}$/, 'Días inválidos').refine((value) => value.includes('1'), 'Elija al menos un día de la semana'),
   productos: z
     .array(productItem, {error: 'Agregue los productos de la promoción'})
@@ -35,6 +39,15 @@ export const promotionSchema = z.object({
 }).superRefine((data, ctx) => {
   if (data.fechaFin && data.fechaFin < data.fechaInicio) {
     ctx.addIssue({code: 'custom', path: ['fechaFin'], message: 'La fecha de fin no puede ser anterior al inicio'});
+  }
+  if (data.horaInicio && !data.horaFin) {
+    ctx.addIssue({code: 'custom', path: ['horaFin'], message: 'Ingrese también la hora de fin'});
+  }
+  if (data.horaFin && !data.horaInicio) {
+    ctx.addIssue({code: 'custom', path: ['horaInicio'], message: 'Ingrese también la hora de inicio'});
+  }
+  if (data.horaInicio && data.horaFin && data.horaFin <= data.horaInicio) {
+    ctx.addIssue({code: 'custom', path: ['horaFin'], message: 'La hora de fin debe ser después de la de inicio'});
   }
   if (data.productos.reduce((total, item) => total + item.cantidad, 0) < MIN_COMBO_ITEMS) {
     ctx.addIssue({code: 'custom', path: ['productos'], message: 'Un combo necesita al menos 2 productos'});

@@ -8,7 +8,7 @@ const SORT_COLUMNS = {
 };
 const DEFAULT_ORDER = 'p.activa DESC, p.fecha_inicio DESC, p.nombre, p.id_promocion';
 
-const promotionColumns = 'p.id_promocion, p.nombre, p.descripcion, p.tipo, p.valor, p.fecha_inicio, p.fecha_fin, p.dias, p.imagen_url, p.activa';
+const promotionColumns = 'p.id_promocion, p.nombre, p.descripcion, p.tipo, p.valor, p.fecha_inicio, p.fecha_fin, p.hora_inicio, p.hora_fin, p.dias, p.imagen_url, p.activa';
 
 // Condiciones SQL de cada vigencia con sus parámetros
 const VIGENCIA = {
@@ -139,21 +139,22 @@ export const createPromotionsRepository = (db) => ({
   },
 
   // Inserta una promoción y devuelve su id
-  insert: async ({nombre, descripcion, tipo, valor, fechaInicio, fechaFin, dias}) => {
+  insert: async ({nombre, descripcion, tipo, valor, fechaInicio, fechaFin, horaInicio, horaFin, dias}) => {
     const {rows} = await db.query(
-      `INSERT INTO promocion (nombre, descripcion, tipo, valor, fecha_inicio, fecha_fin, dias)
-       VALUES ($1, $2, $3, $4, $5::date, $6::date, $7) RETURNING id_promocion`,
-      [nombre, descripcion, tipo, valor, fechaInicio, fechaFin, dias],
+      `INSERT INTO promocion (nombre, descripcion, tipo, valor, fecha_inicio, fecha_fin, dias, hora_inicio, hora_fin)
+       VALUES ($1, $2, $3, $4, $5::date, $6::date, $7, $8, $9) RETURNING id_promocion`,
+      [nombre, descripcion, tipo, valor, fechaInicio, fechaFin, dias, horaInicio, horaFin],
     );
     return rows[0].id_promocion;
   },
 
   // Actualiza los datos de una promoción
-  update: async (id, {nombre, descripcion, tipo, valor, fechaInicio, fechaFin, dias}) => {
+  update: async (id, {nombre, descripcion, tipo, valor, fechaInicio, fechaFin, horaInicio, horaFin, dias}) => {
     await db.query(
-      `UPDATE promocion SET nombre = $1, descripcion = $2, tipo = $3, valor = $4, fecha_inicio = $5::date, fecha_fin = $6::date, dias = $7
-        WHERE id_promocion = $8`,
-      [nombre, descripcion, tipo, valor, fechaInicio, fechaFin, dias, id],
+      `UPDATE promocion SET nombre = $1, descripcion = $2, tipo = $3, valor = $4, fecha_inicio = $5::date, fecha_fin = $6::date, dias = $7,
+              hora_inicio = $8, hora_fin = $9
+        WHERE id_promocion = $10`,
+      [nombre, descripcion, tipo, valor, fechaInicio, fechaFin, dias, horaInicio, horaFin, id],
     );
   },
 

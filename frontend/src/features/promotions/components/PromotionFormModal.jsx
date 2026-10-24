@@ -96,7 +96,7 @@ export function PromotionFormModal({form}) {
       onClose={form.close}
       size="lg"
       title={form.isEdit ? 'Modificar promoción' : 'Registrar nueva promoción'}
-      description="Arme un combo de productos a precio fijo, con sus fechas y días."
+      description="Arme un combo de productos a precio fijo, con sus fechas, días y horario."
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <div className={styles.grid}>
@@ -141,6 +141,18 @@ export function PromotionFormModal({form}) {
           <p className={styles.sectionTitle}>Días en que aplica <span className={styles.required}>*</span></p>
           <DayPicker value={form.values.dias} onChange={(value) => form.setField('dias', value)} />
           {form.errors.dias && <p role="alert" className={styles.error}>{form.errors.dias}</p>}
+        </div>
+
+        <div className={styles.rows}>
+          <p className={styles.sectionTitle}>Horario</p>
+          <div className={styles.pair}>
+            <FormField label="Hora de inicio" error={form.errors.horaInicio} hint="Déjelo vacío si vale todo el día.">
+              {(control) => <Input {...control} type="time" value={form.values.horaInicio} onChange={(event) => form.setField('horaInicio', event.target.value)} />}
+            </FormField>
+            <FormField label="Hora de fin" error={form.errors.horaFin}>
+              {(control) => <Input {...control} type="time" value={form.values.horaFin} onChange={(event) => form.setField('horaFin', event.target.value)} />}
+            </FormField>
+          </div>
         </div>
 
         <FormField label="Descripción" hint="Opcional. Se mostrará al cliente en Familia.">

@@ -1,4 +1,4 @@
-import {formatDate, formatDays, normalizeText} from '../../../lib/format';
+import {formatDate, formatDays, formatHours, normalizeText} from '../../../lib/format';
 import {ALL, LOW_PORTIONS} from '../constants/family';
 
 // Estado de un producto en el catálogo: agotado (lo marcó el local), sin stock, quedan pocas o disponible
@@ -15,7 +15,10 @@ export const productStatus = (product) => {
   return null;
 };
 
-// Banda de estado de una promoción: no se vende (por un producto agotado), hoy, programada u otro día
+// Días y horario juntos para la banda: "Lun a vie · 18:00 a 21:00"
+const whenHint = (promotion) => [formatDays(promotion.dias), formatHours(promotion.horaInicio, promotion.horaFin)].filter(Boolean).join(' · ');
+
+// Banda de estado de una promoción: no se vende (por un producto agotado), ahora, más tarde hoy, ya terminó, programada u otro día
 export const promotionBand = (promotion) => {
   if (!promotion.disponible) {
     let hint = 'Tiene un producto agotado';
@@ -25,10 +28,20 @@ export const promotionBand = (promotion) => {
     return {key: 'noSeVende', label: 'No se vende hoy', hint};
   }
   if (promotion.vigencia === 'vigente') {
-    return {key: 'hoy', label: 'Hoy', hint: formatDays(promotion.dias)};
+    let label = 'Hoy';
+    if (promotion.horaFin) {
+      label = `Ahora, hasta las ${promotion.horaFin}`;
+    }
+    return {key: 'hoy', label, hint: formatDays(promotion.dias)};
+  }
+  if (promotion.vigencia === 'mas_tarde') {
+    return {key: 'programada', label: `Hoy desde las ${promotion.horaInicio}`, hint: whenHint(promotion)};
+  }
+  if (promotion.vigencia === 'termino_hoy') {
+    return {key: 'otroDia', label: 'Terminó por hoy', hint: whenHint(promotion)};
   }
   if (promotion.vigencia === 'programada') {
-    return {key: 'programada', label: `Desde el ${formatDate(promotion.fechaInicio)}`, hint: formatDays(promotion.dias)};
+    return {key: 'programada', label: `Desde el ${formatDate(promotion.fechaInicio)}`, hint: whenHint(promotion)};
   }
   return {key: 'otroDia', label: formatDays(promotion.dias), hint: 'Hoy no aplica'};
 };
