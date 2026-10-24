@@ -117,7 +117,7 @@ describe('Familia: catálogo del local', () => {
     await waitFor(() => expect(within(list).getAllByRole('button')).toHaveLength(1));
     await user.click(within(list).getByRole('button', {name: 'Ver Happy Hour Cervecero'}));
     const dialog = await screen.findByRole('dialog', {name: 'Happy Hour Cervecero'});
-    expect(within(dialog).getByText('Se vende lun a vie, desde el 18 oct 2026.')).toBeInTheDocument();
+    expect(within(dialog).getByText('Se vende de lunes a viernes, desde el 18 oct 2026.')).toBeInTheDocument();
     expect(within(dialog).getByText('No se vende hoy')).toBeInTheDocument();
     const included = within(dialog).getByRole('region', {name: 'Productos de la promoción'});
     expect(within(included).getByRole('listitem')).toHaveTextContent('1 cerveza artesanal · agotadoBs 25,00');
