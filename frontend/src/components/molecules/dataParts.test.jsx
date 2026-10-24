@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from 'vitest';
-import {render, screen} from '@testing-library/react';
+import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Boxes, Scale} from 'lucide-react';
 import {SegmentedControl} from './SegmentedControl';
@@ -111,6 +111,22 @@ describe('ChipTabs', () => {
     expect(screen.getByRole('radio', {name: 'Salón, 2 mesas ocupadas'})).toBeChecked();
     await userEvent.click(screen.getByRole('radio', {name: 'Terraza'}));
     expect(onChange).toHaveBeenCalledWith('2');
+  });
+
+  it('muestra flechas solo hacia el lado donde quedan chips escondidos', () => {
+    const options = Array.from({length: 12}, (_, index) => ({value: String(index), label: `Categoría ${index}`}));
+    const {container} = render(<ChipTabs label="Categorías" options={options} value="0" onChange={() => {}} />);
+    const scroller = screen.getByRole('radiogroup');
+    Object.defineProperty(scroller, 'clientWidth', {configurable: true, value: 300});
+    Object.defineProperty(scroller, 'scrollWidth', {configurable: true, value: 900});
+    fireEvent.scroll(scroller);
+    expect(container.querySelectorAll('button[aria-hidden]')).toHaveLength(1);
+    scroller.scrollLeft = 600;
+    fireEvent.scroll(scroller);
+    expect(container.querySelectorAll('button[aria-hidden]')).toHaveLength(1);
+    scroller.scrollLeft = 200;
+    fireEvent.scroll(scroller);
+    expect(container.querySelectorAll('button[aria-hidden]')).toHaveLength(2);
   });
 });
 
