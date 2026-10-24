@@ -1,8 +1,7 @@
-import {Ban, Plus, ShieldCheck, UsersRound} from 'lucide-react';
+import {Plus} from 'lucide-react';
 import {ManagementPage} from '../../../components/templates/ManagementPage';
 import {ConfirmDialog} from '../../../components/organisms/ConfirmDialog';
 import {FilterSelect} from '../../../components/molecules/FilterSelect';
-import {StatCard} from '../../../components/molecules/StatCard';
 import {RolesTable} from '../components/RolesTable';
 import {RoleFormModal} from '../components/RoleFormModal';
 import {useRoles} from '../hooks/useRoles';
@@ -35,13 +34,6 @@ export function RolesPage() {
 
   return (
     <ManagementPage
-      summary={
-        <>
-          <StatCard icon={ShieldCheck} label="Cargos activos" value={list.summary.cargos} />
-          <StatCard icon={UsersRound} label="Empleados con cargo" value={list.summary.empleados} />
-          <StatCard icon={Ban} label="Cargos de baja" value={list.summary.inactivos} />
-        </>
-      }
       search={{value: list.filters.search, onChange: list.changeSearch, placeholder: 'Buscar cargo'}}
       filters={<FilterSelect label="Filtrar por estado" options={STATUS_OPTIONS} value={list.filters.estado} onChange={list.changeStatus} />}
       table={<RolesTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} />}
