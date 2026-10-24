@@ -4,7 +4,7 @@ import {renderApp} from '../../test/renderApp';
 import {mockApi} from '../../test/mockApi';
 import {createFamilyBackend} from '../../test/familyBackend';
 import {setViewport} from '../../test/viewport';
-import {filterProducts, productStatus, promotionWhen} from './utils/family';
+import {filterProducts, productStatus, promotionBand} from './utils/family';
 
 const openFamily = async (route = '/familia') => {
   const backend = createFamilyBackend();
@@ -116,14 +116,16 @@ describe('Familia: catálogo del local', () => {
     const list = await screen.findByRole('list', {name: 'Promociones'});
     const combo = within(list).getByRole('button', {name: 'Ver Combo Brava'});
     expect(within(combo).getByText('Hoy')).toBeInTheDocument();
-    expect(within(within(list).getByRole('button', {name: 'Ver Happy Hour Cervecero'})).getByText('Desde 18 oct 2026')).toBeInTheDocument();
+    expect(within(combo).getByText('Ahorra Bs 13,00')).toBeInTheDocument();
+    expect(within(within(list).getByRole('button', {name: 'Ver Happy Hour Cervecero'})).getByText('Sin cerveza artesanal')).toBeInTheDocument();
     await user.type(screen.getByRole('searchbox'), 'cerveza');
     await waitFor(() => expect(within(list).getAllByRole('button')).toHaveLength(1));
     await user.click(within(list).getByRole('button', {name: 'Ver Happy Hour Cervecero'}));
     const dialog = await screen.findByRole('dialog', {name: 'Happy Hour Cervecero'});
-    expect(within(dialog).getByText('Tiene productos agotados: hoy no se puede vender en Caja.')).toBeInTheDocument();
-    expect(within(dialog).getByText('Lun a vie')).toBeInTheDocument();
-    expect(within(dialog).getByText('Desde 18 oct 2026', {selector: 'strong'})).toBeInTheDocument();
+    expect(within(dialog).getByText('Se vende lun a vie, desde el 18 oct 2026.')).toBeInTheDocument();
+    expect(within(dialog).getByText('No se vende hoy')).toBeInTheDocument();
+    const included = within(dialog).getByRole('region', {name: 'Productos de la promoción'});
+    expect(within(included).getByRole('listitem')).toHaveTextContent('1 cerveza artesanal · agotadoBs 25,00');
   });
 
   it('se adapta al celular', async () => {
@@ -135,7 +137,8 @@ describe('Familia: catálogo del local', () => {
   it('calcula el estado de productos y promociones y filtra', () => {
     expect(productStatus({disponible: false, porciones: 10})).toEqual({key: 'agotado', tone: 'danger', label: 'Agotado'});
     expect(productStatus({disponible: true, porciones: null})).toBeNull();
-    expect(promotionWhen({vigencia: 'otro_dia', dias: '0010000'})).toEqual({tone: 'neutral', label: 'Martes'});
+    expect(promotionBand({disponible: true, vigencia: 'otro_dia', dias: '0010000'})).toEqual({key: 'otroDia', label: 'Martes', hint: 'Hoy no aplica'});
+    expect(promotionBand({disponible: false, agotados: []})).toMatchObject({key: 'noSeVende', hint: 'Tiene un producto agotado'});
     const items = [{nombre: 'Café', descripcion: null, idCategoria: 1, idSubcategoria: 2}];
     expect(filterProducts(items, {categoria: 'todas', subcategoria: 'todas', search: 'cafe'})).toHaveLength(1);
     expect(filterProducts(items, {categoria: '3', subcategoria: 'todas', search: ''})).toHaveLength(0);
