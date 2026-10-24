@@ -10,6 +10,8 @@ const styles = {
   plainLabel: 'relative font-display text-2xl leading-none tracking-wide text-mostaza',
   plainInitials: 'pointer-events-none absolute -right-2 -top-5 font-display text-[110px] leading-none text-white/[0.06]',
   muted: 'grayscale opacity-70',
+  shade: 'absolute inset-x-0 top-0 h-2/3 bg-gradient-to-b from-carbon/80 to-transparent',
+  photoLabel: 'absolute left-4 top-4 font-display text-2xl leading-none tracking-wide text-mostaza drop-shadow',
   band: 'absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 px-4 py-1.5 text-xs font-bold uppercase tracking-wider',
   bandLabel: 'flex shrink-0 items-center gap-1.5',
   bandHint: 'truncate font-semibold normal-case tracking-normal opacity-90',
@@ -25,7 +27,7 @@ const BANDS = {
 // Hasta dos iniciales del nombre para la portada sin foto
 const initials = (text) => text.split(/\s+/).filter((word) => word.length > 2).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
 
-// Portada de un producto (foto o subcategoría sobre carbón) con la banda de su estado; "hint" reemplaza el texto de ayuda
+// Portada de un producto (foto o carbón, siempre con la subcategoría arriba) con la banda de su estado; "hint" reemplaza el texto de ayuda
 export function ProductCover({product, hint, className}) {
   const status = productStatus(product);
   const muted = status?.key === 'agotado';
@@ -39,7 +41,13 @@ export function ProductCover({product, hint, className}) {
     </span>
   );
   if (product.imagenUrl) {
-    picture = <img src={resolveAssetUrl(product.imagenUrl)} alt={product.nombre} className={cn(styles.image, muted && styles.muted)} />;
+    picture = (
+      <>
+        <img src={resolveAssetUrl(product.imagenUrl)} alt={product.nombre} className={cn(styles.image, muted && styles.muted)} />
+        <span aria-hidden className={styles.shade} />
+        <span aria-hidden className={styles.photoLabel}>{product.subcategoria}</span>
+      </>
+    );
   }
 
   return (
