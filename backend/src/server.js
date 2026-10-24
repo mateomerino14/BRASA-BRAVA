@@ -4,12 +4,14 @@ import {loadConfig} from './config/env.js';
 import {createDb, createPool} from './db/pool.js';
 import {runMigrations} from './db/migrate.js';
 import {createMailer} from './services/mailer.js';
+import {cleanUnusedImages} from './services/imageCleanup.js';
 
 // Arranca la API: aplica migraciones y escucha en el puerto configurado
 export const startServer = async (overrides = {}) => {
   const config = loadConfig({...process.env, ...overrides});
   const db = createDb(createPool(config.DATABASE_URL));
   await runMigrations(db);
+  await cleanUnusedImages({db, directory: config.UPLOADS_DIR});
   const app = createApp({db, mailer: createMailer(config), config});
   const server = await new Promise((resolve) => {
     const instance = app.listen(config.PORT, '127.0.0.1', () => resolve(instance));
