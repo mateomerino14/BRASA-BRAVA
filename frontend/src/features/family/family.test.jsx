@@ -127,7 +127,7 @@ describe('Familia: catálogo del local', () => {
   });
 
   it('calcula el estado de productos y promociones y filtra', () => {
-    expect(productStatus({disponible: false, porciones: 10})).toEqual({tone: 'neutral', label: 'Agotado'});
+    expect(productStatus({disponible: false, porciones: 10})).toEqual({key: 'agotado', tone: 'danger', label: 'Agotado'});
     expect(productStatus({disponible: true, porciones: null})).toBeNull();
     expect(promotionWhen({vigencia: 'otro_dia', dias: '0010000'})).toEqual({tone: 'neutral', label: 'Martes'});
     const items = [{nombre: 'Café', descripcion: null, idCategoria: 1, idSubcategoria: 2}];
