@@ -31,8 +31,6 @@ describe('Familia: avisos de error', () => {
     const {user} = renderApp('/familia', {token: 't'});
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar el catálogo');
     expect(screen.getAllByText('No se pudo cargar el catálogo')).toHaveLength(2);
-    const summary = screen.getByRole('region', {name: 'Resumen'});
-    expect(within(summary).getByText('Productos para vender').previousSibling).toHaveTextContent('—');
     fail = false;
     await user.click(screen.getByRole('button', {name: 'Reintentar'}));
     expect(await screen.findByRole('button', {name: 'Ver Doble Brava'})).toBeInTheDocument();
@@ -59,13 +57,10 @@ describe('Familia: avisos de error', () => {
 });
 
 describe('Familia: catálogo del local', () => {
-  it('muestra el resumen y los productos con su estado de stock', async () => {
+  it('muestra los productos con su estado de stock, sin tarjetas de resumen', async () => {
     await openFamily();
     expect(screen.getByRole('heading', {name: 'Familia'})).toBeInTheDocument();
-    const summary = screen.getByRole('region', {name: 'Resumen'});
-    expect(within(summary).getByText('Productos para vender').previousSibling).toHaveTextContent('2');
-    expect(within(summary).getByText('Agotados o sin stock').previousSibling).toHaveTextContent('2');
-    expect(within(summary).getByText('Promociones de hoy').previousSibling).toHaveTextContent('1');
+    expect(screen.queryByRole('region', {name: 'Resumen'})).not.toBeInTheDocument();
     expect(within(screen.getByRole('button', {name: 'Ver Hamburguesa Clásica'})).getByText('Sin stock')).toBeInTheDocument();
     expect(within(screen.getByRole('button', {name: 'Ver Doble Brava'})).getByText('Quedan 3')).toBeInTheDocument();
     expect(within(screen.getByRole('button', {name: 'Ver Cerveza Artesanal'})).getByText('Agotado')).toBeInTheDocument();
