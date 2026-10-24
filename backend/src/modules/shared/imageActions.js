@@ -12,7 +12,14 @@ export const createImageActions = ({repository, images, getById, notFound, image
     if (saved.error) {
       return saved;
     }
-    await repository.setImage(id, saved.url);
+    try {
+      await repository.setImage(id, saved.url);
+    }
+    catch (error) {
+      // Si no se pudo asociar, la foto nueva no debe quedar suelta en la carpeta
+      await images.remove(saved.url);
+      throw error;
+    }
     await images.remove(imageOf(current));
     return getById(id);
   },
