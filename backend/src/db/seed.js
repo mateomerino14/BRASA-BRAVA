@@ -241,6 +241,9 @@ const PROMOTIONS = [
   ['Jueves de Jugos', 'combo', 26, -20, null, '0000100', false, [['Jugo de Naranja', 2]]],
 ];
 
+// Horario de las promociones demo que solo valen a ciertas horas
+const PROMOTION_HOURS = {'Happy Hour Cervecero': ['18:00', '21:00']};
+
 // Inserta las promociones demo si la tabla está vacía
 const seedPromotions = async (db, now) => {
   const {rows} = await db.query('SELECT COUNT(*)::int AS total FROM promocion');
@@ -252,10 +255,11 @@ const seedPromotions = async (db, now) => {
     if (hasta !== null) {
       fin = shiftDate(now, hasta);
     }
+    const [horaInicio, horaFin] = PROMOTION_HOURS[nombre] ?? [null, null];
     const inserted = await db.query(
-      `INSERT INTO promocion (nombre, tipo, valor, fecha_inicio, fecha_fin, dias, activa)
-       VALUES ($1, $2, $3::numeric, $4::date, $5::date, $6, $7) RETURNING id_promocion`,
-      [nombre, tipo, valor, shiftDate(now, desde), fin, dias, activa],
+      `INSERT INTO promocion (nombre, tipo, valor, fecha_inicio, fecha_fin, dias, activa, hora_inicio, hora_fin)
+       VALUES ($1, $2, $3::numeric, $4::date, $5::date, $6, $7, $8, $9) RETURNING id_promocion`,
+      [nombre, tipo, valor, shiftDate(now, desde), fin, dias, activa, horaInicio, horaFin],
     );
     for (const [product, cantidad] of items) {
       await db.query(

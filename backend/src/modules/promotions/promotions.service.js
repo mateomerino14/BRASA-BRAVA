@@ -21,6 +21,8 @@ const toPromotion = (row, products, today) => {
     valor: Number(row.valor),
     fechaInicio: toIsoDate(row.fecha_inicio),
     fechaFin: toIsoDate(row.fecha_fin),
+    horaInicio: row.hora_inicio,
+    horaFin: row.hora_fin,
     dias: row.dias,
     imagenUrl: row.imagen_url,
     activa: row.activa,

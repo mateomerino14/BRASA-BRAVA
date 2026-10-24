@@ -19,6 +19,8 @@ export const emptyPromotion = (today) => ({
   valor: '',
   fechaInicio: today,
   fechaFin: '',
+  horaInicio: '',
+  horaFin: '',
   dias: ALL_DAYS,
   productos: [],
 });
@@ -74,6 +76,15 @@ export const validatePromotion = (values, {productsById = new Map()} = {}) => {
   if (!values.dias.includes('1')) {
     errors.dias = 'Elija al menos un día de la semana';
   }
+  if (values.horaInicio && !values.horaFin) {
+    errors.horaFin = 'Ingrese también la hora de fin';
+  }
+  else if (values.horaFin && !values.horaInicio) {
+    errors.horaInicio = 'Ingrese también la hora de inicio';
+  }
+  else if (values.horaInicio && values.horaFin <= values.horaInicio) {
+    errors.horaFin = 'La hora de fin debe ser después de la de inicio';
+  }
   if (values.productos.length === 0) {
     errors.productos = 'Agregue al menos un producto';
   }
@@ -110,6 +121,8 @@ export const toFormValues = (promotion) => ({
   valor: comboPrice(promotion),
   fechaInicio: promotion.fechaInicio,
   fechaFin: promotion.fechaFin ?? '',
+  horaInicio: promotion.horaInicio ?? '',
+  horaFin: promotion.horaFin ?? '',
   dias: promotion.dias,
   productos: promotion.productos.map((item) => ({key: `producto-${item.idProducto}`, idProducto: String(item.idProducto), cantidad: item.cantidad})),
 });
@@ -122,6 +135,8 @@ export const toPayload = (values) => ({
   valor: parseNumber(values.valor),
   fechaInicio: values.fechaInicio,
   fechaFin: values.fechaFin,
+  horaInicio: values.horaInicio,
+  horaFin: values.horaFin,
   dias: values.dias,
   productos: values.productos.map((row) => ({idProducto: Number(row.idProducto), cantidad: row.cantidad})),
 });

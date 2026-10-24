@@ -154,7 +154,11 @@ const whenText = (promotion) => {
   if (promotion.fechaFin) {
     dates = `del ${formatDate(promotion.fechaInicio)} al ${formatDate(promotion.fechaFin)}`;
   }
-  return `Se vende ${daysPhrase(promotion.dias)}, ${dates}.`;
+  let hours = '';
+  if (promotion.horaInicio && promotion.horaFin) {
+    hours = ` de ${promotion.horaInicio} a ${promotion.horaFin}`;
+  }
+  return `Se vende ${daysPhrase(promotion.dias)}${hours}, ${dates}.`;
 };
 
 function PromotionDetail({promotion}) {
