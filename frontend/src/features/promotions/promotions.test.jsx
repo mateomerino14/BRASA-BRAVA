@@ -38,9 +38,10 @@ describe('Gestión de promociones', () => {
     expect(within(martes).getByText('Desde 10 sept 2026')).toBeInTheDocument();
   });
 
-  it('las tarjetas filtran por vigencia', async () => {
+  it('filtra por vigencia, sin tarjetas de resumen arriba', async () => {
     const {backend, user} = await openPage();
-    await user.click(screen.getByRole('button', {name: /1\s*Vigentes hoy/}));
+    expect(screen.queryByRole('region', {name: 'Resumen'})).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText('Filtrar por vigencia'), 'vigentes');
     await waitFor(() => expect(backend.calls.list.at(-1)).toMatchObject({vigencia: 'vigentes'}));
   });
 
@@ -62,14 +63,18 @@ describe('Gestión de promociones', () => {
     await user.clear(price);
     await user.type(price, '110');
     expect(within(dialog).getByText('Ahorra Bs 16,00')).toBeInTheDocument();
-    await user.type(within(dialog).getByLabelText(/^Hora de inicio/), '18:00');
+    await user.selectOptions(within(dialog).getByRole('combobox', {name: 'Hora de inicio: hora'}), '6');
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(await within(dialog).findByText('Ingrese también la hora de fin')).toBeInTheDocument();
-    await user.type(within(dialog).getByLabelText(/^Hora de fin/), '21:00');
+    const end = within(dialog).getByRole('group', {name: 'Hora de fin'});
+    await user.selectOptions(within(end).getByRole('combobox', {name: 'Hora de fin: hora'}), '9');
+    await user.selectOptions(within(end).getByRole('combobox', {name: 'Hora de fin: minutos'}), '30');
+    await user.click(within(end).getByRole('button', {name: 'AM'}));
+    await user.click(within(end).getByRole('button', {name: 'PM'}));
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(await screen.findByText('Se registró la promoción Combo Familiar')).toBeInTheDocument();
     expect(backend.calls.saved.at(-1)).toEqual({
-      nombre: 'Combo Familiar', descripcion: '', tipo: 'combo', valor: 110, fechaInicio: '2026-10-10', fechaFin: '', horaInicio: '18:00', horaFin: '21:00', dias: '1111111',
+      nombre: 'Combo Familiar', descripcion: '', tipo: 'combo', valor: 110, fechaInicio: '2026-10-10', fechaFin: '', horaInicio: '18:00', horaFin: '21:30', dias: '1111111',
       productos: [{idProducto: 1, cantidad: 2}, {idProducto: 3, cantidad: 1}],
     });
   });
