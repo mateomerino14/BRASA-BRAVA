@@ -15,15 +15,31 @@ export const productStatus = (product) => {
   return null;
 };
 
-// Cuándo aplica una promoción: hoy, en sus días o desde su fecha de inicio
-export const promotionWhen = (promotion) => {
+// Banda de estado de una promoción: no se vende (por un producto agotado), hoy, programada u otro día
+export const promotionBand = (promotion) => {
+  if (!promotion.disponible) {
+    let hint = 'Tiene un producto agotado';
+    if (promotion.agotados?.length > 0) {
+      hint = `Sin ${promotion.agotados.join(', ')}`;
+    }
+    return {key: 'noSeVende', label: 'No se vende hoy', hint};
+  }
   if (promotion.vigencia === 'vigente') {
-    return {tone: 'success', label: 'Hoy'};
+    return {key: 'hoy', label: 'Hoy', hint: formatDays(promotion.dias)};
   }
   if (promotion.vigencia === 'programada') {
-    return {tone: 'warning', label: `Desde ${formatDate(promotion.fechaInicio)}`};
+    return {key: 'programada', label: `Desde el ${formatDate(promotion.fechaInicio)}`, hint: formatDays(promotion.dias)};
   }
-  return {tone: 'neutral', label: formatDays(promotion.dias)};
+  return {key: 'otroDia', label: formatDays(promotion.dias), hint: 'Hoy no aplica'};
+};
+
+// Marca en cada promoción los productos agotados que trae, en minúsculas para la frase de la banda
+export const withSoldOut = (promotions, products) => {
+  const soldOut = new Set(products.filter((product) => !product.disponible).map((product) => product.id));
+  return promotions.map((promotion) => ({
+    ...promotion,
+    agotados: promotion.productos.filter((item) => soldOut.has(item.id)).map((item) => item.nombre.toLowerCase()),
+  }));
 };
 
 // Filtra los productos por categoría, subcategoría y texto (sin tildes)
