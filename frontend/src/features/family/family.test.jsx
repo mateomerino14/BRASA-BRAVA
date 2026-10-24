@@ -93,14 +93,20 @@ describe('Familia: catálogo del local', () => {
     const dialog = await screen.findByRole('dialog', {name: 'Hamburguesa Clásica'});
     expect(await within(dialog).findByRole('region', {name: 'Receta'})).toBeInTheDocument();
     expect(backend.calls).toEqual([1]);
-    expect(within(dialog).getByText('No alcanza para ninguna porción con el stock actual. Se puede vender igual, pero avise a cocina.')).toBeInTheDocument();
-    const rows = within(dialog).getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('Carne de resSuficiente0,15 kg12 kg80');
-    expect(rows[2]).toHaveTextContent('LechugaSin stock1 unidad0 unidades0');
+    expect(within(dialog).getByText('Hoy no alcanza para ninguna porción: falta lechuga. Se puede vender igual, pero avise a cocina.')).toBeInTheDocument();
+    expect(within(dialog).getByText('Falta lechuga')).toBeInTheDocument();
+    const rows = within(within(dialog).getByRole('region', {name: 'Receta'})).getAllByRole('listitem');
+    expect(rows[0]).toHaveTextContent('1 unidad de lechugano hay');
+    expect(rows[1]).toHaveTextContent('0,15 kg de carne de respara 80');
     await user.keyboard('{Escape}');
     await user.click(screen.getByRole('button', {name: 'Ver Gaseosa 500 ml'}));
     const gaseosa = await screen.findByRole('dialog', {name: 'Gaseosa 500 ml'});
-    expect(within(gaseosa).getByText('Sin receta cargada: no se puede calcular cuántas porciones alcanzan.')).toBeInTheDocument();
+    expect(within(gaseosa).getByText('Todavía no tiene receta cargada, así que no se calcula cuánto alcanza.')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('button', {name: 'Ver Cerveza Artesanal'}));
+    const cerveza = await screen.findByRole('dialog', {name: 'Cerveza Artesanal'});
+    expect(within(cerveza).getByText('Está marcado como agotado: hoy no se vende en Caja.')).toBeInTheDocument();
+    expect(within(cerveza).getByText('No se vende hoy')).toBeInTheDocument();
   });
 
   it('muestra las promociones con cuándo aplican, su precio y sus productos', async () => {
