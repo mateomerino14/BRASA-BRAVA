@@ -132,7 +132,7 @@ describe('ChipTabs', () => {
 
 describe('formato de hora y búsqueda', () => {
   it('muestra la hora en 24 horas y compara textos sin tildes', () => {
-    expect(formatTime(new Date(2026, 9, 13, 20, 5))).toBe('20:05');
+    expect(formatTime(new Date(2026, 9, 13, 20, 5))).toBe('8:05 PM');
     expect(normalizeText('Clásica ÑANDÚ')).toBe('clasica nandu');
   });
 });

@@ -182,7 +182,7 @@ describe('Caja: armado del pedido', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(toggle).toHaveTextContent('1 envío · 2 u.');
     await user.click(toggle);
-    expect(within(panel()).getByText(/^Envío 1 · \d{2}:\d{2} · Carlos Mendoza$/)).toBeInTheDocument();
+    expect(within(panel()).getByText(/^Envío 1 · \d{1,2}:\d{2} (AM|PM) · Carlos Mendoza$/)).toBeInTheDocument();
     expect(within(panel()).getByText('Sin tomate')).toBeInTheDocument();
     expect(within(panel()).getByText('Listo')).toBeInTheDocument();
     expect(within(panel()).getByText('0/1 listos')).toBeInTheDocument();

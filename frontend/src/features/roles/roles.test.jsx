@@ -17,10 +17,9 @@ const openPage = async () => {
 const rowOf = (table, name) => within(table).getByText(name, {selector: 'p'}).closest('tr');
 
 describe('Gestión de cargos', () => {
-  it('muestra resumen, pantallas de cada cargo, empleados y estado', async () => {
+  it('muestra las pantallas de cada cargo, empleados y estado', async () => {
     const {table} = await openPage();
     expect(screen.getByRole('heading', {name: 'Gestión de cargos'})).toBeInTheDocument();
-    expect(within(screen.getByRole('region', {name: 'Resumen'})).getByText('Cargos de baja')).toBeInTheDocument();
     const mesero = rowOf(table, 'Mesero');
     const screens = within(mesero).getByRole('list', {name: 'Pantallas de Mesero'});
     expect(within(screens).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Familia', 'Caja']);

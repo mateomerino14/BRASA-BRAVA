@@ -17,14 +17,13 @@ const styles = {
   shade: 'absolute inset-0 bg-gradient-to-t from-carbon/80 via-carbon/10 to-transparent',
   clock: 'absolute bottom-3 right-5 text-right',
   time: 'font-display text-5xl leading-none tracking-wide text-brasa tabular-nums drop-shadow sm:text-6xl',
+  period: 'ml-1.5 text-2xl sm:text-3xl',
   caption: 'text-xs text-arena',
 };
 
 const TICK_MS = 1000;
 const hidden = {opacity: 0, y: 16};
 const visible = {opacity: 1, y: 0};
-
-const hoursAndMinutes = (time) => time.slice(0, 5);
 
 function LocalView() {
   const reduce = useReducedMotionConfig();
@@ -50,7 +49,7 @@ export function WelcomeCard({name, clockDate}) {
     return () => clearInterval(timer);
   }, [clockDate]);
 
-  const {date, time} = formatDateTime(now);
+  const {date, clock, period} = formatDateTime(now);
 
   return (
     <motion.section initial={hidden} animate={visible} className={styles.board}>
@@ -63,7 +62,7 @@ export function WelcomeCard({name, clockDate}) {
         <LocalView />
         <span aria-hidden className={styles.shade} />
         <div className={styles.clock}>
-          <time dateTime={now.toISOString()} className={styles.time}>{hoursAndMinutes(time)}</time>
+          <time dateTime={now.toISOString()} className={styles.time}>{clock}<span className={styles.period}>{period}</span></time>
           <p className={styles.caption}>Hora del local</p>
         </div>
       </div>

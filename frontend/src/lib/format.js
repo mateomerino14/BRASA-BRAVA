@@ -14,20 +14,32 @@ const dateFormatter = new Intl.DateTimeFormat('es-BO', {
   month: 'long',
   year: 'numeric',
 });
-const timeFormatter = new Intl.DateTimeFormat('es-BO', {
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-  hour12: false,
-});
+const pad = (value) => String(value).padStart(2, '0');
+const NOON = 12;
+
+// Hora de 24 horas en formato de 12 con AM/PM: (18, 5) → {clock: '6:05', period: 'PM'}
+export const toTwelveHour = (hours, minutes) => {
+  let period = 'AM';
+  if (hours >= NOON) {
+    period = 'PM';
+  }
+  const hour = hours % NOON || NOON;
+  return {clock: `${hour}:${pad(minutes)}`, period};
+};
 
 const titleCase = (text) =>
   text.replace(/\b(\p{L})(\p{L}{3,})/gu, (_, first, rest) => first.toUpperCase() + rest);
 
-export const formatDateTime = (date) => ({
-  date: titleCase(dateFormatter.format(date)),
-  time: timeFormatter.format(date),
-});
+// Fecha larga y hora con segundos del reloj: "Viernes, 9 De Octubre De 2026" y "1:05:07 PM"
+export const formatDateTime = (date) => {
+  const {clock, period} = toTwelveHour(date.getHours(), date.getMinutes());
+  return {
+    date: titleCase(dateFormatter.format(date)),
+    time: `${clock}:${pad(date.getSeconds())} ${period}`,
+    clock,
+    period,
+  };
+};
 
 // Texto del pie de tabla: "Mostrando 1–5 de 12 empleados"
 export const rangeText = ({page, pageSize, count, total, itemLabel}) => {
@@ -99,10 +111,22 @@ export const formatDays = (days) => {
   return selected.map((index) => DAY_SHORT[index]).join(', ');
 };
 
-const clockFormatter = new Intl.DateTimeFormat('es-BO', {hour: '2-digit', minute: '2-digit', hour12: false});
+// Hora del día de una fecha, igual en toda la app: "8:15 PM"
+export const formatTime = (date) => {
+  const value = new Date(date);
+  const {clock, period} = toTwelveHour(value.getHours(), value.getMinutes());
+  return `${clock} ${period}`;
+};
 
-// Hora del día de una fecha: "20:15"
-export const formatTime = (date) => clockFormatter.format(new Date(date));
+// Hora guardada como "18:00" mostrada como "6:00 PM" (vacío si no hay)
+export const formatClock = (text) => {
+  if (!text) {
+    return '';
+  }
+  const [hours, minutes] = text.split(':').map(Number);
+  const {clock, period} = toTwelveHour(hours, minutes);
+  return `${clock} ${period}`;
+};
 
 // Texto sin tildes y en minúsculas, para buscar "cafe" y encontrar "Café"
 export const normalizeText = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
@@ -124,10 +148,10 @@ export const parseDecimal = (text) => {
   return Number(clean);
 };
 
-// Horario de una promoción: "18:00 a 20:00" (vacío si vale todo el día)
+// Horario de una promoción: "6:00 PM a 8:00 PM" (vacío si vale todo el día)
 export const formatHours = (start, end) => {
   if (!start || !end) {
     return '';
   }
-  return `${start} a ${end}`;
+  return `${formatClock(start)} a ${formatClock(end)}`;
 };
