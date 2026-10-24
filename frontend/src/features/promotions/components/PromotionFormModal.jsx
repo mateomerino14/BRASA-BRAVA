@@ -4,6 +4,7 @@ import {Modal} from '../../../components/organisms/Modal';
 import {Button} from '../../../components/atoms/Button';
 import {Input} from '../../../components/atoms/Input';
 import {TimeInput} from '../../../components/atoms/TimeInput';
+import {DateInput} from '../../../components/molecules/DateInput';
 import {MoneyInput} from '../../../components/atoms/MoneyInput';
 import {Select} from '../../../components/atoms/Select';
 import {Textarea} from '../../../components/atoms/Textarea';
@@ -131,10 +132,10 @@ export function PromotionFormModal({form}) {
 
         <div className={styles.pair}>
           <FormField label="Desde" required error={form.errors.fechaInicio}>
-            {(control) => <Input {...control} type="date" value={form.values.fechaInicio} onChange={(event) => form.setField('fechaInicio', event.target.value)} />}
+            {(control) => <DateInput {...control} label="Fecha de inicio" value={form.values.fechaInicio} onChange={(value) => form.setField('fechaInicio', value)} />}
           </FormField>
           <FormField label="Hasta" error={form.errors.fechaFin} hint="Déjela vacía si no tiene fecha de fin.">
-            {(control) => <Input {...control} type="date" min={form.values.fechaInicio} value={form.values.fechaFin} onChange={(event) => form.setField('fechaFin', event.target.value)} />}
+            {(control) => <DateInput {...control} label="Fecha de fin" clearable min={form.values.fechaInicio} value={form.values.fechaFin} onChange={(value) => form.setField('fechaFin', value)} />}
           </FormField>
         </div>
 
