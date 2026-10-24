@@ -3,6 +3,7 @@ import {useSearchParams} from 'react-router';
 import {familyApi} from '../services/familyApi';
 import {ALL, PRODUCTS_VIEW, PROMOTIONS_VIEW} from '../constants/family';
 import {filterProducts, filterPromotions} from '../utils/family';
+import {useToast} from '../../../context/useToast';
 
 const emptyCatalog = {hoy: '', categorias: [], productos: [], promociones: []};
 
@@ -11,8 +12,10 @@ export function useFamily({api = familyApi} = {}) {
   const [params, setParams] = useSearchParams();
   const [catalog, setCatalog] = useState(emptyCatalog);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [detail, setDetail] = useState({open: false, kind: null, item: null, loading: false, error: ''});
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const [detail, setDetail] = useState({open: false, kind: null, item: null, loading: false, failed: false});
+  const toast = useToast();
 
   useEffect(() => {
     let cancelled = false;
@@ -21,11 +24,13 @@ export function useFamily({api = familyApi} = {}) {
         const data = await api.catalog();
         if (!cancelled) {
           setCatalog(data);
+          setFailed(false);
         }
       }
       catch (problem) {
         if (!cancelled) {
-          setError(problem.message);
+          setFailed(true);
+          toast.error(problem.message, 'No se pudo cargar el catálogo');
         }
       }
       finally {
@@ -38,7 +43,7 @@ export function useFamily({api = familyApi} = {}) {
     return () => {
       cancelled = true;
     };
-  }, [api]);
+  }, [api, toast, attempt]);
 
   let view = PRODUCTS_VIEW;
   if (params.get('ver') === PROMOTIONS_VIEW) {
@@ -64,19 +69,27 @@ export function useFamily({api = familyApi} = {}) {
   const category = catalog.categorias.find((item) => String(item.id) === filters.categoria);
 
   const openProduct = async (product) => {
-    setDetail({open: true, kind: 'producto', item: product, loading: true, error: ''});
+    setDetail({open: true, kind: 'producto', item: product, loading: true, failed: false});
     try {
       const result = await api.product(product.id);
       setDetail((current) => ({...current, item: result.producto, loading: false}));
     }
     catch (problem) {
-      setDetail((current) => ({...current, loading: false, error: problem.message}));
+      setDetail((current) => ({...current, loading: false, failed: true}));
+      toast.error(problem.message, 'No se pudo cargar la receta');
     }
+  };
+
+  // Vuelve a pedir el catálogo después de un error
+  const reload = () => {
+    setLoading(true);
+    setAttempt((current) => current + 1);
   };
 
   return {
     loading,
-    error,
+    failed,
+    reload,
     hoy: catalog.hoy,
     view,
     changeView: (value) => update({ver: value}),
@@ -92,7 +105,8 @@ export function useFamily({api = familyApi} = {}) {
     promotions: filterPromotions(catalog.promociones, filters.search),
     detail,
     openProduct,
-    openPromotion: (promotion) => setDetail({open: true, kind: 'promocion', item: promotion, loading: false, error: ''}),
+    retryProduct: () => openProduct(detail.item),
+    openPromotion: (promotion) => setDetail({open: true, kind: 'promocion', item: promotion, loading: false, failed: false}),
     closeDetail: () => setDetail((current) => ({...current, open: false})),
   };
 }

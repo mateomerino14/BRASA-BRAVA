@@ -1,6 +1,7 @@
-import {CircleAlert} from 'lucide-react';
+import {CircleAlert, RotateCw} from 'lucide-react';
 import {Modal} from '../../../components/organisms/Modal';
 import {Alert} from '../../../components/molecules/Alert';
+import {Button} from '../../../components/atoms/Button';
 import {PriceTag} from '../../../components/molecules/PriceTag';
 import {Amount} from '../../../components/atoms/Amount';
 import {Badge} from '../../../components/atoms/Badge';
@@ -27,6 +28,7 @@ const styles = {
   rows: 'flex flex-col divide-y divide-arena/40 rounded-card border border-arena/50 bg-white',
   row: 'flex items-center justify-between gap-3 px-3 py-2.5 text-sm',
   loading: 'flex justify-center py-8',
+  failed: 'flex flex-wrap items-center justify-between gap-3 rounded-card border border-dashed border-arena bg-white px-4 py-3 text-sm text-cafe',
 };
 
 const portionsMessage = (product) => {
@@ -42,7 +44,7 @@ const portionsMessage = (product) => {
   return {tone: 'ok', text: `Alcanza para ${countText(product.porciones, 'porción', 'porciones')}.`};
 };
 
-function ProductDetail({product, loading}) {
+function ProductDetail({product, loading, failed, onRetry}) {
   const status = productStatus(product);
   const portions = portionsMessage(product);
   return (
@@ -61,6 +63,14 @@ function ProductDetail({product, loading}) {
         {portions.text}
       </p>
       {loading && <div className={styles.loading}><Spinner size={24} label="Cargando receta" /></div>}
+      {failed && (
+        <div className={styles.failed}>
+          <span>No se pudo cargar la receta</span>
+          <Button size="sm" variant="outline" icon={<RotateCw size={16} aria-hidden />} onClick={onRetry}>
+            Reintentar
+          </Button>
+        </div>
+      )}
       {product.receta?.length > 0 && (
         <section aria-label="Receta">
           <table className={styles.table}>
@@ -128,12 +138,11 @@ function PromotionDetail({promotion}) {
   );
 }
 
-export function DetailModal({detail, onClose}) {
+export function DetailModal({detail, onClose, onRetry}) {
   const {item} = detail;
   return (
     <Modal open={detail.open} onClose={onClose} title={item?.nombre ?? ''} size="md">
-      {detail.error && <Alert tone="error">{detail.error}</Alert>}
-      {item && detail.kind === 'producto' && <ProductDetail product={item} loading={detail.loading} />}
+      {item && detail.kind === 'producto' && <ProductDetail product={item} loading={detail.loading} failed={detail.failed} onRetry={onRetry} />}
       {item && detail.kind === 'promocion' && <PromotionDetail promotion={item} />}
     </Modal>
   );
