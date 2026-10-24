@@ -48,7 +48,7 @@ export const createCatalogRepository = (db) => ({
   // Promociones activas (la vigencia se calcula en el servicio)
   promotions: async () => {
     const {rows} = await db.query(
-      `SELECT id_promocion, nombre, descripcion, tipo, valor, fecha_inicio, fecha_fin, dias, imagen_url, activa
+      `SELECT id_promocion, nombre, descripcion, tipo, valor, fecha_inicio, fecha_fin, hora_inicio, hora_fin, dias, imagen_url, activa
          FROM promocion WHERE activa = TRUE ORDER BY nombre`,
     );
     return rows;

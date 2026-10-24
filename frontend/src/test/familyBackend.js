@@ -23,7 +23,7 @@ export const FAMILY_CATALOG = {
     },
     {
       id: 3, nombre: 'Happy Hour Cervecero', descripcion: null, tipo: 'descuento', valor: 15, imagenUrl: null, dias: '0111110', fechaInicio: '2026-10-18', fechaFin: null,
-      vigencia: 'programada', disponible: false, precio: 21.25, precioRegular: 25, ahorro: 3.75,
+      vigencia: 'programada', horaInicio: '18:00', horaFin: '21:00', disponible: false, precio: 21.25, precioRegular: 25, ahorro: 3.75,
       productos: [{id: 4, nombre: 'Cerveza Artesanal', cantidad: 1, precio: 25}],
     },
   ],

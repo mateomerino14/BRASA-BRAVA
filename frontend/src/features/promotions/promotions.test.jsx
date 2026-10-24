@@ -26,7 +26,7 @@ describe('Gestión de promociones', () => {
     const {table} = await openPage();
     expect(screen.getByRole('heading', {name: 'Gestión de promociones'})).toBeInTheDocument();
     const combo = rowOf(table, 'Combo Brava');
-    expect(within(combo).getByText('Vigente hoy')).toBeInTheDocument();
+    expect(within(combo).getByText('Vigente ahora')).toBeInTheDocument();
     expect(within(combo).getByText('3 oct 2026 – 9 nov 2026')).toBeInTheDocument();
     expect(within(combo).getByText('Todos los días')).toBeInTheDocument();
     expect(within(combo).getByLabelText('Precio regular Bs 83,00')).toBeInTheDocument();
@@ -62,10 +62,14 @@ describe('Gestión de promociones', () => {
     await user.clear(price);
     await user.type(price, '110');
     expect(within(dialog).getByText('Ahorra Bs 16,00')).toBeInTheDocument();
+    await user.type(within(dialog).getByLabelText(/^Hora de inicio/), '18:00');
+    await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
+    expect(await within(dialog).findByText('Ingrese también la hora de fin')).toBeInTheDocument();
+    await user.type(within(dialog).getByLabelText(/^Hora de fin/), '21:00');
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(await screen.findByText('Se registró la promoción Combo Familiar')).toBeInTheDocument();
     expect(backend.calls.saved.at(-1)).toEqual({
-      nombre: 'Combo Familiar', descripcion: '', tipo: 'combo', valor: 110, fechaInicio: '2026-10-10', fechaFin: '', dias: '1111111',
+      nombre: 'Combo Familiar', descripcion: '', tipo: 'combo', valor: 110, fechaInicio: '2026-10-10', fechaFin: '', horaInicio: '18:00', horaFin: '21:00', dias: '1111111',
       productos: [{idProducto: 1, cantidad: 2}, {idProducto: 3, cantidad: 1}],
     });
   });
@@ -117,6 +121,8 @@ describe('Gestión de promociones', () => {
     expect(previewPricing({...values, productos: []}, byId)).toBeNull();
     const errors = validatePromotion({nombre: 'X', tipo: 'combo', valor: '', fechaInicio: '2026-10-10', fechaFin: '2026-10-01', dias: '1111111', productos: [{key: 'a', idProducto: '1', cantidad: 1}]}, {productsById: byId});
     expect(errors).toMatchObject({nombre: expect.any(String), valor: 'Ingrese el precio del combo', fechaFin: 'La fecha de fin no puede ser anterior al inicio', productos: 'Un combo necesita al menos 2 productos'});
+    expect(validatePromotion({nombre: 'Combo', valor: '60', fechaInicio: '2026-10-10', fechaFin: '', horaInicio: '20:00', horaFin: '18:00', dias: '1111111', productos: values.productos.map((row, index) => ({...row, key: String(index)}))}, {productsById: byId}).horaFin)
+      .toBe('La hora de fin debe ser después de la de inicio');
     expect(toPayload({...values, nombre: ' A ', descripcion: '', fechaInicio: '2026-10-10', fechaFin: '', dias: '1111111', productos: [{idProducto: '1', cantidad: 3}]})).toMatchObject({tipo: 'combo', valor: 65.5, productos: [{idProducto: 1, cantidad: 3}]});
   });
 });

@@ -14,7 +14,9 @@ export const VIGENCIA_OPTIONS = [
 ];
 
 export const VIGENCIA_META = {
-  vigente: {label: 'Vigente hoy', tone: 'success'},
+  vigente: {label: 'Vigente ahora', tone: 'success'},
+  mas_tarde: {label: 'Más tarde hoy', tone: 'warning'},
+  termino_hoy: {label: 'Terminó por hoy', tone: 'neutral'},
   otro_dia: {label: 'Hoy no aplica', tone: 'neutral'},
   programada: {label: 'Programada', tone: 'brand'},
   vencida: {label: 'Vencida', tone: 'warning'},

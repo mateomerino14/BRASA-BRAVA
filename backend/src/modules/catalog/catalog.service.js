@@ -8,8 +8,8 @@ const QUANTITY_DECIMALS = 3;
 // Redondea una cantidad a 3 decimales
 const round3 = (value) => Number(Number(value).toFixed(QUANTITY_DECIMALS));
 
-// Orden de las promociones: de hoy, de otros días y programadas
-const VIGENCIA_ORDER = {vigente: 0, otro_dia: 1, programada: 2};
+// Orden de las promociones: de ahora, más tarde hoy, ya terminadas por hoy, de otros días y programadas
+const VIGENCIA_ORDER = {vigente: 0, mas_tarde: 1, termino_hoy: 2, otro_dia: 3, programada: 4};
 
 // Convierte una fila de producto al formato del catálogo
 const toProduct = (row) => ({
@@ -66,6 +66,8 @@ export const createCatalogService = ({repository, clock, timeZone}) => {
             dias: row.dias,
             fechaInicio: toIsoDate(row.fecha_inicio),
             fechaFin: toIsoDate(row.fecha_fin),
+            horaInicio: row.hora_inicio,
+            horaFin: row.hora_fin,
             vigencia,
             disponible: included.every((item) => item.vendible),
             precio: prices.precioPromocion,
