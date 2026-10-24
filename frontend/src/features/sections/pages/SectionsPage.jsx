@@ -1,8 +1,7 @@
-import {Armchair, LayoutGrid, Plus, Users} from 'lucide-react';
+import {Plus} from 'lucide-react';
 import {ManagementPage} from '../../../components/templates/ManagementPage';
 import {ConfirmDialog} from '../../../components/organisms/ConfirmDialog';
 import {FilterSelect} from '../../../components/molecules/FilterSelect';
-import {StatCard} from '../../../components/molecules/StatCard';
 import {SectionsTable} from '../components/SectionsTable';
 import {SectionFormModal} from '../components/SectionFormModal';
 import {useSections} from '../hooks/useSections';
@@ -35,13 +34,6 @@ export function SectionsPage() {
 
   return (
     <ManagementPage
-      summary={
-        <>
-          <StatCard icon={LayoutGrid} label="Secciones activas" value={list.summary.secciones} />
-          <StatCard icon={Armchair} label="Mesas disponibles" value={list.summary.mesas} />
-          <StatCard icon={Users} label="Personas sentadas" value={list.summary.capacidad} />
-        </>
-      }
       search={{value: list.filters.search, onChange: list.changeSearch, placeholder: 'Buscar sección o mesa'}}
       filters={<FilterSelect label="Filtrar por estado" options={STATUS_OPTIONS} value={list.filters.estado} onChange={list.changeStatus} />}
       table={<SectionsTable list={list} onEdit={form.openEdit} onToggleStatus={status.ask} />}

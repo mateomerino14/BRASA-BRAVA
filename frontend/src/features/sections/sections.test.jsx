@@ -20,11 +20,10 @@ const openPage = async () => {
 const rowOf = (table, name) => within(table).getByText(name, {selector: 'p'}).closest('tr');
 
 describe('Gestión de secciones y mesas', () => {
-  it('muestra resumen, mesas agrupadas por tamaño, totales y estado', async () => {
+  it('muestra mesas agrupadas por tamaño, totales y estado', async () => {
     const {table} = await openPage();
     expect(screen.getByRole('heading', {name: 'Gestión de secciones y mesas'})).toBeInTheDocument();
-    const summary = screen.getByRole('region', {name: 'Resumen'});
-    expect(within(summary).getByText('Mesas disponibles')).toBeInTheDocument();
+    expect(screen.queryByRole('region', {name: 'Resumen'})).not.toBeInTheDocument();
     const salon = rowOf(table, 'Salón principal');
     expect(within(salon).getByLabelText('6 mesas')).toBeInTheDocument();
     expect(within(salon).getByLabelText('24 personas')).toBeInTheDocument();

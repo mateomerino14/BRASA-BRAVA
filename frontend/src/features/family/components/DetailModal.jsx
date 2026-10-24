@@ -4,7 +4,7 @@ import {Button} from '../../../components/atoms/Button';
 import {Amount} from '../../../components/atoms/Amount';
 import {Spinner} from '../../../components/atoms/Spinner';
 import {cn} from '../../../lib/cn';
-import {countText, formatAmount, formatDate, formatQuantity} from '../../../lib/format';
+import {countText, formatAmount, formatDate, formatHours, formatQuantity} from '../../../lib/format';
 import {LOW_PORTIONS} from '../constants/family';
 import {ProductCover} from './ProductCover';
 import {PromotionCover} from './PromotionCover';
@@ -156,7 +156,7 @@ const whenText = (promotion) => {
   }
   let hours = '';
   if (promotion.horaInicio && promotion.horaFin) {
-    hours = ` de ${promotion.horaInicio} a ${promotion.horaFin}`;
+    hours = ` de ${formatHours(promotion.horaInicio, promotion.horaFin)}`;
   }
   return `Se vende ${daysPhrase(promotion.dias)}${hours}, ${dates}.`;
 };

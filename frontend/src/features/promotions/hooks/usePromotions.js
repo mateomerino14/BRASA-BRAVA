@@ -3,7 +3,6 @@ import {promotionsApi} from '../services/promotionsApi';
 import {usePaginatedList} from '../../../hooks/usePaginatedList';
 
 const filterDefaults = {estado: 'todos', vigencia: 'todos'};
-const emptySummary = {vigentes: null, programadas: null, vencidas: null};
 
 export function usePromotions({api = promotionsApi} = {}) {
   const list = usePaginatedList({fetchPage: api.list, filterDefaults});
@@ -34,7 +33,6 @@ export function usePromotions({api = promotionsApi} = {}) {
     ...list,
     promotions: list.items,
     products,
-    summary: list.response.summary ?? emptySummary,
     // Fecha de hoy según el servidor (zona horaria del local)
     today: list.response.hoy,
     changeStatus: (value) => list.changeFilter('estado', value),

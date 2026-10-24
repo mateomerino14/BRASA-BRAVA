@@ -3,6 +3,7 @@ import {Plus, Tag, Trash2} from 'lucide-react';
 import {Modal} from '../../../components/organisms/Modal';
 import {Button} from '../../../components/atoms/Button';
 import {Input} from '../../../components/atoms/Input';
+import {TimeInput} from '../../../components/atoms/TimeInput';
 import {MoneyInput} from '../../../components/atoms/MoneyInput';
 import {Select} from '../../../components/atoms/Select';
 import {Textarea} from '../../../components/atoms/Textarea';
@@ -147,10 +148,10 @@ export function PromotionFormModal({form}) {
           <p className={styles.sectionTitle}>Horario</p>
           <div className={styles.pair}>
             <FormField label="Hora de inicio" error={form.errors.horaInicio} hint="Déjelo vacío si vale todo el día.">
-              {(control) => <Input {...control} type="time" value={form.values.horaInicio} onChange={(event) => form.setField('horaInicio', event.target.value)} />}
+              {(control) => <TimeInput {...control} label="Hora de inicio" value={form.values.horaInicio} onChange={(value) => form.setField('horaInicio', value)} />}
             </FormField>
             <FormField label="Hora de fin" error={form.errors.horaFin}>
-              {(control) => <Input {...control} type="time" value={form.values.horaFin} onChange={(event) => form.setField('horaFin', event.target.value)} />}
+              {(control) => <TimeInput {...control} label="Hora de fin" value={form.values.horaFin} onChange={(value) => form.setField('horaFin', value)} />}
             </FormField>
           </div>
         </div>
