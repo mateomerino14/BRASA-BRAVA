@@ -4,7 +4,7 @@ import {Button} from '../../../components/atoms/Button';
 import {Amount} from '../../../components/atoms/Amount';
 import {Spinner} from '../../../components/atoms/Spinner';
 import {cn} from '../../../lib/cn';
-import {countText, formatAmount, formatDate, formatDays, formatQuantity} from '../../../lib/format';
+import {countText, formatAmount, formatDate, formatQuantity} from '../../../lib/format';
 import {LOW_PORTIONS} from '../constants/family';
 import {ProductCover} from './ProductCover';
 import {PromotionCover} from './PromotionCover';
@@ -125,14 +125,36 @@ function ProductDetail({product, loading, failed, onRetry}) {
   );
 }
 
-// Cuándo se vende, dicho en una frase: "Se vende lun a vie, del 3 oct al 9 nov."
+const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+const PLURAL_DAY = {sábado: 'sábados', domingo: 'domingos'};
+
+// Los días en una frase: "todos los días", "de lunes a viernes", "los martes", "los martes y jueves"
+const daysPhrase = (days) => {
+  const selected = WEEK_ORDER.filter((index) => days[index] === '1').map((index) => DAY_NAMES[index]);
+  if (selected.length === WEEK_ORDER.length) {
+    return 'todos los días';
+  }
+  if (days === '0111110') {
+    return 'de lunes a viernes';
+  }
+  if (days === '1000001') {
+    return 'los fines de semana';
+  }
+  const names = selected.map((name) => PLURAL_DAY[name] ?? name);
+  if (names.length === 1) {
+    return `los ${names[0]}`;
+  }
+  return `los ${names.slice(0, -1).join(', ')} y ${names.at(-1)}`;
+};
+
+// Cuándo se vende, dicho en una frase: "Se vende de lunes a viernes, del 3 oct al 9 nov."
 const whenText = (promotion) => {
-  const when = `Se vende ${formatDays(promotion.dias).toLowerCase()}`;
   let dates = `desde el ${formatDate(promotion.fechaInicio)}`;
   if (promotion.fechaFin) {
     dates = `del ${formatDate(promotion.fechaInicio)} al ${formatDate(promotion.fechaFin)}`;
   }
-  return `${when}, ${dates}.`;
+  return `Se vende ${daysPhrase(promotion.dias)}, ${dates}.`;
 };
 
 function PromotionDetail({promotion}) {
