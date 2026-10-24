@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router';
 import {familyApi} from '../services/familyApi';
 import {ALL, PRODUCTS_VIEW, PROMOTIONS_VIEW} from '../constants/family';
-import {filterProducts, filterPromotions} from '../utils/family';
+import {filterProducts, filterPromotions, withSoldOut} from '../utils/family';
 import {useToast} from '../../../context/useToast';
 
 const emptyCatalog = {hoy: '', categorias: [], productos: [], promociones: []};
@@ -102,7 +102,7 @@ export function useFamily({api = familyApi} = {}) {
     allProducts: catalog.productos,
     allPromotions: catalog.promociones,
     products: filterProducts(catalog.productos, filters),
-    promotions: filterPromotions(catalog.promociones, filters.search),
+    promotions: filterPromotions(withSoldOut(catalog.promociones, catalog.productos), filters.search),
     detail,
     openProduct,
     retryProduct: () => openProduct(detail.item),

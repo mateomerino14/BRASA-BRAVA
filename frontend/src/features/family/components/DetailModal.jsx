@@ -1,17 +1,13 @@
 import {RotateCw} from 'lucide-react';
 import {Modal} from '../../../components/organisms/Modal';
-import {Alert} from '../../../components/molecules/Alert';
 import {Button} from '../../../components/atoms/Button';
-import {PriceTag} from '../../../components/molecules/PriceTag';
 import {Amount} from '../../../components/atoms/Amount';
-import {Badge} from '../../../components/atoms/Badge';
 import {Spinner} from '../../../components/atoms/Spinner';
 import {cn} from '../../../lib/cn';
 import {countText, formatAmount, formatDate, formatDays, formatQuantity} from '../../../lib/format';
 import {LOW_PORTIONS} from '../constants/family';
-import {promotionWhen} from '../utils/family';
-import {CoverImage} from './CoverImage';
 import {ProductCover} from './ProductCover';
+import {PromotionCover} from './PromotionCover';
 
 const styles = {
   body: 'flex flex-col gap-5',
@@ -25,6 +21,11 @@ const styles = {
   reach: 'whitespace-nowrap text-sm text-cafe',
   reachNone: 'font-semibold text-rojo',
   reachLow: 'text-brasa-oscuro',
+  promotionCover: 'h-36 sm:h-40',
+  soldOutMark: 'font-semibold text-rojo',
+  total: 'flex justify-between gap-4 border-t border-carbon/70 pt-2.5 text-sm text-cafe',
+  struck: 'line-through',
+  saving: 'text-verde',
   tags: 'flex flex-wrap gap-1.5',
   sectionTitle: 'mb-1 text-xs font-semibold uppercase tracking-wider text-cafe',
   text: 'text-base text-carbon',
@@ -124,38 +125,54 @@ function ProductDetail({product, loading, failed, onRetry}) {
   );
 }
 
-function PromotionDetail({promotion}) {
-  const when = promotionWhen(promotion);
-  let dates = `Desde ${formatDate(promotion.fechaInicio)}`;
+// Cuándo se vende, dicho en una frase: "Se vende lun a vie, del 3 oct al 9 nov."
+const whenText = (promotion) => {
+  const when = `Se vende ${formatDays(promotion.dias).toLowerCase()}`;
+  let dates = `desde el ${formatDate(promotion.fechaInicio)}`;
   if (promotion.fechaFin) {
-    dates = `Del ${formatDate(promotion.fechaInicio)} al ${formatDate(promotion.fechaFin)}`;
+    dates = `del ${formatDate(promotion.fechaInicio)} al ${formatDate(promotion.fechaFin)}`;
   }
+  return `${when}, ${dates}.`;
+};
+
+function PromotionDetail({promotion}) {
+  const soldOut = new Set(promotion.agotados ?? []);
   return (
     <div className={styles.body}>
-      {promotion.imagenUrl && <CoverImage src={promotion.imagenUrl} alt={promotion.nombre} className={styles.cover} />}
       <div className={styles.head}>
-        <span className={styles.tags}>
-          <Badge tone="brand">{promotion.tipo === 'combo' ? 'Combo' : `Descuento ${promotion.valor}%`}</Badge>
-          <Badge tone={when.tone}>{when.label}</Badge>
+        <span className={styles.headText}>
+          <span className={styles.text}>{whenText(promotion)}</span>
+          {promotion.descripcion && <span className={styles.text}>{promotion.descripcion}</span>}
         </span>
-        <PriceTag regular={promotion.precioRegular} promo={promotion.precio} size="lg" />
+        <Amount prefix="Bs" size="lg" value={formatAmount(promotion.precio)} />
       </div>
-      {promotion.descripcion && <p className={styles.text}>{promotion.descripcion}</p>}
-      {!promotion.disponible && <Alert tone="info">Tiene productos agotados: hoy no se puede vender en Caja.</Alert>}
-      <section aria-label="Productos de la promoción" className={styles.rows}>
-        {promotion.productos.map((item) => (
-          <p key={item.id} className={styles.row}>
-            <span>{item.cantidad}× {item.nombre}</span>
-            <span>Bs {formatAmount(item.precio * item.cantidad)}</span>
-          </p>
-        ))}
-      </section>
-      <section aria-label="Cuándo aplica" className={styles.rows}>
-        <p className={styles.row}><span>Días</span><strong>{formatDays(promotion.dias)}</strong></p>
-        <p className={styles.row}><span>Fechas</span><strong>{dates}</strong></p>
+      <section aria-label="Productos de la promoción">
+        <p className={styles.sectionTitle}>Incluye</p>
+        <ul className={styles.recipe}>
+          {promotion.productos.map((item) => (
+            <li key={item.id} className={styles.recipeRow}>
+              <span>
+                {item.cantidad} {item.nombre.toLowerCase()}
+                {soldOut.has(item.nombre.toLowerCase()) && <strong className={styles.soldOutMark}> · agotado</strong>}
+              </span>
+              <span className={styles.reach}>Bs {formatAmount(item.precio * item.cantidad)}</span>
+            </li>
+          ))}
+        </ul>
+        <p className={styles.total}>
+          <span>Por separado <span className={styles.struck}>Bs {formatAmount(promotion.precioRegular)}</span></span>
+          <strong className={styles.saving}>Ahorra Bs {formatAmount(promotion.ahorro)}</strong>
+        </p>
       </section>
     </div>
   );
+}
+
+function DetailCover({kind, item}) {
+  if (kind === 'promocion') {
+    return <PromotionCover promotion={item} size="lg" className={styles.promotionCover} />;
+  }
+  return <ProductDetailCover product={item} />;
 }
 
 export function DetailModal({detail, onClose, onRetry}) {
@@ -166,7 +183,8 @@ export function DetailModal({detail, onClose, onRetry}) {
       onClose={onClose}
       title={item?.nombre ?? ''}
       size="md"
-      cover={item && detail.kind === 'producto' && <ProductDetailCover product={item} />}
+      hideTitle={detail.kind === 'promocion'}
+      cover={item && <DetailCover kind={detail.kind} item={item} />}
     >
       {item && detail.kind === 'producto' && <ProductDetail product={item} loading={detail.loading} failed={detail.failed} onRetry={onRetry} />}
       {item && detail.kind === 'promocion' && <PromotionDetail promotion={item} />}

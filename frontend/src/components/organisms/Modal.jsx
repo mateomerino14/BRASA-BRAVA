@@ -15,6 +15,7 @@ const styles = {
   cover: '-mx-5 -mt-5 mb-6 sm:-mx-8 sm:-mt-8',
   title: 'font-display text-3xl leading-none text-carbon sm:text-4xl',
   titleWithClose: 'pr-8',
+  srOnly: 'sr-only',
   description: 'mt-2 text-base text-cafe',
   body: 'mt-6',
   footer: 'mt-6 flex flex-col gap-3',
@@ -27,8 +28,9 @@ const panelVisible = {opacity: 1, scale: 1, y: 0};
 const panelExit = {opacity: 0, scale: 0.95, y: 12};
 const panelSpring = {type: 'spring', stiffness: 320, damping: 26};
 
-// cover: franja opcional de borde a borde arriba del título (por ejemplo la portada de un producto)
-export function Modal({open, onClose, title, description, size = 'md', closeButton = true, cover, children, footer}) {
+// cover: franja opcional de borde a borde arriba del título (por ejemplo la portada de un producto);
+// hideTitle deja el título solo para lectores de pantalla cuando la portada ya lo muestra
+export function Modal({open, onClose, title, description, size = 'md', closeButton = true, cover, hideTitle = false, children, footer}) {
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef(null);
@@ -57,7 +59,7 @@ export function Modal({open, onClose, title, description, size = 'md', closeButt
               </button>
             )}
             {cover && <div className={styles.cover}>{cover}</div>}
-            <h2 id={titleId} className={cn(styles.title, closeButton && styles.titleWithClose)}>
+            <h2 id={titleId} className={cn(styles.title, closeButton && styles.titleWithClose, hideTitle && styles.srOnly)}>
               {title}
             </h2>
             {description && (
