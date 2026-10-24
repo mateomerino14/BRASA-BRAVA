@@ -4,13 +4,13 @@ import {ALL, LOW_PORTIONS} from '../constants/family';
 // Estado de un producto en el catálogo: agotado (lo marcó el local), sin stock, quedan pocas o disponible
 export const productStatus = (product) => {
   if (!product.disponible) {
-    return {tone: 'neutral', label: 'Agotado'};
+    return {key: 'agotado', tone: 'danger', label: 'Agotado'};
   }
   if (product.porciones === 0) {
-    return {tone: 'danger', label: 'Sin stock'};
+    return {key: 'sinStock', tone: 'danger', label: 'Sin stock'};
   }
   if (product.porciones !== null && product.porciones <= LOW_PORTIONS) {
-    return {tone: 'warning', label: `Quedan ${product.porciones}`};
+    return {key: 'pocas', tone: 'warning', label: `Quedan ${product.porciones}`};
   }
   return null;
 };
