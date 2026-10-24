@@ -1,6 +1,6 @@
 import {AnimatePresence, motion} from 'motion/react';
-import {CircleOff, Package, Percent, SearchX} from 'lucide-react';
-import {Alert} from '../../../components/molecules/Alert';
+import {CircleOff, Package, Percent, RotateCw, SearchX, TriangleAlert} from 'lucide-react';
+import {Button} from '../../../components/atoms/Button';
 import {ChipTabs} from '../../../components/molecules/ChipTabs';
 import {FilterSelect} from '../../../components/molecules/FilterSelect';
 import {SearchInput} from '../../../components/molecules/SearchInput';
@@ -45,13 +45,21 @@ export function FamilyPage() {
   if (isProducts) {
     items = family.products;
   }
+  // Sin catálogo los totales no se conocen: las tarjetas muestran "—"
+  const unknown = family.loading || family.failed;
+  const countOrUnknown = (value) => {
+    if (unknown) {
+      return null;
+    }
+    return value;
+  };
 
   return (
     <div className={styles.page}>
       <section aria-label="Resumen" className={styles.summary}>
-        <StatCard icon={Package} label="Productos para vender" value={available} />
-        <StatCard icon={CircleOff} tone="danger" label="Agotados o sin stock" value={withoutStock} />
-        <StatCard icon={Percent} tone="warning" label="Promociones de hoy" value={today} />
+        <StatCard icon={Package} label="Productos para vender" value={countOrUnknown(available)} />
+        <StatCard icon={CircleOff} tone="danger" label="Agotados o sin stock" value={countOrUnknown(withoutStock)} />
+        <StatCard icon={Percent} tone="warning" label="Promociones de hoy" value={countOrUnknown(today)} />
       </section>
 
       <SegmentedControl label="Qué ver" options={VIEWS} value={family.view} onChange={family.changeView} className={styles.view} />
@@ -64,10 +72,19 @@ export function FamilyPage() {
       </FilterBar>
       {isProducts && <ChipTabs label="Categorías" options={categoryOptions} value={filters.categoria} onChange={family.changeCategory} />}
 
-      {family.error && <Alert tone="error">{family.error}</Alert>}
       {family.loading && <div className={styles.loading}><Spinner size={32} label="Cargando catálogo" /></div>}
 
-      {!family.loading && items.length === 0 && (
+      {!family.loading && family.failed && (
+        <div className={styles.empty}>
+          <TriangleAlert size={32} aria-hidden />
+          <p>No se pudo cargar el catálogo</p>
+          <Button size="sm" variant="outline" icon={<RotateCw size={16} aria-hidden />} onClick={family.reload}>
+            Reintentar
+          </Button>
+        </div>
+      )}
+
+      {!family.loading && !family.failed && items.length === 0 && (
         <p className={styles.empty}>
           <SearchX size={32} aria-hidden />
           {isProducts ? 'No hay productos que coincidan con los filtros.' : 'No hay promociones activas que coincidan.'}
@@ -84,7 +101,7 @@ export function FamilyPage() {
         </AnimatePresence>
       </ul>
 
-      <DetailModal detail={family.detail} onClose={family.closeDetail} />
+      <DetailModal detail={family.detail} onClose={family.closeDetail} onRetry={family.retryProduct} />
     </div>
   );
 }

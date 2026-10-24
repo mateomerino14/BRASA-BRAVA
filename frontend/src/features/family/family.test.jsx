@@ -17,6 +17,47 @@ const openFamily = async (route = '/familia') => {
 const grid = () => screen.getByRole('list', {name: 'Productos'});
 const names = () => within(grid()).getAllByRole('button').map((item) => item.getAttribute('aria-label'));
 
+describe('Familia: avisos de error', () => {
+  it('avisa arriba a la derecha si el catálogo no carga y permite reintentar', async () => {
+    const backend = createFamilyBackend();
+    let fail = true;
+    const ok = backend.handlers['GET /catalog'];
+    mockApi({...backend.handlers, 'GET /catalog': () => {
+      if (fail) {
+        return [500, {message: 'Ocurrió un error inesperado'}];
+      }
+      return ok();
+    }});
+    const {user} = renderApp('/familia', {token: 't'});
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar el catálogo');
+    expect(screen.getAllByText('No se pudo cargar el catálogo')).toHaveLength(2);
+    const summary = screen.getByRole('region', {name: 'Resumen'});
+    expect(within(summary).getByText('Productos para vender').previousSibling).toHaveTextContent('—');
+    fail = false;
+    await user.click(screen.getByRole('button', {name: 'Reintentar'}));
+    expect(await screen.findByRole('button', {name: 'Ver Doble Brava'})).toBeInTheDocument();
+  });
+
+  it('avisa si la receta no carga y la reintenta desde el detalle', async () => {
+    const backend = createFamilyBackend();
+    let fail = true;
+    const ok = backend.handlers['GET /catalog/products/1'];
+    mockApi({...backend.handlers, 'GET /catalog/products/1': () => {
+      if (fail) {
+        return [500, {message: 'Ocurrió un error inesperado'}];
+      }
+      return ok();
+    }});
+    const {user} = renderApp('/familia', {token: 't'});
+    await user.click(await screen.findByRole('button', {name: 'Ver Hamburguesa Clásica'}));
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la receta');
+    const dialog = screen.getByRole('dialog');
+    fail = false;
+    await user.click(within(dialog).getByRole('button', {name: 'Reintentar'}));
+    expect(await within(dialog).findByRole('region', {name: 'Receta'})).toBeInTheDocument();
+  });
+});
+
 describe('Familia: catálogo del local', () => {
   it('muestra el resumen y los productos con su estado de stock', async () => {
     await openFamily();
