@@ -1,11 +1,10 @@
 import {AnimatePresence, motion} from 'motion/react';
-import {CircleOff, Package, Percent, RotateCw, SearchX, TriangleAlert} from 'lucide-react';
+import {Package, Percent, RotateCw, SearchX, TriangleAlert} from 'lucide-react';
 import {Button} from '../../../components/atoms/Button';
 import {ChipTabs} from '../../../components/molecules/ChipTabs';
 import {FilterSelect} from '../../../components/molecules/FilterSelect';
 import {SearchInput} from '../../../components/molecules/SearchInput';
 import {SegmentedControl} from '../../../components/molecules/SegmentedControl';
-import {StatCard} from '../../../components/molecules/StatCard';
 import {Spinner} from '../../../components/atoms/Spinner';
 import {FilterBar} from '../../../components/organisms/FilterBar';
 import {ALL, PRODUCTS_VIEW, PROMOTIONS_VIEW} from '../constants/family';
@@ -16,7 +15,6 @@ import {PromotionCard} from '../components/PromotionCard';
 
 const styles = {
   page: 'flex flex-col gap-6',
-  summary: 'grid grid-cols-3 gap-3 sm:gap-4',
   view: 'w-full sm:max-w-sm',
   grid: 'grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4',
   loading: 'flex justify-center py-16',
@@ -35,9 +33,6 @@ const cardVisible = {opacity: 1, y: 0};
 export function FamilyPage() {
   const family = useFamily();
   const {filters} = family;
-  const available = family.allProducts.filter((item) => item.disponible && item.porciones !== 0).length;
-  const withoutStock = family.allProducts.filter((item) => !item.disponible || item.porciones === 0).length;
-  const today = family.allPromotions.filter((item) => item.vigencia === 'vigente').length;
   const categoryOptions = [{value: ALL, label: 'Todas'}, ...family.categories.map((item) => ({value: String(item.id), label: item.nombre}))];
   const subcategoryOptions = [{value: ALL, label: 'Todas las subcategorías'}, ...family.subcategories.map((item) => ({value: String(item.id), label: item.nombre}))];
   const isProducts = family.view === PRODUCTS_VIEW;
@@ -45,23 +40,9 @@ export function FamilyPage() {
   if (isProducts) {
     items = family.products;
   }
-  // Sin catálogo los totales no se conocen: las tarjetas muestran "—"
-  const unknown = family.loading || family.failed;
-  const countOrUnknown = (value) => {
-    if (unknown) {
-      return null;
-    }
-    return value;
-  };
 
   return (
     <div className={styles.page}>
-      <section aria-label="Resumen" className={styles.summary}>
-        <StatCard icon={Package} label="Productos para vender" value={countOrUnknown(available)} />
-        <StatCard icon={CircleOff} tone="danger" label="Agotados o sin stock" value={countOrUnknown(withoutStock)} />
-        <StatCard icon={Percent} tone="warning" label="Promociones de hoy" value={countOrUnknown(today)} />
-      </section>
-
       <SegmentedControl label="Qué ver" options={VIEWS} value={family.view} onChange={family.changeView} className={styles.view} />
 
       <FilterBar>
