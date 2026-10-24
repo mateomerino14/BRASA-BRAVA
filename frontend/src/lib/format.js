@@ -155,3 +155,12 @@ export const formatHours = (start, end) => {
   }
   return `${formatClock(start)} a ${formatClock(end)}`;
 };
+
+// Fecha guardada como "2026-10-03" mostrada como "03/10/2026" (día/mes/año)
+export const formatDayMonthYear = (iso) => {
+  if (!iso) {
+    return '';
+  }
+  const [year, month, day] = iso.split('-');
+  return `${day}/${month}/${year}`;
+};

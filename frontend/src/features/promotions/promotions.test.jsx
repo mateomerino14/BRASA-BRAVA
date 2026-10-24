@@ -48,7 +48,13 @@ describe('Gestión de promociones', () => {
   it('arma un combo con cantidades, calcula el precio y avisa si no es más barato', async () => {
     const {backend, user} = await openPage();
     const dialog = await openCreate(user);
-    expect(within(dialog).getByLabelText(/^Desde/)).toHaveValue('2026-10-10');
+    expect(within(dialog).getByLabelText(/^Desde/)).toHaveTextContent('10/10/2026');
+    await user.click(within(dialog).getByLabelText(/^Hasta/));
+    const calendar = within(dialog).getByRole('dialog', {name: 'Calendario: Fecha de fin'});
+    expect(within(calendar).getByRole('button', {name: '9 de octubre de 2026'})).toBeDisabled();
+    await user.click(within(calendar).getByRole('button', {name: 'Mes siguiente'}));
+    await user.click(within(calendar).getByRole('button', {name: '15 de noviembre de 2026'}));
+    expect(within(dialog).getByLabelText(/^Hasta/)).toHaveTextContent('15/11/2026');
     await user.type(within(dialog).getByLabelText(/^Nombre/), 'Combo Familiar');
     await user.click(within(dialog).getByRole('button', {name: 'Agregar producto'}));
     await user.selectOptions(within(dialog).getByLabelText('Producto 1'), 'Doble Brava — Bs 58,00');
@@ -74,7 +80,7 @@ describe('Gestión de promociones', () => {
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
     expect(await screen.findByText('Se registró la promoción Combo Familiar')).toBeInTheDocument();
     expect(backend.calls.saved.at(-1)).toEqual({
-      nombre: 'Combo Familiar', descripcion: '', tipo: 'combo', valor: 110, fechaInicio: '2026-10-10', fechaFin: '', horaInicio: '18:00', horaFin: '21:30', dias: '1111111',
+      nombre: 'Combo Familiar', descripcion: '', tipo: 'combo', valor: 110, fechaInicio: '2026-10-10', fechaFin: '2026-11-15', horaInicio: '18:00', horaFin: '21:30', dias: '1111111',
       productos: [{idProducto: 1, cantidad: 2}, {idProducto: 3, cantidad: 1}],
     });
   });

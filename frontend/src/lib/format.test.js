@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {formatClock, formatDateTime, formatHours, formatPrice, formatTime, getInitials, rangeText} from './format';
+import {formatClock, formatDateTime, formatDayMonthYear, formatHours, formatPrice, formatTime, getInitials, rangeText} from './format';
 
 describe('format', () => {
   it('obtiene hasta dos iniciales', () => {
@@ -21,6 +21,7 @@ describe('format', () => {
     expect(formatClock('18:30')).toBe('6:30 PM');
     expect(formatClock('')).toBe('');
     expect(formatHours('18:00', '21:00')).toBe('6:00 PM a 9:00 PM');
+    expect(formatDayMonthYear('2026-10-03')).toBe('03/10/2026');
   });
 });
 
