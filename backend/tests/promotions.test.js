@@ -120,6 +120,36 @@ describe('Gestión de promociones', () => {
     expect(duplicate.status).toBe(409);
   });
 
+  it('guarda un horario opcional y valida que tenga inicio y fin en orden', async () => {
+    await start();
+    const res = await api('post', '/api/promotions').send(await combo({horaInicio: '18:00', horaFin: '20:00'}));
+    expect(res.status).toBe(201);
+    // A las 11:00 todavía no empieza
+    expect(res.body.promotion).toMatchObject({horaInicio: '18:00', horaFin: '20:00', vigencia: 'mas_tarde'});
+    const allDay = await api('post', '/api/promotions').send(await combo({nombre: 'Todo el día', horaInicio: '', horaFin: ''}));
+    expect(allDay.body.promotion).toMatchObject({horaInicio: null, horaFin: null, vigencia: 'vigente'});
+    const onlyStart = await api('post', '/api/promotions').send(await combo({nombre: 'Otra', horaInicio: '18:00'}));
+    expect(onlyStart.body.message).toBe('Ingrese también la hora de fin');
+    const reversed = await api('post', '/api/promotions').send(await combo({nombre: 'Otra', horaInicio: '20:00', horaFin: '18:00'}));
+    expect(reversed.body.message).toBe('La hora de fin debe ser después de la de inicio');
+    const invalid = await api('post', '/api/promotions').send(await combo({nombre: 'Otra', horaInicio: '25:00', horaFin: '26:00'}));
+    expect(invalid.body.message).toBe('Ingrese una hora válida (HH:MM)');
+  });
+
+  it('según la hora del local la promoción con horario vale, empieza más tarde o ya terminó', async () => {
+    await start();
+    await api('post', '/api/promotions').send(await combo({nombre: 'Almuerzo', horaInicio: '10:00', horaFin: '12:00'}));
+    await api('post', '/api/promotions').send(await combo({nombre: 'Desayuno', horaInicio: '07:00', horaFin: '11:00'}));
+    const catalog = await api('get', '/api/catalog');
+    const vigencias = Object.fromEntries(catalog.body.promociones.map((item) => [item.nombre, item.vigencia]));
+    expect(vigencias).toMatchObject({Almuerzo: 'vigente', Desayuno: 'termino_hoy'});
+    expect(catalog.body.promociones.find((item) => item.nombre === 'Almuerzo')).toMatchObject({horaInicio: '10:00', horaFin: '12:00'});
+    const cashier = await api('get', '/api/sales/catalog');
+    const sellable = cashier.body.promociones.map((item) => item.nombre);
+    expect(sellable).toContain('Almuerzo');
+    expect(sellable).not.toContain('Desayuno');
+  });
+
   it('modifica una promoción, la da de baja y responde 404', async () => {
     await start();
     const id = await promotionId('Martes de Hamburguesas');

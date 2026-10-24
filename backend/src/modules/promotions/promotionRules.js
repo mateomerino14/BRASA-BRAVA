@@ -14,7 +14,7 @@ export const pricing = (tipo, valor, items) => {
   return {precioRegular: regular, precioPromocion: promo, ahorro: round2(regular - promo)};
 };
 
-// Vigencia para hoy: inactiva, programada, vencida, fuera de día o vigente
+// Vigencia para hoy: inactiva, programada, vencida, fuera de día, antes o después de su horario, o vigente
 export const vigenciaOf = (row, today) => {
   const inicio = toIsoDate(row.fecha_inicio);
   const fin = toIsoDate(row.fecha_fin);
@@ -29,6 +29,12 @@ export const vigenciaOf = (row, today) => {
   }
   if (row.dias[today.weekday] !== '1') {
     return 'otro_dia';
+  }
+  if (row.hora_inicio && today.time < row.hora_inicio) {
+    return 'mas_tarde';
+  }
+  if (row.hora_fin && today.time >= row.hora_fin) {
+    return 'termino_hoy';
   }
   return 'vigente';
 };

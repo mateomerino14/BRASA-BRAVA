@@ -291,7 +291,8 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 
 - **Combo**: varios productos con cantidad (al menos 2 unidades en total) a un precio fijo, que debe ser menor que comprarlos por separado. Por ahora solo se registran combos (`tipo: combo`); la base conserva el tipo `descuento` para retomarlo más adelante, y una promoción de descuento que ya existiera se sigue calculando con su porcentaje.
 - Vigencia por fechas (`fechaInicio`, `fechaFin` opcional) y días de la semana (`dias`: siete dígitos 1/0 de domingo a sábado, por ejemplo `0010000` = solo martes).
-- Estados del día: `vigente`, `otro_dia` (dentro de fechas pero hoy no aplica), `programada`, `vencida` o `inactiva`. "Hoy" se calcula en la zona horaria del local (`TIMEZONE`), no en la del servidor: a las 23:30 del miércoles en La Paz sigue siendo miércoles aunque en UTC ya sea jueves.
+- Horario opcional (`horaInicio` y `horaFin` en `HH:MM`, los dos o ninguno, el fin después del inicio). Sin horario vale todo el día.
+- Estados del día: `vigente`, `mas_tarde` (hoy aplica pero todavía no empieza su horario), `termino_hoy` (ya pasó su horario de hoy), `otro_dia` (dentro de fechas pero hoy no aplica), `programada`, `vencida` o `inactiva`. Caja solo vende las `vigente`. "Hoy" se calcula en la zona horaria del local (`TIMEZONE`), no en la del servidor: a las 23:30 del miércoles en La Paz sigue siendo miércoles aunque en UTC ya sea jueves.
 - Los precios se calculan con el precio actual de cada producto. Los productos nuevos deben estar activos; uno dado de baja que ya estaba se puede conservar.
 - Las fechas (`DATE`) viajan como texto `YYYY-MM-DD`, sin zona horaria, para que no se corran un día.
 
@@ -300,7 +301,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - Una mesa ocupada tiene una sola venta abierta: un nuevo envío a esa mesa se suma a la misma venta, no crea otra. El id de la venta es su número correlativo y nunca retrocede.
 - Dos envíos al mismo tiempo para una mesa libre terminan en una sola venta: la fila de la mesa se bloquea durante la transacción, un índice único impide dos ventas abiertas y, si aun así chocan, el segundo se reintenta sumándose a la venta del primero.
 - Cada línea guarda el nombre y el precio del momento (si el producto cambia de precio después, la venta no cambia), la cantidad (1 a 99), el consumo (`local` o `llevar`), el número de envío y el mesero de ese envío. La venta guarda además el mesero que abrió la mesa y el cajero de la sesión (o el DIRECTORIO).
-- El precio lo calcula siempre el servidor: el de cada producto y, en promociones, el mismo cálculo que la pantalla de promociones (`modules/promotions/promotionRules.js`). Una promoción se vende solo si está vigente hoy y todos sus productos se pueden vender.
+- El precio lo calcula siempre el servidor: el de cada producto y, en promociones, el mismo cálculo que la pantalla de promociones (`modules/promotions/promotionRules.js`). Una promoción se vende solo si está vigente en ese momento (fechas, día y horario) y todos sus productos se pueden vender.
 - Se pueden quitar ingredientes solo de la receta de cada producto; en un combo, de la receta de cada producto del combo. No hay extras con costo: lo adicional se vende como un producto más (por ejemplo, de "Guarniciones y Extras").
 - No se venden productos agotados ni de baja. El stock **no bloquea** la venta: el catálogo avisa "Sin stock" o "Quedan N", pero el pedido se registra igual.
 - No se puede dar de baja una sección ni quitar una mesa que tenga una venta abierta.
