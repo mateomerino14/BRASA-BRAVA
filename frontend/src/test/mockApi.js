@@ -29,7 +29,7 @@ export const USERS = {
     cargo: 'Directorio',
     fotoUrl: null,
     isDirectorio: true,
-    permissions: ['home', 'familia', 'caja', 'administracion', 'productos', 'secciones', 'stock', 'categorias', 'promociones', 'empleados', 'cargos', 'reportes'],
+    permissions: ['home', 'familia', 'caja', 'administracion', 'productos', 'secciones', 'stock', 'categorias', 'promociones', 'empleados', 'cargos', 'reportes', 'eliminacion'],
   },
   cajero: {
     id: 2,

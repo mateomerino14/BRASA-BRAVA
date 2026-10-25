@@ -10,6 +10,7 @@ import {
   Settings,
   ShieldCheck,
   ShoppingCart,
+  Trash2,
   UsersRound,
 } from 'lucide-react';
 
@@ -72,6 +73,13 @@ export const NAVIGATION = [
         to: '/cargos',
         icon: ShieldCheck,
         permission: 'cargos',
+      },
+      {
+        label: 'Eliminación física',
+        title: 'Eliminación física',
+        to: '/eliminacion',
+        icon: Trash2,
+        permission: 'eliminacion',
       },
     ],
   },

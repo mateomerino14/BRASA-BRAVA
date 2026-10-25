@@ -1,10 +1,10 @@
 import {hashSecret} from '../utils/password.js';
-import {SCREENS} from '../modules/auth/permissions.js';
+import {ASSIGNABLE_SCREENS} from '../modules/auth/permissions.js';
 import {localToday} from '../utils/calendar.js';
 
 // Datos de demostración basados en el prototipo de Figma
 const ROLES = {
-  Administrador: SCREENS,
+  Administrador: ['home', ...ASSIGNABLE_SCREENS],
   Cajero: ['home', 'familia', 'caja'],
   Mesero: ['home', 'familia', 'caja'],
   Cocinero: ['home', 'familia'],
