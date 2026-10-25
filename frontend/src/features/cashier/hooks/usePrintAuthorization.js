@@ -5,7 +5,7 @@ import {useToast} from '../../../context/useToast';
 const emptyValues = {alias: '', contrasena: ''};
 
 // Cuenta cada impresión del ticket en el servidor. Las tres primeras salen directo; desde la cuarta
-// pide el usuario y la contraseña de un empleado autorizado y la impresión espera esa respuesta
+// pide el usuario y la contraseña de un empleado con acceso a Caja (queda registrado) y la impresión espera esa respuesta
 export function usePrintAuthorization({api = cashierApi} = {}) {
   const toast = useToast();
   const resolverRef = useRef(null);
