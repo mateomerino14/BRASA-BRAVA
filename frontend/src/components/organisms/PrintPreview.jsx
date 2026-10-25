@@ -17,7 +17,6 @@ const styles = {
 
 const idle = {kind: 'idle', text: ''};
 
-// Mensaje del resultado de imprimir directo
 const resultStatus = (result) => {
   if (result.ok) {
     return {kind: 'ok', text: `Se imprimió en ${result.impresora}`};
@@ -25,7 +24,6 @@ const resultStatus = (result) => {
   return {kind: 'error', text: `No se pudo imprimir: ${result.error}. Use "Imprimir con diálogo".`};
 };
 
-// Botones de impresión: con impresora elegida en la app de escritorio imprime directo; si no, abre el diálogo del navegador
 function PrintActions({destino, printer, autoPrint, guard, onClose, children}) {
   const [status, setStatus] = useState(() => {
     if (autoPrint && printer) {
@@ -34,7 +32,6 @@ function PrintActions({destino, printer, autoPrint, guard, onClose, children}) {
     return idle;
   });
 
-  // "guard" decide si se puede imprimir (por ejemplo, el límite de impresiones del ticket)
   const allowed = async () => !guard || await guard();
 
   const print = async () => {
@@ -55,7 +52,6 @@ function PrintActions({destino, printer, autoPrint, guard, onClose, children}) {
     }
   };
 
-  // Solo al abrir (la vista previa se monta de nuevo cada vez que se muestra)
   const [initial] = useState({autoPrint, printer, destino, guard, children});
   useEffect(() => {
     if (!initial.autoPrint) {
@@ -100,8 +96,6 @@ function PrintActions({destino, printer, autoPrint, guard, onClose, children}) {
   );
 }
 
-// Vista previa de un documento para la ticketera; "destino" (cocina o caja) indica a qué impresora va en la app de escritorio.
-// "autoPrint" imprime apenas se muestra (ticket al cobrar); "guard" se consulta antes de cada impresión
 export function PrintPreview({open, title, description, onClose, destino, autoPrint = false, guard, children}) {
   const {printers} = useDesktopPrinters();
   let printer = null;

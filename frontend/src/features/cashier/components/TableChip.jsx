@@ -16,7 +16,6 @@ const styles = {
   ready: 'text-verde',
 };
 
-// Estado de una mesa en la fila: libre, con algo en cocina (y cuánto espera) o lista para cobrar
 const stateOf = (venta) => {
   if (!venta) {
     return 'free';
@@ -37,7 +36,6 @@ const labelOf = (mesa, state, minutes) => {
   return `${mesa.nombre}, Bs ${formatAmount(mesa.venta.total)}, lista para cobrar`;
 };
 
-// Ficha de una mesa en la barra de Caja
 export function TableChip({mesa, now, active, onSelect}) {
   const state = stateOf(mesa.venta);
   let minutes = 0;

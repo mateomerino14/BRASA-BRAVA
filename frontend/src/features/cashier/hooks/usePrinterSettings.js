@@ -4,7 +4,6 @@ import {printOnDesktop} from '../../../lib/desktopPrinting';
 
 const emptyDraft = {cocina: '', caja: ''};
 
-// Elección de impresoras de la app de escritorio: lista las instaladas, prueba cada una y guarda
 export function usePrinterSettings({testDocument}) {
   const desktop = useDesktopPrinters();
   const [open, setOpen] = useState(false);

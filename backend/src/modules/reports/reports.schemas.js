@@ -1,5 +1,6 @@
 import {z} from 'zod';
 
+// Fecha YYYY-MM-DD con el mensaje de error de su campo
 const isoDate = (label) => z.string({error: `Elija la fecha ${label}`}).regex(/^\d{4}-\d{2}-\d{2}$/, `Elija la fecha ${label}`);
 const MAX_RANGE_DAYS = 366;
 const DAY_MS = 24 * 60 * 60 * 1000;

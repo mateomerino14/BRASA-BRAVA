@@ -1,7 +1,7 @@
 import {createSalesRepository} from '../sales/sales.repository.js';
 
 // Nuevo valor de "listos" según la acción, entre 0 y la cantidad
-const LISTOS_BY_ACTION = {
+const READY_BY_ACTION = {
   sumar: 'CASE WHEN listos < cantidad THEN listos + 1 ELSE listos END',
   restar: 'CASE WHEN listos > 0 THEN listos - 1 ELSE 0 END',
   todos: 'cantidad',
@@ -32,7 +32,7 @@ export const createKitchenRepository = (db) => ({
   // Cambia las unidades listas de una línea de una venta abierta
   updateLine: async (idDetalle, accion) => {
     const {rows} = await db.query(
-      `UPDATE venta_detalle SET listos = ${LISTOS_BY_ACTION[accion]}
+      `UPDATE venta_detalle SET listos = ${READY_BY_ACTION[accion]}
         WHERE id_detalle = $1 AND ${openSaleFilter}
         RETURNING id_detalle`,
       [idDetalle],
@@ -43,7 +43,7 @@ export const createKitchenRepository = (db) => ({
   // Marca un envío entero como listo o en preparación
   updateShipment: async (idVenta, envio, accion) => {
     const {rows} = await db.query(
-      `UPDATE venta_detalle SET listos = ${LISTOS_BY_ACTION[accion]}
+      `UPDATE venta_detalle SET listos = ${READY_BY_ACTION[accion]}
         WHERE id_venta = $1 AND envio = $2 AND ${openSaleFilter}
         RETURNING id_detalle`,
       [idVenta, envio],

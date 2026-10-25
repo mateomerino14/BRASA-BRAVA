@@ -32,7 +32,6 @@ const employeeOptions = (employees) => [
   }),
 ];
 
-// Tipo de reporte, período (con atajos) y empleado
 export function ReportFilters({reports}) {
   const {filters, errors} = reports;
   return (

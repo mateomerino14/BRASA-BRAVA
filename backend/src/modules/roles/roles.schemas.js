@@ -19,6 +19,6 @@ export const statusSchema = z.object({activo: z.boolean({error: 'Indique el esta
 export const idParamSchema = z.object({id: z.coerce.number().int().positive('Cargo inválido')});
 
 // Columnas por las que se puede ordenar el listado
-export const ROLE_SORT_KEYS = ['nombre', 'empleados', 'pantallas', 'estado'];
+const ROLE_SORT_KEYS = ['nombre', 'empleados', 'pantallas', 'estado'];
 
 export const listQuerySchema = baseListQuery(ROLE_SORT_KEYS);

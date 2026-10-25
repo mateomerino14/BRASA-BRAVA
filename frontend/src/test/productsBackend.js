@@ -1,4 +1,4 @@
-export const PRODUCT_OPTIONS = [
+const PRODUCT_OPTIONS = [
   {id: 1, nombre: 'Hamburguesas', subcategorias: [{id: 1, nombre: 'Clásicas'}, {id: 2, nombre: 'Especiales'}]},
   {id: 2, nombre: 'Bebidas y Refrescos', subcategorias: [{id: 6, nombre: 'Gaseosas'}]},
 ];
@@ -8,7 +8,7 @@ const product = (id, nombre, precio, categoria, subcategoria, extra = {}) => ({
   categoria: {activa: true, ...categoria}, subcategoria: {activa: true, ...subcategoria}, ...extra,
 });
 
-export const PRODUCTS = [
+const PRODUCTS = [
   product(1, 'Hamburguesa Clásica', 35, {id: 1, nombre: 'Hamburguesas'}, {id: 1, nombre: 'Clásicas'}, {descripcion: 'Carne, queso y tomate', imagenUrl: '/uploads/clasica.png', porciones: 25}),
   product(2, 'Gaseosa 500 ml', 10, {id: 2, nombre: 'Bebidas y Refrescos'}, {id: 6, nombre: 'Gaseosas'}, {disponible: false, porciones: 0}),
   product(3, 'Dúo Parrillero', 85, {id: 4, nombre: 'Combos Especiales', activa: false}, {id: 10, nombre: 'Dúo Parrillero'}),
@@ -25,7 +25,6 @@ const findSub = (idSubcategoria) => {
   return null;
 };
 
-// Backend falso en memoria para las pruebas de la pantalla de productos
 export const createProductsBackend = ({failAvailability = false} = {}) => {
   const store = PRODUCTS.map((item) => ({...item}));
   const calls = {list: [], saved: [], uploads: [], availability: [], recipes: []};

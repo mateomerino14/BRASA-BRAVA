@@ -4,7 +4,6 @@ const MINUTE_MS = 60000;
 
 export const waitMinutes = (since, now) => Math.max(0, Math.floor((now - new Date(since).getTime()) / MINUTE_MS));
 
-// Color del semáforo según cuánto lleva esperando un envío: verde, amarillo o rojo
 export const waitTone = (minutes) => {
   if (minutes >= WAIT_DANGER_MINUTES) {
     return 'danger';
@@ -15,7 +14,6 @@ export const waitTone = (minutes) => {
   return 'success';
 };
 
-// Ingredientes quitados de una línea, agrupados por producto en los combos
 export const removedText = (line) => {
   if (line.exclusiones.length === 0) {
     return '';

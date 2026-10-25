@@ -36,7 +36,6 @@ export function useProducts({api = productsApi} = {}) {
     ...list,
     products: list.items,
     categories,
-    // Al cambiar de categoría la subcategoría elegida deja de aplicar
     changeCategory: (value) => list.changeFilters({idCategoria: value, idSubcategoria: ''}),
     changeSubcategory: (value) => list.changeFilter('idSubcategoria', value),
     changeStatus: (value) => list.changeFilter('estado', value),

@@ -14,7 +14,6 @@ const styles = {
   error: 'max-w-32 text-center text-xs font-medium text-error',
 };
 
-// Foto de perfil redonda con un botón de cámara para elegirla, cambiarla o quitarla
 export function AvatarPicker({name, label = 'Foto', file = null, url = null, onChange, size = 72, maxMb = DEFAULT_MAX_MB}) {
   const inputId = useId();
   const [error, setError] = useState('');

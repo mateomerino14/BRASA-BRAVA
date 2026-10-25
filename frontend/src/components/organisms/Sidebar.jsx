@@ -73,7 +73,6 @@ function MenuGroup({item, collapsed}) {
   const Icon = item.icon;
   const contentId = `menu-${item.label}`;
 
-  // Al navegar a una pantalla del grupo, el grupo se abre solo
   if (pathname !== lastPath) {
     setLastPath(pathname);
     if (hasActiveChild && !open) {
@@ -129,7 +128,6 @@ function MenuGroup({item, collapsed}) {
   );
 }
 
-// Menú lateral fijo de escritorio; la pestaña del borde lo contrae a solo íconos
 export function Sidebar({items, collapsed = false, onToggleCollapsed}) {
   let width = {width: expandedWidth};
   let toggleLabel = 'Contraer menú';

@@ -2,7 +2,6 @@ import {useEffect, useState} from 'react';
 import {cashierApi} from '../services/cashierApi';
 import {buildCheckout, emptyCheckout} from '../utils/checkout';
 
-// Cobro de la mesa: formulario de pago, envío a la API y ticket resultante para imprimir
 export function useCheckout({api = cashierApi, idMesa, total}) {
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState(emptyCheckout);

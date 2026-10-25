@@ -6,7 +6,6 @@ const styles = {
   page: 'flex flex-col gap-6',
 };
 
-// Estructura común de toda pantalla de gestión: buscador y filtros, tabla, llamada a registrar y modales
 export function ManagementPage({search, filters, table, callout, children}) {
   return (
     <div className={styles.page}>

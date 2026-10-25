@@ -8,7 +8,7 @@ const tableNotFound = {error: 'Mesa no encontrada o deshabilitada', status: 404}
 const noOpenSale = {error: 'La mesa no tiene un pedido abierto para cobrar', status: 404};
 const saleNotFound = {error: 'Pedido no encontrado', status: 404};
 // Impresiones del ticket que salen sin autorización
-export const FREE_PRINTS = 3;
+const FREE_PRINTS = 3;
 const needsAuthorization = {
   error: `Este ticket ya se imprimió ${FREE_PRINTS} veces. Un empleado con acceso a Caja debe ingresar su usuario y contraseña`,
   status: 403,
@@ -63,7 +63,7 @@ const addRecipeUsage = (usage, recipe, units, removed) => {
 };
 
 // Total de cada insumo que consume un envío
-export const consumptionOf = (lines, recipes, promotionItems) => {
+const consumptionOf = (lines, recipes, promotionItems) => {
   const usage = new Map();
   for (const line of lines) {
     const removedOf = (idProducto) => new Set(line.exclusiones.filter((item) => item.idProducto === idProducto).map((item) => item.idInsumo));

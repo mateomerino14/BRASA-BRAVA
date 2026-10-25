@@ -11,7 +11,6 @@ const styles = {
   },
 };
 
-// Número grande con la fuente de títulos y su moneda o unidad en texto chico (Bebas solo tiene mayúsculas)
 export function Amount({value, prefix, suffix, size = 'md', className, valueClassName}) {
   const label = [prefix, value, suffix].filter(Boolean).join(' ');
   return (

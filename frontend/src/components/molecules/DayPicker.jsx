@@ -9,7 +9,6 @@ const styles = {
   all: 'ml-1 rounded-full px-3 py-1.5 text-xs font-semibold text-brasa transition-colors hover:bg-brasa/10',
 };
 
-// Lunes primero (como se lee en Bolivia); el índice es la posición en el texto de 7 dígitos que empieza en domingo
 const DAYS = [
   {index: 1, short: 'L', name: 'Lunes'},
   {index: 2, short: 'M', name: 'Martes'},
@@ -22,7 +21,6 @@ const DAYS = [
 const ALL_DAYS = '1111111';
 const tapPress = {scale: 0.88};
 
-// Días de la semana como botones encendidos/apagados; el valor es un texto de 7 dígitos 1/0 de domingo a sábado
 export function DayPicker({value, onChange}) {
   const toggle = (index) => {
     const days = value.split('');

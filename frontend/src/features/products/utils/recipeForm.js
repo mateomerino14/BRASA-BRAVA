@@ -1,8 +1,7 @@
 const QUANTITY_PATTERN = /^\d{1,5}([.,]\d{1,3})?$/;
 
-export const parseQuantity = (text) => Number(String(text).trim().replace(',', '.'));
+const parseQuantity = (text) => Number(String(text).trim().replace(',', '.'));
 
-// Errores por fila de la receta: insumo elegido, sin repetir, y cantidad mayor a 0 con hasta 3 decimales
 export const validateRecipe = (rows) => {
   const errors = {};
   const seen = new Set();
@@ -25,7 +24,6 @@ export const validateRecipe = (rows) => {
   return errors;
 };
 
-// Porciones que alcanzan con el stock de cada insumo; null si todavía no hay filas completas
 export const computePortions = (rows, ingredientsById) => {
   const complete = rows.filter((row) => row.idInsumo && parseQuantity(row.cantidad) > 0);
   if (complete.length === 0) {

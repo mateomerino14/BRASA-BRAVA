@@ -42,7 +42,6 @@ export const USERS = {
   },
 };
 
-// Respuesta falsa; "file" (opcional) simula una descarga con sus cabeceras y su contenido
 const json = (status, body, file) =>
   Promise.resolve({
     ok: status < 400,
@@ -52,7 +51,6 @@ const json = (status, body, file) =>
     blob: () => Promise.resolve(file?.blob ?? new Blob([])),
   });
 
-// Los handlers reciben JSON ya parseado o el FormData tal cual (subida de archivos)
 const parseBody = (body) => {
   if (body === undefined || body instanceof FormData) {
     return body;

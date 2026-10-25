@@ -11,7 +11,6 @@ const styles = {
   suffix: 'border-l border-arena',
 };
 
-// Campo numérico con decimales y la unidad o moneda en un bloque acoplado (Bs antes, kg o % después)
 export function NumberInput({prefix, suffix, invalid = false, disabled, className, ref, ...props}) {
   return (
     <div className={cn(styles.group, invalid ? styles.invalid : styles.normal, disabled && styles.disabled, className)}>

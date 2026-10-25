@@ -5,7 +5,6 @@ import {useToast} from '../../../context/useToast';
 
 const EMPTY = {actual: '', nueva: '', confirmacion: ''};
 
-// Revisa los tres campos con las mismas reglas que la API
 const validate = (values) => {
   const errors = {};
   if (!values.actual) {
@@ -27,7 +26,6 @@ const validate = (values) => {
   return errors;
 };
 
-// Cambio de la contraseña del DIRECTORIO: la actual equivocada se marca en su campo, lo demás va como aviso
 export function useDirectorioPassword({api = authApi} = {}) {
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState(EMPTY);

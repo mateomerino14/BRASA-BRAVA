@@ -1,10 +1,9 @@
-export const CATEGORIES = [
+const CATEGORIES = [
   {id: 1, nombre: 'Hamburguesas', descripcion: 'A la parrilla', imagenUrl: '/uploads/burger.png', activa: true, totalProductos: 0, subcategorias: [{id: 1, nombre: 'Clásicas'}, {id: 2, nombre: 'Especiales'}, {id: 3, nombre: 'Doble Carne'}, {id: 4, nombre: 'Veggie'}, {id: 5, nombre: 'Picantes'}]},
   {id: 2, nombre: 'Bebidas y Refrescos', descripcion: null, imagenUrl: null, activa: true, totalProductos: 0, subcategorias: [{id: 6, nombre: 'Gaseosas'}, {id: 7, nombre: 'Cervezas'}]},
   {id: 4, nombre: 'Combos Especiales', descripcion: null, imagenUrl: null, activa: false, totalProductos: 0, subcategorias: [{id: 10, nombre: 'Dúo Parrillero'}]},
 ];
 
-// Backend falso en memoria para las pruebas de la pantalla de categorías
 export const createCategoriesBackend = ({failUpload = false} = {}) => {
   const store = CATEGORIES.map((category) => ({...category, subcategorias: [...category.subcategorias]}));
   const calls = {list: [], saved: [], uploads: [], removed: []};

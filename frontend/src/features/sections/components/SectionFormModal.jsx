@@ -44,7 +44,6 @@ function Chairs({count}) {
   );
 }
 
-// Mesa dibujada con sus sillas: la mitad arriba y la otra mitad abajo
 function TableDrawing({capacity}) {
   const seats = Math.min(capacity, MAX_DRAWN_SEATS);
   return (

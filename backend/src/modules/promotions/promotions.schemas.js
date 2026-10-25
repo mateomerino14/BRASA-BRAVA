@@ -59,7 +59,7 @@ export const statusSchema = z.object({activo: z.boolean({error: 'Indique el esta
 export const idParamSchema = z.object({id: z.coerce.number().int().positive('Promoción inválida')});
 
 // Columnas por las que se puede ordenar el listado
-export const PROMOTION_SORT_KEYS = ['nombre', 'inicio', 'estado'];
+const PROMOTION_SORT_KEYS = ['nombre', 'inicio', 'estado'];
 
 export const listQuerySchema = baseListQuery(PROMOTION_SORT_KEYS, {
   tipo: z.enum(['todos', 'descuento', 'combo']).optional().default('todos'),

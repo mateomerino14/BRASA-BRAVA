@@ -5,7 +5,6 @@ import {useToast} from '../../../context/useToast';
 
 const toText = (value) => String(value).replace('.', ',');
 
-// Une los insumos activos con los de la receta (que pueden estar de baja) para mostrar nombre, unidad y stock
 const indexIngredients = (options, recipeItems) => {
   const byId = new Map(options.map((item) => [String(item.id), {...item, activo: true}]));
   for (const item of recipeItems) {
@@ -16,7 +15,6 @@ const indexIngredients = (options, recipeItems) => {
   return byId;
 };
 
-// Edición de la receta de un producto: filas de insumo y cantidad, porciones en vivo y guardado completo
 export function useRecipe({onSaved, api = productsApi} = {}) {
   const [target, setTarget] = useState(null);
   const [rows, setRows] = useState([]);

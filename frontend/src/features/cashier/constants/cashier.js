@@ -15,9 +15,5 @@ export const TABLE_REFRESH_MS = 15000;
 
 export const MAX_QUANTITY = 99;
 
-// Semáforo de la espera de cocina, en minutos: mostaza desde 15 y rojo desde 30
 export const WAIT_WARNING_MINUTES = 15;
 export const WAIT_DANGER_MINUTES = 30;
-
-// Impresiones del ticket que salen sin pedir autorización
-export const FREE_PRINTS = 3;

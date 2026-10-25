@@ -11,7 +11,6 @@ const styles = {
 const VISIBLE_MS = 5000;
 const MAX_TOASTS = 3;
 
-// Avisos emergentes estándar: errores de una operación (servidor, red) y confirmaciones breves
 export function ToastProvider({children}) {
   const [toasts, setToasts] = useState([]);
   const nextId = useRef(1);

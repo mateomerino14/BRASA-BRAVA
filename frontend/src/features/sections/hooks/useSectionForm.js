@@ -22,10 +22,8 @@ export function useSectionForm({onSaved, api = sectionsApi} = {}) {
   });
   const nextKey = useRef(0);
   const tables = form.values.mesas;
-  // Los nombres repetidos dependen de las otras mesas: al cambiar una se limpian los avisos de todas
   const tableErrors = tables.map((table) => tableErrorKey(table.key));
 
-  // Agrega una mesa con el nombre que sigue a la última y la capacidad de la anterior
   const addTable = () => {
     nextKey.current += 1;
     const capacidad = tables.at(-1)?.capacidad ?? DEFAULT_CAPACITY;

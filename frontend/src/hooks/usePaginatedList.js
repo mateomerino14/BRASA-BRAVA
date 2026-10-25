@@ -30,7 +30,6 @@ const toDirection = (value) => {
   return 'asc';
 };
 
-// Siguiente orden al tocar un encabezado: ascendente → descendente → orden por defecto
 const nextSort = (current, key) => {
   if (current.key !== key) {
     return {sort: key, dir: 'asc'};
@@ -41,7 +40,6 @@ const nextSort = (current, key) => {
   return {sort: '', dir: 'asc'};
 };
 
-// Estado estándar de una tabla de gestión guardado en la URL: búsqueda con espera, filtros, página, filas por página y orden
 export function usePaginatedList({fetchPage, filterDefaults = {}}) {
   const [searchParams, setSearchParams] = useSearchParams();
   const toast = useToast();
@@ -57,7 +55,6 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
   const [error, setError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Si la URL cambia desde afuera (atrás/adelante), el buscador la sigue
   if (urlSearch !== lastUrlSearch) {
     setLastUrlSearch(urlSearch);
     if (search.trim() !== urlSearch) {
@@ -76,7 +73,6 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
   }
   const queryKey = JSON.stringify(query);
 
-  // Escribe cambios en la URL; los valores por defecto no se guardan para mantenerla limpia
   const updateParams = useCallback((changes) => {
     const initial = JSON.parse(defaultsKey);
     setSearchParams((current) => {
@@ -131,7 +127,6 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
     };
   }, [fetchPage, queryKey, reloadKey, toast]);
 
-  // Vuelve a pedir la página actual y, si se indica, muestra el aviso emergente de éxito
   const reload = (message) => {
     if (message) {
       toast.success(message);
@@ -141,7 +136,6 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
 
   const hasActiveFilters = Boolean(urlSearch) || Object.entries(filters).some(([key, value]) => value !== filterDefaults[key]);
 
-  // Cambia el orden: sin dirección alterna como el encabezado; con dirección la aplica tal cual
   const changeSort = (key, dir) => {
     if (dir) {
       updateParams({sort: key, dir, page: 1});
@@ -158,7 +152,6 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
 
   return {
     items: result.items,
-    // Respuesta completa, para datos extra del módulo (por ejemplo, el resumen de stock)
     response: result,
     total: result.total,
     page,
@@ -177,7 +170,6 @@ export function usePaginatedList({fetchPage, filterDefaults = {}}) {
     changeSort,
     clearFilters,
     reload,
-    // Muestra en un aviso emergente el error de una acción rápida (por ejemplo, un interruptor)
     reportError: (message, title) => toast.error(message, title),
   };
 }

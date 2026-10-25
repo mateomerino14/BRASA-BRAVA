@@ -24,7 +24,6 @@ export function CodeInput({value, onChange, length = 6, invalid = false, disable
   const refs = useRef([]);
   const digits = Array.from({length}, (_, index) => (value[index] ?? '').trim());
 
-  // Los huecos se guardan como espacio para que borrar un dígito no corra los siguientes
   const emit = (next) => {
     const text = next.map((digit) => digit || ' ').join('').trimEnd();
     onChange(text);

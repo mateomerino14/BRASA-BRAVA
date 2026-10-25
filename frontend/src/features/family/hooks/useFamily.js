@@ -7,7 +7,6 @@ import {useToast} from '../../../context/useToast';
 
 const emptyCatalog = {hoy: '', categorias: [], productos: [], promociones: []};
 
-// Catálogo de Familia: vista (productos o promociones), categoría, subcategoría y búsqueda viven en la URL
 export function useFamily({api = familyApi} = {}) {
   const [params, setParams] = useSearchParams();
   const [catalog, setCatalog] = useState(emptyCatalog);
@@ -80,7 +79,6 @@ export function useFamily({api = familyApi} = {}) {
     }
   };
 
-  // Vuelve a pedir el catálogo después de un error
   const reload = () => {
     setLoading(true);
     setAttempt((current) => current + 1);

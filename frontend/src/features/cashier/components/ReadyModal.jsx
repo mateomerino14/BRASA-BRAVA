@@ -35,7 +35,6 @@ function Column({title, empty, icon: Icon, lines, busy, onMark}) {
   );
 }
 
-// Marcar listos de una mesa como en cafebar: lo del local, lo para llevar y lo que todavía falta
 export function ReadyModal({open, mesa, venta, busy, onMark, onMarkAll, onClose}) {
   const detalles = venta?.detalles ?? [];
   const missing = detalles.filter((line) => line.listos < line.cantidad);

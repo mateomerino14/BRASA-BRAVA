@@ -2,7 +2,6 @@ const MINUTE_MS = 60000;
 
 const line = (cantidad, nombre, extra = {}) => ({cantidad, nombre, tipo: 'producto', consumo: 'local', productos: '', sin: '', subtotal: 35 * cantidad, ...extra});
 
-// Dos ventas cobradas del 20/10/2026, con envíos, lo quitado y un pago mixto
 const SALES = [
   {
     id: 41, numero: 41, abiertaEn: '2026-10-20T23:05:00Z', cerradaEn: '2026-10-21T00:02:00Z', mesa: 'Mesa 1', seccion: 'Salón principal',
@@ -35,7 +34,6 @@ const employeeName = (id) => {
   return 'Todos los empleados';
 };
 
-// Backend falso en memoria para la pantalla de reportes y sus envíos programados
 export const createReportsBackend = ({now = Date.now()} = {}) => {
   const calls = {reports: [], pdfs: [], emails: [], schedules: []};
   const control = {emailError: null};
@@ -43,7 +41,6 @@ export const createReportsBackend = ({now = Date.now()} = {}) => {
     {id: 1, correo: 'gerencia@brasabrava.bo', tipo: 'resumen', dias: '0100100', hora: '08:00', activo: true, ultimoEnvioEn: new Date(now - 60 * MINUTE_MS).toISOString(), ultimoHasta: null, ultimoAtrasado: true, ultimoTurno: new Date(now - 600 * MINUTE_MS).toISOString(), ultimoError: null, proximo: new Date(now + 600 * MINUTE_MS).toISOString()},
   ];
   let nextId = 2;
-  // Cambia los datos de un envío y lo devuelve
   const update = (id, changes) => {
     schedules = schedules.map((item) => {
       if (item.id !== id) {

@@ -45,7 +45,7 @@ export const availabilitySchema = z.object({disponible: z.boolean({error: 'Indiq
 export const idParamSchema = z.object({id: id('Producto inválido')});
 
 // Columnas por las que se puede ordenar el listado
-export const PRODUCT_SORT_KEYS = ['nombre', 'precio', 'categoria', 'estado'];
+const PRODUCT_SORT_KEYS = ['nombre', 'precio', 'categoria', 'estado'];
 
 export const listQuerySchema = baseListQuery(PRODUCT_SORT_KEYS, {
   idCategoria: z.coerce.number().int().positive().optional(),

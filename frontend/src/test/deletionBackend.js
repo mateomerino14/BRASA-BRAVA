@@ -1,4 +1,3 @@
-// Backend falso de la eliminación física: un empleado y una sección de baja, y dos ventas cobradas
 export const createDeletionBackend = () => {
   const calls = {previews: [], executes: [], candidates: []};
   const data = {

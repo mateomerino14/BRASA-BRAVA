@@ -24,9 +24,6 @@ const panelVisible = {opacity: 1, scale: 1, y: 0};
 const panelExit = {opacity: 0, scale: 0.95, y: 12};
 const panelSpring = {type: 'spring', stiffness: 320, damping: 26};
 
-// Sin X arriba: cada modal cierra con su botón Cerrar o Cancelar del pie (Escape y el fondo también cierran).
-// cover: franja opcional de borde a borde arriba del título (por ejemplo la portada de un producto);
-// hideTitle deja el título solo para lectores de pantalla cuando la portada ya lo muestra
 export function Modal({open, onClose, title, description, size = 'md', cover, hideTitle = false, children, footer}) {
   const titleId = useId();
   const descriptionId = useId();

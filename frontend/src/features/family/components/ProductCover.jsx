@@ -17,17 +17,14 @@ const styles = {
   bandHint: 'truncate font-semibold normal-case tracking-normal opacity-90',
 };
 
-// Color de la banda y texto de ayuda de cada estado
 const BANDS = {
   agotado: {className: 'bg-rojo text-white', hint: 'No se vende hoy', icon: Ban},
   sinStock: {className: 'bg-carbon text-crema', hint: 'Falta un insumo', icon: TriangleAlert},
   pocas: {className: 'bg-mostaza text-carbon', hint: 'Avise a cocina', icon: TriangleAlert},
 };
 
-// Hasta dos iniciales del nombre para la portada sin foto
 const initials = (text) => text.split(/\s+/).filter((word) => word.length > 2).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
 
-// Portada de un producto (foto o carbón, siempre con la subcategoría arriba) con la banda de su estado; "hint" reemplaza el texto de ayuda
 export function ProductCover({product, hint, className}) {
   const status = productStatus(product);
   const muted = status?.key === 'agotado';
