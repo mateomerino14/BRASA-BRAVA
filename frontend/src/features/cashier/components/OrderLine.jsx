@@ -1,40 +1,56 @@
-import {Badge} from '../../../components/atoms/Badge';
+import {cn} from '../../../lib/cn';
 import {formatAmount} from '../../../lib/format';
+import {CONSUMPTION_LABELS} from '../constants/cashier';
 import {exclusionText} from '../utils/cart';
 
 const styles = {
-  line: 'flex flex-col gap-2 py-3',
-  top: 'flex items-start justify-between gap-3',
-  text: 'flex min-w-0 flex-col gap-1',
+  grid: 'grid grid-cols-[2.75rem_minmax(0,1fr)_5.5rem_4.5rem] items-start gap-x-2',
+  head: 'pb-1 text-[11px] font-bold uppercase tracking-wide text-cafe',
+  right: 'text-right',
+  line: 'flex flex-col gap-2 py-2.5',
+  qty: 'font-display text-lg leading-tight text-carbon',
+  text: 'flex min-w-0 flex-col gap-0.5',
   name: 'text-sm font-semibold leading-tight text-carbon',
-  quantity: 'text-cafe',
-  tags: 'flex flex-wrap gap-1',
+  combo: 'text-xs text-cafe',
   exclusions: 'text-xs font-medium text-rojo',
-  subtotal: 'shrink-0 text-sm font-semibold tabular-nums text-carbon',
+  ready: 'text-xs font-semibold text-verde',
+  pending: 'text-xs text-cafe',
+  consumo: 'text-sm text-carbon',
+  subtotal: 'text-right text-sm font-semibold tabular-nums text-carbon',
   actions: 'flex items-center justify-between gap-2',
 };
 
-// Una línea del pedido: nombre, cantidad, consumo, ingredientes quitados y subtotal; "actions" agrega los controles de edición
-export function OrderLine({line, showQuantity = true, actions}) {
+// Encabezado de las columnas del pedido: cantidad, producto, consumo y subtotal
+export function OrderLineHeader() {
+  return (
+    <div aria-hidden className={cn(styles.grid, styles.head)}>
+      <span>Cant.</span>
+      <span>Producto</span>
+      <span>Consumo</span>
+      <span className={styles.right}>Bs</span>
+    </div>
+  );
+}
+
+// Una línea del pedido en columnas: cantidad, producto (con lo que trae el combo, lo quitado y lo listo), consumo y subtotal;
+// "actions" agrega los controles de edición debajo
+export function OrderLine({line, actions}) {
   const combo = line.tipo === 'promocion';
   const removed = exclusionText(line.exclusiones, {combo});
+  const products = (line.productos ?? []).map((item) => `${item.cantidad} ${item.nombre}`).join(' + ');
   return (
     <div className={styles.line}>
-      <div className={styles.top}>
-        <div className={styles.text}>
-          <span className={styles.name}>
-            {showQuantity && <span className={styles.quantity}>{line.cantidad}× </span>}
-            {line.nombre}
-          </span>
-          <span className={styles.tags}>
-            {combo && <Badge tone="brand">Promoción</Badge>}
-            {line.consumo === 'llevar' && <Badge tone="warning">Para llevar</Badge>}
-            {line.listos !== undefined && line.listos === line.cantidad && <Badge tone="success">Listo</Badge>}
-            {line.listos !== undefined && line.listos < line.cantidad && <Badge tone="neutral">{line.listos}/{line.cantidad} listos</Badge>}
-          </span>
+      <div className={styles.grid}>
+        <span className={styles.qty}>{line.cantidad}</span>
+        <span className={styles.text}>
+          <span className={styles.name}>{line.nombre}</span>
+          {products && <span className={styles.combo}>{products}</span>}
           {removed && <span className={styles.exclusions}>{removed}</span>}
-        </div>
-        <span className={styles.subtotal}>Bs {formatAmount(line.subtotal)}</span>
+          {line.listos !== undefined && line.listos === line.cantidad && <span className={styles.ready}>Listo</span>}
+          {line.listos !== undefined && line.listos < line.cantidad && <span className={styles.pending}>{line.listos} de {line.cantidad} listos</span>}
+        </span>
+        <span className={styles.consumo}>{CONSUMPTION_LABELS[line.consumo]}</span>
+        <span className={styles.subtotal}>{formatAmount(line.subtotal)}</span>
       </div>
       {actions && <div className={styles.actions}>{actions}</div>}
     </div>

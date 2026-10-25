@@ -10,7 +10,7 @@ import {countText, formatAmount, formatTime, formatWait} from '../../../lib/form
 import {MAX_QUANTITY} from '../constants/cashier';
 import {groupByShipment, lineSubtotal, orderTitle} from '../utils/cart';
 import {waitMinutes} from '../utils/kitchen';
-import {OrderLine} from './OrderLine';
+import {OrderLine, OrderLineHeader} from './OrderLine';
 
 const styles = {
   bare: 'flex flex-col gap-5',
@@ -120,6 +120,7 @@ export function OrderPanel({order, now, bare = false}) {
                   <p className={styles.shipmentTitle}>Envío {group.envio} · {formatTime(group.creadoEn)} · Registró: {group.cajero}</p>
                   <IconButton icon={Printer} label={`Reimprimir la comanda del envío ${group.envio}`} onClick={() => order.openPrint(group.envio)} />
                 </div>
+                <OrderLineHeader />
                 <ul className={styles.list}>
                   {group.detalles.map((detail) => <li key={detail.id}><OrderLine line={detail} /></li>)}
                 </ul>
@@ -139,27 +140,29 @@ export function OrderPanel({order, now, bare = false}) {
               Toque un producto del menú para agregarlo.
             </p>
           ) : (
-            <ul aria-label="Productos por registrar" className={styles.list}>
-              <AnimatePresence initial={false}>
-                {lines.map((line) => (
-                  <motion.li key={line.key} layout initial={lineIn} animate={lineVisible} exit={lineIn}>
-                    <OrderLine
-                      line={{...line, subtotal: lineSubtotal(line)}}
-                      showQuantity={false}
-                      actions={
-                        <>
-                          <Stepper label={`Cantidad de ${line.nombre}`} value={line.cantidad} max={MAX_QUANTITY} onChange={(cantidad) => order.changeQuantity(line.key, cantidad)} />
-                          <span className={styles.lineActions}>
-                            <IconButton icon={Pencil} tone="edit" label={`Editar ${line.nombre}`} onClick={() => order.editLine(line)} />
-                            <IconButton icon={Trash2} tone="danger" label={`Quitar ${line.nombre}`} onClick={() => order.remove(line.key)} />
-                          </span>
-                        </>
-                      }
-                    />
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </ul>
+            <>
+              <OrderLineHeader />
+              <ul aria-label="Productos por registrar" className={styles.list}>
+                <AnimatePresence initial={false}>
+                  {lines.map((line) => (
+                    <motion.li key={line.key} layout initial={lineIn} animate={lineVisible} exit={lineIn}>
+                      <OrderLine
+                        line={{...line, subtotal: lineSubtotal(line)}}
+                        actions={
+                          <>
+                            <Stepper label={`Cantidad de ${line.nombre}`} value={line.cantidad} max={MAX_QUANTITY} onChange={(cantidad) => order.changeQuantity(line.key, cantidad)} />
+                            <span className={styles.lineActions}>
+                              <IconButton icon={Pencil} tone="edit" label={`Editar ${line.nombre}`} onClick={() => order.editLine(line)} />
+                              <IconButton icon={Trash2} tone="danger" label={`Quitar ${line.nombre}`} onClick={() => order.remove(line.key)} />
+                            </span>
+                          </>
+                        }
+                      />
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
+            </>
           )}
         </div>
 
