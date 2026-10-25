@@ -32,3 +32,7 @@ Los archivos corren en orden y comparten la misma base, porque cada uno sigue lo
 La impresión se reemplaza por un contador (`stubPrinting`) para no abrir el diálogo del navegador, y el correo usa `MAIL_DRIVER=console`.
 
 En GitHub Actions corren en el trabajo **End to end**, con PostgreSQL 16 como servicio; si fallan, el reporte de Playwright queda como artefacto.
+
+## Capturas del manual
+
+`npm run manual:capturas -w e2e` recorre el sistema con la configuración `playwright.manual.config.js` (`manual/capturas.spec.js`) y guarda las capturas en `docs/manual/capturas/`. No corre en GitHub Actions; se usa al cambiar la interfaz.
