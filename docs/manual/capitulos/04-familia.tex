@@ -1,18 +1,42 @@
 \chapter{Familia}
 
-\pantalla{Familia} es el catálogo del local, para consultar sin cambiar nada. Sirve para que todo el personal sepa qué hay, cuánto cuesta y qué lleva cada producto.
+\pantalla{Familia} es el catálogo del local. Es solo de consulta: desde aquí no se cambia nada. Sirve para que todo el personal, incluida cocina, sepa qué se ofrece, cuánto cuesta, qué lleva cada producto y si alcanza el stock.
 
 \captura{familia}{Catálogo de productos}
 
+\section{Buscar en el catálogo}
+
 \begin{itemize}
   \item Arriba se elige entre \boton{Productos} y \boton{Promociones}.
-  \item La búsqueda encuentra productos aunque se escriban sin tildes.
-  \item Los botones de categoría filtran el catálogo, y dentro de cada categoría se puede elegir una subcategoría.
-  \item Las tarjetas avisan el stock: \textbf{Sin stock} si no alcanza para ninguna porción y \textbf{Agotado} si administración lo marcó como no disponible.
+  \item El buscador encuentra productos aunque se escriban sin tildes (\textit{clasica} encuentra \textit{Clásica}).
+  \item Los botones de categoría filtran el catálogo; dentro de una categoría aparecen sus subcategorías para afinar más.
+  \item Lo elegido queda en la dirección de la página, así que al volver atrás el filtro se conserva.
 \end{itemize}
 
-\captura[0.8]{familia-detalle}{Detalle de un producto con su receta}
+Cada tarjeta muestra la subcategoría, la foto, el nombre, la descripción y el precio, y avisa el estado:
 
-Al tocar un producto se ve su precio, su descripción y su \textbf{receta}: cuánto lleva de cada insumo por porción y para cuántas porciones alcanza el stock de cada uno. Si no alcanza para ninguna, el aviso dice qué insumo falta; el producto se puede vender igual, pero conviene avisar a cocina.
+\begin{tabla}{>{\titulos\bfseries}l X}
+  \encabezado{Aviso} & \encabezado{Qué significa} \\
+  Sin stock & Algún insumo de la receta no alcanza para ninguna porción. Se puede vender igual, pero cocina debe saberlo \\
+  Quedan N & Alcanza para 5 porciones o menos: conviene avisar a cocina \\
+  Agotado & Administración lo marcó como no disponible: no se vende hoy \\
+\end{tabla}
 
-En \boton{Promociones} cada combo muestra qué productos incluye, cuánto se ahorra y cuándo aplica (fechas, días y horario).
+\section{Detalle de un producto}
+
+\conventana{0.31}{familia-detalle}{Detalle de un producto con su receta}{%
+Al tocar un producto se abre su ficha con la categoría, el precio, la descripción y la \textbf{receta}:
+
+\begin{itemize}
+  \item \textbf{Lleva por porción}: cuánto de cada insumo usa una porción (por ejemplo, \textit{0,15 kg de carne de res}).
+  \item A la derecha de cada insumo, \textbf{para cuántas porciones alcanza} el stock actual, o \textit{no hay} si se acabó.
+\end{itemize}
+
+Si no alcanza para ninguna porción, un aviso rojo dice qué insumo falta. El producto se puede vender igual, pero conviene avisar a cocina y cargar el stock en \pantalla{Inventario}.
+
+Un producto sin receta lo indica: no descuenta stock al venderse.
+}
+
+\section{Promociones}
+
+En \boton{Promociones} cada combo muestra los productos que incluye con sus cantidades, el precio del combo, cuánto costaría por separado y el porcentaje de ahorro, y \textbf{cuándo aplica}: desde y hasta qué fecha, qué días de la semana y, si tiene, en qué horario (por ejemplo, \textit{Lunes a viernes · 6:00 PM a 9:00 PM}). Las que valen en este momento se destacan como vigentes.
