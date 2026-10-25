@@ -24,7 +24,6 @@ const orderItem = z.object({
 });
 
 export const orderSchema = z.object({
-  idMesero: positiveId('Elija el mesero'),
   items: z
     .array(orderItem, {error: 'Agregue al menos un producto'})
     .min(1, 'Agregue al menos un producto')

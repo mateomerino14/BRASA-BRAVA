@@ -275,13 +275,13 @@ const MINUTE_MS = 60 * 1000;
 
 // Ventas abiertas demo por mesa
 const OPEN_SALES = [
-  ['Mesa 2', 'c.mendoza', 'a.romero', 25, [
+  ['Mesa 2', 'a.romero', 25, [
     ['producto', 'Hamburguesa Clásica', 1, 'local', ['Tomate']],
     ['producto', 'Hamburguesa Clásica', 1, 'local', []],
     ['promocion', 'Combo Brava', 1, 'local', []],
     ['producto', 'Gaseosa 500 ml', 2, 'local', []],
   ]],
-  ['Terraza 1', 'c.mendoza', 'a.romero', 50, [
+  ['Terraza 1', 'a.romero', 50, [
     ['producto', 'Doble Brava', 1, 'local', []],
     ['producto', 'Papas Fritas Clásicas', 2, 'llevar', []],
     ['producto', 'Jugo de Naranja', 1, 'local', []],
@@ -307,15 +307,14 @@ const seedSales = async (db, now) => {
   if (rows[0].total > 0) {
     return false;
   }
-  for (const [mesa, mesero, cajero, minutes, lines] of OPEN_SALES) {
+  for (const [mesa, cajero, minutes, lines] of OPEN_SALES) {
     const openedAt = new Date(now.getTime() - minutes * MINUTE_MS);
     const ids = await db.query(
       `SELECT (SELECT id_mesa FROM mesa WHERE nombre = $1 AND activa = TRUE LIMIT 1) AS id_mesa,
-              (SELECT id_empleado FROM empleado WHERE alias = $2) AS id_mesero,
-              (SELECT id_empleado FROM empleado WHERE alias = $3) AS id_cajero`,
-      [mesa, mesero, cajero],
+              (SELECT id_empleado FROM empleado WHERE alias = $2) AS id_cajero`,
+      [mesa, cajero],
     );
-    const {id_mesa: idMesa, id_mesero: idMesero, id_cajero: idCajero} = ids.rows[0];
+    const {id_mesa: idMesa, id_cajero: idCajero} = ids.rows[0];
     let total = 0;
     const priced = [];
     for (const [tipo, nombre, cantidad, consumo, removed] of lines) {
@@ -324,19 +323,19 @@ const seedSales = async (db, now) => {
       priced.push({...price, nombre, cantidad, consumo, removed});
     }
     const sale = await db.query(
-      `INSERT INTO venta (id_mesa, id_mesero, id_cajero, cajero, total, envios, abierta_en)
-       VALUES ($1, $2, $3, $4, $5::numeric, 1, $6) RETURNING id_venta`,
-      [idMesa, idMesero, idCajero, cajero, total, openedAt],
+      `INSERT INTO venta (id_mesa, id_cajero, cajero, total, envios, abierta_en)
+       VALUES ($1, $2, $3, $4::numeric, 1, $5) RETURNING id_venta`,
+      [idMesa, idCajero, cajero, total, openedAt],
     );
     await db.query(
-      'INSERT INTO venta_envio (id_venta, numero, id_cajero, cajero, id_mesero, creado_en) VALUES ($1, 1, $2, $3, $4, $5)',
-      [sale.rows[0].id_venta, idCajero, cajero, idMesero, openedAt],
+      'INSERT INTO venta_envio (id_venta, numero, id_cajero, cajero, creado_en) VALUES ($1, 1, $2, $3, $4)',
+      [sale.rows[0].id_venta, idCajero, cajero, openedAt],
     );
     for (const line of priced) {
       const detail = await db.query(
-        `INSERT INTO venta_detalle (id_venta, envio, id_producto, id_promocion, nombre, precio_unitario, cantidad, consumo, id_mesero, creado_en)
-         VALUES ($1, 1, $2, $3, $4, $5::numeric, $6, $7, $8, $9) RETURNING id_detalle`,
-        [sale.rows[0].id_venta, line.idProducto, line.idPromocion, line.nombre, line.precio, line.cantidad, line.consumo, idMesero, openedAt],
+        `INSERT INTO venta_detalle (id_venta, envio, id_producto, id_promocion, nombre, precio_unitario, cantidad, consumo, creado_en)
+         VALUES ($1, 1, $2, $3, $4, $5::numeric, $6, $7, $8) RETURNING id_detalle`,
+        [sale.rows[0].id_venta, line.idProducto, line.idPromocion, line.nombre, line.precio, line.cantidad, line.consumo, openedAt],
       );
       for (const insumo of line.removed) {
         await db.query(
