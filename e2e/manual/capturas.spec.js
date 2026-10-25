@@ -2,6 +2,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {expect, test} from '@playwright/test';
 import {loginAs, loginAsDirectorio, stubPrinting} from '../src/session.js';
+import {menu, orderPanel, tableButton} from '../src/cashier.js';
 
 const outputDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../docs/manual/capturas');
 const settleMs = 600;
@@ -42,10 +43,6 @@ const captureRegisterForm = async (page, name, dialogName) => {
   await dialog.getByRole('button', {name: 'Cancelar'}).click();
   await expect(dialog).toBeHidden();
 };
-
-const tableButton = (page, name) => page.getByRole('region', {name: 'Mesas'}).getByRole('button', {name: new RegExp(`^${name},`)});
-const orderPanel = (page) => page.getByRole('region', {name: 'Pedido de la mesa'});
-const menu = (page) => page.getByRole('region', {name: 'Menú'});
 
 test.describe.configure({mode: 'serial'});
 

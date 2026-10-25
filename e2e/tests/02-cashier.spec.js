@@ -1,12 +1,6 @@
 import {expect, test} from '@playwright/test';
 import {loginAs, printCalls, stubPrinting} from '../src/session.js';
-
-const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-const tablesBar = (page) => page.getByRole('region', {name: 'Mesas'});
-const tableButton = (page, name) => tablesBar(page).getByRole('button', {name: new RegExp(`^${escapeRegExp(name)},`)});
-const orderPanel = (page) => page.getByRole('region', {name: 'Pedido de la mesa'});
-const menu = (page) => page.getByRole('region', {name: 'Menú'});
+import {escapeRegExp, menu, orderPanel, tableButton} from '../src/cashier.js';
 
 // Toca un producto del menú, ajusta el diálogo y lo agrega al pedido
 const addItem = async (page, name, {times = 0, remove = [], llevar = false} = {}) => {
