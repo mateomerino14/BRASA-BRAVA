@@ -9,7 +9,14 @@ cd docs/manual
 latexmk -pdf manual.tex      # o: pdflatex manual.tex (dos veces, para el índice)
 ```
 
-Necesita una distribución de LaTeX con los paquetes `babel` (español), `lmodern`, `tcolorbox`, `titlesec` y `fancyhdr` (vienen en TeX Live completo, MiKTeX y Overleaf). El PDF no se sube al repositorio.
+Necesita una distribución de LaTeX con `babel` (español), las fuentes `inter`, `montserrat` y `sourcecodepro`, y los paquetes `tcolorbox`, `titlesec`, `titletoc`, `paracol` y `fancyhdr`. Todo viene en TeX Live completo, MiKTeX (los instala solo al compilar) y Overleaf. El PDF no se sube al repositorio.
+
+## Diseño
+
+- Títulos en **Montserrat** y texto en **Inter**, con la paleta de Brasa Brava (naranja brasa, carbón y hueso).
+- Párrafos sin sangría, separados por un pequeño espacio.
+- Los capítulos siguen en la misma hoja, sin saltos de página.
+- Las pantallas completas flotan para llenar las hojas; las ventanas (formularios y diálogos) van recortadas al lado de su explicación, en dos columnas que pueden seguir en la hoja siguiente.
 
 ## Estructura
 
