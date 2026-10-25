@@ -3,7 +3,6 @@ const round2 = (value) => Math.round(value * PERCENT) / PERCENT;
 
 const exclusionKey = (item) => `${item.idProducto}:${item.idInsumo}`;
 
-// Dos líneas iguales (mismo artículo, consumo e ingredientes quitados) se juntan sumando la cantidad
 export const lineKey = ({tipo, id, consumo, exclusiones}) => [tipo, id, consumo, exclusiones.map(exclusionKey).sort().join(',')].join('|');
 
 export const lineSubtotal = (line) => round2(line.precio * line.cantidad);
@@ -14,7 +13,6 @@ export const cartTotal = (lines) => addAmounts(...lines.map(lineSubtotal));
 
 export const cartUnits = (lines) => lines.reduce((total, line) => total + line.cantidad, 0);
 
-// Agrega una línea al pedido o suma su cantidad a la línea igual que ya exista (sin pasar del máximo)
 export const addLine = (lines, line, max) => {
   const key = lineKey(line);
   const existing = lines.find((item) => item.key === key);
@@ -29,7 +27,6 @@ export const addLine = (lines, line, max) => {
   });
 };
 
-// Reemplaza una línea editada; si queda igual a otra, se juntan
 export const replaceLine = (lines, key, line, max) => addLine(lines.filter((item) => item.key !== key), line, max);
 
 export const setLineQuantity = (lines, key, cantidad) => lines.map((item) => {
@@ -41,7 +38,6 @@ export const setLineQuantity = (lines, key, cantidad) => lines.map((item) => {
 
 export const removeLine = (lines, key) => lines.filter((item) => item.key !== key);
 
-// Texto de ingredientes quitados: "Sin tomate, lechuga" o, en combos, "Doble Brava sin queso cheddar"
 export const exclusionText = (exclusiones, {combo = false} = {}) => {
   if (exclusiones.length === 0) {
     return '';
@@ -59,7 +55,6 @@ export const exclusionText = (exclusiones, {combo = false} = {}) => {
   return [...byProduct.entries()].map(([producto, insumos]) => `${producto} sin ${insumos.join(', ')}`).join(' · ');
 };
 
-// Cuerpo del envío para la API
 export const toOrderPayload = (lines) => ({
   items: lines.map((line) => ({
     tipo: line.tipo,
@@ -70,7 +65,6 @@ export const toOrderPayload = (lines) => ({
   })),
 });
 
-// Agrupa las líneas ya registradas por envío, en orden
 export const groupByShipment = (detalles) => {
   const groups = new Map();
   for (const detail of detalles) {

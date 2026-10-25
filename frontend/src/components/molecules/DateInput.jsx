@@ -43,7 +43,6 @@ const todayIso = () => {
   return toIso(now.getFullYear(), now.getMonth(), now.getDate());
 };
 
-// Las 6 semanas del mes, empezando en lunes, con los días del mes anterior y siguiente para completar
 const monthDays = (year, month) => {
   const firstWeekday = (new Date(year, month, 1).getDay() + WEEK - 1) % WEEK;
   return Array.from({length: DAYS_SHOWN}, (_, index) => {
@@ -52,7 +51,6 @@ const monthDays = (year, month) => {
   });
 };
 
-// Fecha siempre como día/mes/año con un calendario propio (lunes primero); guarda "YYYY-MM-DD"
 export function DateInput({id, value = '', onChange, min, clearable = false, invalid = false, label = 'Fecha', 'aria-describedby': describedBy}) {
   const rootRef = useRef(null);
   const popoverRef = useRef(null);
@@ -65,14 +63,12 @@ export function DateInput({id, value = '', onChange, min, clearable = false, inv
     if (!open) {
       return undefined;
     }
-    // Si el calendario queda bajo el borde del modal, se desplaza para que se vea entero
     popoverRef.current?.scrollIntoView?.({block: 'nearest'});
     const closeOutside = (event) => {
       if (!rootRef.current?.contains(event.target)) {
         setOpen(false);
       }
     };
-    // Escape cierra el calendario sin cerrar el modal que lo contiene
     const closeOnEscape = (event) => {
       if (event.key === 'Escape') {
         event.stopPropagation();

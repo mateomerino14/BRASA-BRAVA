@@ -30,7 +30,6 @@ export function useEmployeeForm({onSaved, api = employeesApi} = {}) {
   });
   const [aliasEdited, setAliasEdited] = useState(false);
 
-  // Al registrar, el usuario se sugiere solo mientras no se haya escrito a mano
   const setField = (field, value) => {
     if (field === 'alias') {
       setAliasEdited(true);

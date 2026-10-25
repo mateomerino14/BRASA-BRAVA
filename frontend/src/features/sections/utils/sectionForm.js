@@ -3,10 +3,8 @@ import {DEFAULT_TABLE_PREFIX, MAX_CAPACITY, MIN_CAPACITY, NAME_MAX_LENGTH} from 
 const MIN_NAME_LENGTH = 2;
 const TRAILING_NUMBER = /^(.*?)(\d+)$/;
 
-// Clave del error de una mesa dentro del objeto de errores del formulario
 export const tableErrorKey = (key) => `mesa:${key}`;
 
-// Valida la sección y cada una de sus mesas con las mismas reglas que la API
 export const validateSection = (values) => {
   const errors = {};
   const nombre = values.nombre.trim();
@@ -36,7 +34,6 @@ export const validateSection = (values) => {
   return errors;
 };
 
-// Propone el nombre de la siguiente mesa siguiendo a la última: "Terraza 4" → "Terraza 5", "B1" → "B2"
 export const nextTableName = (tables) => {
   const last = tables.at(-1)?.nombre.trim() ?? '';
   const match = TRAILING_NUMBER.exec(last);
@@ -67,7 +64,6 @@ export const toPayload = (values) => ({
   mesas: values.mesas.map(({id, nombre, capacidad}) => ({id, nombre: nombre.trim(), capacidad})),
 });
 
-// Agrupa las mesas por capacidad: [{capacidad: 4, mesas: 6}, ...], de la más repetida a la menos
 export const capacityGroups = (tables) => {
   const counts = new Map();
   for (const table of tables) {

@@ -1,6 +1,5 @@
 const ALIAS_MAX_LENGTH = 30;
 
-// Primera palabra en minúsculas, sin tildes ni signos
 const firstWord = (text) => text
   .normalize('NFD')
   .replace(/[̀-ͯ]/g, '')
@@ -9,7 +8,6 @@ const firstWord = (text) => text
   .split(/\s+/)[0]
   .replace(/[^a-z0-9]/g, '');
 
-// Sugiere el usuario a partir del nombre y apellido: "Carlos Andrés" + "Mendoza Rojas" → "c.mendoza"
 export const suggestAlias = (nombre, apellido) => {
   const name = firstWord(nombre);
   const surname = firstWord(apellido);

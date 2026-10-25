@@ -14,7 +14,6 @@ import {
   UsersRound,
 } from 'lucide-react';
 
-// Menú del sidebar. "permission" coincide con las pantallas que devuelve el backend.
 export const NAVIGATION = [
   {label: 'Home', title: 'Página principal', to: '/', icon: House, permission: 'home', end: true},
   {label: 'Familia', title: 'Familia', to: '/familia', icon: Boxes, permission: 'familia'},

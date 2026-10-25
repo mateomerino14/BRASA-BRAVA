@@ -12,7 +12,6 @@ const FADE_PX = 40;
 const EDGE_TOLERANCE = 2;
 const PAGE_SHARE = 0.8;
 
-// Difumina el borde por donde todavía hay elementos escondidos
 const fadeMask = ({start, end}) => {
   const left = start ? `transparent, black ${FADE_PX}px` : 'black, black';
   const right = end ? `black calc(100% - ${FADE_PX}px), transparent` : 'black, black';
@@ -20,8 +19,6 @@ const fadeMask = ({start, end}) => {
   return {maskImage: mask, WebkitMaskImage: mask};
 };
 
-// Fila que se desplaza de lado (chips, mesas): si no entra todo, aparecen flechas y el borde se difumina.
-// "count" vuelve a medir cuando cambia la cantidad de elementos
 export function ScrollRow({label, role, count, className, scrollerClassName, children}) {
   const scrollerRef = useRef(null);
   const [hidden, setHidden] = useState({start: false, end: false});
@@ -51,7 +48,6 @@ export function ScrollRow({label, role, count, className, scrollerClassName, chi
     return () => observer.disconnect();
   }, [measure, count]);
 
-  // Avanza casi un ancho de fila hacia el lado indicado
   const scrollBy = (direction) => {
     const node = scrollerRef.current;
     node.scrollBy({left: direction * node.clientWidth * PAGE_SHARE});

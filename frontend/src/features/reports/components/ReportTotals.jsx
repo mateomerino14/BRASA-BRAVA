@@ -7,7 +7,6 @@ const styles = {
   value: 'font-display text-3xl leading-none text-carbon',
 };
 
-// Totales del período: ventas, total, efectivo, QR y ticket promedio
 export function ReportTotals({resumen}) {
   const tiles = [
     ['Ventas', String(resumen.cantidad)],

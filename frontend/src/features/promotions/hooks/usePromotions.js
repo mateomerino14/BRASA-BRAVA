@@ -33,7 +33,6 @@ export function usePromotions({api = promotionsApi} = {}) {
     ...list,
     promotions: list.items,
     products,
-    // Fecha de hoy según el servidor (zona horaria del local)
     today: list.response.hoy,
     changeStatus: (value) => list.changeFilter('estado', value),
     changeVigencia: (value) => list.changeFilter('vigencia', value),

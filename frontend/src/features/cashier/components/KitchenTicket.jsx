@@ -29,7 +29,6 @@ const exclusionNote = (detail) => {
   return [...byProduct.entries()].map(([producto, insumos]) => `${producto} sin: ${insumos.join(', ')}`);
 };
 
-// Comanda de cocina de un envío: solo lo nuevo de ese envío, sin precios, con L (local) o LL (para llevar)
 export function KitchenTicket({mesa, venta, envio, printedAt}) {
   const comanda = venta.comandas.find((item) => item.envio === envio);
   const lines = venta.detalles.filter((item) => item.envio === envio);

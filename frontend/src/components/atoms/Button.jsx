@@ -40,7 +40,6 @@ export function Button({
   ...props
 }) {
   const isDisabled = disabled || loading;
-  // "action" pone el ícono estándar de esa acción (cancelar, guardar, imprimir…) cuando no se pasa uno propio
   let leading = icon;
   const ActionIcon = ACTION_ICONS[action];
   if (!leading && ActionIcon) {

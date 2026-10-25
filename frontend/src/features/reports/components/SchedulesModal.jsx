@@ -27,7 +27,6 @@ const styles = {
 
 const when = (date) => `${formatDayMonthYear(isoDate(new Date(date)))} ${formatTime(date)}`;
 
-// Último envío, si salió al encender el sistema o si falló, y el próximo
 const statusOf = (item) => {
   let next = 'pausado';
   if (item.proximo) {
@@ -45,7 +44,6 @@ const statusOf = (item) => {
   return {tone: '', Icon: CheckCircle2, text: `Enviado el ${when(item.ultimoEnvioEn)} · ${next}`};
 };
 
-// Envíos programados del reporte de ventas (solo el DIRECTORIO)
 export function SchedulesModal({schedules}) {
   return (
     <Modal

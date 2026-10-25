@@ -41,7 +41,6 @@ const styles = {
   failed: 'flex flex-wrap items-center justify-between gap-3 rounded-card border border-dashed border-arena bg-white px-4 py-3 text-sm text-cafe',
 };
 
-// Frase con lo que alcanza el stock de hoy; "missing" son los insumos que no hay
 const portionsMessage = (product, missing) => {
   if (!product.disponible) {
     return {tone: 'none', text: 'Está marcado como agotado: hoy no se vende en Caja.'};
@@ -62,7 +61,6 @@ const portionsMessage = (product, missing) => {
   return {tone: 'muted', text: `Con el stock de hoy alcanza para ${countText(product.porciones, 'porción', 'porciones')}.`};
 };
 
-// Lo que alcanza un insumo, dicho corto: "no hay", "de baja" o "para 36"
 const reachText = (item) => {
   if (!item.activo) {
     return 'de baja';
@@ -75,8 +73,7 @@ const reachText = (item) => {
 
 const sortedRecipe = (recipe) => [...recipe].sort((a, b) => a.alcanza - b.alcanza);
 
-// Portada del detalle: si falta algún insumo la banda dice cuál
-export function ProductDetailCover({product}) {
+function ProductDetailCover({product}) {
   const missing = (product.receta ?? []).filter((item) => item.alcanza === 0).map((item) => item.nombre.toLowerCase());
   let hint;
   if (product.disponible && product.porciones === 0 && missing.length > 0) {
@@ -129,7 +126,6 @@ const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'vierne
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const PLURAL_DAY = {sábado: 'sábados', domingo: 'domingos'};
 
-// Los días en una frase: "todos los días", "de lunes a viernes", "los martes", "los martes y jueves"
 const daysPhrase = (days) => {
   const selected = WEEK_ORDER.filter((index) => days[index] === '1').map((index) => DAY_NAMES[index]);
   if (selected.length === WEEK_ORDER.length) {
@@ -148,7 +144,6 @@ const daysPhrase = (days) => {
   return `los ${names.slice(0, -1).join(', ')} y ${names.at(-1)}`;
 };
 
-// Cuándo se vende, dicho en una frase: "Se vende de lunes a viernes, del 3 oct al 9 nov."
 const whenText = (promotion) => {
   let dates = `desde el ${formatDate(promotion.fechaInicio)}`;
   if (promotion.fechaFin) {

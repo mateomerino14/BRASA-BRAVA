@@ -13,7 +13,6 @@ const styles = {
 };
 
 const fillTransition = {type: 'spring', stiffness: 120, damping: 20};
-// Barra que muestra cuánto stock queda comparado con el mínimo
 export function LevelBar({value, minimum, tone = 'success', className}) {
   const percent = `${Math.round(levelRatio(value, minimum) * 100)}%`;
   return (

@@ -13,7 +13,6 @@ export const TYPE_LABELS = {
   ventas: 'Ventas',
 };
 
-// Texto de la pestaña cuando no hay nada para eliminar
 export const EMPTY_TEXT = {
   empleados: 'No hay empleados dados de baja.',
   cargos: 'No hay cargos dados de baja.',

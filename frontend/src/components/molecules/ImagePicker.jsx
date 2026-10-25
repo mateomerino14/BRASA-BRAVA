@@ -26,7 +26,6 @@ const styles = {
 const fadeIn = {opacity: 0, scale: 1.04};
 const fadeVisible = {opacity: 1, scale: 1};
 
-// fill: en pantallas medianas la zona crece hasta igualar el alto de los campos que tiene al lado
 export function ImagePicker({label = 'Imagen', file = null, url = null, onChange, maxMb = DEFAULT_MAX_MB, error, fill = false, className}) {
   const inputId = useId();
   const inputRef = useRef(null);

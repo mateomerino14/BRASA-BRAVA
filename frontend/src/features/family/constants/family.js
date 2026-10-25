@@ -2,5 +2,4 @@ export const PRODUCTS_VIEW = 'productos';
 export const PROMOTIONS_VIEW = 'promociones';
 export const ALL = 'todas';
 
-// Desde cuántas porciones o menos se avisa que quedan pocas
 export const LOW_PORTIONS = 5;

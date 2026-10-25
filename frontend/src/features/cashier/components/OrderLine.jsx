@@ -20,7 +20,6 @@ const styles = {
   actions: 'flex items-center justify-between gap-2',
 };
 
-// Encabezado de las columnas del pedido: cantidad, producto, consumo y subtotal
 export function OrderLineHeader() {
   return (
     <div aria-hidden className={cn(styles.grid, styles.head)}>
@@ -32,8 +31,6 @@ export function OrderLineHeader() {
   );
 }
 
-// Una línea del pedido en columnas: cantidad, producto (con lo que trae el combo, lo quitado y lo listo), consumo y subtotal;
-// "actions" agrega los controles de edición debajo
 export function OrderLine({line, actions}) {
   const combo = line.tipo === 'promocion';
   const removed = exclusionText(line.exclusiones, {combo});

@@ -29,7 +29,6 @@ const VIEWS = [
 const cardIn = {opacity: 0, y: 12};
 const cardVisible = {opacity: 1, y: 0};
 
-// Familia: catálogo del local para que el personal vea qué se ofrece, a qué precio y cuánto alcanza con el stock
 export function FamilyPage() {
   const family = useFamily();
   const {filters} = family;

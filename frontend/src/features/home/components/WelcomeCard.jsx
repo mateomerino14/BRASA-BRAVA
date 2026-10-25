@@ -8,7 +8,7 @@ import localPoster from '../../../assets/local/local.jpg';
 
 const styles = {
   board: 'relative grid overflow-hidden rounded-3xl bg-carbon bg-grill text-crema shadow-card sm:grid-cols-[1fr_48%]',
-  coal: 'pointer-events-none absolute -bottom-20 -left-16 h-40 w-64 rounded-full bg-[radial-gradient(closest-side,rgb(247_148_29/0.45),transparent)] blur-sm animate-coal',
+  coal: 'pointer-events-none absolute -bottom-20 -left-16 h-40 w-64 rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-brasa)_45%,transparent),transparent)] blur-sm animate-coal',
   text: 'relative self-center px-6 py-6 sm:px-8 sm:py-8',
   greeting: 'font-accent text-3xl leading-tight sm:text-4xl',
   date: 'mt-2 font-semibold text-mostaza',

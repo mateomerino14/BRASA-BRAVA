@@ -3,7 +3,6 @@ import {desktopBridge} from '../lib/desktopPrinting';
 
 const emptyChoice = {cocina: null, caja: null};
 
-// Estado compartido por todas las pantallas: se lee una vez y se avisa a todas cuando cambia
 let shared = {loaded: false, printers: emptyChoice};
 const listeners = new Set();
 
@@ -25,7 +24,6 @@ const load = async () => {
   }
 };
 
-// Impresoras elegidas en la app de escritorio para cocina y caja (en el navegador no hay ninguna)
 export function useDesktopPrinters() {
   const [state, setState] = useState(shared);
   const isDesktop = Boolean(desktopBridge());
@@ -49,7 +47,6 @@ export function useDesktopPrinters() {
   return {isDesktop, printers: state.printers, save, list: () => desktopBridge().listPrinters()};
 }
 
-// Para pruebas: olvida lo leído y vuelve a pedirlo
 export const resetDesktopPrinters = () => {
   shared = {loaded: false, printers: emptyChoice};
 };

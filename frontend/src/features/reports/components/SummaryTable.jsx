@@ -15,7 +15,6 @@ const styles = {
 const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const weekday = (iso) => WEEKDAYS[new Date(`${iso}T12:00:00`).getDay()];
 
-// Una fila por día del período con efectivo, QR y total, y la fila del total
 export function SummaryTable({report}) {
   const {resumen} = report;
   return (

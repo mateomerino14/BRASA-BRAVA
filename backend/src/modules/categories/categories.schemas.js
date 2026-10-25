@@ -29,6 +29,6 @@ export const statusSchema = z.object({activo: z.boolean({error: 'Indique el esta
 export const idParamSchema = z.object({id: z.coerce.number().int().positive('Categoría inválida')});
 
 // Columnas por las que se puede ordenar el listado
-export const CATEGORY_SORT_KEYS = ['nombre', 'productos', 'estado'];
+const CATEGORY_SORT_KEYS = ['nombre', 'productos', 'estado'];
 
 export const listQuerySchema = baseListQuery(CATEGORY_SORT_KEYS);

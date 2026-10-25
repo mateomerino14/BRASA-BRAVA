@@ -29,12 +29,14 @@ export const createDeletionRepository = (db) => ({
       WHERE e.activo = FALSE ORDER BY e.nombre, e.apellido`,
   )).rows,
 
+  // Cargos dados de baja con cuántos empleados arrastran
   inactiveRoles: async () => (await db.query(
     `SELECT c.id_cargo AS id, c.nombre, COALESCE(n.empleados, 0)::int AS empleados
        FROM cargo c LEFT JOIN (SELECT id_cargo, COUNT(*) AS empleados FROM empleado GROUP BY id_cargo) n ON n.id_cargo = c.id_cargo
       WHERE c.activo = FALSE ORDER BY c.nombre`,
   )).rows,
 
+  // Secciones dadas de baja con sus mesas y ventas
   inactiveSections: async () => (await db.query(
     `SELECT s.id_seccion AS id, s.nombre, COALESCE(t.mesas, 0)::int AS mesas, COALESCE(n.ventas, 0)::int AS ventas
        FROM seccion s
@@ -43,6 +45,7 @@ export const createDeletionRepository = (db) => ({
       WHERE s.activa = FALSE ORDER BY s.nombre`,
   )).rows,
 
+  // Productos dados de baja con en cuántas ventas aparecen
   inactiveProducts: async () => (await db.query(
     `SELECT p.id_producto AS id, p.nombre, c.nombre AS categoria, COALESCE(n.ventas, 0)::int AS ventas
        FROM producto p JOIN subcategoria s ON s.id_subcategoria = p.id_subcategoria JOIN categoria c ON c.id_categoria = s.id_categoria
@@ -50,6 +53,7 @@ export const createDeletionRepository = (db) => ({
       WHERE p.activo = FALSE ORDER BY p.nombre`,
   )).rows,
 
+  // Categorías dadas de baja con cuántos productos tienen
   inactiveCategories: async () => (await db.query(
     `SELECT c.id_categoria AS id, c.nombre, COALESCE(n.productos, 0)::int AS productos
        FROM categoria c
@@ -58,12 +62,14 @@ export const createDeletionRepository = (db) => ({
       WHERE c.activa = FALSE ORDER BY c.nombre`,
   )).rows,
 
+  // Insumos dados de baja con en cuántas recetas están
   inactiveIngredients: async () => (await db.query(
     `SELECT i.id_insumo AS id, i.nombre, COALESCE(n.recetas, 0)::int AS recetas
        FROM insumo i LEFT JOIN (SELECT id_insumo, COUNT(*) AS recetas FROM receta GROUP BY id_insumo) n ON n.id_insumo = i.id_insumo
       WHERE i.activo = FALSE ORDER BY i.nombre`,
   )).rows,
 
+  // Promociones dadas de baja con en cuántas ventas se vendieron
   inactivePromotions: async () => (await db.query(
     `SELECT p.id_promocion AS id, p.nombre, COALESCE(n.ventas, 0)::int AS ventas
        FROM promocion p LEFT JOIN (SELECT id_promocion, COUNT(DISTINCT id_venta) AS ventas FROM venta_detalle GROUP BY id_promocion) n ON n.id_promocion = p.id_promocion
@@ -100,13 +106,17 @@ export const createDeletionRepository = (db) => ({
   // Mesas de las secciones
   tablesOf: (sectionIds) => withIds(db, sectionIds, (list) => `SELECT id_mesa AS id, nombre FROM mesa WHERE id_seccion IN (${list}) ORDER BY nombre`),
 
-  // Ventas que dependen de cada tipo de registro
+  // Ventas que abrió, a las que agregó un envío o que cobró cada empleado
   salesOfEmployees: async (ids) => idsOf(await withIds(db, ids, (list) => `SELECT id_venta FROM venta WHERE id_cajero IN (${list}) OR id_cobrador IN (${list})
      UNION SELECT id_venta FROM venta_envio WHERE id_cajero IN (${list})`), 'id_venta'),
+  // Ventas hechas en las mesas indicadas
   salesOfTables: async (ids) => idsOf(await withIds(db, ids, (list) => `SELECT id_venta FROM venta WHERE id_mesa IN (${list})`), 'id_venta'),
+  // Ventas donde se vendió o se quitó algo de los productos
   salesWithProducts: async (ids) => idsOf(await withIds(db, ids, (list) => `SELECT id_venta FROM venta_detalle WHERE id_producto IN (${list})
      UNION SELECT d.id_venta FROM venta_detalle_exclusion x JOIN venta_detalle d ON d.id_detalle = x.id_detalle WHERE x.id_producto IN (${list})`), 'id_venta'),
+  // Ventas donde se vendieron las promociones
   salesWithPromotions: async (ids) => idsOf(await withIds(db, ids, (list) => `SELECT id_venta FROM venta_detalle WHERE id_promocion IN (${list})`), 'id_venta'),
+  // Ventas donde se quitaron los insumos
   salesWithIngredients: async (ids) => idsOf(await withIds(db, ids, (list) => `SELECT d.id_venta FROM venta_detalle_exclusion x JOIN venta_detalle d ON d.id_detalle = x.id_detalle WHERE x.id_insumo IN (${list})`), 'id_venta'),
 
   // Datos de las ventas para mostrarlas y saber si alguna sigue abierta

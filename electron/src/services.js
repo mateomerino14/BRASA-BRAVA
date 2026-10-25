@@ -23,7 +23,7 @@ export const findFreePort = () =>
   });
 
 // Arranca el Postgres embebido en la carpeta de datos (lo inicializa la primera vez)
-export const startDatabase = async ({dataDir, password}) => {
+const startDatabase = async ({dataDir, password}) => {
   const databaseDir = path.join(dataDir, 'pgdata');
   const port = await findFreePort();
   const postgres = new EmbeddedPostgres({

@@ -9,7 +9,7 @@ const LINE = '#d4d4d4';
 const SOFT = '#f3f3f3';
 const CELL_PAD = 4;
 const TITLES = {resumen: 'Resumen de ventas', detalle: 'Ventas detalladas'};
-const CONSUMO = {local: 'Local', llevar: 'Para llevar'};
+const CONSUMPTION_LABELS = {local: 'Local', llevar: 'Para llevar'};
 
 // Ancho útil de la página
 const usable = (doc) => doc.page.width - MARGIN * 2;
@@ -137,7 +137,7 @@ const salesDetail = (doc, report, timeZone) => {
         if (line.productos) {
           product = `${line.nombre}\n${line.productos}`;
         }
-        row(doc, columns, [`${envio.numero} · ${clock(envio.creadoEn, timeZone)}\n${envio.cajero}`, line.cantidad, product, CONSUMO[line.consumo], line.sin || '—', money(line.subtotal)]);
+        row(doc, columns, [`${envio.numero} · ${clock(envio.creadoEn, timeZone)}\n${envio.cajero}`, line.cantidad, product, CONSUMPTION_LABELS[line.consumo], line.sin || '—', money(line.subtotal)]);
       }
     }
   }

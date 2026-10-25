@@ -9,7 +9,6 @@ const styles = {
 
 const LABELS = {cocina: 'COCINA', caja: 'CAJA'};
 
-// Hoja de prueba para comprobar que la ticketera elegida imprime bien el ancho de 80 mm
 export function PrinterTestTicket({destino, printer, printedAt}) {
   return (
     <article aria-label="Hoja de prueba" className={styles.ticket}>

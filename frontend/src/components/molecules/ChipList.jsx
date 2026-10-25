@@ -12,7 +12,6 @@ const chipVisible = {opacity: 1, y: 0, scale: 1};
 const STAGGER_SECONDS = 0.04;
 const DEFAULT_VISIBLE = 3;
 
-// Lista de chips que muestra los primeros y despliega el resto con "+N más" y entrada escalonada
 export function ChipList({label, items, visible = DEFAULT_VISIBLE, chipClassName = styles.chip}) {
   const [expanded, setExpanded] = useState(false);
   const hidden = items.length - visible;

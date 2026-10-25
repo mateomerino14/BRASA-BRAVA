@@ -28,7 +28,6 @@ const styles = {
   empty: 'rounded-3xl border border-dashed border-arena bg-white px-4 py-10 text-center text-sm text-cafe',
 };
 
-// Reimpresión del ticket desde el reporte (solo con Caja), con el mismo límite de impresiones
 function useReprint() {
   const toast = useToast();
   const authorization = usePrintAuthorization();
@@ -45,7 +44,6 @@ function useReprint() {
   return {authorization, receipt, open, close: () => setReceipt((current) => ({...current, open: false}))};
 }
 
-// Reportes de ventas: resumen por día o ventas detalladas de un período, con PDF, correo y envíos programados
 export function ReportsPage() {
   const {user} = useAuth();
   const reports = useReports();

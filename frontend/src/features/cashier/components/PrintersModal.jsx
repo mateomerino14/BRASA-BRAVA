@@ -22,7 +22,6 @@ const DESTINATIONS = [
 
 const TEST_TONES = {ok: 'success', error: 'error', sending: 'info'};
 
-// Elige en qué impresora de Windows sale cada documento (solo en la app de escritorio)
 export function PrintersModal({settings}) {
   const options = settings.installed.map((item) => {
     let label = item.displayName;

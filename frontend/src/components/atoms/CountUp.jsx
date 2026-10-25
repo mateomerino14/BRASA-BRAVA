@@ -3,7 +3,6 @@ import {animate, useReducedMotionConfig} from 'motion/react';
 
 const DURATION_S = 0.9;
 
-// Número que sube desde el valor anterior hasta el nuevo; con movimiento reducido cambia de golpe
 export function CountUp({value, format = String}) {
   const reduce = useReducedMotionConfig();
   let initial = 0;

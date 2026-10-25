@@ -10,7 +10,6 @@ const styles = {
   send: 'md:mt-[30px]',
 };
 
-// Descargar el PDF del reporte en pantalla o enviarlo al correo que se escriba
 export function ReportActions({reports}) {
   const submit = (event) => {
     event.preventDefault();

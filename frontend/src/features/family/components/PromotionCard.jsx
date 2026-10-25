@@ -20,10 +20,8 @@ const styles = {
 
 const hoverLift = {y: -4};
 
-// Los productos del combo en una línea: "1 Doble Brava + 1 Gaseosa 500 ml"
 const productsLine = (promotion) => promotion.productos.map((item) => `${item.cantidad} ${item.nombre}`).join(' + ');
 
-// Tarjeta de promoción: el nombre sobre la portada, los productos una sola vez, el ahorro y el precio
 export function PromotionCard({promotion, onOpen}) {
   const off = !promotion.disponible;
   return (

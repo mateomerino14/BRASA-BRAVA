@@ -8,7 +8,6 @@ export const PAYMENT_LABELS = {efectivo: 'Efectivo', qr: 'QR'};
 
 export const emptyCheckout = {metodo: 'efectivo', recibido: '', efectivo: ''};
 
-// Montos rápidos para el efectivo recibido: el exacto y los billetes redondos que lo cubren
 export const cashSuggestions = (total) => {
   const options = [total];
   for (const bill of BILLS) {
@@ -20,7 +19,6 @@ export const cashSuggestions = (total) => {
   return options.slice(0, 4);
 };
 
-// Lee el efectivo recibido; vacío significa "paga exacto"
 const readReceived = (text, cash, errors) => {
   if (!String(text).trim()) {
     return {recibido: null, cambio: 0};
@@ -37,7 +35,6 @@ const readReceived = (text, cash, errors) => {
   return {recibido: received, cambio: addAmounts(received, -cash)};
 };
 
-// Arma el cobro desde el formulario: pagos para la API, cambio y errores por campo
 export const buildCheckout = (values, total) => {
   const errors = {};
   if (values.metodo === 'qr') {
@@ -61,7 +58,6 @@ export const buildCheckout = (values, total) => {
   return {errors, cambio, payload: {pagos, recibido}};
 };
 
-// Líneas del ticket: las iguales (nombre, precio y consumo) se juntan sumando cantidad
 export const receiptLines = (detalles) => {
   const lines = new Map();
   for (const detail of detalles) {
@@ -74,7 +70,6 @@ export const receiptLines = (detalles) => {
   return [...lines.values()];
 };
 
-// Parte por QR de un cobro mixto según el efectivo escrito (0 si todavía no es válido)
 export const parseCashSplit = (values, total) => {
   const cash = parseDecimal(values.efectivo);
   if (values.metodo !== 'mixto' || Number.isNaN(cash) || cash <= 0 || cash >= total) {

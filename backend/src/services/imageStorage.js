@@ -15,7 +15,7 @@ const SIGNATURES = [
 const STORED_NAME = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp)$/;
 
 // Detecta el formato real de una imagen a partir de sus primeros bytes
-export const detectImageType = (buffer) => SIGNATURES.find((signature) => signature.matches(buffer))?.ext ?? null;
+const detectImageType = (buffer) => SIGNATURES.find((signature) => signature.matches(buffer))?.ext ?? null;
 
 // Guarda imágenes en una carpeta local y las expone bajo /uploads
 export const createImageStorage = (directory) => {

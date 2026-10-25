@@ -11,14 +11,13 @@ const levelOf = (stockActual, stockMinimo) => {
 
 const ingredient = (id, nombre, unidad, stockActual, stockMinimo, extra = {}) => ({id, nombre, unidad, stockActual, stockMinimo, nivel: levelOf(stockActual, stockMinimo), activo: true, ...extra});
 
-export const INGREDIENTS = [
+const INGREDIENTS = [
   ingredient(1, 'Carne de res', 'kg', 12, 5, {unidadFija: true}),
   ingredient(2, 'Queso cheddar', 'kg', 1.5, 2),
   ingredient(3, 'Lechuga', 'unidad', 0, 5),
   ingredient(4, 'Aceite', 'l', 6, 4, {activo: false}),
 ];
 
-// Backend falso en memoria para las pruebas de la pantalla de inventario
 export const createStockBackend = () => {
   const store = INGREDIENTS.map((item) => ({...item}));
   const calls = {list: [], saved: []};

@@ -9,7 +9,6 @@ import {AppShell} from './AppShell';
 import {RequireAuth, RequirePermission} from './guards';
 import {PageLoader} from './PageLoader';
 
-// Cada pantalla de módulo se descarga recién cuando se abre, así el inicio carga solo lo necesario
 const lazyPage = (load, name) => lazy(() => load().then((module) => ({default: module[name]})));
 
 const PAGES = {

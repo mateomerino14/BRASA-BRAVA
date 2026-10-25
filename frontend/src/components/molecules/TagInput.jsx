@@ -20,7 +20,6 @@ const chipVisible = {opacity: 1, scale: 1};
 const chipSpring = {type: 'spring', stiffness: 500, damping: 30};
 const SEPARATOR_KEYS = ['Enter', ','];
 
-// Lista editable de etiquetas: Enter o coma agrega, Retroceso en vacío borra la última
 export function TagInput({tags, onAdd, onRemove, max, placeholder = 'Escriba y presione Enter', invalid = false, id, 'aria-describedby': describedBy, className}) {
   const fallbackId = useId();
   const [draft, setDraft] = useState('');

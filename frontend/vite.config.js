@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // La API sirve el build (web y escritorio), así que las rutas de assets son absolutas.
   base: '/',
   server: {
     port: 5173,

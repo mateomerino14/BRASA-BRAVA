@@ -29,7 +29,6 @@ const TABLES = [
   {id: 20, nombre: 'Terraza 1', capacidad: 6, seccion: {id: 2, nombre: 'Terraza'}},
 ];
 
-// Productos de un combo, como los manda la API en las líneas de promoción
 const comboProducts = (line) => {
   if (line.tipo !== 'promocion') {
     return [];
@@ -45,7 +44,6 @@ const detail = (id, envio, line, cajero, creadoEn) => ({
   consumo: line.consumo, cajero, creadoEn, exclusiones: line.exclusiones ?? [],
 });
 
-// Busca un producto o una promoción del catálogo para armar una línea con nombre y precio
 const lineFrom = (item) => {
   if (item.tipo === 'promocion') {
     const promo = CATALOG.promociones.find((entry) => entry.id === item.id);
@@ -61,7 +59,6 @@ const lineFrom = (item) => {
   }))};
 };
 
-// Backend falso en memoria para las pruebas de Caja: Mesa 2 ya tiene el pedido Nº 7 abierto
 export const createCashierBackend = ({now = Date.now()} = {}) => {
   const openedAt = new Date(now - 25 * MINUTE_MS).toISOString();
   const sales = {
@@ -79,7 +76,6 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
   const closed = [];
   let taxLink = 'https://siat.impuestos.gob.bo/v2/launcher/';
 
-  // Ticket de una venta como lo arma la API: líneas iguales juntas, pagos, recibido y cambio
   const ticketOf = (sale, table, payment = {pagos: [], recibido: null, cambio: null}) => {
     const lines = new Map();
     for (const item of sale.detalles) {
@@ -141,7 +137,6 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       return [200, {enlaceImpuestos: taxLink}];
     },
   };
-  // Tickets de las ventas cobradas (los ids de prueba son chicos)
   for (let id = 1; id <= MAX_TEST_SALE; id += 1) {
     handlers[`GET /sales/${id}/receipt`] = () => {
       const ticket = closed.find((item) => item.id === id);
@@ -151,7 +146,6 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       return [200, {ticket}];
     };
   }
-  // Impresiones del ticket: las tres primeras salen, desde la cuarta pide un empleado de Caja (admin con Brasa2026)
   const printsOf = {};
   for (let id = 1; id <= MAX_TEST_SALE; id += 1) {
     handlers[`POST /sales/${id}/prints`] = (body) => {
@@ -174,7 +168,6 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       return [201, {numero: item.numero, impresiones: printsOf[id]}];
     };
   }
-  // Marcar listos: por línea (sumar, restar, todos) o por envío
   const allLines = () => Object.values(sales).flatMap((sale) => sale.detalles);
   const LIMITS = {sumar: (line) => Math.min(line.cantidad, line.listos + 1), restar: (line) => Math.max(0, line.listos - 1), todos: (line) => line.cantidad, ninguno: () => 0};
   for (let id = 1; id <= 200; id += 1) {
@@ -200,7 +193,6 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       };
     }
   }
-  // Marca todo lo pedido como listo en cocina
   control.readyAll = () => Object.values(sales).forEach((sale) => sale.detalles.forEach((item) => {
     item.listos = item.cantidad;
   }));

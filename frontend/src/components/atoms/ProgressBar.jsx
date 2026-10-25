@@ -14,7 +14,6 @@ const styles = {
 
 const fillTransition = {type: 'spring', stiffness: 140, damping: 22};
 
-// Barra de avance de "value" sobre "max" (unidades listas de un pedido, pasos completados)
 export function ProgressBar({value, max, label, tone = 'brand', className}) {
   let ratio = 0;
   if (max > 0) {

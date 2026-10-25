@@ -8,10 +8,8 @@ const PERCENT = 100;
 const parseNumber = (text) => Number(String(text).trim().replace(',', '.'));
 const round2 = (value) => Math.round(value * PERCENT) / PERCENT;
 
-// Clave del error de una fila de producto
 export const productErrorKey = (key) => `producto:${key}`;
 
-// Valores vacíos con la fecha de hoy del local como inicio
 export const emptyPromotion = (today) => ({
   nombre: '',
   descripcion: '',
@@ -25,7 +23,6 @@ export const emptyPromotion = (today) => ({
   productos: [],
 });
 
-// Precio regular de los productos elegidos, precio con la promoción y ahorro (null si aún no se puede calcular)
 export const previewPricing = (values, productsById) => {
   const items = values.productos.filter((row) => productsById.has(row.idProducto));
   if (items.length === 0) {
@@ -53,7 +50,6 @@ const validateValue = (values, pricing) => {
   return '';
 };
 
-// Valida la promoción con las mismas reglas que la API
 export const validatePromotion = (values, {productsById = new Map()} = {}) => {
   const errors = {};
   const nombre = values.nombre.trim();
@@ -106,7 +102,6 @@ export const validatePromotion = (values, {productsById = new Map()} = {}) => {
 
 const toText = (value) => String(value).replace('.', ',');
 
-// Por ahora solo hay combos: una promoción antigua de descuento se abre como combo y pide su precio
 const comboPrice = (promotion) => {
   if (promotion.tipo === 'combo') {
     return toText(promotion.valor);
@@ -127,7 +122,6 @@ export const toFormValues = (promotion) => ({
   productos: promotion.productos.map((item) => ({key: `producto-${item.idProducto}`, idProducto: String(item.idProducto), cantidad: item.cantidad})),
 });
 
-// El cuerpo para la API (por ahora siempre combo)
 export const toPayload = (values) => ({
   nombre: values.nombre.trim(),
   descripcion: values.descripcion.trim(),

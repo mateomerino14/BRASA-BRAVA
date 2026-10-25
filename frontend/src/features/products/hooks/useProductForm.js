@@ -22,7 +22,6 @@ export function useProductForm({onSaved, categories = [], api = productsApi} = {
     withImage: true,
   });
 
-  // Al elegir categoría se reinicia la subcategoría; si solo tiene una, se elige sola
   const changeCategory = (idCategoria) => {
     const category = categories.find((item) => String(item.id) === idCategoria);
     let idSubcategoria = '';
