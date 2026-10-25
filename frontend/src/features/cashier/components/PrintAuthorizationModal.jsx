@@ -13,7 +13,7 @@ const styles = {
   actions: 'grid gap-3 sm:grid-cols-2',
 };
 
-// Pide el usuario y la contraseña de un empleado autorizado para imprimir el ticket otra vez
+// Pide el usuario y la contraseña de un empleado con acceso a Caja para imprimir el ticket otra vez
 export function PrintAuthorizationModal({authorization}) {
   const {request, values, errors} = authorization;
   const ticket = request?.ticket;
@@ -26,7 +26,7 @@ export function PrintAuthorizationModal({authorization}) {
       open={Boolean(request)}
       onClose={authorization.cancel}
       title={`Ticket ya impreso ${request?.impresiones.length ?? 0} veces`}
-      description={ticket && `Pedido Nº ${ticket.numero} · ${ticket.mesa} · Bs ${formatAmount(ticket.total)}. Para imprimirlo otra vez, un empleado autorizado debe ingresar su usuario y contraseña.`}
+      description={ticket && `Pedido Nº ${ticket.numero} · ${ticket.mesa} · Bs ${formatAmount(ticket.total)}. Para imprimirlo otra vez, un empleado con acceso a Caja debe ingresar su usuario y contraseña; quedará registrado que él lo autorizó.`}
       size="sm"
     >
       <form noValidate onSubmit={submit} className={styles.form}>

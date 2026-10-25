@@ -25,7 +25,7 @@ describe('Gestión de cargos', () => {
     expect(within(screens).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Familia', 'Caja']);
     expect(within(mesero).getByLabelText('2 empleados')).toBeInTheDocument();
     const admin = within(rowOf(table, 'Administrador')).getByRole('list', {name: 'Pantallas de Administrador'});
-    expect(within(admin).getByRole('button', {name: '+8 más'})).toBeInTheDocument();
+    expect(within(admin).getByRole('button', {name: '+7 más'})).toBeInTheDocument();
     expect(within(rowOf(table, 'Delivery')).getByText('Inactivo')).toBeInTheDocument();
   });
 
@@ -40,10 +40,9 @@ describe('Gestión de cargos', () => {
     await user.type(within(dialog).getByLabelText(/^Nombre del cargo/), 'Bartender');
     const group = within(dialog).getByRole('group', {name: /Pantallas que puede ver/});
     await user.click(within(group).getAllByRole('button', {name: 'Marcar todas'})[0]);
-    expect(within(group).getByRole('checkbox', {name: /Autorizar reimpresiones/})).toBeChecked();
-    await user.click(within(group).getByRole('checkbox', {name: /Autorizar reimpresiones/}));
+    expect(within(group).getByRole('checkbox', {name: /^Caja/})).toBeChecked();
     await user.click(within(group).getByRole('checkbox', {name: /Inventario/}));
-    expect(within(dialog).getByText('marcadas', {exact: false})).toHaveTextContent('3 de 11 marcadas');
+    expect(within(dialog).getByText('marcadas', {exact: false})).toHaveTextContent('3 de 10 marcadas');
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
 
     expect(await screen.findByText('Se registró el cargo Bartender')).toBeInTheDocument();
@@ -56,10 +55,10 @@ describe('Gestión de cargos', () => {
     const dialog = await screen.findByRole('dialog', {name: 'Modificar cargo'});
     expect(within(dialog).getByRole('checkbox', {name: /^Caja/})).toBeChecked();
     expect(within(dialog).getByText(/afecta a 2 empleados/)).toBeInTheDocument();
-    await user.click(within(dialog).getByRole('checkbox', {name: /Autorizar reimpresiones/}));
+    await user.click(within(dialog).getByRole('checkbox', {name: /Inventario/}));
     await user.click(within(dialog).getByRole('button', {name: 'Guardar'}));
     expect(await screen.findByText('Se actualizó el cargo Mesero')).toBeInTheDocument();
-    expect(backend.calls.saved[0].pantallas).toEqual(['familia', 'caja', 'reimpresion']);
+    expect(backend.calls.saved[0].pantallas).toEqual(['familia', 'caja', 'stock']);
   });
 
   it('muestra el aviso del servidor si el cargo tiene empleados y reactiva uno de baja', async () => {
