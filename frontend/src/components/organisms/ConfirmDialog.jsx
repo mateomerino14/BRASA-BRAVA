@@ -8,13 +8,13 @@ const styles = {
 
 export function ConfirmDialog({open, title, message, confirmLabel, tone = 'danger', loading = false, onConfirm, onCancel}) {
   return (
-    <Modal open={open} closeButton={false} onClose={onCancel} title={title} size="sm">
+    <Modal open={open} onClose={onCancel} title={title} size="sm">
       <p className={styles.message}>{message}</p>
       <div className={styles.actions}>
-        <Button variant="outline" onClick={onCancel} disabled={loading}>
+        <Button variant="outline" action="cancel" onClick={onCancel} disabled={loading}>
           Cancelar
         </Button>
-        <Button variant={tone === 'danger' ? 'danger' : 'primary'} onClick={onConfirm} loading={loading}>
+        <Button variant={tone === 'danger' ? 'danger' : 'primary'} action={tone === 'danger' ? 'remove' : 'confirm'} onClick={onConfirm} loading={loading}>
           {confirmLabel}
         </Button>
       </div>

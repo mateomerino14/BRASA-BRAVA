@@ -164,3 +164,27 @@ export const formatDayMonthYear = (iso) => {
   const [year, month, day] = iso.split('-');
   return `${day}/${month}/${year}`;
 };
+
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+
+// Espera corta y legible: "12 min", "1 h 5 min", "2 d 3 h" (nunca "20076 min")
+export const formatWait = (minutes) => {
+  if (minutes < MINUTES_PER_HOUR) {
+    return `${minutes} min`;
+  }
+  const hours = Math.floor(minutes / MINUTES_PER_HOUR);
+  if (hours < HOURS_PER_DAY) {
+    const rest = minutes % MINUTES_PER_HOUR;
+    if (rest === 0) {
+      return `${hours} h`;
+    }
+    return `${hours} h ${rest} min`;
+  }
+  const days = Math.floor(hours / HOURS_PER_DAY);
+  const restHours = hours % HOURS_PER_DAY;
+  if (restHours === 0) {
+    return `${days} d`;
+  }
+  return `${days} d ${restHours} h`;
+};

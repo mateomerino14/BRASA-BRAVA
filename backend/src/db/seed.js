@@ -7,7 +7,7 @@ const ROLES = {
   Administrador: SCREENS,
   Cajero: ['home', 'familia', 'caja'],
   Mesero: ['home', 'familia', 'caja'],
-  Cocinero: ['home', 'familia', 'cocina'],
+  Cocinero: ['home', 'familia'],
 };
 
 const EMPLOYEES = [

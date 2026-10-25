@@ -1,6 +1,5 @@
 import {
   Boxes,
-  ChefHat,
   Database,
   FolderTree,
   House,
@@ -18,7 +17,6 @@ export const NAVIGATION = [
   {label: 'Home', title: 'Página principal', to: '/', icon: House, permission: 'home', end: true},
   {label: 'Familia', title: 'Familia', to: '/familia', icon: Boxes, permission: 'familia'},
   {label: 'Caja', title: 'Caja', to: '/caja', icon: ShoppingCart, permission: 'caja'},
-  {label: 'Cocina', title: 'Pedidos pendientes', to: '/cocina', icon: ChefHat, permission: 'cocina'},
   {
     label: 'Administración',
     icon: Settings,

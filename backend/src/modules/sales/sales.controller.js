@@ -20,6 +20,12 @@ export const createSalesController = (service) => ({
     return respond(res, result, ({ticket}) => res.json({ticket}));
   },
 
+  // Registra una impresión del ticket (desde la cuarta, con autorización)
+  registerPrint: async (req, res) => {
+    const result = await service.registerPrint(req.validated.params.idVenta, req.validated.body, req.user);
+    return respond(res, result, ({numero, impresiones}) => res.status(201).json({numero, impresiones}));
+  },
+
   // Cobra la venta abierta de una mesa y devuelve su ticket
   checkout: async (req, res) => {
     const result = await service.checkout(req.validated.params.idMesa, req.validated.body, req.user);

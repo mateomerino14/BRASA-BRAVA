@@ -22,7 +22,6 @@ function PasswordField({form, field, label, hint, autoComplete}) {
 export function DirectorioPasswordModal({form}) {
   return (
     <Modal
-      closeButton={false}
       open={form.open}
       onClose={form.close}
       title="Cambiar contraseña"
@@ -34,10 +33,10 @@ export function DirectorioPasswordModal({form}) {
         <PasswordField form={form} field="nueva" label="Nueva contraseña" hint="Mínimo 8 caracteres, con letras y números." autoComplete="new-password" />
         <PasswordField form={form} field="confirmacion" label="Repita la nueva contraseña" autoComplete="new-password" />
         <div className={styles.actions}>
-          <Button variant="outline" onClick={form.close} disabled={form.saving}>
+          <Button variant="outline" action="cancel" onClick={form.close} disabled={form.saving}>
             Cancelar
           </Button>
-          <Button type="submit" loading={form.saving}>
+          <Button type="submit" action="password" loading={form.saving}>
             Cambiar contraseña
           </Button>
         </div>

@@ -84,7 +84,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       ],
     },
   };
-  const calls = {orders: [], checkouts: [], settings: []};
+  const calls = {orders: [], checkouts: [], settings: [], marks: [], prints: []};
   const control = {orderError: null, shortages: [], checkoutError: null};
   const closed = [];
   let taxLink = 'https://siat.impuestos.gob.bo/v2/launcher/';
@@ -119,7 +119,8 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       const sale = sales[table.id];
       let venta = null;
       if (sale) {
-        venta = {id: sale.id, total: sale.total, unidades: sale.detalles.reduce((total, item) => total + item.cantidad, 0), listos: sale.detalles.reduce((total, item) => total + item.listos, 0), mesero: sale.mesero.nombre, abiertaEn: sale.abiertaEn};
+        const waiting = sale.detalles.filter((item) => item.listos < item.cantidad).map((item) => item.creadoEn).sort();
+        venta = {id: sale.id, total: sale.total, unidades: sale.detalles.reduce((total, item) => total + item.cantidad, 0), listos: sale.detalles.reduce((total, item) => total + item.listos, 0), mesero: sale.mesero.nombre, abiertaEn: sale.abiertaEn, esperaDesde: waiting[0] ?? null};
       }
       section.mesas.push({id: table.id, nombre: table.nombre, capacidad: table.capacidad, venta});
     }
@@ -160,6 +161,55 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       }
       return [200, {ticket}];
     };
+  }
+  // Impresiones del ticket: las tres primeras salen, desde la cuarta pide a admin con Brasa2026
+  const printsOf = {};
+  for (let id = 1; id <= MAX_TEST_SALE; id += 1) {
+    handlers[`POST /sales/${id}/prints`] = (body) => {
+      calls.prints.push({id, body});
+      const previous = printsOf[id] ?? [];
+      if (previous.length >= 3) {
+        if (!body.alias || !body.contrasena) {
+          return [403, {message: 'Este ticket ya se imprimió 3 veces. Un empleado autorizado debe ingresar su usuario y contraseña', motivo: 'autorizacion', impresiones: previous}];
+        }
+        if (body.alias !== 'admin' || body.contrasena !== 'Brasa2026') {
+          return [400, {message: 'Usuario o contraseña incorrectos', motivo: 'autorizacion', campo: 'contrasena'}];
+        }
+      }
+      let autorizadoPor = null;
+      if (previous.length >= 3) {
+        autorizadoPor = 'Marco Vargas';
+      }
+      const item = {numero: previous.length + 1, impresoPor: 'admin', autorizadoPor, impresoEn: new Date(now).toISOString()};
+      printsOf[id] = [...previous, item];
+      return [201, {numero: item.numero, impresiones: printsOf[id]}];
+    };
+  }
+  // Marcar listos: por línea (sumar, restar, todos) o por envío
+  const allLines = () => Object.values(sales).flatMap((sale) => sale.detalles);
+  const LIMITS = {sumar: (line) => Math.min(line.cantidad, line.listos + 1), restar: (line) => Math.max(0, line.listos - 1), todos: (line) => line.cantidad, ninguno: () => 0};
+  for (let id = 1; id <= 200; id += 1) {
+    handlers[`PATCH /kitchen/lines/${id}`] = (body) => {
+      const line = allLines().find((item) => item.id === id);
+      if (!line) {
+        return [404, {message: 'La línea no existe o su pedido ya se cerró'}];
+      }
+      calls.marks.push({line: id, accion: body.accion});
+      line.listos = LIMITS[body.accion](line);
+      return [200, {envios: []}];
+    };
+  }
+  for (const sale of [7, 8, 9]) {
+    for (const envio of [1, 2, 3]) {
+      handlers[`PATCH /kitchen/shipments/${sale}/${envio}`] = (body) => {
+        const found = Object.values(sales).find((item) => item.id === sale);
+        calls.marks.push({sale, envio, accion: body.accion});
+        found.detalles.filter((item) => item.envio === envio).forEach((item) => {
+          item.listos = LIMITS[body.accion](item);
+        });
+        return [200, {envios: []}];
+      };
+    }
   }
   // Marca todo lo pedido como listo en cocina
   control.readyAll = () => Object.values(sales).forEach((sale) => sale.detalles.forEach((item) => {
