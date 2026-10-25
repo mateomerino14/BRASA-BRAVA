@@ -42,7 +42,6 @@ export function KitchenTicket({mesa, venta, envio, printedAt}) {
       <div className={styles.rule} />
       <p>Pedido Nº {venta.numero} · Envío {envio}</p>
       <p>{mesa.nombre} · {mesa.seccion.nombre}</p>
-      {comanda && <p>Mesero: {comanda.mesero.nombre}</p>}
       {comanda && <p>Cajero: {comanda.cajero}</p>}
       {comanda && <p>Pedido: {formatTime(comanda.creadoEn)} · Impreso: {formatTime(printedAt)}</p>}
       <div className={styles.rule} />

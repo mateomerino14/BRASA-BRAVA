@@ -26,11 +26,10 @@ describe('Caja: mesas y registro de pedidos', () => {
   const ingredientId = (name) => idOf('insumo', 'id_insumo', name);
   const tableId = (name) => idOf('mesa', 'id_mesa', name);
   const promotionId = (name) => idOf('promocion', 'id_promocion', name);
-  const employeeId = (alias) => idOf('empleado', 'id_empleado', alias, 'alias');
   const countSales = async () => (await ctx.db.query('SELECT COUNT(*)::int AS total FROM venta')).rows[0].total;
 
-  const order = async (mesa, items, {mesero = 'c.mendoza', session} = {}) => api('post', `/api/sales/tables/${await tableId(mesa)}/orders`, session)
-    .send({idMesero: await employeeId(mesero), items});
+  const order = async (mesa, items, {session} = {}) => api('post', `/api/sales/tables/${await tableId(mesa)}/orders`, session)
+    .send({items});
 
   it('exige sesión y el permiso de caja', async () => {
     await start();
@@ -50,7 +49,8 @@ describe('Caja: mesas y registro de pedidos', () => {
     const salon = res.body.secciones.find((item) => item.nombre === 'Salón principal');
     expect(salon.mesas.map((item) => item.nombre).slice(0, 3)).toEqual(['Mesa 1', 'Mesa 2', 'Mesa 3']);
     expect(salon.mesas[0].venta).toBeNull();
-    expect(salon.mesas[1].venta).toMatchObject({total: 160, unidades: 5, mesero: 'Carlos Mendoza'});
+    expect(salon.mesas[1].venta).toMatchObject({total: 160, unidades: 5, cajero: 'a.romero'});
+    expect(salon.mesas[1].venta).not.toHaveProperty('mesero');
     expect(new Date(salon.mesas[1].venta.abiertaEn).getTime()).toBe(TUESDAY_NIGHT.getTime() - 25 * 60 * 1000);
     expect(salon.mesas[1].venta.esperaDesde).toBeTruthy();
     await ctx.db.query('UPDATE venta_detalle SET listos = cantidad');
@@ -85,14 +85,9 @@ describe('Caja: mesas y registro de pedidos', () => {
     expect(res.body.promociones.map((item) => item.nombre)).toEqual(['Martes de Hamburguesas']);
   });
 
-  it('lista como meseros a los empleados activos con acceso a Caja', async () => {
+  it('ya no hay lista de meseros: el pedido solo guarda al cajero', async () => {
     await start();
-    const res = await api('get', '/api/sales/waiters');
-    expect(res.body.meseros.map((item) => `${item.nombre} (${item.cargo})`)).toEqual([
-      'Andrea Romero (Cajero)',
-      'Carlos Mendoza (Mesero)',
-      'Marco Vargas (Administrador)',
-    ]);
+    expect((await api('get', '/api/sales/waiters')).status).toBe(404);
   });
 
   it('devuelve una mesa libre y una ocupada con sus líneas e ingredientes quitados', async () => {
@@ -101,7 +96,7 @@ describe('Caja: mesas y registro de pedidos', () => {
     expect(free.status).toBe(200);
     expect(free.body).toMatchObject({mesa: {nombre: 'Mesa 1', capacidad: 4, seccion: {nombre: 'Salón principal'}}, venta: null});
     const busy = await api('get', `/api/sales/tables/${await tableId('Mesa 2')}`);
-    expect(busy.body.venta).toMatchObject({total: 160, envios: 1, cajero: 'a.romero', mesero: {nombre: 'Carlos Mendoza'}});
+    expect(busy.body.venta).toMatchObject({total: 160, envios: 1, cajero: 'a.romero'});
     expect(busy.body.venta.numero).toBe(busy.body.venta.id);
     expect(busy.body.venta.detalles).toHaveLength(4);
     expect(busy.body.venta.detalles[0]).toMatchObject({
@@ -122,7 +117,7 @@ describe('Caja: mesas y registro de pedidos', () => {
     ]);
     expect(res.status).toBe(201);
     expect(res.body.nueva).toBe(true);
-    expect(res.body.venta).toMatchObject({total: 128, envios: 1, cajero: 'a.romero', mesero: {nombre: 'Carlos Mendoza'}});
+    expect(res.body.venta).toMatchObject({total: 128, envios: 1, cajero: 'a.romero'});
     expect(res.body.venta.detalles).toEqual([
       expect.objectContaining({nombre: 'Hamburguesa Clásica', cantidad: 2, subtotal: 70, consumo: 'local', envio: 1, exclusiones: [expect.objectContaining({insumo: 'Lechuga'})]}),
       expect.objectContaining({tipo: 'promocion', nombre: 'Martes de Hamburguesas', precioUnitario: 58, consumo: 'llevar', exclusiones: [expect.objectContaining({producto: 'Cheeseburger', insumo: 'Queso cheddar'})]}),
@@ -134,12 +129,13 @@ describe('Caja: mesas y registro de pedidos', () => {
   it('suma un nuevo envío a la venta abierta de una mesa ocupada sin crear otra venta', async () => {
     await start();
     const before = (await api('get', `/api/sales/tables/${await tableId('Mesa 2')}`)).body.venta;
-    const res = await order('Mesa 2', [{tipo: 'producto', id: await productId('Gaseosa 500 ml'), cantidad: 1, consumo: 'local'}], {mesero: 'admin'});
+    const admin = await loginAs(ctx.app, 'admin');
+    const res = await order('Mesa 2', [{tipo: 'producto', id: await productId('Gaseosa 500 ml'), cantidad: 1, consumo: 'local'}], {session: admin});
     expect(res.status).toBe(201);
     expect(res.body.nueva).toBe(false);
-    expect(res.body.venta).toMatchObject({id: before.id, total: 170, envios: 2, mesero: {nombre: 'Carlos Mendoza'}});
+    expect(res.body.venta).toMatchObject({id: before.id, total: 170, envios: 2, cajero: 'a.romero'});
     const last = res.body.venta.detalles.at(-1);
-    expect(last).toMatchObject({nombre: 'Gaseosa 500 ml', envio: 2, mesero: {nombre: 'Marco Vargas'}});
+    expect(last).toMatchObject({nombre: 'Gaseosa 500 ml', envio: 2, cajero: 'admin'});
     expect(await countSales()).toBe(2);
   });
 
@@ -164,14 +160,12 @@ describe('Caja: mesas y registro de pedidos', () => {
     expect(rows[0].id_cajero).toBeNull();
   });
 
-  it('rechaza meseros, productos, promociones, ingredientes y mesas no válidos sin registrar nada', async () => {
+  it('rechaza productos, promociones, ingredientes y mesas no válidos sin registrar nada', async () => {
     await start();
     const before = await countSales();
     const clasica = await productId('Hamburguesa Clásica');
     const line = {tipo: 'producto', id: clasica, cantidad: 1, consumo: 'local'};
     const cases = [
-      [await order('Mesa 1', [line], {mesero: 'r.sanchez'}), 400, 'Elija un mesero activo'],
-      [await order('Mesa 1', [line], {mesero: 'j.ortiz'}), 400, 'Elija un mesero activo'],
       [await order('Mesa 1', []), 400, 'Agregue al menos un producto'],
       [await order('Mesa 1', [{...line, cantidad: 0}]), 400, 'La cantidad debe ser de 1 a 99'],
       [await order('Mesa 1', [{...line, id: await productId('Cerveza Artesanal')}]), 400, 'Cerveza Artesanal no está disponible por ahora'],
@@ -185,7 +179,7 @@ describe('Caja: mesas y registro de pedidos', () => {
       expect(res.status).toBe(status);
       expect(res.body.message).toBe(message);
     }
-    expect((await api('post', '/api/sales/tables/9999/orders').send({idMesero: 1, items: [line]})).status).toBe(404);
+    expect((await api('post', '/api/sales/tables/9999/orders').send({items: [line]})).status).toBe(404);
     expect(await countSales()).toBe(before);
   });
 
@@ -269,13 +263,13 @@ describe('Caja: mesas y registro de pedidos', () => {
   it('guarda cada envío como comanda y marca la venta como modificada desde el segundo', async () => {
     await start();
     const opened = await order('Mesa 1', [{tipo: 'producto', id: await productId('Gaseosa 500 ml'), cantidad: 1, consumo: 'local'}]);
-    expect(opened.body.venta).toMatchObject({modificado: false, modificadoPor: null, comandas: [expect.objectContaining({envio: 1, cajero: 'a.romero', mesero: expect.objectContaining({nombre: 'Carlos Mendoza'})})]});
+    expect(opened.body.venta).toMatchObject({modificado: false, modificadoPor: null, comandas: [expect.objectContaining({envio: 1, cajero: 'a.romero'})]});
 
     const admin = await loginAs(ctx.app, 'admin');
-    const res = await order('Mesa 2', [{tipo: 'producto', id: await productId('Jugo de Naranja'), cantidad: 1, consumo: 'llevar'}], {mesero: 'admin', session: admin});
+    const res = await order('Mesa 2', [{tipo: 'producto', id: await productId('Jugo de Naranja'), cantidad: 1, consumo: 'llevar'}], {session: admin});
     expect(res.body.envio).toBe(2);
     expect(res.body.venta).toMatchObject({modificado: true, modificadoPor: 'admin'});
-    expect(res.body.venta.comandas.map((item) => [item.envio, item.cajero, item.mesero.nombre])).toEqual([[1, 'a.romero', 'Carlos Mendoza'], [2, 'admin', 'Marco Vargas']]);
+    expect(res.body.venta.comandas.map((item) => [item.envio, item.cajero])).toEqual([[1, 'a.romero'], [2, 'admin']]);
     const combo = res.body.venta.detalles.find((item) => item.nombre === 'Combo Brava');
     expect(combo.productos).toEqual([{nombre: 'Doble Brava', cantidad: 1}, {nombre: 'Gaseosa 500 ml', cantidad: 1}, {nombre: 'Papas Fritas Clásicas', cantidad: 1}]);
     expect(res.body.venta.detalles[0].productos).toEqual([]);

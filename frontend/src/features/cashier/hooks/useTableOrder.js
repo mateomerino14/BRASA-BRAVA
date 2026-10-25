@@ -6,17 +6,7 @@ import {ALL_CATEGORIES, MAX_QUANTITY, PROMOTIONS_CATEGORY, TABLE_REFRESH_MS} fro
 import {addAmounts, addLine, cartTotal, cartUnits, removeLine, replaceLine, setLineQuantity, toOrderPayload} from '../utils/cart';
 
 const emptyCatalog = {categorias: [], productos: [], promociones: []};
-const initialState = {loading: true, error: '', mesa: null, venta: null, catalog: emptyCatalog, waiters: []};
-
-const defaultWaiter = (venta, waiters, user) => {
-  if (venta) {
-    return String(venta.mesero.id);
-  }
-  if (user && !user.isDirectorio && waiters.some((item) => item.id === user.id)) {
-    return String(user.id);
-  }
-  return '';
-};
+const initialState = {loading: true, error: '', mesa: null, venta: null, catalog: emptyCatalog};
 
 const matches = (item, search) => !search || normalizeText(item.nombre).includes(normalizeText(search));
 
@@ -28,15 +18,13 @@ export const ingredientGroups = (kind, item) => {
   return [{idProducto: item.id, nombre: item.nombre, cantidad: 1, ingredientes: item.ingredientes}];
 };
 
-// Pedido de una mesa: lo ya registrado, el catálogo del día, los meseros, las líneas por registrar y lo que sale de cocina.
+// Pedido de una mesa: lo ya registrado, el catálogo del día, las líneas por registrar y lo que sale de cocina.
 // Sin mesa elegida solo carga el menú. "printKitchen" (app de escritorio con impresora de cocina) imprime la comanda
 // directo; si no está o falla, se abre la vista previa. "onChanged" avisa que cambió la mesa (para refrescar la barra)
-export function useTableOrder({api = cashierApi, idMesa, user, printKitchen, onChanged}) {
+export function useTableOrder({api = cashierApi, idMesa, printKitchen, onChanged}) {
   const toast = useToast();
   const [state, setState] = useState(initialState);
   const [lines, setLines] = useState([]);
-  const [idMesero, setIdMesero] = useState('');
-  const [meseroError, setMeseroError] = useState('');
   const [category, setCategory] = useState(ALL_CATEGORIES);
   const [search, setSearch] = useState('');
   const [picker, setPicker] = useState({open: false, session: 0, kind: 'producto', item: null, line: null});
@@ -53,12 +41,11 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen, onC
         if (idMesa) {
           tableLoad = api.table(idMesa);
         }
-        const [table, catalog, waiters] = await Promise.all([tableLoad, api.catalog(), api.waiters()]);
+        const [table, catalog] = await Promise.all([tableLoad, api.catalog()]);
         if (cancelled) {
           return;
         }
-        setState({loading: false, error: '', mesa: table.mesa, venta: table.venta, catalog, waiters: waiters.meseros});
-        setIdMesero(defaultWaiter(table.venta, waiters.meseros, user));
+        setState({loading: false, error: '', mesa: table.mesa, venta: table.venta, catalog});
       }
       catch (problem) {
         if (!cancelled) {
@@ -70,7 +57,7 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen, onC
     return () => {
       cancelled = true;
     };
-  }, [api, idMesa, user]);
+  }, [api, idMesa]);
 
   // Refresca lo registrado de la mesa por si otra caja la cambió
   useEffect(() => {
@@ -134,22 +121,13 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen, onC
     setPicker((current) => ({...current, open: false}));
   };
 
-  const changeWaiter = (value) => {
-    setIdMesero(value);
-    setMeseroError('');
-  };
-
   const submit = async () => {
-    if (!idMesero) {
-      setMeseroError('Elija el mesero que atiende la mesa');
-      return false;
-    }
     if (lines.length === 0) {
       return false;
     }
     setSaving(true);
     try {
-      const result = await api.addOrder(idMesa, toOrderPayload(idMesero, lines));
+      const result = await api.addOrder(idMesa, toOrderPayload(lines));
       setState((current) => ({...current, venta: result.venta}));
       setLines([]);
       if (result.sinStock?.length > 0) {
@@ -232,9 +210,6 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen, onC
     lines,
     units: cartUnits(lines),
     totals: {registered, pending, total: addAmounts(registered, pending)},
-    idMesero,
-    meseroError,
-    changeWaiter,
     category,
     changeCategory: setCategory,
     search,

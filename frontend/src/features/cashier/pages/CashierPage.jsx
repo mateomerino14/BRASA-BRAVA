@@ -30,13 +30,12 @@ const testDocument = (destino, printer) => <PrinterTestTicket destino={destino} 
 
 // Pedido y menú de la mesa elegida; se monta de nuevo al cambiar de mesa. Avisa cuántas unidades quedan sin enviar
 function Workspace({idMesa, now, authorizePrint, onChanged, onCheckedOut, onPendingChange}) {
-  const {user} = useAuth();
   const {printers} = useDesktopPrinters();
   let printKitchen;
   if (printers.cocina) {
     printKitchen = ({mesa, venta, envio, printedAt}) => printOnDesktop('cocina', <KitchenTicket mesa={mesa} venta={venta} envio={envio} printedAt={printedAt} />);
   }
-  const order = useTableOrder({idMesa, user, printKitchen, onChanged});
+  const order = useTableOrder({idMesa, printKitchen, onChanged});
   const checkout = useCheckout({idMesa, total: order.venta?.total ?? 0});
   useEffect(() => {
     onPendingChange(order.units);

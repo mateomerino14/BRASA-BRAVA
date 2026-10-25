@@ -60,8 +60,7 @@ export const exclusionText = (exclusiones, {combo = false} = {}) => {
 };
 
 // Cuerpo del envío para la API
-export const toOrderPayload = (idMesero, lines) => ({
-  idMesero: Number(idMesero),
+export const toOrderPayload = (lines) => ({
   items: lines.map((line) => ({
     tipo: line.tipo,
     id: line.id,
@@ -76,7 +75,7 @@ export const groupByShipment = (detalles) => {
   const groups = new Map();
   for (const detail of detalles) {
     if (!groups.has(detail.envio)) {
-      groups.set(detail.envio, {envio: detail.envio, creadoEn: detail.creadoEn, mesero: detail.mesero.nombre, detalles: []});
+      groups.set(detail.envio, {envio: detail.envio, creadoEn: detail.creadoEn, cajero: detail.cajero, detalles: []});
     }
     groups.get(detail.envio).detalles.push(detail);
   }

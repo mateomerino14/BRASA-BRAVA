@@ -14,8 +14,7 @@ const unitsJoin = `LEFT JOIN (
     SELECT id_venta, SUM(cantidad)::int AS unidades, SUM(listos)::int AS listos FROM venta_detalle GROUP BY id_venta
   ) u ON u.id_venta = v.id_venta`;
 
-const saleColumns = `v.id_venta, v.id_mesa, v.total, v.envios, v.abierta_en, v.cajero, v.id_mesero, v.modificado, v.modificado_por,
-       e.nombre AS mesero_nombre, e.apellido AS mesero_apellido`;
+const saleColumns = 'v.id_venta, v.id_mesa, v.total, v.envios, v.abierta_en, v.cajero, v.modificado, v.modificado_por';
 
 // Acceso a datos de Caja
 export const createSalesRepository = (db) => ({
@@ -23,11 +22,10 @@ export const createSalesRepository = (db) => ({
   floor: async () => {
     const {rows} = await db.query(
       `SELECT s.id_seccion, s.nombre AS seccion, m.id_mesa, m.nombre, m.capacidad,
-              v.id_venta, v.total, v.abierta_en, e.nombre AS mesero_nombre, e.apellido AS mesero_apellido, u.unidades, u.listos
+              v.id_venta, v.total, v.abierta_en, v.cajero, u.unidades, u.listos
          FROM seccion s
          JOIN mesa m ON m.id_seccion = s.id_seccion AND m.activa = TRUE
          LEFT JOIN venta v ON v.id_mesa = m.id_mesa AND v.estado = 'abierta'
-         LEFT JOIN empleado e ON e.id_empleado = v.id_mesero
          ${unitsJoin}
         WHERE s.activa = TRUE
         ORDER BY s.id_seccion, m.id_mesa`,
@@ -105,18 +103,6 @@ export const createSalesRepository = (db) => ({
     return rows;
   },
 
-  // Empleados activos cuyo cargo tiene acceso a Caja (pueden atender mesas)
-  waiters: async () => {
-    const {rows} = await db.query(
-      `SELECT e.id_empleado, e.nombre, e.apellido, c.nombre AS cargo
-         FROM empleado e JOIN cargo c ON c.id_cargo = e.id_cargo
-        WHERE e.activo = TRUE AND c.activo = TRUE
-          AND e.id_cargo IN (SELECT id_cargo FROM cargo_permiso WHERE pantalla = 'caja')
-        ORDER BY e.nombre, e.apellido`,
-    );
-    return rows;
-  },
-
   // Mesa activa con su sección (solo si la sección también está activa)
   findTable: async (idMesa) => {
     const {rows} = await db.query(
@@ -133,22 +119,22 @@ export const createSalesRepository = (db) => ({
     await db.query('SELECT id_mesa FROM mesa WHERE id_mesa = $1 FOR UPDATE', [idMesa]);
   },
 
-  // Venta abierta de una mesa con su mesero de apertura
+  // Venta abierta de una mesa
   openSale: async (idMesa) => {
     const {rows} = await db.query(
-      `SELECT ${saleColumns} FROM venta v JOIN empleado e ON e.id_empleado = v.id_mesero
+      `SELECT ${saleColumns} FROM venta v
         WHERE v.id_mesa = $1 AND v.estado = 'abierta'`,
       [idMesa],
     );
     return rows[0] ?? null;
   },
 
-  // Líneas de una venta con el nombre del mesero de cada envío
+  // Líneas de una venta con el cajero que registró su envío
   saleDetails: async (idVenta) => {
     const {rows} = await db.query(
       `SELECT d.id_detalle, d.envio, d.id_producto, d.id_promocion, d.nombre, d.precio_unitario, d.cantidad, d.listos, d.consumo,
-              d.creado_en, d.id_mesero, e.nombre AS mesero_nombre, e.apellido AS mesero_apellido
-         FROM venta_detalle d JOIN empleado e ON e.id_empleado = d.id_mesero
+              d.creado_en, s.cajero
+         FROM venta_detalle d JOIN venta_envio s ON s.id_venta = d.id_venta AND s.numero = d.envio
         WHERE d.id_venta = $1
         ORDER BY d.envio, d.id_detalle`,
       [idVenta],
@@ -174,11 +160,11 @@ export const createSalesRepository = (db) => ({
   },
 
   // Abre una venta para la mesa y devuelve su número
-  insertSale: async ({idMesa, idMesero, idCajero, cajero, abiertaEn}) => {
+  insertSale: async ({idMesa, idCajero, cajero, abiertaEn}) => {
     const {rows} = await db.query(
-      `INSERT INTO venta (id_mesa, id_mesero, id_cajero, cajero, abierta_en)
-       VALUES ($1, $2, $3, $4, $5) RETURNING id_venta`,
-      [idMesa, idMesero, idCajero, cajero, abiertaEn],
+      `INSERT INTO venta (id_mesa, id_cajero, cajero, abierta_en)
+       VALUES ($1, $2, $3, $4) RETURNING id_venta`,
+      [idMesa, idCajero, cajero, abiertaEn],
     );
     return rows[0].id_venta;
   },
@@ -193,20 +179,20 @@ export const createSalesRepository = (db) => ({
   },
 
   // Inserta una línea de la venta y devuelve su id
-  insertDetail: async ({idVenta, envio, idProducto, idPromocion, nombre, precioUnitario, cantidad, consumo, idMesero, creadoEn}) => {
+  insertDetail: async ({idVenta, envio, idProducto, idPromocion, nombre, precioUnitario, cantidad, consumo, creadoEn}) => {
     const {rows} = await db.query(
-      `INSERT INTO venta_detalle (id_venta, envio, id_producto, id_promocion, nombre, precio_unitario, cantidad, consumo, id_mesero, creado_en)
-       VALUES ($1, $2, $3, $4, $5, $6::numeric, $7, $8, $9, $10) RETURNING id_detalle`,
-      [idVenta, envio, idProducto, idPromocion, nombre, precioUnitario, cantidad, consumo, idMesero, creadoEn],
+      `INSERT INTO venta_detalle (id_venta, envio, id_producto, id_promocion, nombre, precio_unitario, cantidad, consumo, creado_en)
+       VALUES ($1, $2, $3, $4, $5, $6::numeric, $7, $8, $9) RETURNING id_detalle`,
+      [idVenta, envio, idProducto, idPromocion, nombre, precioUnitario, cantidad, consumo, creadoEn],
     );
     return rows[0].id_detalle;
   },
 
-  // Envíos de una venta con su cajero y su mesero, en orden
+  // Envíos de una venta con el cajero que registró cada uno, en orden
   saleShipments: async (idVenta) => {
     const {rows} = await db.query(
-      `SELECT s.numero, s.cajero, s.creado_en, s.id_mesero, e.nombre AS mesero_nombre, e.apellido AS mesero_apellido
-         FROM venta_envio s JOIN empleado e ON e.id_empleado = s.id_mesero
+      `SELECT s.numero, s.cajero, s.creado_en
+         FROM venta_envio s
         WHERE s.id_venta = $1 ORDER BY s.numero`,
       [idVenta],
     );
@@ -214,11 +200,11 @@ export const createSalesRepository = (db) => ({
   },
 
   // Registra un envío (comanda) de la venta
-  insertShipment: async ({idVenta, numero, idCajero, cajero, idMesero, creadoEn}) => {
+  insertShipment: async ({idVenta, numero, idCajero, cajero, creadoEn}) => {
     await db.query(
-      `INSERT INTO venta_envio (id_venta, numero, id_cajero, cajero, id_mesero, creado_en)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [idVenta, numero, idCajero, cajero, idMesero, creadoEn],
+      `INSERT INTO venta_envio (id_venta, numero, id_cajero, cajero, creado_en)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [idVenta, numero, idCajero, cajero, creadoEn],
     );
   },
 
@@ -279,7 +265,7 @@ export const createSalesRepository = (db) => ({
   saleById: async (idVenta) => {
     const {rows} = await db.query(
       `SELECT ${saleColumns}, v.estado, v.cobrador, v.recibido, v.cambio, v.cerrada_en, m.nombre AS mesa, s.nombre AS seccion
-         FROM venta v JOIN empleado e ON e.id_empleado = v.id_mesero
+         FROM venta v
          JOIN mesa m ON m.id_mesa = v.id_mesa JOIN seccion s ON s.id_seccion = m.id_seccion
         WHERE v.id_venta = $1`,
       [idVenta],

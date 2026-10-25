@@ -18,14 +18,12 @@ export const createKitchenRepository = (db) => ({
   openLines: async () => {
     const {rows} = await db.query(
       `SELECT d.id_detalle, d.id_venta, d.envio, d.id_promocion, d.nombre, d.cantidad, d.listos, d.consumo,
-              m.nombre AS mesa, s.nombre AS seccion, ve.cajero, ve.creado_en,
-              e.nombre AS mesero_nombre, e.apellido AS mesero_apellido
+              m.nombre AS mesa, s.nombre AS seccion, ve.cajero, ve.creado_en
          FROM venta_detalle d
          JOIN venta v ON v.id_venta = d.id_venta AND v.estado = 'abierta'
          JOIN mesa m ON m.id_mesa = v.id_mesa
          JOIN seccion s ON s.id_seccion = m.id_seccion
          JOIN venta_envio ve ON ve.id_venta = d.id_venta AND ve.numero = d.envio
-         JOIN empleado e ON e.id_empleado = ve.id_mesero
         ORDER BY ve.creado_en, d.id_venta, d.envio, d.id_detalle`,
     );
     return rows;

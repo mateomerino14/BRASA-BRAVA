@@ -61,7 +61,7 @@ export const createKitchenService = ({repository}) => {
         modificadoPor,
         mesa: first.mesa,
         seccion: first.seccion,
-        mesero: `${first.mesero_nombre} ${first.mesero_apellido}`,
+        cajero: first.cajero,
         creadoEn: first.creado_en,
         unidades,
         listas,

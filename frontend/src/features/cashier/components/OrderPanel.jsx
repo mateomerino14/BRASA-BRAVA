@@ -4,8 +4,6 @@ import {ChevronDown, Pencil, Printer, ShoppingBasket, Trash2} from 'lucide-react
 import {Amount} from '../../../components/atoms/Amount';
 import {Button} from '../../../components/atoms/Button';
 import {IconButton} from '../../../components/atoms/IconButton';
-import {Select} from '../../../components/atoms/Select';
-import {FormField} from '../../../components/molecules/FormField';
 import {Stepper} from '../../../components/molecules/Stepper';
 import {cn} from '../../../lib/cn';
 import {countText, formatAmount, formatTime, formatWait} from '../../../lib/format';
@@ -66,8 +64,6 @@ const checkoutBlock = (venta, lines) => {
 
 const unitsOf = (detalles) => detalles.reduce((total, detail) => total + detail.cantidad, 0);
 
-const optionsOf = (waiters) => waiters.map((item) => ({value: String(item.id), label: `${item.nombre} · ${item.cargo}`}));
-
 // Desde cuándo espera lo que cocina todavía no sacó (el envío pendiente más antiguo)
 const waitingSince = (venta) => {
   const pending = venta.detalles.filter((detail) => detail.listos < detail.cantidad).map((detail) => new Date(detail.creadoEn).getTime());
@@ -90,8 +86,8 @@ function PanelHeader({mesa, venta, now}) {
       </div>
       {venta && (
         <dl className={styles.facts}>
-          <div><dt className={styles.factLabel}>Mesero</dt><dd className={styles.factValue}>{venta.mesero.nombre}</dd></div>
-          <div><dt className={styles.factLabel}>Abrió</dt><dd className={styles.factValue}>{formatTime(venta.abiertaEn)}</dd></div>
+          <div><dt className={styles.factLabel}>Abrió</dt><dd className={styles.factValue}>{venta.cajero}</dd></div>
+          <div><dt className={styles.factLabel}>Desde</dt><dd className={styles.factValue}>{formatTime(venta.abiertaEn)}</dd></div>
           <div><dt className={styles.factLabel}>Espera</dt><dd className={styles.waitValue}>{wait ?? 'Nada'}</dd></div>
         </dl>
       )}
@@ -108,12 +104,6 @@ export function OrderPanel({order, now, bare = false}) {
     <section aria-label="Pedido de la mesa" className={bare ? styles.bare : styles.panel}>
       {!bare && <PanelHeader mesa={mesa} venta={venta} now={now} />}
 
-      <FormField label="Mesero" required error={order.meseroError}>
-        {(field) => (
-          <Select {...field} placeholder="Elija el mesero" options={optionsOf(order.waiters)} value={order.idMesero} onChange={(event) => order.changeWaiter(event.target.value)} />
-        )}
-      </FormField>
-
       <div className={styles.scroll}>
         {venta && (
           <div className={styles.block}>
@@ -127,7 +117,7 @@ export function OrderPanel({order, now, bare = false}) {
             {showRegistered && groupByShipment(venta.detalles).map((group) => (
               <div key={group.envio} className={styles.shipment}>
                 <div className={styles.shipmentHead}>
-                  <p className={styles.shipmentTitle}>Envío {group.envio} · {formatTime(group.creadoEn)} · {group.mesero}</p>
+                  <p className={styles.shipmentTitle}>Envío {group.envio} · {formatTime(group.creadoEn)} · Registró: {group.cajero}</p>
                   <IconButton icon={Printer} label={`Reimprimir la comanda del envío ${group.envio}`} onClick={() => order.openPrint(group.envio)} />
                 </div>
                 <ul className={styles.list}>

@@ -40,7 +40,7 @@ describe('Caja: cobro, ticket y ventas del día', () => {
     const res = await checkout('Mesa 2', {pagos: [{metodo: 'efectivo', monto: '160'}], recibido: '200,00'});
     expect(res.status).toBe(201);
     expect(res.body.ticket).toMatchObject({
-      estado: 'cobrada', mesa: 'Mesa 2', seccion: 'Salón principal', mesero: 'Carlos Mendoza', cajero: 'a.romero', cobrador: 'a.romero',
+      estado: 'cobrada', mesa: 'Mesa 2', seccion: 'Salón principal', cajero: 'a.romero', cobrador: 'a.romero',
       total: 160, pagos: [{metodo: 'efectivo', monto: 160}], recibido: 200, cambio: 40,
     });
     expect(new Date(res.body.ticket.cerradaEn).getTime()).toBe(NOW.getTime());
