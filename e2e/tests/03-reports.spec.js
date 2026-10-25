@@ -1,6 +1,7 @@
 import {expect, test} from '@playwright/test';
 import {loginAs, loginAsDirectorio} from '../src/session.js';
 
+// Abre Reportes y genera el reporte de hoy
 const openReports = async (page) => {
   await page.goto('/reportes');
   await expect(page.getByRole('region', {name: 'Totales del período'})).toBeVisible();

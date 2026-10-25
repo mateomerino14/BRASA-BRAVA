@@ -1,7 +1,7 @@
 import {expect} from '@playwright/test';
 
 export const DEMO_PASSWORD = 'Brasa2026';
-export const DIRECTORIO_PASSWORD = 'Directorio2026';
+const DIRECTORIO_PASSWORD = 'Directorio2026';
 
 // Inicia sesión como empleado y espera a que cargue el panel
 export const loginAs = async (page, alias, password = DEMO_PASSWORD) => {

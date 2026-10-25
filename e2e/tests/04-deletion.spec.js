@@ -1,6 +1,7 @@
 import {expect, test} from '@playwright/test';
 import {loginAs, loginAsDirectorio} from '../src/session.js';
 
+// Pestañas de tipos de la eliminación física
 const tabs = (page) => page.getByRole('radiogroup', {name: 'Qué eliminar'});
 
 // Marca la fila que contiene el texto tocando la fila, como lo hace el usuario
