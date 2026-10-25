@@ -1,7 +1,7 @@
 import {defineConfig} from '@playwright/test';
 import baseConfig from './playwright.config.js';
 
-const manualViewport = {width: 1366, height: 768};
+const manualViewport = {width: 1366, height: 1000};
 
 export default defineConfig({
   ...baseConfig,
