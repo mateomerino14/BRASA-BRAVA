@@ -93,6 +93,7 @@ BRASA-BRAVA/
 | Caja: plano de mesas y armado del pedido (Local o Para llevar, quitar ingredientes, envíos a la mesa ocupada) | Terminado |
 | Caja: comanda de cocina por envío, descuento de stock por receta y marca de venta modificada | Terminado |
 | Caja en una sola pantalla: secciones y mesas arriba con su espera, pedido a la izquierda, menú a la derecha y Marcar listos (Local / Para llevar / Faltan); cocina solo recibe la comanda impresa | Terminado |
+| Reportes de ventas: resumen por día y ventas detalladas por fechas y empleado, en PDF o por correo; envíos programados por el DIRECTORIO que salen al encender si se perdieron | Terminado |
 | Ticket de cobro: 3 impresiones libres y desde la 4.ª usuario y contraseña de cualquier empleado con acceso a Caja, que queda registrado como quien autorizó | Terminado |
 | Caja: cobro (efectivo, QR o mixto con cambio), ticket de venta impreso al cobrar, ventas del día y enlace a impuestos | Terminado |
 | Familia: catálogo del local con productos por categoría, receta y porciones que alcanzan, y promociones con cuándo aplican | Terminado |

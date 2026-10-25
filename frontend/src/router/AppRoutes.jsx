@@ -15,6 +15,7 @@ const lazyPage = (load, name) => lazy(() => load().then((module) => ({default: m
 const PAGES = {
   familia: lazyPage(() => import('../features/family/pages/FamilyPage'), 'FamilyPage'),
   caja: lazyPage(() => import('../features/cashier/pages/CashierPage'), 'CashierPage'),
+  reportes: lazyPage(() => import('../features/reports/pages/ReportsPage'), 'ReportsPage'),
   empleados: lazyPage(() => import('../features/employees/pages/EmployeesPage'), 'EmployeesPage'),
   categorias: lazyPage(() => import('../features/categories/pages/CategoriesPage'), 'CategoriesPage'),
   productos: lazyPage(() => import('../features/products/pages/ProductsPage'), 'ProductsPage'),
