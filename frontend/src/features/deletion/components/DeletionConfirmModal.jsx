@@ -20,7 +20,6 @@ const styles = {
   blockedActions: 'mt-6 grid gap-3 sm:grid-cols-2',
 };
 
-// Líneas de lo elegido y de lo que se borra en cascada
 const linesOf = ({elegidos, arrastra}) => {
   const lines = [];
   for (const [tipo, names] of Object.entries(elegidos)) {
@@ -54,7 +53,6 @@ const linesOf = ({elegidos, arrastra}) => {
   return lines;
 };
 
-// Confirmación final: todo lo que se borra (en cascada) y la palabra ELIMINAR
 export function DeletionConfirmModal({deletion}) {
   const {preview} = deletion;
   const data = preview.data;

@@ -27,7 +27,6 @@ const tapPress = {scale: 0.95};
 const markGrow = {hidden: {scaleX: 0}, visible: {scaleX: 1}};
 const marksStagger = {visible: {transition: {staggerChildren: 0.08, delayChildren: 0.15}}};
 
-// Encabezado de escritorio: título con las tres marcas de parrilla, usuario, cambio de contraseña (solo DIRECTORIO) y cierre de sesión
 export function Header({title, user, onLogout, onChangePassword}) {
   return (
     <header className={styles.header}>

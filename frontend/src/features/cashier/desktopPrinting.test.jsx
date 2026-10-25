@@ -11,7 +11,6 @@ const PRINTERS = [
   {name: 'TicketeraCaja', displayName: 'Ticketera Caja', isDefault: true},
 ];
 
-// App de escritorio falsa: guarda la elección y responde a cada impresión
 const stubDesktop = ({choice = {cocina: null, caja: null}, printResult} = {}) => {
   let saved = choice;
   const bridge = {

@@ -54,7 +54,6 @@ const alignClass = (align) => {
 const ARIA_SORT = {asc: 'ascending', desc: 'descending'};
 const DIRECTION_LABEL = {asc: 'ascendente', desc: 'descendente'};
 
-// Encabezado que ordena al tocarlo e indica el orden actual
 function SortableHeader({column, sort, onSort}) {
   const active = sort?.key === column.sortKey;
   let Icon = ArrowUpDown;
@@ -72,7 +71,6 @@ function SortableHeader({column, sort, onSort}) {
   );
 }
 
-// En tarjetas no hay encabezados: el orden se elige en una lista
 function SortSelect({columns, sort, onSort}) {
   const sortable = columns.filter((column) => column.sortKey);
   if (sortable.length === 0 || !onSort) {
@@ -119,7 +117,6 @@ function SkeletonRows({columns}) {
   ));
 }
 
-// Tarjetas para celular y tablet (dos columnas en tablet): la columna "title" arriba, "actions" a la derecha y el resto como etiqueta y valor
 function CardList({columns, rows, rowKey, loading, emptyMessage, emptyAction, caption, rowClassName}) {
   const title = columns.find((column) => column.mobile === 'title');
   const actions = columns.find((column) => column.mobile === 'actions');
@@ -173,7 +170,6 @@ function CardList({columns, rows, rowKey, loading, emptyMessage, emptyAction, ca
   );
 }
 
-// Tabla de datos; en pantallas angostas se convierte en tarjetas para no obligar a desplazarse de lado
 export function DataTable({columns, rows, rowKey, loading = false, emptyMessage, emptyAction, footer, caption, rowClassName, sort, onSort}) {
   const isWide = useMediaQuery(DESKTOP_QUERY);
 

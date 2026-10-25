@@ -12,7 +12,6 @@ const styles = {
 
 const PERCENT = 100;
 
-// Precio con promoción: el regular tachado arriba, el final grande y el ahorro en porcentaje
 export function PriceTag({regular, promo, size, align = 'end'}) {
   let savings = 0;
   if (regular > 0) {

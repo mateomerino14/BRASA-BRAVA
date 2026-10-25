@@ -13,7 +13,6 @@ const styles = {
 
 const pillSpring = {type: 'spring', stiffness: 420, damping: 34};
 
-// Opciones excluyentes en botones lado a lado; la opción elegida se resalta con una píldora que se desliza
 export function SegmentedControl({label, options, value, onChange, className}) {
   const groupId = useId();
   return (

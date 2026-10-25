@@ -2,7 +2,6 @@ const MORNING_FROM = 5;
 const AFTERNOON_FROM = 12;
 const NIGHT_FROM = 19;
 
-// Saludo según la hora del día, sin género: "Buenos días, Marco"
 export const greetingFor = (name, date) => {
   const hour = date.getHours();
   let greeting = 'Buenas noches';

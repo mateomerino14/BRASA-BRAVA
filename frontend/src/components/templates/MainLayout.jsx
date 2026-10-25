@@ -22,19 +22,16 @@ const pageVisible = {opacity: 1, y: 0};
 const pageExit = {opacity: 0, y: -8};
 const pageTransition = {duration: 0.25, ease: 'easeOut'};
 
-// Plantilla de las pantallas con sesión: menú fijo en escritorio; en celular o tablet, barra naranja con menú tipo persiana
 export function MainLayout({sidebarItems, user, title, onLogout, onChangePassword, collapsed, onToggleCollapsed, pageKey, children}) {
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastPage, setLastPage] = useState(pageKey);
 
-  // Al navegar a otra pantalla la persiana se cierra sola
   if (pageKey !== lastPage) {
     setLastPage(pageKey);
     setMenuOpen(false);
   }
 
-  // En celular la persiana se cierra antes de abrir el modal de contraseña
   let changePasswordFromMenu;
   if (onChangePassword) {
     changePasswordFromMenu = () => {

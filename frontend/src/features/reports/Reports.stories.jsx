@@ -1,4 +1,6 @@
 import {fn} from 'storybook/test';
+import {ReportFilters} from './components/ReportFilters';
+import {ReportActions} from './components/ReportActions';
 import {ReportTotals} from './components/ReportTotals';
 import {SummaryTable} from './components/SummaryTable';
 import {SalesTable} from './components/SalesTable';
@@ -19,7 +21,29 @@ const REPORT = {
   ventas: sales,
 };
 
-const hoursFrom = (hours) => new Date(NOW + hours * 3600000).toISOString();
+const MS_PER_HOUR = 3_600_000;
+const hoursFrom = (hours) => new Date(NOW + hours * MS_PER_HOUR).toISOString();
+
+const REPORTS = {
+  filters: {tipo: 'resumen', desde: '2026-10-01', hasta: '2026-10-25', empleado: 'todos'},
+  errors: {},
+  employees: [
+    {id: 1, nombre: 'Andrea Romero', alias: 'a.romero', activo: true},
+    {id: 2, nombre: 'Jorge Quispe', alias: 'j.quispe', activo: false},
+  ],
+  loading: false,
+  change: fn(),
+  changeType: fn(),
+  applyPeriod: fn(),
+  generate: fn(),
+  correo: '',
+  correoError: '',
+  changeCorreo: fn(),
+  download: fn(),
+  downloading: false,
+  email: fn(),
+  sending: false,
+};
 
 const SCHEDULES = {
   open: true,
@@ -38,6 +62,8 @@ const SCHEDULES = {
   askRemove: fn(),
 };
 
+export const Filtros = {render: () => <ReportFilters reports={REPORTS} />};
+export const DescargarOEnviar = {render: () => <ReportActions reports={REPORTS} />};
 export const Totales = {render: () => <ReportTotals resumen={REPORT.resumen} />};
 export const ResumenPorDia = {render: () => <SummaryTable report={REPORT} />};
 export const VentasDetalladas = {render: () => <SalesTable report={REPORT} onOpen={fn()} />};

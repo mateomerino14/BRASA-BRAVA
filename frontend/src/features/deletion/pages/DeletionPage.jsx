@@ -23,7 +23,6 @@ const styles = {
   footerText: 'text-sm text-cafe',
 };
 
-// Eliminación física (solo el DIRECTORIO): borra para siempre lo dado de baja y todo lo que depende de ello
 export function DeletionPage() {
   const deletion = useDeletion();
   const {tipo, rows} = deletion;

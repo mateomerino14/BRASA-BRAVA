@@ -8,7 +8,6 @@ const successMessage = (product) => {
   return `${product.nombre} quedó marcado como agotado`;
 };
 
-// Cambio rápido de disponible/agotado, sin confirmación; bloquea el interruptor mientras guarda
 export function useProductAvailability({onChanged, onError, api = productsApi} = {}) {
   const [pendingIds, setPendingIds] = useState([]);
 

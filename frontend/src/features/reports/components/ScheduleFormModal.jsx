@@ -18,7 +18,6 @@ const styles = {
   actions: 'grid gap-3 sm:grid-cols-2',
 };
 
-// Alta o cambio de un envío programado: correo, tipo de reporte, días y hora
 export function ScheduleFormModal({schedules}) {
   const {form} = schedules;
   const daysId = useId();

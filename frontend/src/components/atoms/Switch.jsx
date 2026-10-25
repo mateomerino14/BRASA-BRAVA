@@ -15,7 +15,6 @@ const styles = {
 const thumbSpring = {type: 'spring', stiffness: 600, damping: 32};
 const THUMB_TRAVEL_PX = 20;
 
-// Interruptor de encendido/apagado con texto visible para cada estado
 export function Switch({checked, onChange, label, onText, offText, disabled = false, className}) {
   return (
     <span className={cn(styles.wrapper, className)}>

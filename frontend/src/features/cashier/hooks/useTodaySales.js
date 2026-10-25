@@ -3,7 +3,6 @@ import {cashierApi} from '../services/cashierApi';
 
 const emptySales = {hoy: '', ventas: [], resumen: {cantidad: 0, total: 0, efectivo: 0, qr: 0}};
 
-// Resumen de las ventas cobradas hoy, reimpresión de tickets y enlace a la página de impuestos
 export function useTodaySales({api = cashierApi} = {}) {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState(emptySales);

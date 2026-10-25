@@ -42,7 +42,6 @@ function NoTable() {
   );
 }
 
-// Pedido de la mesa elegida a la izquierda y el menú a la derecha; en el celular el pedido se abre desde la barra de abajo
 export function TableWorkspace({order, checkout, now, authorizePrint, onCheckedOut}) {
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const [mobileOpen, setMobileOpen] = useState(false);

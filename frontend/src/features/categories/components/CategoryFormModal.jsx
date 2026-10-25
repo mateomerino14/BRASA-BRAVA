@@ -44,7 +44,6 @@ function SubcategoryRow({form, sub, index, isLast}) {
     }
   }, [shouldFocus]);
 
-  // Enter en la última fila con texto agrega otra; nunca envía el formulario
   const handleKeyDown = (event) => {
     if (event.key !== 'Enter') {
       return;

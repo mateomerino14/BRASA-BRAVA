@@ -7,7 +7,6 @@ export const ROLES = [
   role(4, 'Delivery', ['caja'], 0, {activo: false}),
 ];
 
-// Backend falso en memoria para las pruebas de la pantalla de cargos
 export const createRolesBackend = () => {
   const store = ROLES.map((item) => ({...item, pantallas: [...item.pantallas]}));
   const calls = {list: [], saved: []};

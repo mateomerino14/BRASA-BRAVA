@@ -26,7 +26,6 @@ export function useCategoryForm({onSaved, api = categoriesApi} = {}) {
   const [focusKey, setFocusKey] = useState(null);
   const subcategories = form.values.subcategorias;
 
-  // Suma una fila vacía al final y la deja con el cursor para escribir
   const addSubcategory = () => {
     nextKey.current += 1;
     const key = `nueva-${nextKey.current}`;

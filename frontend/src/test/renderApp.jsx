@@ -7,7 +7,6 @@ import {AuthProvider} from '../context/AuthContext';
 import {ToastProvider} from '../context/ToastContext';
 import {AppRoutes} from '../router/AppRoutes';
 
-// Registra la ubicación actual para que las pruebas lean la URL (búsqueda, filtros, página)
 function LocationSpy({onChange}) {
   const location = useLocation();
   useEffect(() => {

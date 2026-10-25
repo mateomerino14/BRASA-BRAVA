@@ -15,7 +15,6 @@ const openPage = async (options) => {
   return {backend, table, ...view};
 };
 
-// El nombre del producto va en un <p>; la subcategoría puede llamarse igual (Dúo Parrillero)
 const rowOf = (table, name) => within(table).getByText(name, {selector: 'p'}).closest('tr');
 
 describe('Gestión de productos', () => {
@@ -73,7 +72,6 @@ describe('Gestión de productos', () => {
     await user.type(within(dialog).getByLabelText(/^Nombre/), 'Hamburguesa Picante');
     await user.type(within(dialog).getByLabelText(/^Precio/), '42,50');
     await user.selectOptions(within(dialog).getByLabelText(/^Categoría/), 'Bebidas y Refrescos');
-    // Bebidas tiene una sola subcategoría: se elige sola
     expect(within(dialog).getByLabelText(/^Subcategoría/)).toHaveValue('6');
     await user.selectOptions(within(dialog).getByLabelText(/^Categoría/), 'Hamburguesas');
     expect(within(dialog).getByLabelText(/^Subcategoría/)).toHaveValue('');
@@ -138,7 +136,6 @@ describe('Gestión de productos', () => {
     await user.click(within(dialog).getByRole('button', {name: 'Agregar insumo'}));
     await user.selectOptions(within(dialog).getByLabelText('Insumo 2'), 'Queso cheddar');
     await user.type(within(dialog).getByLabelText('Cantidad 2'), '0,06');
-    // Carne: 12 / 0,15 = 80; queso: 1,5 / 0,06 = 25 → manda el queso
     expect(within(dialog).getByLabelText('25 porciones')).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', {name: 'Guardar receta'}));
     expect(await screen.findByText('Se guardó la receta de Gaseosa 500 ml')).toBeInTheDocument();
@@ -152,7 +149,6 @@ describe('Gestión de productos', () => {
     expect(await within(dialog).findByLabelText('Insumo 2')).toHaveDisplayValue('Tocino (de baja)');
     expect(within(dialog).getByText('Insumo dado de baja')).toBeInTheDocument();
     expect(within(dialog).getByLabelText('Cantidad 1')).toHaveValue('0,15');
-    // Un insumo de baja cuenta como sin stock
     expect(within(dialog).getByLabelText('0 porciones')).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', {name: 'Agregar insumo'}));
     await user.selectOptions(within(dialog).getByLabelText('Insumo 3'), 'Carne de res');

@@ -2,7 +2,7 @@ import {Button} from '../../../components/atoms/Button';
 import {Modal} from '../../../components/organisms/Modal';
 import {countText, formatAmount, formatDayMonthYear, formatTime} from '../../../lib/format';
 import {isoDate} from '../utils/reports';
-import {CONSUMO_LABELS} from '../constants/reports';
+import {CONSUMPTION_LABELS} from '../../cashier/constants/cashier';
 
 const styles = {
   layout: 'grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]',
@@ -33,7 +33,6 @@ const styles = {
   actions: 'grid gap-3 sm:grid-cols-2',
 };
 
-// "Ticket sin imprimir", "Ticket impreso 1 vez" o "Ticket impreso 4 veces"
 const printsText = (count) => {
   if (count === 0) {
     return 'Ticket sin imprimir';
@@ -68,7 +67,7 @@ function Shipment({envio}) {
                 {line.productos && <span className={styles.combo}>{line.productos}</span>}
                 {line.sin && <span className={styles.removed}>{line.sin}</span>}
               </td>
-              <td className={styles.consumo}>{CONSUMO_LABELS[line.consumo]}</td>
+              <td className={styles.consumo}>{CONSUMPTION_LABELS[line.consumo]}</td>
               <td className={styles.subtotal}>{formatAmount(line.subtotal)}</td>
             </tr>
           ))}
@@ -99,7 +98,6 @@ function Payment({sale}) {
   );
 }
 
-// Detalle de una venta del reporte: productos por envío y el cobro; con Caja se puede reimprimir el ticket
 export function SaleDetailModal({sale, onClose, onReprint}) {
   return (
     <Modal

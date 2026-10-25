@@ -13,7 +13,6 @@ const styles = {
   actions: 'grid gap-3 sm:grid-cols-2',
 };
 
-// Pide el usuario y la contraseña de un empleado con acceso a Caja para imprimir el ticket otra vez
 export function PrintAuthorizationModal({authorization}) {
   const {request, values, errors} = authorization;
   const ticket = request?.ticket;

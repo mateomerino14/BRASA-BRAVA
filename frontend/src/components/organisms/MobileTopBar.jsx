@@ -10,7 +10,6 @@ const styles = {
 
 const tapPress = {scale: 0.92};
 
-// Barra naranja de celular y tablet: logo, título de la pantalla y botón de la persiana
 export function MobileTopBar({title, open = false, expanded = open, onToggle, titleAs: Title = 'h1'}) {
   let label = 'Abrir menú';
   let Icon = Menu;

@@ -18,7 +18,6 @@ const styles = {
   srOnly: 'sr-only',
 };
 
-// Una fila por venta; tocarla (o su ojo) abre su detalle en una ventana
 export function SalesTable({report, onOpen}) {
   return (
     <div className={styles.wrap}>

@@ -17,8 +17,6 @@ const styles = {
 
 const pillSpring = {type: 'spring', stiffness: 420, damping: 34};
 
-// Opciones excluyentes en chips que se desplazan de lado (secciones, categorías). Si no entran, aparecen flechas
-// y el borde se difumina; cada chip puede mostrar un contador con su texto para lectores de pantalla
 export function ChipTabs({label, options, value, onChange, className}) {
   const groupId = useId();
   return (

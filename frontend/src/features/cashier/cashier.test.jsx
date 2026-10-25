@@ -31,7 +31,6 @@ const openTable = async (name, options) => {
 const panel = () => screen.getByRole('region', {name: 'Pedido de la mesa'});
 const menu = () => screen.getByRole('region', {name: 'Menú'});
 
-// Toca un producto del menú, ajusta el diálogo y lo agrega al pedido
 const addItem = async (user, name, {times = 0, remove = [], llevar = false, group} = {}) => {
   await user.click(within(menu()).getByRole('button', {name: new RegExp(`^${name},`)}));
   const dialog = await screen.findByRole('dialog', {name: name});

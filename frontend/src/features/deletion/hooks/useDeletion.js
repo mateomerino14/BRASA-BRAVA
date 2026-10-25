@@ -15,7 +15,6 @@ const defaultRange = () => {
 
 const totalOf = (selection) => Object.values(selection).reduce((total, ids) => total + ids.length, 0);
 
-// Eliminación física: pestañas por tipo, marcas en cada una, vista previa en cascada y borrado con la palabra ELIMINAR
 export function useDeletion({api = deletionApi} = {}) {
   const toast = useToast();
   const [tipo, setTipo] = useState('empleados');

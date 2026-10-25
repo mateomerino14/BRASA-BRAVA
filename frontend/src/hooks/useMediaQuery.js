@@ -1,6 +1,5 @@
 import {useCallback, useSyncExternalStore} from 'react';
 
-// Indica si la ventana cumple una media query y se actualiza al redimensionar
 export function useMediaQuery(query) {
   const subscribe = useCallback((notify) => {
     const media = window.matchMedia(query);

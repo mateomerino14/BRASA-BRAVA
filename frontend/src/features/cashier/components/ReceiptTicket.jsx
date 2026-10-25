@@ -20,7 +20,6 @@ const styles = {
 
 const dateFormatter = new Intl.DateTimeFormat('es-BO', {day: '2-digit', month: '2-digit', year: 'numeric'});
 
-// Ticket de venta: todo lo acumulado de la mesa con precios, total, pagos y cambio
 export function ReceiptTicket({ticket, printedAt}) {
   return (
     <article aria-label={`Ticket del pedido ${ticket.numero}`} className={styles.ticket}>

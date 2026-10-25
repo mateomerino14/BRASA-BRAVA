@@ -19,7 +19,6 @@ const styles = {
   total: 'text-base text-cafe',
 };
 
-// Una línea del pedido con sus unidades listas: −1, +1 o todas
 export function ReadyLine({line, busy, onMark}) {
   const done = line.listos === line.cantidad;
   const removed = removedText(line);

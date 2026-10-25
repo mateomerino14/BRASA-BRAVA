@@ -3,12 +3,10 @@ import {Boxes, Database, FileChartColumn, FolderTree, Link2, LayoutGrid, Package
 export {STATUS_OPTIONS} from '../../../config/lists';
 
 export const NAME_MAX_LENGTH = 40;
-// Pantallas visibles en la tabla antes del botón "+N más"
 export const VISIBLE_SCREENS = 3;
 
 export const EMPTY_FORM = {nombre: '', pantallas: []};
 
-// Pantallas que se marcan en un cargo, agrupadas como en el menú; "id" coincide con el permiso del backend
 export const SCREEN_GROUPS = [
   {
     title: 'Operación del local',
@@ -35,5 +33,4 @@ export const SCREEN_GROUPS = [
 
 export const ALL_SCREENS = SCREEN_GROUPS.flatMap((group) => group.screens);
 
-// Nombre corto de cada pantalla para la tabla
 export const SCREEN_LABELS = Object.fromEntries(ALL_SCREENS.map((screen) => [screen.id, screen.label]));

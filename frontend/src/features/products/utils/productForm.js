@@ -3,10 +3,8 @@ import {NAME_MAX_LENGTH} from '../constants/products';
 const MIN_NAME_LENGTH = 2;
 const PRICE_PATTERN = /^\d{1,5}([.,]\d{1,2})?$/;
 
-// Convierte "35,50" o "35.5" en número
-export const parsePrice = (text) => Number(String(text).trim().replace(',', '.'));
+const parsePrice = (text) => Number(String(text).trim().replace(',', '.'));
 
-// Valida el formulario con las mismas reglas que la API
 export const validateProduct = (values) => {
   const errors = {};
   const nombre = values.nombre.trim();
@@ -35,7 +33,6 @@ export const validateProduct = (values) => {
   return errors;
 };
 
-// Convierte un producto de la API en valores editables (el precio con coma decimal)
 export const toFormValues = (product) => ({
   nombre: product.nombre,
   descripcion: product.descripcion ?? '',
@@ -44,7 +41,6 @@ export const toFormValues = (product) => ({
   idSubcategoria: String(product.subcategoria.id),
 });
 
-// Arma el cuerpo que espera la API
 export const toPayload = (values) => ({
   nombre: values.nombre.trim(),
   descripcion: values.descripcion.trim(),
@@ -52,7 +48,6 @@ export const toPayload = (values) => ({
   idSubcategoria: Number(values.idSubcategoria),
 });
 
-// Opciones de categoría y subcategoría; incluye las del producto editado aunque estén de baja
 export const buildCategoryOptions = (categories, product) => {
   const options = categories.map((category) => ({...category, subcategorias: [...category.subcategorias]}));
   if (!product) {

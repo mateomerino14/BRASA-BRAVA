@@ -18,12 +18,10 @@ const HOURS = Array.from({length: 12}, (_, index) => String(index + 1));
 const MINUTE_STEP = 5;
 const MINUTES = Array.from({length: 60 / MINUTE_STEP}, (_, index) => String(index * MINUTE_STEP).padStart(2, '0'));
 const NOON = 12;
-// Si se elige primero la hora, se completa a la tarde: la mayoría de promociones del bar son de noche
 const DEFAULT_PERIOD = 'PM';
 
 const pad = (value) => String(value).padStart(2, '0');
 
-// "18:05" → {hour: '6', minute: '05', period: 'PM'}; vacío si no hay hora
 const split = (value) => {
   if (!value) {
     return {hour: '', minute: '', period: DEFAULT_PERIOD};
@@ -36,7 +34,6 @@ const split = (value) => {
   return {hour: String(hours % NOON || NOON), minute: pad(minutes), period};
 };
 
-// {hour: '6', minute: '05', period: 'PM'} → "18:05"
 const join = ({hour, minute, period}) => {
   let hours = Number(hour) % NOON;
   if (period === 'PM') {
@@ -45,7 +42,6 @@ const join = ({hour, minute, period}) => {
   return `${pad(hours)}:${minute || '00'}`;
 };
 
-// Hora siempre en formato de 12 horas con AM/PM, sin depender del idioma de la computadora; guarda "HH:MM" de 24 horas
 export function TimeInput({id, value = '', onChange, invalid = false, label = 'Hora', 'aria-describedby': describedBy, className}) {
   const parts = split(value);
 
