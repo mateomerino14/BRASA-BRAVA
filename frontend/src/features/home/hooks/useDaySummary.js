@@ -13,31 +13,21 @@ const loadKitchen = async (api) => {
   return {...data.summary, waiting};
 };
 
-const skip = async () => null;
-
-// Resumen del día según el cargo: caja (ventas y mesas) y cocina (envíos pendientes), recargado cada cierto tiempo
-export function useDaySummary({canCashier, canKitchen, api = homeApi}) {
+// Resumen del día para quien tiene Caja: ventas, mesas y lo que falta en cocina, recargado cada cierto tiempo
+export function useDaySummary({canCashier, api = homeApi}) {
   const [summary, setSummary] = useState({cashier: null, kitchen: null});
-  const [loading, setLoading] = useState(canCashier || canKitchen);
+  const [loading, setLoading] = useState(canCashier);
   const [error, setError] = useState('');
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!canCashier && !canKitchen) {
+    if (!canCashier) {
       return undefined;
     }
     let cancelled = false;
     const load = async () => {
-      let cashierLoad = skip;
-      if (canCashier) {
-        cashierLoad = loadCashier;
-      }
-      let kitchenLoad = skip;
-      if (canKitchen) {
-        kitchenLoad = loadKitchen;
-      }
       try {
-        const [cashier, kitchen] = await Promise.all([cashierLoad(api), kitchenLoad(api)]);
+        const [cashier, kitchen] = await Promise.all([loadCashier(api), loadKitchen(api)]);
         if (!cancelled) {
           setSummary({cashier, kitchen});
           setError('');
@@ -61,7 +51,7 @@ export function useDaySummary({canCashier, canKitchen, api = homeApi}) {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [api, canCashier, canKitchen]);
+  }, [api, canCashier]);
 
   return {...summary, loading, error, now};
 }

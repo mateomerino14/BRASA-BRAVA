@@ -84,7 +84,6 @@ export function SectionFormModal({form}) {
 
   return (
     <Modal
-      closeButton={false}
       open={form.open}
       onClose={form.close}
       size="lg"
@@ -119,10 +118,10 @@ export function SectionFormModal({form}) {
         </section>
 
         <div className={styles.actions}>
-          <Button variant="outline" onClick={form.close} disabled={form.saving}>
+          <Button variant="outline" action="cancel" onClick={form.close} disabled={form.saving}>
             Cancelar
           </Button>
-          <Button type="submit" loading={form.saving}>
+          <Button type="submit" action="save" loading={form.saving}>
             {form.isEdit ? 'Guardar' : 'Registrar'}
           </Button>
         </div>

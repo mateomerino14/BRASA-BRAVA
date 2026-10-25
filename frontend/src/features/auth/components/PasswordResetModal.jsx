@@ -198,7 +198,7 @@ export function PasswordResetModal({reset}) {
   };
 
   return (
-    <Modal open={reset.step !== 'closed'} closeButton={false} onClose={close} title={step.title} description={step.description}>
+    <Modal open={reset.step !== 'closed'} onClose={close} title={step.title} description={step.description}>
       <form onSubmit={handleSubmit} noValidate className={styles.form}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={reset.step} initial={stepHidden} animate={stepVisible} exit={stepExit} transition={stepTransition}>
@@ -211,22 +211,22 @@ export function PasswordResetModal({reset}) {
 
         <div className={styles.actions}>
           {codeBlocked && (
-            <Button type="button" fullWidth loading={reset.loading} onClick={reset.resendCode}>
+            <Button type="button" fullWidth action="email" loading={reset.loading} onClick={reset.resendCode}>
               Reenviar código
             </Button>
           )}
           {!codeBlocked && (
-            <Button type="submit" fullWidth loading={reset.loading}>
+            <Button type="submit" fullWidth action={step.icon} loading={reset.loading}>
               {step.action}
             </Button>
           )}
           {reset.step === 'code' && !codeBlocked && (
-            <Button type="button" fullWidth variant="outline" disabled={reset.loading} onClick={reset.resendCode}>
+            <Button type="button" fullWidth variant="outline" action="email" disabled={reset.loading} onClick={reset.resendCode}>
               Reenviar código
             </Button>
           )}
           {reset.step !== 'done' && (
-            <Button type="button" fullWidth variant="danger" onClick={close}>
+            <Button type="button" fullWidth variant="danger" action="cancel" onClick={close}>
               Cancelar
             </Button>
           )}

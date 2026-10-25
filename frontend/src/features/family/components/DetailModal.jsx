@@ -211,6 +211,7 @@ export function DetailModal({detail, onClose, onRetry}) {
       size="md"
       hideTitle={detail.kind === 'promocion'}
       cover={item && <DetailCover kind={detail.kind} item={item} />}
+      footer={<Button variant="outline" action="close" fullWidth onClick={onClose}>Cerrar</Button>}
     >
       {item && detail.kind === 'producto' && <ProductDetail product={item} loading={detail.loading} failed={detail.failed} onRetry={onRetry} />}
       {item && detail.kind === 'promocion' && <PromotionDetail promotion={item} />}

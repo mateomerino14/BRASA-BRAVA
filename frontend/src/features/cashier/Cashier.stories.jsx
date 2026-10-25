@@ -1,5 +1,7 @@
 import {fn} from 'storybook/test';
-import {FloorView} from './components/FloorView';
+import {TablesBar} from './components/TablesBar';
+import {ReadyModal} from './components/ReadyModal';
+import {PrintAuthorizationModal} from './components/PrintAuthorizationModal';
 import {CatalogCard} from './components/CatalogCard';
 import {OrderPanel} from './components/OrderPanel';
 import {ItemPickerModal} from './components/ItemPickerModal';
@@ -24,15 +26,16 @@ const SECTION = {
   nombre: 'Salón principal',
   mesas: [
     table(1, 'Mesa 1'),
-    table(2, 'Mesa 2', {id: 7, total: 160, unidades: 5, mesero: 'Carlos Mendoza', abiertaEn: minutesAgo(25)}),
+    table(2, 'Mesa 2', {id: 7, total: 160, unidades: 5, mesero: 'Carlos Mendoza', abiertaEn: minutesAgo(25), esperaDesde: minutesAgo(25)}),
     table(3, 'Mesa 3'),
-    table(4, 'Mesa 4', {id: 9, total: 58, unidades: 1, mesero: 'Andrea Romero', abiertaEn: minutesAgo(75)}),
-    table(5, 'Mesa 5'),
+    table(4, 'Mesa 4', {id: 9, total: 58, unidades: 1, mesero: 'Andrea Romero', abiertaEn: minutesAgo(75), esperaDesde: null}),
+    table(5, 'Mesa 5', {id: 10, total: 35, unidades: 1, mesero: 'Andrea Romero', abiertaEn: minutesAgo(8), esperaDesde: minutesAgo(8)}),
+    ...Array.from({length: 9}, (_, index) => table(6 + index, `Mesa ${6 + index}`)),
   ],
 };
 
 const FLOOR = {
-  sections: [SECTION, {id: 2, nombre: 'Terraza', mesas: []}, {id: 3, nombre: 'Barra', mesas: []}],
+  sections: [SECTION, ...['Terraza', 'Barra', 'Salón VIP', 'Jardín', 'Segundo piso', 'Patio de comidas', 'Sala de eventos', 'Mirador'].map((nombre, index) => ({id: index + 2, nombre, mesas: []}))],
   section: SECTION,
   summary: {mesas: 5, ocupadas: 2, libres: 3, porCobrar: 218},
   selectSection: fn(),
@@ -41,7 +44,7 @@ const FLOOR = {
   now: NOW,
 };
 
-export const PlanoDeMesas = {render: () => <FloorView floor={FLOOR} onOpenTable={fn()} />};
+export const BarraDeMesas = {render: () => <TablesBar floor={FLOOR} selectedId={2} onSelectTable={fn()} onShowSales={fn()} onShowPrinters={fn()} />};
 
 const [clasica, , gaseosa, cerveza] = CATALOG.productos;
 
@@ -65,9 +68,9 @@ const ORDER = {
     id: 7, numero: 7, total: 140, envios: 2, abiertaEn: minutesAgo(25), cajero: 'a.romero', mesero, modificado: true, modificadoPor: 'admin',
     comandas: [{envio: 1, cajero: 'a.romero', mesero, creadoEn: minutesAgo(25)}, {envio: 2, cajero: 'admin', mesero, creadoEn: minutesAgo(5)}],
     detalles: [
-      {id: 1, envio: 1, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, consumo: 'local', mesero, creadoEn: minutesAgo(25), productos: [], exclusiones: [tomate]},
-      {id: 2, envio: 1, tipo: 'promocion', nombre: 'Combo Brava', precioUnitario: 70, cantidad: 1, subtotal: 70, consumo: 'local', mesero, creadoEn: minutesAgo(25), productos: [{nombre: 'Doble Brava', cantidad: 1}, {nombre: 'Gaseosa 500 ml', cantidad: 1}], exclusiones: []},
-      {id: 3, envio: 2, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, consumo: 'llevar', mesero, creadoEn: minutesAgo(5), productos: [], exclusiones: [tomate]},
+      {id: 1, envio: 1, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, listos: 1, consumo: 'local', mesero, creadoEn: minutesAgo(25), productos: [], exclusiones: [tomate]},
+      {id: 2, envio: 1, tipo: 'promocion', nombre: 'Combo Brava', precioUnitario: 70, cantidad: 1, subtotal: 70, listos: 0, consumo: 'local', mesero, creadoEn: minutesAgo(25), productos: [{nombre: 'Doble Brava', cantidad: 1}, {nombre: 'Gaseosa 500 ml', cantidad: 1}], exclusiones: []},
+      {id: 3, envio: 2, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, listos: 0, consumo: 'llevar', mesero, creadoEn: minutesAgo(5), productos: [], exclusiones: [tomate]},
     ],
   },
   lines: [
@@ -84,13 +87,36 @@ const ORDER = {
   editLine: fn(),
   remove: fn(),
   saving: false,
-  submitError: '',
   submit: fn(),
   openPrint: fn(),
+  openReady: fn(),
+  startCheckout: fn(),
 };
 
-export const PedidoDeLaMesa = {render: () => <div className="max-w-md"><OrderPanel order={ORDER} /></div>};
-export const PedidoNuevoVacio = {render: () => <div className="max-w-md"><OrderPanel order={{...ORDER, venta: null, lines: [], units: 0, totals: {registered: 0, pending: 0, total: 0}, idMesero: ''}} /></div>};
+export const PedidoDeLaMesa = {render: () => <div className="max-w-md"><OrderPanel order={ORDER} now={NOW} /></div>};
+
+export const MarcarListos = {
+  render: () => <ReadyModal open mesa={ORDER.mesa} venta={ORDER.venta} busy="" onMark={fn()} onMarkAll={fn()} onClose={fn()} />,
+};
+
+const print = (numero, impresoPor, minutes) => ({numero, impresoPor, autorizadoPor: null, impresoEn: minutesAgo(minutes)});
+
+export const AutorizarReimpresion = {
+  render: () => (
+    <PrintAuthorizationModal
+      authorization={{
+        request: {ticket: {id: 7, numero: 7, mesa: 'Mesa 2', total: 140}, impresiones: [print(1, 'a.romero', 12), print(2, 'a.romero', 10), print(3, 'admin', 4)]},
+        values: {alias: '', contrasena: ''},
+        errors: {},
+        saving: false,
+        change: fn(),
+        confirm: fn(),
+        cancel: fn(),
+      }}
+    />
+  ),
+};
+export const PedidoNuevoVacio = {render: () => <div className="max-w-md"><OrderPanel order={{...ORDER, venta: null, lines: [], units: 0, totals: {registered: 0, pending: 0, total: 0}, idMesero: ''}} now={NOW} /></div>};
 
 const picker = (kind, item) => ({open: true, session: 1, kind, item, line: null});
 
@@ -141,7 +167,7 @@ const SALES = {
   taxLink: 'https://siat.impuestos.gob.bo/v2/launcher/', linkDraft: null, editLink: fn(), changeLink: fn(), cancelLink: fn(), saveLink: fn(), linkError: '', savingLink: false,
 };
 
-export const VentasDeHoy = {render: () => <TodaySalesModal sales={SALES} canEditLink />};
+export const VentasDeHoy = {render: () => <TodaySalesModal sales={SALES} canEditLink authorizePrint={fn()} />};
 
 const PRINTERS = {
   open: true, close: fn(), loading: false, saving: false, error: '',

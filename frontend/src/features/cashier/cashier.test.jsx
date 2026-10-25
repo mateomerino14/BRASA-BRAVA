@@ -4,7 +4,8 @@ import {renderApp} from '../../test/renderApp';
 import {USERS, mockApi} from '../../test/mockApi';
 import {createCashierBackend} from '../../test/cashierBackend';
 import {setViewport} from '../../test/viewport';
-import {addLine, elapsedText, exclusionText, groupByShipment, lineKey, toOrderPayload} from './utils/cart';
+import {addLine, exclusionText, groupByShipment, lineKey, toOrderPayload} from './utils/cart';
+import {formatWait} from '../../lib/format';
 
 const openCashier = async (route = '/caja', {user} = {}) => {
   const backend = createCashierBackend();
@@ -17,9 +18,12 @@ const openCashier = async (route = '/caja', {user} = {}) => {
   return {backend, ...view};
 };
 
+const tableButton = (name) => within(screen.getByRole('region', {name: 'Mesas'})).getByRole('button', {name: new RegExp(`^${name},`)});
+
 const openTable = async (name, options) => {
   const view = await openCashier('/caja', options);
-  await view.user.click(await screen.findByRole('button', {name: new RegExp(`^${name},`)}));
+  await screen.findByRole('region', {name: 'Menú'});
+  await view.user.click(tableButton(name));
   await screen.findByRole('region', {name: 'Pedido de la mesa'});
   return view;
 };
@@ -48,36 +52,80 @@ const addItem = async (user, name, {times = 0, remove = [], llevar = false, grou
   await waitFor(() => expect(screen.queryByRole('dialog', {name: name})).not.toBeInTheDocument());
 };
 
-describe('Caja: plano de mesas', () => {
-  it('muestra el resumen y las mesas por sección con su ocupación', async () => {
+describe('Caja: una sola pantalla', () => {
+  it('muestra las secciones, las mesas con su estado y el menú, sin tarjetas de resumen', async () => {
     const {user, location} = await openCashier();
     expect(await screen.findByRole('heading', {name: 'Caja'})).toBeInTheDocument();
-    const tables = await screen.findByRole('list', {name: 'Mesas de Salón principal'});
-    const summary = screen.getByRole('region', {name: 'Resumen'});
-    expect(within(summary).getByText('Mesas libres').previousSibling).toHaveTextContent('2');
-    expect(within(summary).getByText('Bs por cobrar').previousSibling).toHaveTextContent('105,00');
-    const busy = within(tables).getByRole('button', {name: 'Mesa 2, ocupada, Bs 105,00'});
-    expect(within(busy).getByText('Carlos Mendoza')).toBeInTheDocument();
-    expect(within(busy).getByText('Hace 25 min')).toBeInTheDocument();
-    expect(within(busy).getByText('2 u.')).toBeInTheDocument();
-    expect(within(busy).getByText('1 de 2 listos')).toBeInTheDocument();
-    expect(within(tables).getByRole('button', {name: 'Mesa 1, libre, 4 personas'})).toBeInTheDocument();
+    await screen.findByRole('region', {name: 'Menú'});
+    expect(screen.queryByRole('region', {name: 'Resumen'})).not.toBeInTheDocument();
+    const bar = screen.getByRole('region', {name: 'Mesas'});
+    expect(within(bar).getByRole('button', {name: 'Mesa 2, Bs 105,00, en cocina hace 25 min'})).toBeInTheDocument();
+    expect(within(bar).getByRole('button', {name: 'Mesa 1, libre'})).toBeInTheDocument();
+    expect(screen.getByText('Elija una mesa')).toBeInTheDocument();
+    expect(screen.queryByRole('link', {name: 'Cocina'})).not.toBeInTheDocument();
 
     const sections = screen.getByRole('radiogroup', {name: 'Secciones'});
     expect(within(sections).getByRole('radio', {name: 'Salón principal, 1 mesa ocupada'})).toBeChecked();
     await user.click(within(sections).getByRole('radio', {name: 'Terraza'}));
-    expect(await screen.findByRole('list', {name: 'Mesas de Terraza'})).toBeInTheDocument();
+    expect(await within(bar).findByRole('button', {name: 'Terraza 1, libre'})).toBeInTheDocument();
     expect(location.current.search).toBe('?seccion=2');
   });
 
-  it('abre la mesa elegida guardándola en la dirección y vuelve al plano', async () => {
+  it('elige la mesa en la misma pantalla y la guarda en la dirección', async () => {
     const {user, location} = await openTable('Mesa 1');
     expect(location.current.search).toBe('?mesa=1');
-    expect(screen.getByRole('heading', {name: 'Mesa 1'})).toBeInTheDocument();
-    expect(within(panel()).getByRole('heading', {name: 'Nuevo pedido'})).toBeInTheDocument();
-    await user.click(screen.getByRole('button', {name: 'Mesas'}));
-    expect(await screen.findByRole('list', {name: 'Mesas de Salón principal'})).toBeInTheDocument();
-    expect(location.current.search).toBe('');
+    expect(within(panel()).getByRole('heading', {name: 'Mesa 1'})).toBeInTheDocument();
+    expect(within(panel()).getByText('Nuevo pedido')).toBeInTheDocument();
+    expect(tableButton('Mesa 1')).toHaveAttribute('aria-pressed', 'true');
+    await user.click(tableButton('Mesa 2'));
+    expect(await within(panel()).findByRole('heading', {name: 'Mesa 2'})).toBeInTheDocument();
+    expect(location.current.search).toBe('?mesa=2');
+  });
+
+  it('sin mesa elegida el menú avisa que falta la mesa', async () => {
+    const {user} = await openCashier();
+    await screen.findByRole('region', {name: 'Menú'});
+    await user.click(within(menu()).getByRole('button', {name: /^Doble Brava,/}));
+    expect(await screen.findByText('Elija primero la mesa en la barra de arriba')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', {name: 'Doble Brava'})).not.toBeInTheDocument();
+  });
+
+  it('muestra la espera corta y legible aunque sea de días', () => {
+    expect(formatWait(12)).toBe('12 min');
+    expect(formatWait(65)).toBe('1 h 5 min');
+    expect(formatWait(120)).toBe('2 h');
+    expect(formatWait(20076)).toBe('13 d 22 h');
+  });
+});
+
+describe('Caja: marcar listos', () => {
+  it('marca lo que sale de cocina en tres columnas y habilita Cobrar cuando no falta nada', async () => {
+    const {user, backend} = await openTable('Mesa 2');
+    expect(within(panel()).getByRole('button', {name: 'Cobrar'})).toBeDisabled();
+    await user.click(within(panel()).getByRole('button', {name: 'Marcar listos'}));
+    const dialog = await screen.findByRole('dialog', {name: 'Marcar listos · Mesa 2'});
+    expect(within(dialog).queryByRole('button', {name: 'Cerrar'})).toBeInTheDocument();
+    const local = within(dialog).getByRole('region', {name: 'Local'});
+    expect(within(local).getByText('1× Combo Brava')).toBeInTheDocument();
+    expect(within(dialog).getByRole('region', {name: 'Para llevar'})).toHaveTextContent('Nada para llevar');
+    const missing = within(dialog).getByRole('region', {name: 'Faltan'});
+    expect(missing).toHaveTextContent('Combo Brava1');
+    await user.click(within(local).getByRole('button', {name: 'Sumar una lista de Combo Brava'}));
+    expect(await within(missing).findByText('Ya salió todo. Se puede cobrar.')).toBeInTheDocument();
+    expect(backend.calls.marks).toEqual([{line: 2, accion: 'sumar'}]);
+    await user.click(within(dialog).getByRole('button', {name: 'Cerrar'}));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(within(panel()).getByRole('button', {name: 'Cobrar'})).toBeEnabled();
+    expect(within(panel()).getByRole('button', {name: 'Marcar listos'})).toBeDisabled();
+  });
+
+  it('"Todo listo" marca todos los envíos pendientes de la mesa', async () => {
+    const {user, backend} = await openTable('Mesa 2');
+    await user.click(within(panel()).getByRole('button', {name: 'Marcar listos'}));
+    const dialog = await screen.findByRole('dialog', {name: 'Marcar listos · Mesa 2'});
+    await user.click(within(dialog).getByRole('button', {name: 'Todo listo'}));
+    expect(await screen.findByText('Todo listo en Mesa 2. Ya se puede cobrar')).toBeInTheDocument();
+    expect(backend.calls.marks).toEqual([{sale: 7, envio: 1, accion: 'todos'}]);
   });
 });
 
@@ -164,24 +212,22 @@ describe('Caja: armado del pedido', () => {
     await user.click(within(dialog).getByRole('button', {name: 'Imprimir'}));
     expect(print).toHaveBeenCalledTimes(1);
     expect(document.querySelector('.print-only article')).toHaveAccessibleName('Comanda del envío 1');
-    await user.click(within(dialog).getByRole('button', {name: 'Listo'}));
+    await user.click(within(dialog).getByRole('button', {name: 'Cerrar'}));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(document.querySelector('.print-only')).toBeNull();
     expect(backend.calls.orders[0]).toEqual({idMesa: 1, body: {idMesero: 1, items: [{tipo: 'producto', id: 11, cantidad: 1, consumo: 'local', exclusiones: [{idProducto: 11, idInsumo: 5}]}]}});
-    expect(within(panel()).getByRole('heading', {name: 'Pedido Nº 8'})).toBeInTheDocument();
+    expect(within(panel()).getByText('Pedido Nº 8')).toBeInTheDocument();
     expect(within(panel()).getByText('Toque un producto del menú para agregarlo.')).toBeInTheDocument();
-    await user.click(within(panel()).getByRole('button', {name: /Registrado/}));
     expect(within(panel()).getByText('Sin lechuga')).toBeInTheDocument();
   });
 
   it('suma un envío a la mesa ocupada con su mesero y muestra lo ya registrado', async () => {
     const {user, backend} = await openTable('Mesa 2');
-    expect(within(panel()).getByRole('heading', {name: 'Pedido Nº 7'})).toBeInTheDocument();
+    expect(within(panel()).getByText('Pedido Nº 7')).toBeInTheDocument();
     expect(within(panel()).getByLabelText(/^Mesero/)).toHaveValue('1');
     const toggle = within(panel()).getByRole('button', {name: /Registrado/});
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(toggle).toHaveTextContent('1 envío · 2 u.');
-    await user.click(toggle);
     expect(within(panel()).getByText(/^Envío 1 · \d{1,2}:\d{2} (AM|PM) · Carlos Mendoza$/)).toBeInTheDocument();
     expect(within(panel()).getByText('Sin tomate')).toBeInTheDocument();
     expect(within(panel()).getByText('Listo')).toBeInTheDocument();
@@ -198,7 +244,7 @@ describe('Caja: armado del pedido', () => {
     expect(within(ticket).getByText('Gaseosa 500 ml')).toBeInTheDocument();
     expect(within(ticket).queryByText('Hamburguesa Clásica')).not.toBeInTheDocument();
     expect(within(ticket).getByText('Unidades: 2')).toBeInTheDocument();
-    await user.click(within(dialog).getByRole('button', {name: 'Listo'}));
+    await user.click(within(dialog).getByRole('button', {name: 'Cerrar'}));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(within(panel()).getByText('Modificado por admin')).toBeInTheDocument();
     expect(within(panel()).getByText(/^Envío 2 · /)).toBeInTheDocument();
@@ -216,7 +262,8 @@ describe('Caja: armado del pedido', () => {
     backend.control.shortages = ['Lechuga'];
     await addItem(user, 'Hamburguesa Clásica');
     await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
-    expect(await screen.findByText('No alcanzó el stock de Lechuga: quedó en 0 y el pedido se envió igual. Revise el inventario.')).toBeInTheDocument();
+    expect(await screen.findByText('No alcanzó el stock de Lechuga: quedó en 0 y el pedido se envió igual.')).toBeInTheDocument();
+    expect(screen.getByText('Revise el inventario')).toBeInTheDocument();
   });
 
   it('elige al usuario de la sesión como mesero si atiende mesas', async () => {
@@ -229,21 +276,21 @@ describe('Caja: armado del pedido', () => {
     backend.control.orderError = 'Gaseosa 500 ml no está disponible por ahora';
     await addItem(user, 'Gaseosa 500 ml');
     await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
-    expect(await within(panel()).findByText('Gaseosa 500 ml no está disponible por ahora')).toBeInTheDocument();
+    expect(await screen.findByText('Gaseosa 500 ml no está disponible por ahora')).toBeInTheDocument();
     expect(within(within(panel()).getByRole('list', {name: 'Productos por registrar'})).getAllByRole('listitem')).toHaveLength(1);
   });
 
-  it('avisa antes de salir con productos sin registrar', async () => {
+  it('avisa antes de cambiar de mesa con productos sin enviar', async () => {
     const {user, location} = await openTable('Mesa 1');
     await addItem(user, 'Gaseosa 500 ml');
-    await user.click(screen.getByRole('button', {name: 'Mesas'}));
+    await user.click(tableButton('Mesa 2'));
     const dialog = await screen.findByRole('dialog', {name: 'Descartar productos'});
-    expect(within(dialog).getByText(/Hay 1 productos sin registrar en Mesa 1/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/Hay 1 productos sin enviar a cocina. Si cambia a Mesa 2/)).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', {name: 'Cancelar'}));
     expect(location.current.search).toBe('?mesa=1');
-    await user.click(screen.getByRole('button', {name: 'Mesas'}));
-    await user.click(await screen.findByRole('button', {name: 'Descartar y salir'}));
-    await waitFor(() => expect(location.current.search).toBe(''));
+    await user.click(tableButton('Mesa 2'));
+    await user.click(await screen.findByRole('button', {name: 'Descartar y cambiar'}));
+    await waitFor(() => expect(location.current.search).toBe('?mesa=2'));
   });
 
   it('en celular muestra el pedido desde una barra inferior', async () => {
@@ -252,10 +299,12 @@ describe('Caja: armado del pedido', () => {
     await screen.findByRole('region', {name: 'Menú'});
     expect(screen.queryByRole('region', {name: 'Pedido de la mesa'})).not.toBeInTheDocument();
     await addItem(user, 'Gaseosa 500 ml');
-    await user.click(screen.getByRole('button', {name: /Ver pedido · 1 por registrar/}));
+    await user.click(screen.getByRole('button', {name: /Mesa 1 · 1 por registrar/}));
     const dialog = await screen.findByRole('dialog', {name: 'Nuevo pedido'});
     expect(within(dialog).getByText('Mesa 1 · Salón principal')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', {name: 'Enviar a cocina'})).toBeEnabled();
+    await user.click(within(dialog).getByRole('button', {name: 'Cerrar'}));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 });
 
@@ -288,13 +337,5 @@ describe('Caja: utilidades del pedido', () => {
     const mesero = {id: 1, nombre: 'Carlos Mendoza'};
     const groups = groupByShipment([{id: 1, envio: 1, mesero, creadoEn: 'a'}, {id: 2, envio: 2, mesero, creadoEn: 'b'}, {id: 3, envio: 1, mesero, creadoEn: 'a'}]);
     expect(groups.map((group) => [group.envio, group.detalles.map((item) => item.id)])).toEqual([[1, [1, 3]], [2, [2]]]);
-  });
-
-  it('describe el tiempo que lleva abierta una mesa', () => {
-    const now = new Date('2026-10-13T20:00:00Z').getTime();
-    expect(elapsedText('2026-10-13T19:59:40Z', now)).toBe('Recién');
-    expect(elapsedText('2026-10-13T19:35:00Z', now)).toBe('Hace 25 min');
-    expect(elapsedText('2026-10-13T18:00:00Z', now)).toBe('Hace 2 h');
-    expect(elapsedText('2026-10-13T18:55:00Z', now)).toBe('Hace 1 h 5 min');
   });
 });

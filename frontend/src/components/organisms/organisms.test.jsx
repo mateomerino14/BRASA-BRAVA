@@ -30,7 +30,7 @@ describe('navegación', () => {
   });
 
   it('aplana todas las rutas', () => {
-    expect(flattenNavigation(NAVIGATION)).toHaveLength(11);
+    expect(flattenNavigation(NAVIGATION)).toHaveLength(10);
   });
 });
 
@@ -66,7 +66,7 @@ describe('Sidebar', () => {
 });
 
 describe('Modal', () => {
-  it('se cierra con Escape y con el botón', async () => {
+  it('se cierra con Escape y no tiene X arriba (cada modal trae su Cerrar o Cancelar)', async () => {
     const onClose = vi.fn();
     render(
       <Modal open onClose={onClose} title="Recuperar contraseña">
@@ -74,9 +74,9 @@ describe('Modal', () => {
       </Modal>,
     );
     expect(screen.getByRole('dialog', {name: 'Recuperar contraseña'})).toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Cerrar'})).not.toBeInTheDocument();
     await userEvent.keyboard('{Escape}');
-    await userEvent.click(screen.getByRole('button', {name: 'Cerrar'}));
-    expect(onClose).toHaveBeenCalledTimes(2);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('no renderiza nada cerrado', () => {

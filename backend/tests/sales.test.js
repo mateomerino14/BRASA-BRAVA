@@ -52,6 +52,10 @@ describe('Caja: mesas y registro de pedidos', () => {
     expect(salon.mesas[0].venta).toBeNull();
     expect(salon.mesas[1].venta).toMatchObject({total: 160, unidades: 5, mesero: 'Carlos Mendoza'});
     expect(new Date(salon.mesas[1].venta.abiertaEn).getTime()).toBe(TUESDAY_NIGHT.getTime() - 25 * 60 * 1000);
+    expect(salon.mesas[1].venta.esperaDesde).toBeTruthy();
+    await ctx.db.query('UPDATE venta_detalle SET listos = cantidad');
+    const ready = await api('get', '/api/sales/floor');
+    expect(ready.body.secciones[0].mesas[1].venta.esperaDesde).toBeNull();
   });
 
   it('arma el catálogo del día con recetas, disponibilidad y promociones vigentes', async () => {

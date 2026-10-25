@@ -4,7 +4,10 @@ import {authenticate, authorize} from '../../middlewares/auth.js';
 import {createSalesRepository} from './sales.repository.js';
 import {createSalesService} from './sales.service.js';
 import {createSalesController} from './sales.controller.js';
-import {checkoutSchema, orderSchema, saleParamSchema, tableParamSchema} from './sales.schemas.js';
+import {createLimiter} from '../../middlewares/rateLimit.js';
+import {checkoutSchema, orderSchema, printSchema, saleParamSchema, tableParamSchema} from './sales.schemas.js';
+
+const printAttemptsLimit = 30;
 
 // Declara las rutas /api/sales, protegidas con el permiso "caja"
 export const createSalesRouter = ({db, config, clock}) => {
@@ -28,6 +31,7 @@ export const createSalesRouter = ({db, config, clock}) => {
   router.post('/tables/:idMesa/checkout', byTable, validate(checkoutSchema), controller.checkout);
   router.get('/today', controller.todaySales);
   router.get('/:idVenta/receipt', validate(saleParamSchema, 'params'), controller.receipt);
+  router.post('/:idVenta/prints', createLimiter(config.RATE_LIMIT_ENABLED, printAttemptsLimit), validate(saleParamSchema, 'params'), validate(printSchema), controller.registerPrint);
 
   return router;
 };

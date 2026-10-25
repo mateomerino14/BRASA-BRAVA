@@ -2,7 +2,7 @@ import {Link} from 'react-router';
 import {CountUp} from '../../../components/atoms/CountUp';
 import {formatAmount} from '../../../lib/format';
 import {cn} from '../../../lib/cn';
-import {waitMinutes, waitTone} from '../../kitchen/utils/kitchen';
+import {waitMinutes, waitTone} from '../../cashier/utils/kitchen';
 
 const styles = {
   section: 'flex flex-col gap-3',
@@ -115,7 +115,7 @@ function KitchenRow({data, now, divided}) {
     wait = <Cell value={parts.value} format={parts.format} suffix={parts.suffix} label={`espera más larga, ${data.waiting.mesa}`} tone={waitTone(minutes)} />;
   }
   return (
-    <Row title="Cocina" to="/cocina" linkLabel="Abrir cocina" divided={divided}>
+    <Row title="Cocina" to="/caja" linkLabel="Abrir caja" divided={divided}>
       <Cell value={data.preparacion} label={pluralWord(data.preparacion, 'envío en preparación', 'envíos en preparación')} />
       <Cell value={data.unidadesPendientes} label="unidades por preparar" />
       <Cell value={data.listos} label={pluralWord(data.listos, 'envío listo para entregar', 'envíos listos para entregar')} />
@@ -124,8 +124,9 @@ function KitchenRow({data, now, divided}) {
   );
 }
 
-export function DaySummary({summary, showCashier, showKitchen}) {
-  const rows = [showCashier, showKitchen].filter(Boolean).length;
+const ROWS = 2;
+
+export function DaySummary({summary}) {
   return (
     <section aria-labelledby="day-summary-title" className={styles.section}>
       <div className={styles.header}>
@@ -134,9 +135,9 @@ export function DaySummary({summary, showCashier, showKitchen}) {
       </div>
       {summary.error && <p role="alert" className={styles.error}>No se pudo cargar el resumen: {summary.error}</p>}
       <div className={styles.board}>
-        {summary.loading && Array.from({length: rows}, (_, index) => <div key={index} aria-label="Cargando resumen" className={cn(styles.skeleton, index > 0 && styles.divided)} />)}
-        {!summary.loading && showCashier && summary.cashier && <CashierRow data={summary.cashier} />}
-        {!summary.loading && showKitchen && summary.kitchen && <KitchenRow data={summary.kitchen} now={summary.now} divided={showCashier} />}
+        {summary.loading && Array.from({length: ROWS}, (_, index) => <div key={index} aria-label="Cargando resumen" className={cn(styles.skeleton, index > 0 && styles.divided)} />)}
+        {!summary.loading && summary.cashier && <CashierRow data={summary.cashier} />}
+        {!summary.loading && summary.kitchen && <KitchenRow data={summary.kitchen} now={summary.now} divided />}
       </div>
     </section>
   );

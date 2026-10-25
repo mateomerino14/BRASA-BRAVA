@@ -2,6 +2,10 @@ import {useEffect, useRef} from 'react';
 
 const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), select, textarea, a[href], [tabindex]:not([tabindex="-1"])';
 
+// Paneles abiertos en orden: con un modal encima de otro, solo el de arriba responde al teclado
+const openPanels = [];
+const isTop = (panel) => openPanels.at(-1) === panel;
+
 // Mantiene el Tab dentro del panel: del último salta al primero y viceversa
 const trapTab = (event, panel) => {
   const items = [...panel.querySelectorAll(FOCUSABLE)];
@@ -40,7 +44,11 @@ export function useDialogFocus({open, panelRef, onClose, initialFocus = 'input, 
       target?.focus();
     }
 
+    openPanels.push(panel);
     const handleKey = (event) => {
+      if (!isTop(panel)) {
+        return;
+      }
       if (event.key === 'Escape') {
         event.stopPropagation();
         onCloseRef.current?.();
@@ -53,6 +61,7 @@ export function useDialogFocus({open, panelRef, onClose, initialFocus = 'input, 
     document.addEventListener('keydown', handleKey);
     return () => {
       document.removeEventListener('keydown', handleKey);
+      openPanels.splice(openPanels.indexOf(panel), 1);
       previous?.focus?.();
     };
   }, [open, panelRef, initialFocus]);

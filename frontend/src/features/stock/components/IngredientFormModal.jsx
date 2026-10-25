@@ -26,7 +26,6 @@ export function IngredientFormModal({form}) {
 
   return (
     <Modal
-      closeButton={false}
       open={form.open}
       onClose={form.close}
       title={form.isEdit ? 'Modificar insumo' : 'Registrar nuevo insumo'}
@@ -51,10 +50,10 @@ export function IngredientFormModal({form}) {
         </div>
 
         <div className={styles.actions}>
-          <Button variant="outline" onClick={form.close} disabled={form.saving}>
+          <Button variant="outline" action="cancel" onClick={form.close} disabled={form.saving}>
             Cancelar
           </Button>
-          <Button type="submit" loading={form.saving}>
+          <Button type="submit" action="save" loading={form.saving}>
             {form.isEdit ? 'Guardar' : 'Registrar'}
           </Button>
         </div>

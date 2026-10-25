@@ -62,11 +62,11 @@ describe('Gestión de cargos y permisos', () => {
 
   it('renombra un cargo y reemplaza sus pantallas', async () => {
     const id = await roleId('Cocinero');
-    const res = await api('put', `/api/roles/${id}`).send({nombre: 'Parrillero', pantallas: ['cocina', 'stock']});
+    const res = await api('put', `/api/roles/${id}`).send({nombre: 'Parrillero', pantallas: ['caja', 'stock']});
     expect(res.status).toBe(200);
-    expect(res.body.role).toMatchObject({nombre: 'Parrillero', pantallas: ['cocina', 'stock']});
+    expect(res.body.role).toMatchObject({nombre: 'Parrillero', pantallas: ['caja', 'stock']});
     const cocinero = await loginAs(ctx.app, 'r.sanchez');
-    expect(cocinero.user).toMatchObject({cargo: 'Parrillero', permissions: ['home', 'cocina', 'stock']});
+    expect(cocinero.user).toMatchObject({cargo: 'Parrillero', permissions: ['home', 'caja', 'stock']});
   });
 
   it('no da de baja un cargo con empleados activos, sí uno sin ellos', async () => {

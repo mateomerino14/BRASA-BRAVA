@@ -17,7 +17,7 @@ const SUMMARY_HANDLERS = {
   }],
 };
 
-const COCINERO = {...USERS.cajero, id: 3, alias: 'r.sanchez', nombre: 'Roberto Sánchez', cargo: 'Cocinero', permissions: ['home', 'familia', 'cocina']};
+const COCINERO = {...USERS.cajero, id: 3, alias: 'r.sanchez', nombre: 'Roberto Sánchez', cargo: 'Cocinero', permissions: ['home', 'familia']};
 
 describe('Home', () => {
   it('el administrador ve el resumen de caja y de cocina del día', async () => {
@@ -35,16 +35,15 @@ describe('Home', () => {
     expect(within(kitchen).getByLabelText('25 min')).toBeInTheDocument();
     expect(within(kitchen).getByText('espera más larga, Mesa 2')).toBeInTheDocument();
     expect(within(cashier).getByRole('link', {name: 'Abrir caja'})).toHaveAttribute('href', '/caja');
-    expect(within(kitchen).getByRole('link', {name: 'Abrir cocina'})).toHaveAttribute('href', '/cocina');
+    expect(within(kitchen).getByRole('link', {name: 'Abrir caja'})).toHaveAttribute('href', '/caja');
   });
 
-  it('cada cargo ve solo el resumen de lo suyo', async () => {
+  it('sin permiso de Caja no hay resumen del día ni se consulta', async () => {
     const fetchMock = mockApi({...SUMMARY_HANDLERS, 'GET /auth/me': () => [200, {user: COCINERO}]});
     renderApp('/', {token: 't'});
-    const summary = await screen.findByRole('region', {name: 'Resumen de hoy'});
-    expect(await within(summary).findByText('envío en preparación')).toBeInTheDocument();
-    expect(within(summary).queryByRole('group', {name: 'Caja'})).not.toBeInTheDocument();
-    expect(fetchMock.mock.calls.some(([url]) => url.includes('/sales/'))).toBe(false);
+    expect(await screen.findByRole('region', {name: 'Accesos rápidos'})).toBeInTheDocument();
+    expect(screen.queryByRole('region', {name: 'Resumen de hoy'})).not.toBeInTheDocument();
+    expect(fetchMock.mock.calls.some(([url]) => url.includes('/sales/') || url.includes('/kitchen/'))).toBe(false);
   });
 
   it('avisa si el resumen no se pudo cargar', async () => {
@@ -60,7 +59,7 @@ describe('Home', () => {
       await screen.findByRole('heading', {name: /^(Buenos días|Buenas tardes|Buenas noches), Marco$/}),
     ).toBeInTheDocument();
     const shortcuts = screen.getByRole('region', {name: 'Accesos rápidos'});
-    expect(shortcuts.querySelectorAll('a')).toHaveLength(10);
+    expect(shortcuts.querySelectorAll('a')).toHaveLength(9);
   });
 
   it('el cajero solo ve sus módulos y no entra a pantallas sin permiso', async () => {

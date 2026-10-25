@@ -34,7 +34,7 @@ const openCheckout = async (user) => {
 describe('Caja: cobro', () => {
   it('no deja cobrar mientras cocina tenga unidades sin terminar', async () => {
     await openMesa2({ready: false});
-    expect(within(panel()).getByText('Cocina tiene 1 unidad por terminar.')).toBeInTheDocument();
+    expect(within(panel()).getByText('Por salir de cocina: 1 unidad. Márquelas en Marcar listos cuando salgan.')).toBeInTheDocument();
     expect(within(panel()).getByRole('button', {name: 'Cobrar'})).toBeDisabled();
   });
 
@@ -48,7 +48,7 @@ describe('Caja: cobro', () => {
     expect(within(panel()).getByRole('button', {name: 'Cobrar'})).toBeDisabled();
   });
 
-  it('cobra en efectivo con cambio, imprime el ticket solo y vuelve a las mesas', async () => {
+  it('cobra en efectivo con cambio, imprime el ticket solo (1ª impresión) y deja la mesa libre', async () => {
     const {user, backend, print, location} = await openMesa2();
     const dialog = await openCheckout(user);
     const preview = within(dialog).getByRole('region', {name: 'Vista previa del ticket'});
@@ -63,10 +63,12 @@ describe('Caja: cobro', () => {
     const ticket = within(receipt).getByRole('article', {name: 'Ticket del pedido 7'});
     expect(within(ticket).getByText('Recibido').nextSibling).toHaveTextContent('Bs 110,00');
     expect(within(ticket).getByText('Cambio').nextSibling).toHaveTextContent('Bs 5,00');
-    expect(print).toHaveBeenCalledTimes(1);
-    await user.click(within(receipt).getByRole('button', {name: 'Listo'}));
+    await waitFor(() => expect(print).toHaveBeenCalledTimes(1));
+    expect(backend.calls.prints).toEqual([{id: 7, body: {}}]);
+    await user.click(within(receipt).getByRole('button', {name: 'Cerrar'}));
     await waitFor(() => expect(location.current.search).toBe(''));
-    expect(await screen.findByRole('button', {name: 'Mesa 2, libre, 4 personas'})).toBeInTheDocument();
+    expect(await screen.findByRole('button', {name: 'Mesa 2, libre'})).toBeInTheDocument();
+    expect(screen.getByText('La mesa quedó libre')).toBeInTheDocument();
   });
 
   it('valida el efectivo recibido y arma el pago mixto con la parte por QR', async () => {
@@ -108,7 +110,7 @@ describe('Caja: cobro', () => {
     await user.click(within(dialog).getByRole('radio', {name: 'QR'}));
     await user.click(within(dialog).getByRole('button', {name: 'Cobrar Bs 105,00'}));
     const receipt = await screen.findByRole('dialog', {name: 'Ticket de venta'});
-    await user.click(within(receipt).getByRole('button', {name: 'Listo'}));
+    await user.click(within(receipt).getByRole('button', {name: 'Cerrar'}));
 
     await user.click(await screen.findByRole('button', {name: 'Ventas de hoy'}));
     const today = await screen.findByRole('dialog', {name: 'Ventas de hoy'});
@@ -118,7 +120,7 @@ describe('Caja: cobro', () => {
     await user.click(within(today).getByRole('button', {name: 'Reimprimir el ticket del pedido 7'}));
     const reprint = await screen.findByRole('dialog', {name: 'Ticket de venta'});
     expect(within(reprint).getByRole('article', {name: 'Ticket del pedido 7'})).toBeInTheDocument();
-    await user.click(within(reprint).getByRole('button', {name: 'Listo'}));
+    await user.click(within(reprint).getByRole('button', {name: 'Cerrar'}));
 
     await user.click(within(today).getByRole('button', {name: 'Cambiar el enlace de impuestos'}));
     const field = within(today).getByLabelText('Enlace de la página de impuestos');
@@ -131,6 +133,41 @@ describe('Caja: cobro', () => {
     await user.click(within(today).getByRole('button', {name: 'Guardar enlace'}));
     expect(await within(today).findByRole('link', {name: 'Página de impuestos'})).toHaveAttribute('href', 'https://siat.impuestos.gob.bo/nuevo');
     expect(backend.calls.settings.at(-1)).toEqual({enlaceImpuestos: 'https://siat.impuestos.gob.bo/nuevo'});
+  }, LONG_TEST_MS);
+
+  it('reimprime el ticket tres veces y desde la cuarta pide el usuario y la contraseña de quien autoriza', async () => {
+    const {user, backend, print} = await openMesa2();
+    const dialog = await openCheckout(user);
+    await user.click(within(dialog).getByRole('radio', {name: 'QR'}));
+    await user.click(within(dialog).getByRole('button', {name: 'Cobrar Bs 105,00'}));
+    const receipt = await screen.findByRole('dialog', {name: 'Ticket de venta'});
+    await waitFor(() => expect(print).toHaveBeenCalledTimes(1));
+    await user.click(within(receipt).getByRole('button', {name: 'Imprimir'}));
+    await user.click(within(receipt).getByRole('button', {name: 'Imprimir'}));
+    await waitFor(() => expect(print).toHaveBeenCalledTimes(3));
+
+    await user.click(within(receipt).getByRole('button', {name: 'Imprimir'}));
+    const lock = await screen.findByRole('dialog', {name: 'Ticket ya impreso 3 veces'});
+    expect(within(lock).getByRole('list', {name: 'Impresiones anteriores'}).children).toHaveLength(3);
+    await user.click(within(lock).getByRole('button', {name: 'Autorizar e imprimir'}));
+    expect(await within(lock).findByText('Ingrese el usuario de quien autoriza')).toBeInTheDocument();
+    await user.type(within(lock).getByLabelText(/^Usuario de quien autoriza/), 'admin');
+    await user.type(within(lock).getByLabelText(/^Contraseña/), 'otra');
+    await user.click(within(lock).getByRole('button', {name: 'Autorizar e imprimir'}));
+    expect(await within(lock).findByText('Usuario o contraseña incorrectos')).toBeInTheDocument();
+    expect(print).toHaveBeenCalledTimes(3);
+    await user.clear(within(lock).getByLabelText(/^Contraseña/));
+    await user.type(within(lock).getByLabelText(/^Contraseña/), 'Brasa2026');
+    await user.click(within(lock).getByRole('button', {name: 'Autorizar e imprimir'}));
+    await waitFor(() => expect(print).toHaveBeenCalledTimes(4));
+    await waitFor(() => expect(screen.queryByRole('dialog', {name: /Ticket ya impreso/})).not.toBeInTheDocument());
+    expect(backend.calls.prints.at(-1).body).toEqual({alias: 'admin', contrasena: 'Brasa2026'});
+
+    await user.click(within(receipt).getByRole('button', {name: 'Imprimir'}));
+    const again = await screen.findByRole('dialog', {name: 'Ticket ya impreso 4 veces'});
+    await user.click(within(again).getByRole('button', {name: 'Cancelar'}));
+    await waitFor(() => expect(screen.queryByRole('dialog', {name: /Ticket ya impreso/})).not.toBeInTheDocument());
+    expect(print).toHaveBeenCalledTimes(4);
   }, LONG_TEST_MS);
 
   it('sin Administración no se puede cambiar el enlace', async () => {

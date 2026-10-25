@@ -1,6 +1,4 @@
 const PERCENT = 100;
-const MINUTE_MS = 60000;
-const MINUTES_PER_HOUR = 60;
 const round2 = (value) => Math.round(value * PERCENT) / PERCENT;
 
 const exclusionKey = (item) => `${item.idProducto}:${item.idInsumo}`;
@@ -83,23 +81,6 @@ export const groupByShipment = (detalles) => {
     groups.get(detail.envio).detalles.push(detail);
   }
   return [...groups.values()];
-};
-
-// Tiempo transcurrido desde una fecha, como texto corto: "Recién", "Hace 25 min", "Hace 1 h 5 min"
-export const elapsedText = (since, now) => {
-  const minutes = Math.max(0, Math.floor((now - new Date(since).getTime()) / MINUTE_MS));
-  if (minutes < 1) {
-    return 'Recién';
-  }
-  if (minutes < MINUTES_PER_HOUR) {
-    return `Hace ${minutes} min`;
-  }
-  const hours = Math.floor(minutes / MINUTES_PER_HOUR);
-  const rest = minutes % MINUTES_PER_HOUR;
-  if (rest === 0) {
-    return `Hace ${hours} h`;
-  }
-  return `Hace ${hours} h ${rest} min`;
 };
 
 export const orderTitle = (venta) => {
