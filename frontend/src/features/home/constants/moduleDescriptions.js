@@ -9,4 +9,5 @@ export const MODULE_DESCRIPTIONS = {
   promociones: 'Combos y horarios especiales',
   empleados: 'Personal y sus datos de acceso',
   cargos: 'Puestos y pantallas que ve cada uno',
+  eliminacion: 'Borrar para siempre lo dado de baja',
 };

@@ -12,10 +12,12 @@ export const SCREENS = Object.freeze([
   'empleados',
   'cargos',
   'reportes',
+  'eliminacion',
 ]);
 
 // Pantallas que se marcan en un cargo (home lo tienen todos)
-export const ASSIGNABLE_SCREENS = Object.freeze(SCREENS.filter((screen) => screen !== 'home'));
+// "eliminacion" (eliminación física) es solo del DIRECTORIO y no se asigna a cargos
+export const ASSIGNABLE_SCREENS = Object.freeze(SCREENS.filter((screen) => screen !== 'home' && screen !== 'eliminacion'));
 
 // Normaliza los permisos de un cargo e incluye siempre home
 export const normalizePermissions = (screens) =>

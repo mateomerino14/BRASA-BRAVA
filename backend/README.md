@@ -125,6 +125,7 @@ src/
 │   ├── promotions/            Promociones: combos con vigencia
 │   ├── sales/                 Caja: plano de mesas, catálogo del día y registro de pedidos
 │   ├── kitchen/               Lo que falta en cocina y marcar listos (lo usa Caja)
+│   ├── deletion/              Eliminación física en cascada (solo el DIRECTORIO)
 │   ├── reports/               Reportes de ventas: resumen y detalladas, PDF, correo y envíos programados
 │   ├── settings/              Ajustes del local (enlace a la página de impuestos)
 │   ├── catalog/               Familia: catálogo del local con receta y stock
@@ -228,6 +229,9 @@ tests/                       Pruebas de la API y unitarias
 | `PUT` `DELETE` | `/api/reports/schedules/:id` | Modifica o borra un envío programado |
 | `PATCH` | `/api/reports/schedules/:id/status` | Pausa o reactiva un envío programado |
 | `POST` | `/api/reports/schedules/:id/send` | Envía ahora; el próximo trae desde este envío |
+| `GET` | `/api/deletion/candidates/:tipo` | (solo el DIRECTORIO) Registros dados de baja de `empleados`, `cargos`, `secciones`, `productos`, `categorias`, `insumos` o `promociones` con lo que arrastran; `ventas` cobradas entre `desde` y `hasta` |
+| `POST` | `/api/deletion/preview` | Lo elegido (ids por tipo) y todo lo que se borraría en cascada, más los `bloqueos` |
+| `POST` | `/api/deletion/execute` | Borra para siempre lo elegido y lo que arrastra en una transacción; exige `confirmacion: "ELIMINAR"` |
 | `GET` | `/api/settings` | Ajustes del local (`enlaceImpuestos`); cualquier sesión |
 | `PUT` | `/api/settings` | Cambia el enlace a la página de impuestos (permiso `administracion`) |
 | `GET` | `/api/kitchen/orders` | (permiso `caja`) Envíos de las ventas abiertas (mesa, sección, cajero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
@@ -309,7 +313,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 
 - Una mesa ocupada tiene una sola venta abierta: un nuevo envío a esa mesa se suma a la misma venta, no crea otra. El id de la venta es su número correlativo y nunca retrocede.
 - Dos envíos al mismo tiempo para una mesa libre terminan en una sola venta: la fila de la mesa se bloquea durante la transacción, un índice único impide dos ventas abiertas y, si aun así chocan, el segundo se reintenta sumándose a la venta del primero.
-- Cada línea guarda el nombre y el precio del momento (si el producto cambia de precio después, la venta no cambia), la cantidad (1 a 99), el consumo (`local` o `llevar`), y el número de envío. No hay mesero: la venta y cada envío guardan el cajero de la sesión que lo registró (o el DIRECTORIO). La migración 016 quitó las columnas de mesero.
+- Cada línea guarda el nombre y el precio del momento (si el producto cambia de precio después, la venta no cambia), la cantidad (1 a 99), el consumo (`local` o `llevar`), y el número de envío. No hay mesero: la venta y cada envío guardan el cajero de la sesión que lo registró (o el DIRECTORIO). La migración 016 dejó vacías y opcionales las columnas de mesero (ya no se usan).
 - El precio lo calcula siempre el servidor: el de cada producto y, en promociones, el mismo cálculo que la pantalla de promociones (`modules/promotions/promotionRules.js`). Una promoción se vende solo si está vigente en ese momento (fechas, día y horario) y todos sus productos se pueden vender.
 - Se pueden quitar ingredientes solo de la receta de cada producto; en un combo, de la receta de cada producto del combo. No hay extras con costo: lo adicional se vende como un producto más (por ejemplo, de "Guarniciones y Extras").
 - No se venden productos agotados ni de baja. El stock **no bloquea** la venta: el catálogo avisa "Sin stock" o "Quedan N", pero el pedido se registra igual.
@@ -332,6 +336,13 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - El PDF (`pdfkit`) tiene dos formatos: **Resumen de ventas** (totales y una fila por día) y **Ventas detalladas** (totales y cada venta con sus envíos, productos, lo quitado, cómo se pagó y las impresiones del ticket).
 - Por correo sale con el PDF adjunto mediante la API de Brevo (`MAIL_DRIVER=brevo`).
 - **Envíos programados** (`reporte_programado`): el servidor revisa cada minuto y al arrancar. Si ya pasó un turno (día marcado a su hora) que no se atendió, envía el reporte con las ventas **desde el envío anterior** hasta ese momento; si el sistema estaba apagado, sale al encenderlo y queda marcado como atrasado. Un turno se atiende una sola vez aunque se hayan perdido varios. Si el correo falla, se reintenta a los 15 minutos.
+
+### Eliminación física
+
+- Solo el DIRECTORIO (permiso `eliminacion`, que no se puede asignar a ningún cargo).
+- Solo se eliminan registros **dados de baja** (y ventas **cobradas**). Si algo elegido sigue activo, o si arrastra un pedido abierto, la vista previa lo lista en `bloqueos` y el borrado responde 409.
+- Es **en cascada**: un cargo arrastra a sus empleados; un empleado, las ventas que abrió, a las que agregó un envío o que cobró; una sección, sus mesas y sus ventas; una categoría, sus subcategorías y productos; un producto, su receta, las promociones que lo incluyen y las ventas donde aparece; una promoción, sus ventas; un insumo, su lugar en las recetas, sus movimientos y las ventas donde se quitó. Una venta se borra con sus líneas, envíos, pagos e impresiones.
+- Todo pasa en una transacción y al final se borran las fotos de lo eliminado.
 
 ### Impresiones del ticket
 
@@ -356,6 +367,7 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 | Home | `home` (todos los cargos) |
 | Familia, Caja (con marcar listos de cocina) | `familia`, `caja` |
 | Administración | `productos`, `secciones`, `stock`, `categorias`, `promociones`, `empleados`, `cargos` |
+| Eliminación física | `eliminacion` (solo el DIRECTORIO; no se asigna a cargos) |
 | Reportes | `reportes` (la migración 017 lo da a los cargos con `administracion`) |
 | Enlace de impuestos en Caja | `administracion` |
 
