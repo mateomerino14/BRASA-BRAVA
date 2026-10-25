@@ -15,6 +15,7 @@ import {createKitchenRouter} from './modules/kitchen/kitchen.routes.js';
 import {createSettingsRouter} from './modules/settings/settings.routes.js';
 import {createCatalogRouter} from './modules/catalog/catalog.routes.js';
 import {createReportsModule, createReportsRouter} from './modules/reports/reports.routes.js';
+import {createDeletionRouter} from './modules/deletion/deletion.routes.js';
 import {UPLOADS_ROUTE, createImageStorage} from './services/imageStorage.js';
 import {errorHandler, notFoundHandler} from './middlewares/errorHandler.js';
 
@@ -45,6 +46,7 @@ export const createApp = ({db, mailer, config, logger = console, images = create
   app.use('/api/kitchen', createKitchenRouter({db, config}));
   app.use('/api/settings', createSettingsRouter({db, config}));
   app.use('/api/catalog', createCatalogRouter({db, config, clock}));
+  app.use('/api/deletion', createDeletionRouter({db, config, images}));
   app.use('/api/reports', createReportsRouter({service: createReportsModule({db, mailer, config, clock, logger})}));
   app.use('/api', notFoundHandler);
   app.use(UPLOADS_ROUTE, express.static(images.root, {maxAge: '7d'}), notFoundHandler);
