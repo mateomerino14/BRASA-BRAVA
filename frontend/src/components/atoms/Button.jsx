@@ -4,7 +4,7 @@ import {Spinner} from './Spinner';
 import {ACTION_ICONS} from '../../config/actionIcons';
 
 const styles = {
-  base: 'inline-flex select-none items-center justify-center gap-2 rounded-lg font-display tracking-wide transition-[background-color,box-shadow,color,border-color] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
+  base: 'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg font-display tracking-wide transition-[background-color,box-shadow,color,border-color] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
   fullWidth: 'w-full',
   variants: {
     primary: 'bg-brasa text-white hover:bg-brasa-oscuro hover:shadow-brasa',

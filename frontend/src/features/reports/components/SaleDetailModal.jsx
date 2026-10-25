@@ -1,8 +1,8 @@
-import {Badge} from '../../../components/atoms/Badge';
 import {Button} from '../../../components/atoms/Button';
 import {Modal} from '../../../components/organisms/Modal';
 import {countText, formatAmount, formatDayMonthYear, formatTime} from '../../../lib/format';
 import {isoDate} from '../utils/reports';
+import {CONSUMO_LABELS} from '../constants/reports';
 
 const styles = {
   layout: 'grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]',
@@ -10,14 +10,17 @@ const styles = {
   shipment: 'overflow-hidden rounded-2xl border border-arena/50 bg-white',
   shipmentHead: 'flex flex-wrap items-center gap-2 border-b border-arena/40 px-4 py-2 text-xs font-semibold text-cafe',
   shipmentTag: 'rounded-full bg-carbon px-2 py-0.5 text-[11px] font-bold text-crema',
-  lines: 'divide-y divide-arena/30',
-  line: 'flex items-start gap-3 px-4 py-2.5',
-  qty: 'flex size-7 shrink-0 items-center justify-center rounded-lg bg-hueso font-display text-base text-carbon',
-  text: 'min-w-0 flex-1',
-  name: 'flex flex-wrap items-center gap-1.5 text-sm font-semibold text-carbon',
+  table: 'w-full text-sm',
+  th: 'px-4 py-2 text-left text-[11px] font-bold uppercase tracking-wide text-cafe',
+  thRight: 'px-4 py-2 text-right text-[11px] font-bold uppercase tracking-wide text-cafe',
+  lines: 'divide-y divide-arena/30 border-t border-arena/30',
+  td: 'px-4 py-2.5 align-top',
+  qty: 'w-12 px-4 py-2.5 align-top font-display text-lg leading-tight text-carbon',
+  consumo: 'w-28 px-4 py-2.5 align-top text-carbon',
+  name: 'block font-semibold text-carbon',
   combo: 'block text-xs text-cafe',
   removed: 'block text-xs font-medium text-rojo',
-  subtotal: 'text-sm font-semibold tabular-nums text-carbon',
+  subtotal: 'w-28 px-4 py-2.5 text-right align-top font-semibold tabular-nums text-carbon',
   aside: 'flex flex-col gap-2.5 self-start rounded-2xl border border-arena/50 bg-white p-4 text-sm',
   asideTitle: 'text-xs font-bold uppercase tracking-wider text-cafe',
   row: 'flex justify-between gap-3',
@@ -47,23 +50,30 @@ function Shipment({envio}) {
         <span className={styles.shipmentTag}>Envío {envio.numero}</span>
         {formatTime(envio.creadoEn)} · Registró: {envio.cajero}
       </p>
-      <ul className={styles.lines}>
-        {envio.lineas.map((line, index) => (
-          <li key={`${line.nombre}-${index}`} className={styles.line}>
-            <span className={styles.qty}>{line.cantidad}</span>
-            <span className={styles.text}>
-              <span className={styles.name}>
-                {line.nombre}
-                {line.tipo === 'promocion' && <Badge tone="brand">Promoción</Badge>}
-                {line.consumo === 'llevar' && <Badge tone="warning">Para llevar</Badge>}
-              </span>
-              {line.productos && <span className={styles.combo}>{line.productos}</span>}
-              {line.sin && <span className={styles.removed}>{line.sin}</span>}
-            </span>
-            <span className={styles.subtotal}>Bs {formatAmount(line.subtotal)}</span>
-          </li>
-        ))}
-      </ul>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th scope="col" className={styles.th}>Cant.</th>
+            <th scope="col" className={styles.th}>Producto</th>
+            <th scope="col" className={styles.th}>Consumo</th>
+            <th scope="col" className={styles.thRight}>Subtotal Bs</th>
+          </tr>
+        </thead>
+        <tbody className={styles.lines}>
+          {envio.lineas.map((line, index) => (
+            <tr key={`${line.nombre}-${index}`}>
+              <td className={styles.qty}>{line.cantidad}</td>
+              <td className={styles.td}>
+                <span className={styles.name}>{line.nombre}</span>
+                {line.productos && <span className={styles.combo}>{line.productos}</span>}
+                {line.sin && <span className={styles.removed}>{line.sin}</span>}
+              </td>
+              <td className={styles.consumo}>{CONSUMO_LABELS[line.consumo]}</td>
+              <td className={styles.subtotal}>{formatAmount(line.subtotal)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </section>
   );
 }
