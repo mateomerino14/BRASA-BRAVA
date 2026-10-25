@@ -1,7 +1,6 @@
 import {useId, useRef} from 'react';
 import {createPortal} from 'react-dom';
 import {AnimatePresence, motion} from 'motion/react';
-import {X} from 'lucide-react';
 import {cn} from '../../lib/cn';
 import {useDialogFocus} from '../../hooks/useDialogFocus';
 
@@ -9,12 +8,9 @@ const styles = {
   overlay: 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4',
   backdrop: 'absolute inset-0 bg-carbon/40 backdrop-blur-md',
   panel: 'relative max-h-[90dvh] w-full overflow-y-auto rounded-3xl bg-crema p-5 shadow-float sm:p-8',
-  sizes: {sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl'},
-  close: 'absolute right-4 top-4 z-10 rounded-full p-1.5 text-cafe transition hover:rotate-90 hover:bg-hueso hover:text-carbon',
-  closeOnCover: 'bg-carbon/60 text-crema hover:bg-carbon hover:text-crema',
+  sizes: {sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-5xl'},
   cover: '-mx-5 -mt-5 mb-6 sm:-mx-8 sm:-mt-8',
   title: 'font-display text-3xl leading-none text-carbon sm:text-4xl',
-  titleWithClose: 'pr-8',
   srOnly: 'sr-only',
   description: 'mt-2 text-base text-cafe',
   body: 'mt-6',
@@ -28,9 +24,10 @@ const panelVisible = {opacity: 1, scale: 1, y: 0};
 const panelExit = {opacity: 0, scale: 0.95, y: 12};
 const panelSpring = {type: 'spring', stiffness: 320, damping: 26};
 
+// Sin X arriba: cada modal cierra con su botón Cerrar o Cancelar del pie (Escape y el fondo también cierran).
 // cover: franja opcional de borde a borde arriba del título (por ejemplo la portada de un producto);
 // hideTitle deja el título solo para lectores de pantalla cuando la portada ya lo muestra
-export function Modal({open, onClose, title, description, size = 'md', closeButton = true, cover, hideTitle = false, children, footer}) {
+export function Modal({open, onClose, title, description, size = 'md', cover, hideTitle = false, children, footer}) {
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef(null);
@@ -53,13 +50,8 @@ export function Modal({open, onClose, title, description, size = 'md', closeButt
             transition={panelSpring}
             className={cn(styles.panel, styles.sizes[size])}
           >
-            {onClose && closeButton && (
-              <button type="button" onClick={onClose} aria-label="Cerrar" className={cn(styles.close, cover && styles.closeOnCover)}>
-                <X size={20} />
-              </button>
-            )}
             {cover && <div className={styles.cover}>{cover}</div>}
-            <h2 id={titleId} className={cn(styles.title, closeButton && styles.titleWithClose, hideTitle && styles.srOnly)}>
+            <h2 id={titleId} className={cn(styles.title, hideTitle && styles.srOnly)}>
               {title}
             </h2>
             {description && (

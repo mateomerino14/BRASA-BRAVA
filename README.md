@@ -1,6 +1,6 @@
 # Brasa Brava — Sistema de Gestión
 
-Sistema interno del restaurante Brasa Brava: inicio de sesión por empleado, caja, cocina, catálogo y administración de productos, categorías, stock, secciones y mesas, promociones, empleados y cargos.
+Sistema interno del restaurante Brasa Brava: inicio de sesión por empleado, caja (con lo que sale de cocina), catálogo y administración de productos, categorías, stock, secciones y mesas, promociones, empleados y cargos.
 
 Funciona de dos formas con el mismo código:
 
@@ -92,7 +92,8 @@ BRASA-BRAVA/
 | Promociones (combos a precio fijo con fechas, días, horario opcional y vigencia del momento) | Terminado |
 | Caja: plano de mesas y armado del pedido (Local o Para llevar, quitar ingredientes, envíos a la mesa ocupada) | Terminado |
 | Caja: comanda de cocina por envío, descuento de stock por receta y marca de venta modificada | Terminado |
-| Cocina: pedidos pendientes por envío, unidades listas (−1, +1, todas), avance y semáforo de espera | Terminado |
+| Caja en una sola pantalla: secciones y mesas arriba con su espera, pedido a la izquierda, menú a la derecha y Marcar listos (Local / Para llevar / Faltan); cocina solo recibe la comanda impresa | Terminado |
+| Ticket de cobro: 3 impresiones libres y desde la 4.ª usuario y contraseña de un empleado autorizado, registrado en la base | Terminado |
 | Caja: cobro (efectivo, QR o mixto con cambio), ticket de venta impreso al cobrar, ventas del día y enlace a impuestos | Terminado |
 | Familia: catálogo del local con productos por categoría, receta y porciones que alcanzan, y promociones con cuándo aplican | Terminado |
 | Impresión directa en escritorio: comanda en la ticketera de cocina y ticket en la de caja, sin diálogo, con hoja de prueba | Terminado |

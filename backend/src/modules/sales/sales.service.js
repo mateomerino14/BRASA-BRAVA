@@ -1,11 +1,21 @@
 import {localDayRange, localToday} from '../../utils/calendar.js';
 import {pricing, round2, vigenciaOf} from '../promotions/promotionRules.js';
+import {DUMMY_HASH, verifySecret} from '../../utils/password.js';
 
 const UNIQUE_VIOLATION = '23505';
 
 const tableNotFound = {error: 'Mesa no encontrada o deshabilitada', status: 404};
 const noOpenSale = {error: 'La mesa no tiene un pedido abierto para cobrar', status: 404};
 const saleNotFound = {error: 'Pedido no encontrado', status: 404};
+// Impresiones del ticket que salen sin autorización
+export const FREE_PRINTS = 3;
+const needsAuthorization = {
+  error: `Este ticket ya se imprimió ${FREE_PRINTS} veces. Un empleado autorizado debe ingresar su usuario y contraseña`,
+  status: 403,
+  detail: {motivo: 'autorizacion'},
+};
+const wrongAuthorizer = {error: 'Usuario o contraseña incorrectos', status: 400, detail: {motivo: 'autorizacion', campo: 'contrasena'}};
+const notAllowedAuthorizer = {error: 'Su cargo no puede autorizar reimpresiones', status: 403, detail: {motivo: 'autorizacion', campo: 'alias'}};
 const cashOnly = {error: 'El monto recibido solo se usa con pago en efectivo', status: 400};
 
 // Monto como lo lee el cajero: 1234.5 → "1234,50"
@@ -17,6 +27,9 @@ const invalidExclusion = {error: 'Hay ingredientes quitados que no son de la rec
 
 // Error de un producto o promoción que no se puede vender hoy
 const notSellable = (nombre, motivo) => ({error: `${nombre} ${motivo}`, status: 400});
+
+// Impresión del ticket como la ve Caja
+const toPrint = (row) => ({numero: row.numero, impresoPor: row.impreso_por, autorizadoPor: row.autorizado_por, impresoEn: row.impreso_en});
 
 // Nombre completo de un empleado
 const fullName = (nombre, apellido) => `${nombre} ${apellido}`;
@@ -105,6 +118,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
   // Secciones activas con sus mesas y el resumen del salón
   const floor = async () => {
     const rows = await repository.floor();
+    const waiting = new Map((await repository.pendingSince()).map((row) => [row.id_venta, row.desde]));
     const sections = [];
     for (const [idSeccion, tables] of groupBy(rows, 'id_seccion')) {
       sections.push({
@@ -120,6 +134,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
               listos: row.listos ?? 0,
               mesero: fullName(row.mesero_nombre, row.mesero_apellido),
               abiertaEn: row.abierta_en,
+              esperaDesde: waiting.get(row.id_venta) ?? null,
             };
           }
           return {id: row.id_mesa, nombre: row.nombre, capacidad: row.capacidad, venta};
@@ -430,8 +445,51 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
         pagos: (await repository.payments([idVenta])).map((item) => ({metodo: item.metodo, monto: Number(item.monto)})),
         recibido,
         cambio,
+        impresiones: (await repository.prints(idVenta)).map(toPrint),
       },
     };
+  };
+
+  // Quién autoriza la impresión: nadie hasta la tercera, el DIRECTORIO por sí mismo o un empleado con permiso
+  const authorizerOf = async (tx, count, {alias, contrasena}, user) => {
+    if (count < FREE_PRINTS || user.isDirectorio) {
+      return {idAutorizador: null, autorizadoPor: null};
+    }
+    if (!alias || !contrasena) {
+      return {problem: needsAuthorization};
+    }
+    const employee = await tx.findAuthorizer(alias);
+    const valid = await verifySecret(contrasena, employee?.contrasena_hash ?? DUMMY_HASH);
+    if (!employee || !valid) {
+      return {problem: wrongAuthorizer};
+    }
+    if (!employee.puede) {
+      return {problem: notAllowedAuthorizer};
+    }
+    return {idAutorizador: employee.id_empleado, autorizadoPor: fullName(employee.nombre, employee.apellido)};
+  };
+
+  // Registra una impresión del ticket; desde la cuarta exige quien la autorice
+  const registerPrint = async (idVenta, body, user) => {
+    if (!await repository.saleById(idVenta)) {
+      return saleNotFound;
+    }
+    const cashier = cashierOf(user);
+    const result = await transaction(async (tx) => {
+      await tx.lockSale(idVenta);
+      const previous = await tx.prints(idVenta);
+      const count = previous.length;
+      const authorizer = await authorizerOf(tx, count, body, user);
+      if (authorizer.problem) {
+        return {problem: {...authorizer.problem, detail: {...authorizer.problem.detail, impresiones: previous.map(toPrint)}}};
+      }
+      await tx.insertPrint({idVenta, numero: count + 1, idEmpleado: cashier.idCajero, impresoPor: cashier.cajero, ...authorizer, impresoEn: clock()});
+      return {numero: count + 1};
+    });
+    if (result.problem) {
+      return result.problem;
+    }
+    return {numero: result.numero, impresiones: (await repository.prints(idVenta)).map(toPrint)};
   };
 
   // Cobra la venta abierta de una mesa
@@ -503,5 +561,5 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     };
   };
 
-  return {floor, catalog, waiters, getTable, addOrder, checkout, receipt, todaySales};
+  return {floor, catalog, waiters, getTable, addOrder, checkout, receipt, registerPrint, todaySales};
 };

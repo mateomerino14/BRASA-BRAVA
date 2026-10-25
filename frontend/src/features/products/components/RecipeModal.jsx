@@ -94,15 +94,15 @@ export function RecipeModal({recipe}) {
   }
 
   return (
-    <Modal closeButton={false} open={Boolean(recipe.target)} onClose={recipe.close} size="lg" title="Receta" description={recipe.target?.nombre}>
+    <Modal open={Boolean(recipe.target)} onClose={recipe.close} size="lg" title="Receta" description={recipe.target?.nombre}>
       <form onSubmit={recipe.submit} noValidate className={styles.form}>
         <p className={styles.hint}>Cantidad de cada insumo que lleva una porción. Caja la descontará del stock en cada venta.</p>
         {body}
         <div className={styles.actions}>
-          <Button variant="outline" onClick={recipe.close} disabled={recipe.saving}>
+          <Button variant="outline" action="cancel" onClick={recipe.close} disabled={recipe.saving}>
             Cancelar
           </Button>
-          <Button type="submit" loading={recipe.saving} disabled={recipe.loading}>
+          <Button type="submit" action="save" loading={recipe.saving} disabled={recipe.loading}>
             Guardar receta
           </Button>
         </div>

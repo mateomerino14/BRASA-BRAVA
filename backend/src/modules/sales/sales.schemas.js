@@ -50,3 +50,9 @@ export const checkoutSchema = z.object({
 });
 
 export const saleParamSchema = z.object({idVenta: positiveId('Pedido inválido')});
+
+// Impresión del ticket; desde la cuarta se manda el alias y la contraseña de quien la autoriza
+export const printSchema = z.object({
+  alias: z.string({error: 'Ingrese el usuario'}).trim().max(40, 'Usuario demasiado largo').optional(),
+  contrasena: z.string({error: 'Ingrese la contraseña'}).max(100, 'Contraseña demasiado larga').optional(),
+});

@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import {cashierApi} from '../services/cashierApi';
-import {NOTICE_DURATION_MS} from '../../../config/lists';
+import {useToast} from '../../../context/useToast';
 import {normalizeText} from '../../../lib/format';
 import {ALL_CATEGORIES, MAX_QUANTITY, PROMOTIONS_CATEGORY, TABLE_REFRESH_MS} from '../constants/cashier';
 import {addAmounts, addLine, cartTotal, cartUnits, removeLine, replaceLine, setLineQuantity, toOrderPayload} from '../utils/cart';
@@ -28,9 +28,11 @@ export const ingredientGroups = (kind, item) => {
   return [{idProducto: item.id, nombre: item.nombre, cantidad: 1, ingredientes: item.ingredientes}];
 };
 
-// Pedido de una mesa: lo ya registrado, el catálogo del día, los meseros y las líneas por registrar
-// "printKitchen" (app de escritorio con impresora de cocina) imprime la comanda directo; si no está o falla, se abre la vista previa
-export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
+// Pedido de una mesa: lo ya registrado, el catálogo del día, los meseros, las líneas por registrar y lo que sale de cocina.
+// Sin mesa elegida solo carga el menú. "printKitchen" (app de escritorio con impresora de cocina) imprime la comanda
+// directo; si no está o falla, se abre la vista previa. "onChanged" avisa que cambió la mesa (para refrescar la barra)
+export function useTableOrder({api = cashierApi, idMesa, user, printKitchen, onChanged}) {
+  const toast = useToast();
   const [state, setState] = useState(initialState);
   const [lines, setLines] = useState([]);
   const [idMesero, setIdMesero] = useState('');
@@ -39,17 +41,19 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
   const [search, setSearch] = useState('');
   const [picker, setPicker] = useState({open: false, session: 0, kind: 'producto', item: null, line: null});
   const [saving, setSaving] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [notice, setNotice] = useState('');
-  const [stockWarning, setStockWarning] = useState('');
-  const [printError, setPrintError] = useState('');
+  const [readyOpen, setReadyOpen] = useState(false);
+  const [marking, setMarking] = useState('');
   const [printing, setPrinting] = useState({open: false, envio: 0, printedAt: null});
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const [table, catalog, waiters] = await Promise.all([api.table(idMesa), api.catalog(), api.waiters()]);
+        let tableLoad = Promise.resolve({mesa: null, venta: null});
+        if (idMesa) {
+          tableLoad = api.table(idMesa);
+        }
+        const [table, catalog, waiters] = await Promise.all([tableLoad, api.catalog(), api.waiters()]);
         if (cancelled) {
           return;
         }
@@ -68,7 +72,7 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
     };
   }, [api, idMesa, user]);
 
-  // Refresca lo registrado de la mesa para ver lo que cocina va marcando como listo
+  // Refresca lo registrado de la mesa por si otra caja la cambió
   useEffect(() => {
     if (!state.mesa) {
       return undefined;
@@ -85,14 +89,6 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
     return () => clearInterval(timer);
   }, [api, idMesa, state.mesa]);
 
-  useEffect(() => {
-    if (!notice) {
-      return undefined;
-    }
-    const timer = setTimeout(() => setNotice(''), NOTICE_DURATION_MS);
-    return () => clearTimeout(timer);
-  }, [notice]);
-
   const {catalog} = state;
   const visibleItems = useMemo(() => {
     const promotions = catalog.promociones.filter((item) => matches(item, search)).map((item) => ({kind: 'promocion', item}));
@@ -107,6 +103,10 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
   }, [catalog, category, search]);
 
   const openPicker = (kind, item, line = null) => {
+    if (!state.mesa) {
+      toast.error('Elija primero la mesa en la barra de arriba', 'Falta la mesa');
+      return;
+    }
     setPicker((current) => ({open: true, session: current.session + 1, kind, item, line}));
   };
 
@@ -131,7 +131,6 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
     else {
       setLines((current) => addLine(current, next, MAX_QUANTITY));
     }
-    setSubmitError('');
     setPicker((current) => ({...current, open: false}));
   };
 
@@ -149,15 +148,12 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
       return false;
     }
     setSaving(true);
-    setSubmitError('');
-    setStockWarning('');
-    setPrintError('');
     try {
       const result = await api.addOrder(idMesa, toOrderPayload(idMesero, lines));
       setState((current) => ({...current, venta: result.venta}));
       setLines([]);
       if (result.sinStock?.length > 0) {
-        setStockWarning(`No alcanzó el stock de ${result.sinStock.join(', ')}: quedó en 0 y el pedido se envió igual. Revise el inventario.`);
+        toast.error(`No alcanzó el stock de ${result.sinStock.join(', ')}: quedó en 0 y el pedido se envió igual.`, 'Revise el inventario');
       }
       let message = `Se envió a cocina el envío ${result.envio} del pedido Nº ${result.venta.numero}`;
       if (result.nueva) {
@@ -170,19 +166,61 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
       }
       else {
         if (printed) {
-          setPrintError(`No se pudo imprimir la comanda en cocina: ${printed.error}. Imprímala desde la vista previa.`);
+          toast.error(`${printed.error}. Imprímala desde la vista previa.`, 'No se imprimió la comanda');
         }
         setPrinting({open: true, envio: result.envio, printedAt});
       }
-      setNotice(message);
+      toast.success(message);
+      onChanged?.();
       return true;
     }
     catch (problem) {
-      setSubmitError(problem.message);
+      toast.error(problem.message, 'No se pudo enviar a cocina');
       return false;
     }
     finally {
       setSaving(false);
+    }
+  };
+
+  // Vuelve a leer la mesa después de marcar listos
+  const refreshTable = async () => {
+    const table = await api.table(idMesa);
+    setState((current) => ({...current, venta: table.venta}));
+    onChanged?.();
+  };
+
+  // Suma, resta o marca todas las unidades listas de una línea
+  const markReady = async (line, accion) => {
+    setMarking(`line-${line.id}`);
+    try {
+      await api.markLine(line.id, accion);
+      await refreshTable();
+    }
+    catch (problem) {
+      toast.error(problem.message, 'No se pudo marcar');
+    }
+    finally {
+      setMarking('');
+    }
+  };
+
+  // Marca listo todo lo que falta, envío por envío
+  const markAllReady = async () => {
+    const envios = [...new Set(state.venta.detalles.filter((line) => line.listos < line.cantidad).map((line) => line.envio))];
+    setMarking('all');
+    try {
+      for (const envio of envios) {
+        await api.markShipment(state.venta.id, envio, 'todos');
+      }
+      await refreshTable();
+      toast.success(`Todo listo en ${state.mesa.nombre}. Ya se puede cobrar`);
+    }
+    catch (problem) {
+      toast.error(problem.message, 'No se pudo marcar');
+    }
+    finally {
+      setMarking('');
     }
   };
 
@@ -210,11 +248,13 @@ export function useTableOrder({api = cashierApi, idMesa, user, printKitchen}) {
     changeQuantity: (key, cantidad) => setLines((current) => setLineQuantity(current, key, cantidad)),
     remove: (key) => setLines((current) => removeLine(current, key)),
     saving,
-    submitError,
-    notice,
-    stockWarning,
-    printError,
     printing,
+    readyOpen,
+    openReady: () => setReadyOpen(true),
+    closeReady: () => setReadyOpen(false),
+    marking,
+    markReady,
+    markAllReady,
     openPrint: (envio) => setPrinting({open: true, envio, printedAt: new Date()}),
     closePrint: () => setPrinting((current) => ({...current, open: false})),
     submit,

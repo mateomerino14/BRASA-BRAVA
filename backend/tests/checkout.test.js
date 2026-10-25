@@ -105,12 +105,11 @@ describe('Caja: cobro, ticket y ventas del día', () => {
     expect(res.body.resumen).toEqual({cantidad: 1, total: 103, efectivo: 0, qr: 103});
   });
 
-  it('cocina deja de ver los pedidos cobrados y el ticket inexistente responde 404', async () => {
+  it('los pendientes ya no muestran los pedidos cobrados y el ticket inexistente responde 404', async () => {
     await start();
     await readyAll();
     await checkout('Terraza 1', {pagos: [{metodo: 'qr', monto: 103}]});
-    const cocinero = await loginAs(ctx.app, 'r.sanchez');
-    const kitchen = await api('get', '/api/kitchen/orders', cocinero);
+    const kitchen = await api('get', '/api/kitchen/orders');
     expect(kitchen.body.envios.map((item) => item.mesa)).toEqual(['Mesa 2']);
     expect((await api('get', '/api/sales/9999/receipt')).status).toBe(404);
   });
@@ -126,5 +125,35 @@ describe('Caja: cobro, ticket y ventas del día', () => {
     const saved = await api('put', '/api/settings', admin).send({enlaceImpuestos: ' https://siat.impuestos.gob.bo/nuevo '});
     expect(saved.body).toEqual({enlaceImpuestos: 'https://siat.impuestos.gob.bo/nuevo'});
     expect((await api('get', '/api/settings')).body.enlaceImpuestos).toBe('https://siat.impuestos.gob.bo/nuevo');
+  });
+
+  it('imprime el ticket tres veces y desde la cuarta pide un empleado autorizado, que queda registrado', async () => {
+    await start();
+    await readyAll();
+    const {body} = await checkout('Terraza 1', {pagos: [{metodo: 'qr', monto: 103}]});
+    const print = (data = {}, session = cajero) => api('post', `/api/sales/${body.ticket.id}/prints`, session).send(data);
+    for (const numero of [1, 2, 3]) {
+      expect((await print()).body.numero).toBe(numero);
+    }
+    const blocked = await print();
+    expect(blocked.status).toBe(403);
+    expect(blocked.body.impresiones.map((item) => item.impresoPor)).toEqual(['a.romero', 'a.romero', 'a.romero']);
+    expect(blocked.body).toMatchObject({motivo: 'autorizacion', message: 'Este ticket ya se imprimió 3 veces. Un empleado autorizado debe ingresar su usuario y contraseña'});
+    const wrong = await print({alias: 'admin', contrasena: 'otra'});
+    expect(wrong.status).toBe(400);
+    expect(wrong.body.campo).toBe('contrasena');
+    const notAllowed = await print({alias: 'c.mendoza', contrasena: 'Brasa2026'});
+    expect(notAllowed.status).toBe(403);
+    expect(notAllowed.body.message).toBe('Su cargo no puede autorizar reimpresiones');
+    const allowed = await print({alias: 'ADMIN', contrasena: 'Brasa2026'});
+    expect(allowed.status).toBe(201);
+    expect(allowed.body.numero).toBe(4);
+    expect(allowed.body.impresiones[3]).toMatchObject({numero: 4, impresoPor: 'a.romero'});
+    expect(allowed.body.impresiones[3].autorizadoPor).toBeTruthy();
+    const receipt = await api('get', `/api/sales/${body.ticket.id}/receipt`);
+    expect(receipt.body.ticket.impresiones).toHaveLength(4);
+    const directorio = await loginAs(ctx.app, 'DIRECTORIO');
+    expect((await print({}, directorio)).body.numero).toBe(5);
+    expect((await api('post', '/api/sales/9999/prints').send({})).status).toBe(404);
   });
 });

@@ -26,7 +26,7 @@ const resultStatus = (result) => {
 };
 
 // Botones de impresión: con impresora elegida en la app de escritorio imprime directo; si no, abre el diálogo del navegador
-function PrintActions({destino, printer, autoPrint, onClose, children}) {
+function PrintActions({destino, printer, autoPrint, guard, onClose, children}) {
   const [status, setStatus] = useState(() => {
     if (autoPrint && printer) {
       return {kind: 'sending', text: `Enviando a ${printer}…`};
@@ -34,7 +34,13 @@ function PrintActions({destino, printer, autoPrint, onClose, children}) {
     return idle;
   });
 
+  // "guard" decide si se puede imprimir (por ejemplo, el límite de impresiones del ticket)
+  const allowed = async () => !guard || await guard();
+
   const print = async () => {
+    if (!await allowed()) {
+      return;
+    }
     if (!printer) {
       window.print();
       return;
@@ -43,22 +49,36 @@ function PrintActions({destino, printer, autoPrint, onClose, children}) {
     setStatus(resultStatus(await printOnDesktop(destino, children)));
   };
 
+  const printWithDialog = async () => {
+    if (await allowed()) {
+      window.print();
+    }
+  };
+
   // Solo al abrir (la vista previa se monta de nuevo cada vez que se muestra)
-  const [initial] = useState({autoPrint, printer, destino, children});
+  const [initial] = useState({autoPrint, printer, destino, guard, children});
   useEffect(() => {
     if (!initial.autoPrint) {
       return undefined;
     }
-    if (!initial.printer) {
-      window.print();
-      return undefined;
-    }
     let cancelled = false;
-    printOnDesktop(initial.destino, initial.children).then((result) => {
+    const run = async () => {
+      if (initial.guard && !await initial.guard()) {
+        if (!cancelled) {
+          setStatus(idle);
+        }
+        return;
+      }
+      if (!initial.printer) {
+        window.print();
+        return;
+      }
+      const result = await printOnDesktop(initial.destino, initial.children);
       if (!cancelled) {
         setStatus(resultStatus(result));
       }
-    });
+    };
+    run();
     return () => {
       cancelled = true;
     };
@@ -70,19 +90,19 @@ function PrintActions({destino, printer, autoPrint, onClose, children}) {
       {status.kind === 'sending' && <Alert tone="info" className={styles.status}>{status.text}</Alert>}
       {status.kind === 'error' && <Alert tone="error" className={styles.status}>{status.text}</Alert>}
       <div className={styles.actions}>
-        <Button variant="outline" onClick={onClose}>Listo</Button>
+        <Button variant="outline" action="close" onClick={onClose}>Cerrar</Button>
         <Button icon={<Printer size={18} aria-hidden />} loading={status.kind === 'sending'} onClick={print}>Imprimir</Button>
       </div>
       {printer && (
-        <Button variant="ghost" size="sm" className={styles.dialog} onClick={() => window.print()}>Imprimir con diálogo</Button>
+        <Button variant="ghost" size="sm" action="print" className={styles.dialog} onClick={printWithDialog}>Imprimir con diálogo</Button>
       )}
     </>
   );
 }
 
 // Vista previa de un documento para la ticketera; "destino" (cocina o caja) indica a qué impresora va en la app de escritorio.
-// "autoPrint" imprime apenas se muestra (ticket al cobrar)
-export function PrintPreview({open, title, description, onClose, destino, autoPrint = false, children}) {
+// "autoPrint" imprime apenas se muestra (ticket al cobrar); "guard" se consulta antes de cada impresión
+export function PrintPreview({open, title, description, onClose, destino, autoPrint = false, guard, children}) {
   const {printers} = useDesktopPrinters();
   let printer = null;
   if (destino) {
@@ -92,7 +112,7 @@ export function PrintPreview({open, title, description, onClose, destino, autoPr
     <>
       <Modal open={open} onClose={onClose} title={title} description={description} size="sm">
         <div className={styles.paper}>{children}</div>
-        <PrintActions destino={destino} printer={printer} autoPrint={autoPrint} onClose={onClose}>{children}</PrintActions>
+        <PrintActions destino={destino} printer={printer} autoPrint={autoPrint} guard={guard} onClose={onClose}>{children}</PrintActions>
       </Modal>
       {open && createPortal(<div className={styles.printOnly}>{children}</div>, document.body)}
     </>

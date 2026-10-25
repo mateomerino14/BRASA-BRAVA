@@ -35,6 +35,19 @@ export const createSalesRepository = (db) => ({
     return rows;
   },
 
+  // Desde cuándo espera cada venta abierta lo que cocina todavía no sacó (el envío pendiente más antiguo)
+  pendingSince: async () => {
+    const {rows} = await db.query(
+      `SELECT d.id_venta, MIN(ve.creado_en) AS desde
+         FROM venta_detalle d
+         JOIN venta v ON v.id_venta = d.id_venta AND v.estado = 'abierta'
+         JOIN venta_envio ve ON ve.id_venta = d.id_venta AND ve.numero = d.envio
+        WHERE d.listos < d.cantidad
+        GROUP BY d.id_venta`,
+    );
+    return rows;
+  },
+
   // Productos a la venta con las porciones que alcanzan
   sellableProducts: async () => {
     const {rows} = await db.query(
@@ -304,5 +317,41 @@ export const createSalesRepository = (db) => ({
       'INSERT INTO venta_detalle_exclusion (id_detalle, id_producto, id_insumo) VALUES ($1, $2, $3)',
       [idDetalle, idProducto, idInsumo],
     );
+  },
+
+  // Impresiones del ticket de una venta, en orden
+  prints: async (idVenta) => {
+    const {rows} = await db.query(
+      `SELECT numero, impreso_por, autorizado_por, impreso_en FROM ticket_impresion
+        WHERE id_venta = $1 ORDER BY numero`,
+      [idVenta],
+    );
+    return rows;
+  },
+
+  // Bloquea la venta para numerar sus impresiones sin repetir
+  lockSale: async (idVenta) => {
+    await db.query('SELECT id_venta FROM venta WHERE id_venta = $1 FOR UPDATE', [idVenta]);
+  },
+
+  // Registra una impresión del ticket
+  insertPrint: async ({idVenta, numero, idEmpleado, impresoPor, idAutorizador, autorizadoPor, impresoEn}) => {
+    await db.query(
+      `INSERT INTO ticket_impresion (id_venta, numero, id_empleado, impreso_por, id_autorizador, autorizado_por, impreso_en)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [idVenta, numero, idEmpleado, impresoPor, idAutorizador, autorizadoPor, impresoEn],
+    );
+  },
+
+  // Empleado activo por alias con su contraseña y si su cargo puede autorizar reimpresiones
+  findAuthorizer: async (alias) => {
+    const {rows} = await db.query(
+      `SELECT e.id_empleado, e.nombre, e.apellido, e.contrasena_hash, p.pantalla IS NOT NULL AS puede
+         FROM empleado e JOIN cargo c ON c.id_cargo = e.id_cargo
+         LEFT JOIN cargo_permiso p ON p.id_cargo = c.id_cargo AND p.pantalla = 'reimpresion'
+        WHERE LOWER(e.alias) = LOWER($1) AND e.activo = TRUE AND c.activo = TRUE`,
+      [alias],
+    );
+    return rows[0] ?? null;
   },
 });

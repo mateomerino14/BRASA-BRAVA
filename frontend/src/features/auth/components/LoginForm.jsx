@@ -68,13 +68,14 @@ export function LoginForm({form, onForgotPassword, passwordRef}) {
       </div>
 
       <div className={styles.actions}>
-        <Button type="submit" variant="dark" size="lg" loading={submitting}>
+        <Button type="submit" variant="dark" size="lg" action="login" loading={submitting}>
           Ingresar
         </Button>
         <Button
           type="button"
           size="lg"
           variant={isDirectorio ? 'outline' : 'primary'}
+          action={isDirectorio ? 'employee' : 'password'}
           aria-pressed={isDirectorio}
           onClick={toggleDirectorio}
         >

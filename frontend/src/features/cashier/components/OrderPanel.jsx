@@ -1,8 +1,6 @@
 import {useState} from 'react';
 import {AnimatePresence, motion} from 'motion/react';
-import {ChevronDown, HandCoins, Pencil, Printer, Send, ShoppingBasket, Trash2} from 'lucide-react';
-import {Badge} from '../../../components/atoms/Badge';
-import {Alert} from '../../../components/molecules/Alert';
+import {ChevronDown, Pencil, Printer, ShoppingBasket, Trash2} from 'lucide-react';
 import {Amount} from '../../../components/atoms/Amount';
 import {Button} from '../../../components/atoms/Button';
 import {IconButton} from '../../../components/atoms/IconButton';
@@ -10,18 +8,25 @@ import {Select} from '../../../components/atoms/Select';
 import {FormField} from '../../../components/molecules/FormField';
 import {Stepper} from '../../../components/molecules/Stepper';
 import {cn} from '../../../lib/cn';
-import {countText, formatAmount, formatTime} from '../../../lib/format';
+import {countText, formatAmount, formatTime, formatWait} from '../../../lib/format';
 import {MAX_QUANTITY} from '../constants/cashier';
 import {groupByShipment, lineSubtotal, orderTitle} from '../utils/cart';
+import {waitMinutes} from '../utils/kitchen';
 import {OrderLine} from './OrderLine';
 
 const styles = {
   bare: 'flex flex-col gap-5',
-  panel: 'flex flex-col gap-5 rounded-3xl border border-arena/40 bg-white p-4 shadow-card sm:p-5 lg:max-h-[calc(100dvh-15rem)]',
-  scroll: 'flex min-h-0 flex-1 flex-col gap-5 lg:-mx-2 lg:overflow-y-auto lg:px-2',
-  header: 'flex items-start justify-between gap-3',
-  title: 'font-display text-3xl leading-none text-carbon',
-  subtitle: 'mt-1 text-sm text-cafe',
+  panel: 'flex flex-col gap-5 rounded-3xl border border-arena/40 bg-white p-4 shadow-card sm:p-5',
+  scroll: 'flex flex-col gap-5',
+  header: '-mx-4 -mt-4 rounded-t-3xl bg-carbon px-4 py-4 text-crema sm:-mx-5 sm:-mt-5 sm:px-5',
+  headerTop: 'flex items-baseline justify-between gap-3',
+  title: 'font-display text-3xl leading-none',
+  number: 'font-display text-xl leading-none text-mostaza',
+  facts: 'mt-3 grid grid-cols-3 gap-2 text-xs',
+  factLabel: 'block text-crema/60',
+  factValue: 'block truncate font-semibold',
+  waitValue: 'block font-semibold text-mostaza',
+  modified: 'mt-2 text-xs text-crema/70',
   block: 'flex flex-col',
   blockTitle: 'flex items-center justify-between text-xs font-bold uppercase tracking-wide text-cafe',
   toggle: 'flex w-full items-center justify-between gap-2 rounded-xl bg-hueso/60 px-3 py-2.5 text-left text-sm font-semibold text-carbon transition-colors hover:bg-hueso',
@@ -38,20 +43,23 @@ const styles = {
   totalRow: 'flex items-center justify-between',
   grandTotal: 'flex items-center justify-between pt-1 text-base font-semibold text-carbon',
   hint: 'text-sm text-cafe',
-  actions: 'grid gap-3',
+  actions: 'grid grid-cols-2 gap-3',
+  wide: 'col-span-2',
 };
 
 const lineIn = {opacity: 0, x: 16};
 const lineVisible = {opacity: 1, x: 0};
+
+const pendingUnits = (venta) => venta.detalles.reduce((total, detail) => total + detail.cantidad - detail.listos, 0);
 
 // Motivo por el que todavía no se puede cobrar, o vacío si se puede
 const checkoutBlock = (venta, lines) => {
   if (lines.length > 0) {
     return 'Envíe a cocina o quite lo que falta registrar antes de cobrar.';
   }
-  const pending = venta.detalles.reduce((total, detail) => total + detail.cantidad - detail.listos, 0);
+  const pending = pendingUnits(venta);
   if (pending > 0) {
-    return `Cocina tiene ${countText(pending, 'unidad', 'unidades')} por terminar.`;
+    return `Por salir de cocina: ${countText(pending, 'unidad', 'unidades')}. Márquelas en Marcar listos cuando salgan.`;
   }
   return '';
 };
@@ -60,21 +68,45 @@ const unitsOf = (detalles) => detalles.reduce((total, detail) => total + detail.
 
 const optionsOf = (waiters) => waiters.map((item) => ({value: String(item.id), label: `${item.nombre} · ${item.cargo}`}));
 
-// Pedido de la mesa; "bare" lo muestra sin tarjeta ni título (dentro del modal del celular)
-export function OrderPanel({order, bare = false}) {
+// Desde cuándo espera lo que cocina todavía no sacó (el envío pendiente más antiguo)
+const waitingSince = (venta) => {
+  const pending = venta.detalles.filter((detail) => detail.listos < detail.cantidad).map((detail) => new Date(detail.creadoEn).getTime());
+  if (pending.length === 0) {
+    return null;
+  }
+  return Math.min(...pending);
+};
+
+function PanelHeader({mesa, venta, now}) {
+  let wait = null;
+  if (venta && waitingSince(venta)) {
+    wait = formatWait(waitMinutes(waitingSince(venta), now));
+  }
+  return (
+    <header className={styles.header}>
+      <div className={styles.headerTop}>
+        <h2 className={styles.title}>{mesa.nombre}</h2>
+        <span className={styles.number}>{orderTitle(venta)}</span>
+      </div>
+      {venta && (
+        <dl className={styles.facts}>
+          <div><dt className={styles.factLabel}>Mesero</dt><dd className={styles.factValue}>{venta.mesero.nombre}</dd></div>
+          <div><dt className={styles.factLabel}>Abrió</dt><dd className={styles.factValue}>{formatTime(venta.abiertaEn)}</dd></div>
+          <div><dt className={styles.factLabel}>Espera</dt><dd className={styles.waitValue}>{wait ?? 'Nada'}</dd></div>
+        </dl>
+      )}
+      {venta?.modificado && <p className={styles.modified}>Modificado por {venta.modificadoPor}</p>}
+    </header>
+  );
+}
+
+// Pedido de la mesa; "bare" lo muestra sin tarjeta ni cabecera (dentro del modal del celular)
+export function OrderPanel({order, now, bare = false}) {
   const {venta, mesa, lines, totals} = order;
-  const [showRegistered, setShowRegistered] = useState(false);
+  const [showRegistered, setShowRegistered] = useState(true);
   return (
     <section aria-label="Pedido de la mesa" className={bare ? styles.bare : styles.panel}>
-      {!bare && (
-        <header className={styles.header}>
-          <div>
-            <h2 className={styles.title}>{orderTitle(venta)}</h2>
-            <p className={styles.subtitle}>{mesa.nombre} · {mesa.seccion.nombre}</p>
-          </div>
-          {venta?.modificado && <Badge tone="warning">Modificado por {venta.modificadoPor}</Badge>}
-        </header>
-      )}
+      {!bare && <PanelHeader mesa={mesa} venta={venta} now={now} />}
 
       <FormField label="Mesero" required error={order.meseroError}>
         {(field) => (
@@ -154,14 +186,18 @@ export function OrderPanel({order, bare = false}) {
         </span>
       </div>
 
-      {order.submitError && <Alert tone="error">{order.submitError}</Alert>}
       {venta && checkoutBlock(venta, lines) && <p className={styles.hint}>{checkoutBlock(venta, lines)}</p>}
       <div className={styles.actions}>
-        <Button fullWidth icon={<Send size={18} aria-hidden />} loading={order.saving} disabled={lines.length === 0} onClick={order.submit}>
+        <Button fullWidth action="send" loading={order.saving} disabled={lines.length === 0} onClick={order.submit} className={styles.wide}>
           Enviar a cocina
         </Button>
         {venta && (
-          <Button variant="dark" fullWidth icon={<HandCoins size={18} aria-hidden />} disabled={Boolean(checkoutBlock(venta, lines))} onClick={order.startCheckout}>
+          <Button variant="outline" fullWidth action="ready" disabled={pendingUnits(venta) === 0} onClick={order.openReady}>
+            Marcar listos
+          </Button>
+        )}
+        {venta && (
+          <Button variant="dark" fullWidth action="charge" disabled={Boolean(checkoutBlock(venta, lines))} onClick={order.startCheckout}>
             Cobrar
           </Button>
         )}

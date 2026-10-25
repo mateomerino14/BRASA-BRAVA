@@ -1,15 +1,16 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {cashierApi} from '../services/cashierApi';
 import {FLOOR_REFRESH_MS} from '../constants/cashier';
 
 const emptyFloor = {secciones: [], summary: {mesas: 0, ocupadas: 0, libres: 0, porCobrar: 0}};
 
-// Plano de mesas: se recarga solo cada cierto tiempo para ver lo que registran otras cajas
+// Mesas por sección: se recargan solas cada cierto tiempo para ver lo que registran otras cajas
 export function useFloor({api = cashierApi, sectionId, onSectionChange}) {
   const [floor, setFloor] = useState(emptyFloor);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [now, setNow] = useState(() => Date.now());
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,7 +40,10 @@ export function useFloor({api = cashierApi, sectionId, onSectionChange}) {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [api]);
+  }, [api, version]);
+
+  // Vuelve a leer las mesas ya (después de enviar, marcar listos o cobrar)
+  const reload = useCallback(() => setVersion((current) => current + 1), []);
 
   let section = floor.secciones.find((item) => String(item.id) === String(sectionId));
   if (!section) {
@@ -54,5 +58,6 @@ export function useFloor({api = cashierApi, sectionId, onSectionChange}) {
     loading,
     error,
     now,
+    reload,
   };
 }

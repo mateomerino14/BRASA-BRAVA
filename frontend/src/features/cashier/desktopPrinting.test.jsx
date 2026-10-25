@@ -73,10 +73,11 @@ describe('Impresión directa en la app de escritorio', () => {
     stubDesktop({choice: {cocina: 'TicketeraCocina', caja: null}, printResult: {ok: false, error: 'Sin papel', impresora: 'TicketeraCocina'}});
     const {user, print} = await openCashier('/caja?mesa=2');
     await sendGaseosa(user);
-    expect(await screen.findByText('No se pudo imprimir la comanda en cocina: Sin papel. Imprímala desde la vista previa.')).toBeInTheDocument();
+    expect(await screen.findByText('Sin papel. Imprímala desde la vista previa.')).toBeInTheDocument();
+    expect(screen.getByText('No se imprimió la comanda')).toBeInTheDocument();
     const dialog = await screen.findByRole('dialog', {name: 'Comanda de cocina'});
     await user.click(within(dialog).getByRole('button', {name: 'Imprimir con diálogo'}));
-    expect(print).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(print).toHaveBeenCalledTimes(1));
   });
 
   it('al cobrar imprime el ticket directo en la impresora de caja', async () => {
