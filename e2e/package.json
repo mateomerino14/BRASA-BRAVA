@@ -7,7 +7,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:e2e": "playwright test",
-    "server": "node src/server.js"
+    "server": "node src/server.js",
+    "manual:capturas": "playwright test --config playwright.manual.config.js"
   },
   "devDependencies": {
     "@brasa-brava/backend": "^0.1.0",

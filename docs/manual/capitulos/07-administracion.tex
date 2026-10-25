@@ -1,0 +1,105 @@
+\chapter{Administración}
+
+Las pantallas de \pantalla{Administración} mantienen al día el menú, el local y el personal. Todas funcionan igual.
+
+\section{Cómo funcionan las pantallas de gestión}
+
+\begin{itemize}
+  \item \textbf{Buscar}: el buscador filtra mientras se escribe.
+  \item \textbf{Filtros}: los selectores de arriba (estado, categoría, cargo…). \boton{Limpiar filtros} los quita.
+  \item \textbf{Ordenar}: toque el encabezado de una columna; otra vez invierte el orden.
+  \item \textbf{Filas por página} y las flechas de abajo para pasar de página.
+  \item \textbf{Registrar}: el botón naranja del final (\textit{¿Desea registrar…?}).
+  \item \textbf{Acciones} de cada fila: el lápiz modifica; el círculo tachado \textbf{da de baja}; la flecha \textbf{reactiva}.
+\end{itemize}
+
+Los filtros y el orden quedan en la dirección de la página, así que al volver atrás se conservan.
+
+\begin{consejo}
+\textbf{Dar de baja no borra nada}: el registro deja de usarse pero se conserva con su historial (las ventas viejas siguen mostrando ese producto o ese empleado). Lo dado de baja aparece tachado y se puede reactivar. Para borrarlo para siempre está la eliminación física (capítulo~\ref{cap:eliminacion}).
+\end{consejo}
+
+\section{Productos}
+
+\captura{productos}{Gestión de productos}
+
+Cada producto tiene nombre, precio, foto, categoría y subcategoría, descripción y su receta. La columna \textbf{Disponible} es un interruptor: apagado, el producto figura como \textbf{Agotado} y no se puede vender en Caja hasta encenderlo de nuevo. La columna \textbf{Receta} dice para cuántas porciones alcanza el stock, o \textit{Sin insumos} si falta alguno.
+
+\captura[0.7]{productos-registrar}{Registrar un producto}
+
+Para registrar, elija primero la categoría y después la subcategoría. El precio se escribe con coma decimal.
+
+\subsection{Receta}
+
+\captura[0.7]{productos-receta}{Receta de un producto}
+
+El botón del gorro de cocinero abre la \textbf{receta}: los insumos que lleva una porción y cuánto de cada uno. Caja descuenta esas cantidades del inventario en cada venta. Debajo se ve para cuántas porciones alcanza el stock actual.
+
+\section{Secciones y mesas}
+
+\captura{secciones}{Gestión de secciones}
+
+Las secciones son los ambientes del local. Cada una tiene sus mesas con su capacidad.
+
+\captura[0.7]{secciones-registrar}{Registrar una sección con sus mesas}
+
+\boton{Agregar mesa} suma una mesa numerada automáticamente; la capacidad se ajusta con sus botones. Una mesa que se quita deja de aparecer en Caja, pero sus ventas anteriores se conservan.
+
+\section{Inventario}
+
+\captura{inventario}{Inventario de insumos}
+
+Cada insumo tiene su unidad (kilogramos, litros o unidades), la cantidad actual y el \textbf{mínimo}. La cantidad se pinta según el nivel: en rojo cuando no queda nada y en naranja cuando llegó al mínimo o está por debajo.
+
+Para corregir la cantidad después de contar el depósito, modifique el insumo y escriba la cantidad real: queda registrado como un ajuste.
+
+\section{Categorías}
+
+\captura{categorias}{Gestión de categorías}
+
+\captura[0.7]{categorias-registrar}{Registrar una categoría}
+
+Cada categoría del menú tiene foto, descripción y sus \textbf{subcategorías} (por ejemplo, Hamburguesas → Clásicas, Especiales, Doble Carne). Las subcategorías se agregan, renombran o quitan en el mismo formulario. Una categoría dada de baja deja de mostrarse en el menú de Caja.
+
+\section{Promociones}
+
+\captura{promociones}{Gestión de promociones}
+
+Las promociones son \textbf{combos a precio fijo}: varios productos con sus cantidades por un precio menor al que costarían por separado.
+
+\captura[0.7]{promociones-registrar}{Registrar una promoción}
+
+\begin{itemize}
+  \item Agregue los productos con \boton{Agregar producto} y su cantidad. El sistema muestra en vivo el precio por separado y el ahorro.
+  \item Elija la fecha \textbf{Desde} y, si quiere, \textbf{Hasta} (vacía, no vence).
+  \item Marque los \textbf{días} en que vale (obligatorio) y, si quiere, un \textbf{horario} (por ejemplo, 6:00 PM a 9:00 PM).
+\end{itemize}
+
+La columna \textbf{Vigencia} dice su estado: \textit{Vigente ahora}, \textit{Hoy no aplica}, \textit{Programada}, \textit{Vencida} o \textit{Inactiva}. Solo las vigentes en ese momento aparecen en \boton{Promociones de hoy} de Caja.
+
+\section{Empleados}
+
+\captura{empleados}{Gestión de empleados}
+
+\captura[0.7]{empleados-registrar}{Registrar un empleado}
+
+Para registrar un empleado se cargan sus datos personales (nombre, apellido, CI, teléfono), su foto, su cargo, su correo y su contraseña inicial. El \textbf{usuario} se sugiere con el nombre y el apellido, y se puede cambiar. El correo es el que usará para recuperar la contraseña. Al modificar, la contraseña se deja vacía para mantener la actual.
+
+Un empleado dado de baja no puede ingresar al sistema, pero sus ventas se conservan.
+
+\section{Cargos}
+\label{sec:cargos}
+
+\captura{cargos}{Gestión de cargos}
+
+Cada cargo tiene marcadas las pantallas que ve quien lo tenga.
+
+\captura[0.75]{cargos-modificar}{Pantallas de un cargo}
+
+\begin{itemize}
+  \item La página principal la tienen todos.
+  \item Las pantallas están agrupadas en \textbf{Operación del local} y \textbf{Administración}; \boton{Marcar todas} marca un grupo entero.
+  \item Antes de guardar, el formulario avisa a cuántos empleados afecta el cambio; lo verán la próxima vez que inicien sesión.
+  \item Un cargo no se puede dar de baja mientras tenga empleados activos.
+  \item La eliminación física no se puede dar a ningún cargo: es solo del DIRECTORIO.
+\end{itemize}

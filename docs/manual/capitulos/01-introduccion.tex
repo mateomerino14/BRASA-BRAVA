@@ -1,0 +1,58 @@
+\chapter{Introducción}
+
+Este manual explica cómo usar el sistema de gestión de \textbf{Brasa Brava}: tomar los pedidos de cada mesa, mandarlos a cocina, cobrar, revisar las ventas y mantener al día el menú, el inventario y el personal.
+
+\section{Qué hace el sistema}
+
+\begin{itemize}
+  \item \textbf{Caja}: el plano de mesas, el armado del pedido, la comanda para cocina, lo que ya salió de cocina, el cobro y el ticket.
+  \item \textbf{Familia}: el catálogo del local con productos, recetas, porciones que alcanzan con el stock y promociones.
+  \item \textbf{Reportes}: las ventas cobradas por fechas y por empleado, en PDF o por correo, y los envíos automáticos.
+  \item \textbf{Administración}: productos, secciones y mesas, inventario, categorías, promociones, empleados y cargos.
+  \item \textbf{Eliminación física}: el borrado definitivo de lo que ya se dio de baja, solo para el DIRECTORIO.
+\end{itemize}
+
+\section{Cómo se usa}
+
+El sistema funciona de dos formas con las mismas pantallas:
+
+\begin{description}
+  \item[Aplicación de escritorio (Windows).] Se abre como cualquier programa. Trae su propia base de datos, así que no necesita internet. Es la que imprime directo en las ticketeras de cocina y de caja.
+  \item[Versión web.] Se abre en el navegador con la dirección que entregue el encargado del sistema. Imprime con el diálogo de impresión del navegador.
+\end{description}
+
+Las pantallas se adaptan a computadora, tablet y celular. En pantallas angostas el menú se abre con el botón de la barra naranja y las tablas se muestran como tarjetas (capítulo~\ref{cap:inicio}).
+
+\section{Quién ve qué}
+
+Cada empleado tiene un \textbf{cargo}, y cada cargo tiene marcadas las pantallas que puede ver (sección~\ref{sec:cargos}). El \textbf{DIRECTORIO} es la cuenta del dueño: ve todo, programa los envíos automáticos de reportes y es el único que puede hacer la eliminación física.
+
+\begin{table}[H]
+  \centering
+  \caption{Pantallas de los cargos que trae el sistema al instalarse}
+  \rowcolors{2}{hueso}{white}
+  \begin{tabularx}{\linewidth}{lX}
+    \toprule
+    \textbf{Cargo} & \textbf{Pantallas} \\
+    \midrule
+    Administrador & Todas, menos la eliminación física \\
+    Cajero & Página principal, Familia y Caja \\
+    Mesero & Página principal, Familia y Caja \\
+    Cocinero & Página principal y Familia \\
+    DIRECTORIO & Todas, incluida la eliminación física \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{consejo}
+Los cargos se pueden cambiar en \pantalla{Administración → Cargos}. Lo que se marque ahí es lo que verá cada empleado la próxima vez que entre.
+\end{consejo}
+
+\section{Convenciones de este manual}
+
+\begin{itemize}
+  \item Los botones se escriben así: \boton{Enviar a cocina}.
+  \item Las pantallas y menús, así: \pantalla{Administración → Productos}.
+  \item Los montos están en bolivianos (Bs), con coma decimal: Bs 85,00.
+  \item Las fechas se muestran como día/mes/año y las horas en formato de 12 horas (AM/PM), en la hora del local.
+\end{itemize}

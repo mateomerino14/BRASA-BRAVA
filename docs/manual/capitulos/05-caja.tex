@@ -1,0 +1,113 @@
+\chapter{Caja}
+
+\pantalla{Caja} reúne en una sola pantalla todo el recorrido de una mesa: elegirla, armar el pedido, mandarlo a cocina, marcar lo que sale y cobrar. Cocina no usa el sistema: recibe la \textbf{comanda impresa}, y el cajero marca en Caja lo que ya salió.
+
+\captura{caja}{Caja sin mesa elegida}
+
+La pantalla tiene tres partes:
+
+\begin{description}
+  \item[Arriba, las mesas.] Las secciones del local (Salón principal, Terraza, Barra…) con cuántas mesas ocupadas tiene cada una, y las mesas de la sección elegida. Una mesa libre dice \textbf{Libre}; una ocupada muestra lo que lleva consumido y hace cuánto espera lo que falta de cocina. La espera se pinta de amarillo desde los 15 minutos y de rojo desde los 30.
+  \item[A la izquierda, el pedido] de la mesa elegida.
+  \item[A la derecha, el menú del día] con buscador y categorías. \boton{Promociones de hoy} muestra solo los combos que valen en este momento.
+\end{description}
+
+\section{Tomar un pedido}
+
+\begin{enumerate}
+  \item Toque la mesa en la barra de arriba. Si no eligió mesa, el menú le recuerda hacerlo primero.
+  \item Toque un producto o una promoción del menú. Se abre su ventana:
+\end{enumerate}
+
+\captura[0.75]{caja-agregar-producto}{Agregar un producto: cantidad, consumo e ingredientes}
+
+\begin{itemize}
+  \item \textbf{Cantidad}: con $-$ y $+$.
+  \item \textbf{Consumo}: \boton{Local} si se sirve en la mesa o \boton{Para llevar}.
+  \item \textbf{Quitar ingredientes}: toque los que el cliente no quiere; quedan tachados en rojo. En un combo se eligen por cada producto del combo.
+  \item Presione \boton{Agregar al pedido}.
+\end{itemize}
+
+\begin{consejo}
+Si dos hamburguesas llevan cambios distintos (una sin tomate y otra completa), agréguelas por separado. Cuando se agrega algo igual a una línea que ya está, el sistema las junta y suma la cantidad.
+\end{consejo}
+
+\captura{caja-pedido-nuevo}{Pedido por registrar}
+
+Lo agregado aparece en \textbf{Por registrar}, en columnas: \textbf{Cant.}, \textbf{Producto}, \textbf{Consumo} y \textbf{Bs}. Lo quitado se lee en rojo debajo del nombre. Cada línea se puede ajustar con $-$ y $+$, cambiar con el lápiz o quitar con el tacho.
+
+En el menú, los productos con poco stock dicen \textbf{Quedan N} o \textbf{Sin stock}, pero se pueden vender igual; los marcados como agotados no se pueden elegir.
+
+\section{Enviar a cocina}
+
+Presione \boton{Enviar a cocina}. Si la mesa estaba libre se abre la venta con su número de pedido; si ya estaba ocupada, lo nuevo se suma como un \textbf{envío} más. El stock de los insumos se descuenta según la receta.
+
+\captura[0.75]{caja-comanda}{Comanda de cocina del envío}
+
+La \textbf{comanda} lleva solo lo nuevo de ese envío, con la mesa, el número de pedido, el cajero que lo registró, lo quitado (\textit{sin: tomate}) y el consumo de cada línea (\textbf{L} local, \textbf{LL} para llevar). No lleva precios. Desde el segundo envío dice \textbf{MODIFICADO POR} y el nombre de quien lo registró.
+
+\begin{itemize}
+  \item En la \textbf{aplicación de escritorio} con impresora de cocina elegida, la comanda se imprime sola.
+  \item En el navegador se muestra la vista previa: presione \boton{Imprimir}.
+\end{itemize}
+
+Si un insumo no alcanzó, aparece el aviso \textit{Revise el inventario}: el pedido se envió igual y ese insumo quedó en cero.
+
+\begin{importante}
+Si cambia de mesa con productos todavía sin enviar, el sistema pregunta antes de descartarlos. Envíelos a cocina primero si no quiere perderlos.
+\end{importante}
+
+\section{Lo ya registrado en una mesa}
+
+\captura{caja-mesa-ocupada}{Mesa ocupada con su pedido registrado}
+
+Al elegir una mesa ocupada se ve quién la abrió, desde qué hora y cuánto espera. En \textbf{Registrado} aparece cada envío con su hora y \textbf{quién lo registró} (por ejemplo, \textit{Envío 2 · 8:31 PM · Registró: admin}), y debajo de cada producto cuántas unidades ya salieron de cocina. El botón de impresora de cada envío vuelve a imprimir su comanda; la comanda se puede reimprimir las veces que haga falta.
+
+El pedido ya no lleva mesero: solo queda registrado el empleado que tomó cada envío.
+
+\section{Marcar lo que sale de cocina}
+
+\captura{caja-marcar-listos}{Marcar listos}
+
+Cuando cocina entrega, presione \boton{Marcar listos}. La ventana tiene tres columnas:
+
+\begin{description}
+  \item[Local] y \textbf{Para llevar}: cada producto pendiente con $-$ y $+$ para marcar las unidades que salieron, y el botón verde para marcarlo completo.
+  \item[Faltan]: lo que todavía no salió. Cuando no falta nada dice que ya se puede cobrar.
+\end{description}
+
+\boton{Todo listo} marca de una vez todo lo pendiente de la mesa.
+
+\section{Cobrar}
+
+\boton{Cobrar} se habilita recién cuando no falta nada de cocina.
+
+\captura{caja-cobro}{Cobro de la mesa}
+
+\begin{enumerate}
+  \item Elija la forma de pago: \boton{Efectivo}, \boton{QR} o \boton{Mixto} (una parte en efectivo y el resto por QR).
+  \item En efectivo, escriba lo que entregó el cliente o use los montos rápidos (\boton{Exacto}, Bs 90, Bs 100…). El sistema calcula el cambio. Si el monto no alcanza, avisa cuánto falta. Si paga exacto puede dejarlo vacío.
+  \item Presione \boton{Cobrar Bs …}.
+\end{enumerate}
+
+A la izquierda se ve la vista previa del ticket. El enlace \boton{Página de impuestos} abre la página para emitir la factura.
+
+\captura[0.75]{caja-ticket}{Ticket de venta}
+
+Al cobrar, la mesa queda libre y se imprime el \textbf{ticket de venta}, que junta las líneas iguales y lleva el total, la forma de pago, lo recibido y el cambio.
+
+\section{Límite de impresiones del ticket}
+
+El ticket de una venta se puede imprimir \textbf{3 veces} libremente (contando la del cobro). Desde la cuarta, el sistema pide el usuario y la contraseña de un empleado con acceso a Caja, y deja registrado quién la autorizó.
+
+\captura[0.75]{caja-autorizar-reimpresion}{Autorización para la cuarta impresión}
+
+\section{Ventas de hoy}
+
+\captura[0.8]{caja-ventas-hoy}{Ventas de hoy}
+
+\boton{Ventas de hoy}, arriba a la derecha de las mesas, muestra las ventas cobradas del día con sus totales (ventas, total, efectivo y QR). Cada venta tiene su botón para reimprimir el ticket, con el mismo límite de impresiones. Quien tiene acceso a Administración puede cambiar aquí el enlace de la página de impuestos.
+
+\section{Impresoras (aplicación de escritorio)}
+
+En la aplicación de escritorio aparece el botón \boton{Impresoras} junto a \boton{Ventas de hoy}. Ahí se elige la impresora de \textbf{cocina} (comandas) y la de \textbf{caja} (tickets) de esa computadora, y \boton{Imprimir prueba} saca una hoja para comprobarla. Si una impresión directa falla, el sistema avisa y ofrece \boton{Imprimir con diálogo}.
