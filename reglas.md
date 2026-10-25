@@ -98,7 +98,7 @@ export const generateCode = () => String(randomInt(0, codeRange)).padStart(codeL
 
 ### Sintaxis
 
-El formato se valida con ESLint (`npm run lint`) y se corrige solo con `npm run lint:fix`.
+El formato se valida con ESLint (`npm run lint`) y se corrige solo con `npm run lint:fix`. El código sin uso (archivos, exportaciones y dependencias) se busca con `npm run lint:deadcode` y no debe quedar ninguno.
 
 **Punto y coma** al final de cada sentencia.
 
@@ -323,7 +323,8 @@ El backend es la única fuente de verdad: una validación presente solo en el cl
 ## PRUEBAS
 
 - Cada módulo incluye pruebas de la API (Supertest) y de la interfaz (Testing Library).
-- Un módulo se considera terminado cuando las pruebas pasan en GitHub Actions, su historia de Storybook está al día y su README está actualizado.
+- Los recorridos principales (inicio de sesión, Caja, Reportes y eliminación física) se prueban de punta a punta con Playwright en `e2e/`, contra la API y PostgreSQL reales.
+- Un módulo se considera terminado cuando las pruebas pasan en GitHub Actions, su historia de Storybook está al día, su README está actualizado y el manual de usuario (`docs/manual/`) explica la pantalla.
 
 ---
 
