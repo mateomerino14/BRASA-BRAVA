@@ -1,19 +1,29 @@
-\documentclass[11pt,a4paper,oneside]{report}
+\documentclass[10pt,a4paper,oneside]{report}
 
 \usepackage[spanish,es-noshorthands,es-tabla]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage[margin=2.3cm,headheight=14pt]{geometry}
+\usepackage[sfdefault]{inter}
+\usepackage[scale=1]{montserrat}
+\usepackage[scaled=0.9]{sourcecodepro}
+\usepackage[margin=2cm,top=2.3cm,headheight=14pt]{geometry}
+\usepackage[skip=5pt plus 1pt,indent=0pt]{parskip}
 \usepackage{graphicx}
+\usepackage{amssymb}
 \usepackage[table]{xcolor}
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{array}
 \usepackage{enumitem}
 \usepackage{titlesec}
+\usepackage{titletoc}
 \usepackage{fancyhdr}
 \usepackage{float}
 \usepackage{caption}
+\usepackage{etoolbox}
+\usepackage{microtype}
+\usepackage{placeins}
+\usepackage{paracol}
 \usepackage[most]{tcolorbox}
 \usepackage[hidelinks]{hyperref}
 
@@ -21,62 +31,141 @@
 
 % Paleta de Brasa Brava
 \definecolor{brasa}{HTML}{F7941D}
+\definecolor{brasaoscuro}{HTML}{D97C0B}
 \definecolor{carbon}{HTML}{1C1A17}
+\definecolor{cafe}{HTML}{6B5B4B}
 \definecolor{hueso}{HTML}{FAF4EA}
+\definecolor{arena}{HTML}{E8DCC8}
 \definecolor{rojo}{HTML}{C1272D}
 
-\hypersetup{colorlinks=true,linkcolor=carbon,urlcolor=brasa}
-\setlist{itemsep=2pt,topsep=4pt}
-\captionsetup{font=small,labelfont={bf,color=carbon}}
+% Fuente de títulos: Montserrat; texto: Inter
+\newcommand{\titulos}{\fontfamily{Montserrat-LF}\selectfont}
 
-\titleformat{\chapter}[display]{\normalfont\bfseries\color{carbon}}{\large\color{brasa}\MakeUppercase{\chaptertitlename}~\thechapter}{4pt}{\Huge}
-\titlespacing*{\chapter}{0pt}{0pt}{18pt}
-\titleformat{\section}{\normalfont\Large\bfseries\color{carbon}}{\color{brasa}\thesection}{0.8em}{}
-\titleformat{\subsection}{\normalfont\large\bfseries\color{carbon}}{\color{brasa}\thesubsection}{0.8em}{}
+\hypersetup{colorlinks=true,linkcolor=carbon,urlcolor=brasaoscuro}
+\setlist{itemsep=1pt,topsep=2pt,parsep=0pt,leftmargin=1.4em}
+\setlist[enumerate]{label=\textbf{\color{brasaoscuro}\arabic*.}}
+\setlist[itemize]{label=\textcolor{brasa}{\small$\blacktriangleright$}}
+\setlist[description]{font=\titulos\bfseries\color{carbon},leftmargin=0pt,itemsep=3pt}
+\renewcommand{\topfraction}{0.85}\renewcommand{\textfraction}{0.1}\renewcommand{\floatpagefraction}{0.75}
+\captionsetup{font={small,color=cafe},labelfont={bf,color=carbon},skip=4pt}
+\renewcommand{\arraystretch}{1.25}
+\linespread{1.08}
 
+% Capítulos seguidos, sin empezar cada uno en una hoja nueva
+\makeatletter
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{\par\vspace{14pt}}{}{}
+\makeatother
+
+\titleformat{\chapter}[block]
+  {\titulos\bfseries\color{carbon}}
+  {\colorbox{brasa}{\parbox[c][1.15cm][c]{1.15cm}{\centering\color{white}\Huge\thechapter}}}
+  {12pt}
+  {\Huge}
+  [\vspace{4pt}{\color{brasa}\titlerule[1.5pt]}]
+\titleformat{name=\chapter,numberless}[block]{\titulos\bfseries\color{carbon}}{}{0pt}{\Huge}[\vspace{4pt}{\color{brasa}\titlerule[1.5pt]}]
+\titlespacing*{\chapter}{0pt}{0pt}{12pt}
+\titleformat{\section}{\titulos\Large\bfseries\color{carbon}}{\color{brasa}\thesection}{0.7em}{}
+\titlespacing*{\section}{0pt}{14pt}{4pt}
+\titleformat{\subsection}{\titulos\large\bfseries\color{carbon}}{\color{brasaoscuro}\thesubsection}{0.7em}{}
+\titlespacing*{\subsection}{0pt}{10pt}{3pt}
+\titleformat{\paragraph}[runin]{\titulos\bfseries\color{carbon}}{}{0pt}{}[.]
+\titlespacing*{\paragraph}{0pt}{6pt}{0.6em}
+
+% Índice
+\titlecontents{chapter}[2.4em]{\addvspace{3pt}\titulos\bfseries\color{carbon}}
+  {\contentslabel[\colorbox{brasa}{\makebox[1.1em]{\color{white}\thecontentslabel}}]{2.4em}}{}
+  {\hfill\contentspage}[\vspace{1pt}]
+\titlecontents{section}[4.6em]{\small\color{carbon}}
+  {\contentslabel[\color{brasaoscuro}\thecontentslabel]{2.2em}}{}
+  {\titlerule*[0.6pc]{\color{arena}.}\contentspage}
+\titlecontents{subsection}[7.2em]{\footnotesize\color{cafe}}
+  {\contentslabel[\thecontentslabel]{2.6em}}{}
+  {\titlerule*[0.6pc]{\color{arena}.}\contentspage}
+\setcounter{tocdepth}{1}
+
+% Encabezado y pie
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\color{carbon!70}Brasa Brava · Manual de usuario}
-\fancyhead[R]{\small\color{carbon!70}\leftmark}
-\fancyfoot[C]{\small\thepage}
-\renewcommand{\headrulewidth}{0.4pt}
-\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\thepage}\renewcommand{\headrulewidth}{0pt}}
+\fancyhead[L]{\titulos\footnotesize\bfseries\color{brasaoscuro}BRASA BRAVA}
+\fancyhead[R]{\footnotesize\color{cafe}\nouppercase{\leftmark}}
+\fancyfoot[R]{\titulos\footnotesize\bfseries\color{carbon}\thepage}
+\fancyfoot[L]{\footnotesize\color{cafe}Manual de usuario}
+\renewcommand{\headrule}{{\color{arena}\hrule height 0.6pt}}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[R]{\titulos\footnotesize\bfseries\thepage}\renewcommand{\headrulewidth}{0pt}}
 
 % Recuadros de ayuda
-\newtcolorbox{consejo}{colback=hueso,colframe=brasa,boxrule=0.6pt,arc=2mm,left=8pt,right=8pt,top=6pt,bottom=6pt,fonttitle=\bfseries,title=Consejo}
-\newtcolorbox{importante}{colback=rojo!5,colframe=rojo,boxrule=0.6pt,arc=2mm,left=8pt,right=8pt,top=6pt,bottom=6pt,fonttitle=\bfseries,title=Importante}
+\tcbset{recuadro/.style={enhanced,breakable,boxrule=0pt,arc=1.5mm,left=9pt,right=9pt,top=5pt,bottom=5pt,
+  fonttitle=\titulos\bfseries\small,coltitle=white,attach boxed title to top left={yshift=-2mm,xshift=8pt},
+  boxed title style={arc=1mm,boxrule=0pt},before skip=8pt,after skip=8pt}}
+\newtcolorbox{consejo}{recuadro,colback=hueso,borderline west={3pt}{0pt}{brasa},colbacktitle=brasa,title=Consejo}
+\newtcolorbox{importante}{recuadro,colback=rojo!6,borderline west={3pt}{0pt}{rojo},colbacktitle=rojo,title=Importante}
 
-% Captura con su pie de figura
-\newcommand{\captura}[3][0.92]{%
-  \begin{figure}[H]
+% Imagen con borde fino
+\newcommand{\imagen}[2]{{\setlength{\fboxsep}{0pt}\fcolorbox{arena}{white}{\includegraphics[width=#1]{#2}}}}
+
+% Captura de pantalla completa: flota para no dejar huecos, sin salir de su sección
+\newcommand{\captura}[3][0.86]{%
+  \begin{figure}[!htb]
     \centering
-    \includegraphics[width=#1\linewidth]{#2}
+    \imagen{#1\linewidth}{#2}
     \caption{#3}
   \end{figure}}
 
+% Texto a la izquierda y una ventana a la derecha; el texto puede seguir en la hoja siguiente
+\setlength{\columnsep}{1.4em}
+\newcommand{\conventana}[4]{%
+  \columnratio{\fpeval{1-#1}}
+  \begin{paracol}{2}
+    \raggedright #4
+    \switchcolumn
+    \centering\imagen{\linewidth}{#2}
+    \captionof{figure}{#3}
+  \end{paracol}}
+
+% Dos ventanas lado a lado
+\newcommand{\dosventanas}[6]{%
+  \begin{figure}[!htb]
+    \centering
+    \begin{minipage}[b]{#1\linewidth}\centering\imagen{\linewidth}{#2}\caption{#3}\end{minipage}\hfill
+    \begin{minipage}[b]{#4\linewidth}\centering\imagen{\linewidth}{#5}\caption{#6}\end{minipage}
+  \end{figure}}
+
+% Signos de los botones de cantidad
+\newcommand{\menos}{\textbf{\textendash}}
+\newcommand{\mas}{\textbf{+}}
+
 % Botones y textos de la pantalla
-\newcommand{\boton}[1]{\textsf{\textbf{#1}}}
-\newcommand{\pantalla}[1]{\textsf{#1}}
+\newcommand{\boton}[1]{\colorbox{hueso}{\titulos\bfseries\footnotesize\color{carbon}\strut#1}}
+\newcommand{\pantalla}[1]{\textbf{\color{brasaoscuro}#1}}
+\newcommand{\campo}[1]{\textbf{#1}}
+
+% Tabla con encabezado de color
+\newenvironment{tabla}[1]
+  {\par\smallskip\rowcolors{2}{hueso}{white}\small\noindent\tabularx{\linewidth}{#1}\toprule\rowcolor{carbon}}
+  {\bottomrule\endtabularx\par\smallskip}
+\newcommand{\encabezado}[1]{\textcolor{white}{\titulos\bfseries\footnotesize #1}}
 
 \begin{document}
 
 \begin{titlepage}
   \pagecolor{carbon}\color{white}
-  \centering
-  \vspace*{3cm}
-  {\color{brasa}\rule{\linewidth}{2pt}}\\[1.2cm]
-  {\fontsize{44}{48}\selectfont\bfseries BRASA BRAVA}\\[0.4cm]
-  {\Large Resto-Bar}\\[1.6cm]
-  {\huge\bfseries Manual de usuario}\\[0.4cm]
-  {\Large Sistema de gestión del restaurante}\\[1.2cm]
-  {\color{brasa}\rule{\linewidth}{2pt}}
+  \newgeometry{margin=2.5cm}
+  \vspace*{2.2cm}
+  {\titulos\color{brasa}\Large\bfseries RESTO-BAR}\\[0.3cm]
+  {\titulos\fontsize{56}{60}\selectfont\bfseries BRASA BRAVA}\\[0.5cm]
+  {\color{brasa}\rule{5cm}{3pt}}\\[1.4cm]
+  {\titulos\fontsize{30}{34}\selectfont Manual de usuario}\\[0.4cm]
+  {\Large\color{white!80}Sistema de gestión del restaurante}
   \vfill
-  {\large Caja, Familia, Reportes, Administración y Eliminación física}\\[0.3cm]
-  {\large Versión de octubre de 2026}
+  {\color{brasa}\rule{\linewidth}{0.6pt}}\\[0.3cm]
+  {\color{white!85}Caja · Familia · Reportes · Administración · Eliminación física}\hfill{\titulos\bfseries\color{brasa}Octubre de 2026}
 \end{titlepage}
 \nopagecolor\color{black}
+\restoregeometry
 
-\tableofcontents
+{\hypersetup{linkcolor=carbon}\linespread{1}\selectfont\tableofcontents}
+\clearpage
 
 \input{capitulos/01-introduccion}
 \input{capitulos/02-ingreso}

@@ -1,78 +1,82 @@
 \chapter{Reportes de ventas}
 
-\pantalla{Reportes} muestra las ventas \textbf{cobradas}, según la hora en que se cobraron. Al abrirla trae el resumen de hoy.
+\pantalla{Reportes} muestra las ventas \textbf{cobradas}. Cada venta cuenta en el día y la hora en que se cobró, no en la que se abrió la mesa. Al abrir la pantalla ya trae el resumen de hoy de todos los empleados.
+
+\captura{reportes-resumen}{Resumen de ventas de hoy}
 
 \section{Elegir qué ver}
 
-\captura{reportes-resumen}{Resumen de ventas}
-
 \begin{enumerate}
-  \item Elija el tipo: \boton{Resumen de ventas} o \boton{Ventas detalladas}.
-  \item Elija las fechas \textbf{Desde} y \textbf{Hasta} con el calendario, o use los atajos \boton{Hoy}, \boton{Ayer}, \boton{Esta semana} y \boton{Este mes}.
-  \item Si quiere, elija un \textbf{Empleado}: trae las ventas que esa persona registró, a las que agregó un envío o que cobró. También se puede elegir el DIRECTORIO. Los empleados dados de baja aparecen marcados como \textit{de baja}.
+  \item Elija el tipo de reporte: \boton{Resumen de ventas} o \boton{Ventas detalladas}.
+  \item Elija las fechas \campo{Desde} y \campo{Hasta} con el calendario, o use los atajos \boton{Hoy}, \boton{Ayer}, \boton{Esta semana} y \boton{Este mes}. El período puede ser de hasta un año, y \campo{Hasta} no puede ser anterior a \campo{Desde}.
+  \item Si quiere, elija un \campo{Empleado}. Trae las ventas en las que esa persona participó: las que \textbf{registró}, aquellas a las que \textbf{agregó un envío} y las que \textbf{cobró}. También se puede elegir el DIRECTORIO. Los empleados dados de baja figuran con la marca \textit{de baja}, para consultar su historial.
   \item Presione \boton{Generar}.
 \end{enumerate}
 
-Arriba de la tabla están los totales del período: cantidad de ventas, total, efectivo, QR y ticket promedio.
+Debajo de los filtros están los \textbf{totales del período}: cantidad de ventas, total, efectivo, QR y ticket promedio. Arriba de todo se lee el período y el empleado elegidos.
+
+\section{Resumen y ventas detalladas}
 
 \begin{description}
-  \item[Resumen de ventas] tiene una fila por día con sus ventas, efectivo, QR y total.
-  \item[Ventas detalladas] tiene una fila por venta: número, hora de cobro, mesa, quién la abrió y quién la cobró, y los montos.
+  \item[Resumen de ventas.] Una fila por día con su cantidad de ventas, lo cobrado en efectivo, por QR y el total. Sirve para el cierre del día o para comparar días.
+  \item[Ventas detalladas.] Una fila por venta: número, día y hora de cobro, mesa y sección, quién la abrió y quién la cobró, efectivo, QR y total. Sirve para revisar una venta en particular.
 \end{description}
 
 \captura{reportes-detalladas}{Ventas detalladas}
 
 \section{Detalle de una venta}
 
-\captura{reportes-venta}{Detalle de una venta}
+\captura[0.82]{reportes-venta}{Detalle de una venta}
 
-El ojo de cada fila abre la venta completa:
+El ojo de cada fila de Ventas detalladas abre la venta completa:
 
 \begin{itemize}
-  \item Cada \textbf{envío} con su hora y quién lo registró, en una tabla con \textbf{Cant.}, \textbf{Producto}, \textbf{Consumo} (Local o Para llevar) y \textbf{Subtotal}. Lo quitado se lee en rojo debajo del producto.
-  \item El \textbf{cobro}: efectivo, QR, total, recibido, cambio, quién cobró y cuándo.
-  \item Cuántas veces se imprimió el ticket.
+  \item En el título, el número y el total; debajo, la fecha, la hora en que se abrió y se cobró, la mesa, la sección y quién la abrió.
+  \item Cada \textbf{envío} con su hora y quién lo registró, en una tabla con \textbf{Cant.}, \textbf{Producto}, \textbf{Consumo} (Local o Para llevar) y \textbf{Subtotal}. Lo quitado se lee en rojo debajo del producto; en un combo, también lo que trae.
+  \item El \textbf{cobro}: efectivo, QR, total, recibido y cambio, quién cobró y cuándo.
+  \item Cuántas veces se imprimió el ticket y, si hubo autorización, quién la dio.
 \end{itemize}
 
-\boton{Reimprimir ticket} vuelve a imprimirlo, con el mismo límite de impresiones de Caja (solo quien tiene acceso a Caja).
+\boton{Reimprimir ticket} vuelve a imprimirlo con el mismo límite de impresiones de Caja. Solo aparece para quien tiene acceso a Caja.
 
 \section{Descargar o enviar por correo}
 
 \begin{itemize}
-  \item \boton{Descargar PDF} guarda el reporte que se está viendo. El PDF de ventas detalladas trae cada venta con su tabla de productos.
-  \item Para mandarlo, escriba un correo en \textbf{Enviar a este correo} y presione \boton{Enviar por correo}: llega con el PDF adjunto.
+  \item \boton{Descargar PDF} guarda el reporte que se está viendo, con el nombre del tipo y las fechas (por ejemplo, \texttt{brasa-brava-resumen-2026-10-01-al-2026-10-25.pdf}). El PDF de ventas detalladas trae cada venta con su tabla de productos, lo quitado, cómo se pagó y las impresiones del ticket.
+  \item Para mandarlo, escriba un correo en \campo{Enviar a este correo} y presione \boton{Enviar por correo}: llega un correo con los totales y el PDF adjunto.
 \end{itemize}
 
 \begin{importante}
-Para que los correos salgan de verdad, la computadora debe tener configurada la clave del servicio de correo (Brevo), la misma que usa la recuperación de contraseñas. Pídasela al encargado del sistema.
+Para que los correos salgan de verdad, la computadora debe tener configurada la clave del servicio de correo (Brevo), la misma que usa la recuperación de contraseñas. Si no está, el sistema avisa que no pudo enviar. Pídasela al encargado del sistema.
 \end{importante}
 
 \section{Envíos programados (solo el DIRECTORIO)}
 
-El DIRECTORIO puede hacer que el reporte llegue solo por correo ciertos días a cierta hora.
+El DIRECTORIO puede hacer que un reporte llegue solo por correo ciertos días a cierta hora, por ejemplo el resumen al contador cada lunes a las 8:00 AM.
 
-\captura[0.8]{reportes-nuevo-envio}{Nuevo envío programado}
-
+\conventana{0.32}{reportes-nuevo-envio}{Nuevo envío programado}{%
 \begin{enumerate}
-  \item Presione \boton{Envíos programados} y luego \boton{Nuevo envío}.
-  \item Escriba el \textbf{correo de destino}, elija el \textbf{reporte}, marque los \textbf{días de la semana} y la \textbf{hora}.
+  \item Presione \boton{Envíos programados}, arriba a la derecha, y luego \boton{Nuevo envío}.
+  \item Escriba el \campo{Correo de destino}.
+  \item Elija el \campo{Reporte}: Resumen de ventas o Ventas detalladas.
+  \item Marque los \campo{Días de la semana} en que sale (\boton{Todos los días} los marca todos).
+  \item Elija la \campo{Hora}, con AM o PM.
   \item Presione \boton{Guardar}.
 \end{enumerate}
 
-\captura[0.8]{reportes-programados}{Lista de envíos programados}
+Cada envío trae las ventas de \textbf{todos los empleados} cobradas \textbf{desde el envío anterior} hasta ese momento, así no se repite ni se pierde ninguna venta. El primero trae las ventas desde el turno anterior que le habría tocado.
+}
 
-En la lista, cada envío muestra cuándo salió el último y cuándo sale el próximo. Con sus botones se puede:
+\captura[0.6]{reportes-programados}{Lista de envíos programados}
 
-\begin{itemize}
-  \item \textbf{Pausar} o reanudar con el interruptor.
-  \item \textbf{Enviar ahora}, sin esperar el día y la hora.
-  \item \textbf{Modificar} con el lápiz o \textbf{borrar} con el tacho.
-\end{itemize}
-
-Cómo funciona:
+En la lista, cada envío muestra el destino, el reporte, los días y la hora, cuándo salió el último y cuándo sale el próximo. Con sus botones se puede:
 
 \begin{itemize}
-  \item Cada envío trae las ventas \textbf{desde el envío anterior} hasta ese momento.
-  \item Si la computadora estaba apagada a esa hora, el reporte sale apenas se enciende el sistema y en la lista figura como \textit{Enviado al encender}.
-  \item Si el correo falla, el sistema lo vuelve a intentar solo a los 15 minutos.
+  \item \textbf{Pausar} o reanudar con el interruptor. Uno pausado no sale hasta reanudarlo.
+  \item \textbf{Enviar ahora}, sin esperar el día y la hora; no cambia el próximo envío.
+  \item \textbf{Modificar} con el lápiz o \textbf{borrar} con el tacho (pide confirmación).
 \end{itemize}
+
+\paragraph{Si la computadora estaba apagada} El reporte sale apenas se enciende el sistema y en la lista figura como \textit{Enviado al encender}. Si se perdieron varios turnos, sale uno solo con todas las ventas desde el último envío.
+
+\paragraph{Si el correo falla} La lista muestra el error y el sistema lo vuelve a intentar solo a los 15 minutos.
