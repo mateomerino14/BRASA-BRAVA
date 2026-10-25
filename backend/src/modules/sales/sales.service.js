@@ -22,7 +22,6 @@ const cashOnly = {error: 'El monto recibido solo se usa con pago en efectivo', s
 const money = (value) => Number(value).toFixed(2).replace('.', ',');
 
 const CENT = 0.005;
-const invalidWaiter = {error: 'Elija un mesero activo', status: 400};
 const invalidExclusion = {error: 'Hay ingredientes quitados que no son de la receta del producto', status: 400};
 
 // Error de un producto o promoción que no se puede vender hoy
@@ -98,7 +97,7 @@ const toDetail = (row, exclusions, combos) => {
     listos: row.listos,
     subtotal: round2(precioUnitario * row.cantidad),
     consumo: row.consumo,
-    mesero: {id: row.id_mesero, nombre: fullName(row.mesero_nombre, row.mesero_apellido)},
+    cajero: row.cajero,
     creadoEn: row.creado_en,
     productos: (combos.get(row.id_promocion) ?? []).map((item) => ({nombre: item.nombre, cantidad: item.cantidad})),
     exclusiones: (exclusions.get(row.id_detalle) ?? []).map((item) => ({
@@ -132,7 +131,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
               total: Number(row.total),
               unidades: row.unidades ?? 0,
               listos: row.listos ?? 0,
-              mesero: fullName(row.mesero_nombre, row.mesero_apellido),
+              cajero: row.cajero,
               abiertaEn: row.abierta_en,
               esperaDesde: waiting.get(row.id_venta) ?? null,
             };
@@ -217,11 +216,6 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     };
   };
 
-  // Empleados que pueden atender mesas
-  const waiters = async () => ({
-    meseros: (await repository.waiters()).map((row) => ({id: row.id_empleado, nombre: fullName(row.nombre, row.apellido), cargo: row.cargo})),
-  });
-
   // Venta abierta de una mesa con todas sus líneas
   const saleOf = async (idMesa) => {
     const row = await repository.openSale(idMesa);
@@ -242,11 +236,9 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
       cajero: row.cajero,
       modificado: row.modificado,
       modificadoPor: row.modificado_por,
-      mesero: {id: row.id_mesero, nombre: fullName(row.mesero_nombre, row.mesero_apellido)},
       comandas: shipments.map((item) => ({
         envio: item.numero,
         cajero: item.cajero,
-        mesero: {id: item.id_mesero, nombre: fullName(item.mesero_nombre, item.mesero_apellido)},
         creadoEn: item.creado_en,
       })),
       detalles: details.map((item) => toDetail(item, exclusions, combos)),
@@ -355,13 +347,10 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
   };
 
   // Registra un envío de la mesa y abre la venta si está libre
-  const addOrder = async (idMesa, {idMesero, items}, user) => {
+  const addOrder = async (idMesa, {items}, user) => {
     const table = await repository.findTable(idMesa);
     if (!table) {
       return tableNotFound;
-    }
-    if (!(await repository.waiters()).some((row) => row.id_empleado === idMesero)) {
-      return invalidWaiter;
     }
     const {lines, problem, recipes, promotionItems} = await priceLines(items);
     if (problem) {
@@ -376,16 +365,16 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
       let idVenta = (await tx.openSale(idMesa))?.id_venta;
       let opened = false;
       if (!idVenta) {
-        idVenta = await tx.insertSale({idMesa, idMesero, ...cashier, abiertaEn: now});
+        idVenta = await tx.insertSale({idMesa, ...cashier, abiertaEn: now});
         opened = true;
       }
       const envio = await tx.addShipment(idVenta, amount);
-      await tx.insertShipment({idVenta, numero: envio, ...cashier, idMesero, creadoEn: now});
+      await tx.insertShipment({idVenta, numero: envio, ...cashier, creadoEn: now});
       if (envio > 1) {
         await tx.markModified(idVenta, cashier.cajero);
       }
       for (const line of lines) {
-        const idDetalle = await tx.insertDetail({...line, idVenta, envio, idMesero, creadoEn: now});
+        const idDetalle = await tx.insertDetail({...line, idVenta, envio, creadoEn: now});
         for (const exclusion of line.exclusiones) {
           await tx.insertExclusion(idDetalle, exclusion);
         }
@@ -434,7 +423,6 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
         estado: row.estado,
         mesa: row.mesa,
         seccion: row.seccion,
-        mesero: fullName(row.mesero_nombre, row.mesero_apellido),
         cajero: row.cajero,
         cobrador: row.cobrador,
         modificadoPor: row.modificado_por,
@@ -561,5 +549,5 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     };
   };
 
-  return {floor, catalog, waiters, getTable, addOrder, checkout, receipt, registerPrint, todaySales};
+  return {floor, catalog, getTable, addOrder, checkout, receipt, registerPrint, todaySales};
 };

@@ -39,7 +39,7 @@ describe('Caja: lo que falta en cocina y marcar listos', () => {
     expect(res.body.envios.map((item) => item.mesa)).toEqual(['Terraza 1', 'Mesa 2']);
     expect(res.body.summary).toEqual({preparacion: 2, listos: 0, unidadesPendientes: 6});
     const terraza = shipment(res.body, 'Terraza 1');
-    expect(terraza).toMatchObject({envio: 1, seccion: 'Terraza', mesero: 'Carlos Mendoza', unidades: 4, listas: 1, estado: 'preparacion', modificadoPor: null});
+    expect(terraza).toMatchObject({envio: 1, seccion: 'Terraza', cajero: 'a.romero', unidades: 4, listas: 1, estado: 'preparacion', modificadoPor: null});
     expect(terraza.lineas.find((item) => item.nombre === 'Jugo de Naranja')).toMatchObject({cantidad: 1, listos: 1});
     const mesa2 = shipment(res.body, 'Mesa 2');
     expect(mesa2.lineas[0]).toMatchObject({nombre: 'Hamburguesa Clásica', exclusiones: [{producto: 'Hamburguesa Clásica', insumo: 'Tomate'}]});
@@ -78,8 +78,7 @@ describe('Caja: lo que falta en cocina y marcar listos', () => {
     const cajero = await loginAs(ctx.app, 'a.romero');
     const mesa2 = (await ctx.db.query("SELECT id_mesa FROM mesa WHERE nombre = 'Mesa 2'")).rows[0].id_mesa;
     const gaseosa = (await ctx.db.query("SELECT id_producto FROM producto WHERE nombre = 'Gaseosa 500 ml'")).rows[0].id_producto;
-    const mesero = (await ctx.db.query("SELECT id_empleado FROM empleado WHERE alias = 'c.mendoza'")).rows[0].id_empleado;
-    await api('post', `/api/sales/tables/${mesa2}/orders`, cajero).send({idMesero: mesero, items: [{tipo: 'producto', id: gaseosa, cantidad: 1, consumo: 'llevar'}]});
+    await api('post', `/api/sales/tables/${mesa2}/orders`, cajero).send({items: [{tipo: 'producto', id: gaseosa, cantidad: 1, consumo: 'llevar'}]});
     const res = await api('get', '/api/kitchen/orders');
     const second = res.body.envios.find((item) => item.mesa === 'Mesa 2' && item.envio === 2);
     expect(second).toMatchObject({modificadoPor: 'a.romero', unidades: 1, listas: 0, lineas: [expect.objectContaining({nombre: 'Gaseosa 500 ml', consumo: 'llevar'})]});

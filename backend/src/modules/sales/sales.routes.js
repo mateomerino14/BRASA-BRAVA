@@ -25,7 +25,6 @@ export const createSalesRouter = ({db, config, clock}) => {
 
   router.get('/floor', controller.floor);
   router.get('/catalog', controller.catalog);
-  router.get('/waiters', controller.waiters);
   router.get('/tables/:idMesa', byTable, controller.getTable);
   router.post('/tables/:idMesa/orders', byTable, validate(orderSchema), controller.addOrder);
   router.post('/tables/:idMesa/checkout', byTable, validate(checkoutSchema), controller.checkout);

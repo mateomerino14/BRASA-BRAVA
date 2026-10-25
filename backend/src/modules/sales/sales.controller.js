@@ -8,9 +8,6 @@ export const createSalesController = (service) => ({
   // Productos y promociones que se pueden vender hoy
   catalog: async (_req, res) => res.json(await service.catalog()),
 
-  // Empleados que pueden atender mesas
-  waiters: async (_req, res) => res.json(await service.waiters()),
-
   // Ventas cobradas hoy y totales por método de pago
   todaySales: async (_req, res) => res.json(await service.todaySales()),
 

@@ -209,9 +209,8 @@ tests/                       Pruebas de la API y unitarias
 | `PATCH` | `/api/promotions/:id/status` | Da de baja o reactiva una promoción |
 | `PUT` | `/api/promotions/:id/image` | Sube o reemplaza la foto |
 | `DELETE` | `/api/promotions/:id/image` | Quita la foto |
-| `GET` | `/api/sales/floor` | Secciones activas con sus mesas, la venta abierta de cada una (total, unidades, mesero, hora de apertura y `esperaDesde`, la hora del envío pendiente más antiguo o `null` si cocina ya sacó todo) y `summary` (`mesas`, `ocupadas`, `libres`, `porCobrar`) |
+| `GET` | `/api/sales/floor` | Secciones activas con sus mesas, la venta abierta de cada una (total, unidades, cajero que la abrió, hora de apertura y `esperaDesde`, la hora del envío pendiente más antiguo o `null` si cocina ya sacó todo) y `summary` (`mesas`, `ocupadas`, `libres`, `porCobrar`) |
 | `GET` | `/api/sales/catalog` | Lo que se vende hoy: categorías, productos activos con disponibilidad, porciones e ingredientes de su receta, y promociones vigentes hoy con su precio y productos |
-| `GET` | `/api/sales/waiters` | Empleados activos que pueden atender mesas (su cargo tiene acceso a Caja) |
 | `GET` | `/api/sales/tables/:idMesa` | Mesa con su sección y su venta abierta (`null` si está libre) con todas sus líneas agrupables por envío |
 | `POST` | `/api/sales/tables/:idMesa/orders` | Registra un envío a cocina: abre la venta si la mesa está libre o suma las líneas a la abierta, y descuenta el stock. Responde `nueva`, el número de `envio` y `sinStock` (insumos que no alcanzaron) |
 | `POST` | `/api/sales/tables/:idMesa/checkout` | Cobra la venta abierta de la mesa: `pagos` (`efectivo`, `qr` o ambos, con `monto`) y `recibido` opcional (efectivo entregado). Responde el `ticket` |
@@ -222,7 +221,7 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/api/catalog/products/:id` | Producto con su receta: cantidad por porción, stock, nivel y porciones que alcanza cada insumo |
 | `GET` | `/api/settings` | Ajustes del local (`enlaceImpuestos`); cualquier sesión |
 | `PUT` | `/api/settings` | Cambia el enlace a la página de impuestos (permiso `administracion`) |
-| `GET` | `/api/kitchen/orders` | (permiso `caja`) Envíos de las ventas abiertas (mesa, sección, mesero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
+| `GET` | `/api/kitchen/orders` | (permiso `caja`) Envíos de las ventas abiertas (mesa, sección, cajero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
 | `PATCH` | `/api/kitchen/lines/:id` | Cambia las unidades listas de una línea: `accion` = `sumar`, `restar`, `todos` o `ninguno`. Responde la lista actualizada |
 | `PATCH` | `/api/kitchen/shipments/:idVenta/:envio` | Marca todo el envío como listo (`todos`) o lo devuelve a preparación (`ninguno`) |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
@@ -301,12 +300,12 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 
 - Una mesa ocupada tiene una sola venta abierta: un nuevo envío a esa mesa se suma a la misma venta, no crea otra. El id de la venta es su número correlativo y nunca retrocede.
 - Dos envíos al mismo tiempo para una mesa libre terminan en una sola venta: la fila de la mesa se bloquea durante la transacción, un índice único impide dos ventas abiertas y, si aun así chocan, el segundo se reintenta sumándose a la venta del primero.
-- Cada línea guarda el nombre y el precio del momento (si el producto cambia de precio después, la venta no cambia), la cantidad (1 a 99), el consumo (`local` o `llevar`), el número de envío y el mesero de ese envío. La venta guarda además el mesero que abrió la mesa y el cajero de la sesión (o el DIRECTORIO).
+- Cada línea guarda el nombre y el precio del momento (si el producto cambia de precio después, la venta no cambia), la cantidad (1 a 99), el consumo (`local` o `llevar`), y el número de envío. No hay mesero: la venta y cada envío guardan el cajero de la sesión que lo registró (o el DIRECTORIO). La migración 016 quitó las columnas de mesero.
 - El precio lo calcula siempre el servidor: el de cada producto y, en promociones, el mismo cálculo que la pantalla de promociones (`modules/promotions/promotionRules.js`). Una promoción se vende solo si está vigente en ese momento (fechas, día y horario) y todos sus productos se pueden vender.
 - Se pueden quitar ingredientes solo de la receta de cada producto; en un combo, de la receta de cada producto del combo. No hay extras con costo: lo adicional se vende como un producto más (por ejemplo, de "Guarniciones y Extras").
 - No se venden productos agotados ni de baja. El stock **no bloquea** la venta: el catálogo avisa "Sin stock" o "Quedan N", pero el pedido se registra igual.
 - No se puede dar de baja una sección ni quitar una mesa que tenga una venta abierta.
-- Cada envío es una comanda (`venta_envio`): guarda su número, el cajero, el mesero y la hora. La venta trae `comandas` y, en las líneas de promoción, los `productos` del combo. Desde el segundo envío la venta queda `modificado` con `modificadoPor` = cajero del último envío.
+- Cada envío es una comanda (`venta_envio`): guarda su número, el cajero que lo registró y la hora. La venta trae `comandas` y, en las líneas de promoción, los `productos` del combo. Desde el segundo envío la venta queda `modificado` con `modificadoPor` = cajero del último envío.
 - **Stock**: cada envío descuenta la receta de cada producto por su cantidad (en combos, la de cada producto del combo), sin los ingredientes quitados, con un movimiento `venta` en el historial (`Venta Nº 7 · Mesa 2 · envío 2`). Si no alcanza, el insumo queda en 0, el movimiento dice "(stock insuficiente)" y la respuesta lo avisa en `sinStock`, pero la venta se registra igual. Los insumos dados de baja no se tocan. Los insumos se bloquean en orden de id durante la transacción para que dos envíos no se pisen.
 
 ### Reglas del cobro

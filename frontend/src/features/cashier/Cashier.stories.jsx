@@ -26,10 +26,10 @@ const SECTION = {
   nombre: 'Salón principal',
   mesas: [
     table(1, 'Mesa 1'),
-    table(2, 'Mesa 2', {id: 7, total: 160, unidades: 5, mesero: 'Carlos Mendoza', abiertaEn: minutesAgo(25), esperaDesde: minutesAgo(25)}),
+    table(2, 'Mesa 2', {id: 7, total: 160, unidades: 5, cajero: 'a.romero', abiertaEn: minutesAgo(25), esperaDesde: minutesAgo(25)}),
     table(3, 'Mesa 3'),
-    table(4, 'Mesa 4', {id: 9, total: 58, unidades: 1, mesero: 'Andrea Romero', abiertaEn: minutesAgo(75), esperaDesde: null}),
-    table(5, 'Mesa 5', {id: 10, total: 35, unidades: 1, mesero: 'Andrea Romero', abiertaEn: minutesAgo(8), esperaDesde: minutesAgo(8)}),
+    table(4, 'Mesa 4', {id: 9, total: 58, unidades: 1, cajero: 'a.romero', abiertaEn: minutesAgo(75), esperaDesde: null}),
+    table(5, 'Mesa 5', {id: 10, total: 35, unidades: 1, cajero: 'a.romero', abiertaEn: minutesAgo(8), esperaDesde: minutesAgo(8)}),
     ...Array.from({length: 9}, (_, index) => table(6 + index, `Mesa ${6 + index}`)),
   ],
 };
@@ -60,17 +60,16 @@ export const TarjetasDelMenu = {
 };
 
 const tomate = {idProducto: 11, producto: 'Hamburguesa Clásica', idInsumo: 4, insumo: 'Tomate'};
-const mesero = {id: 1, nombre: 'Carlos Mendoza'};
 
 const ORDER = {
   mesa: {id: 2, nombre: 'Mesa 2', capacidad: 4, seccion: {id: 1, nombre: 'Salón principal'}},
   venta: {
-    id: 7, numero: 7, total: 140, envios: 2, abiertaEn: minutesAgo(25), cajero: 'a.romero', mesero, modificado: true, modificadoPor: 'admin',
-    comandas: [{envio: 1, cajero: 'a.romero', mesero, creadoEn: minutesAgo(25)}, {envio: 2, cajero: 'admin', mesero, creadoEn: minutesAgo(5)}],
+    id: 7, numero: 7, total: 140, envios: 2, abiertaEn: minutesAgo(25), cajero: 'a.romero', modificado: true, modificadoPor: 'admin',
+    comandas: [{envio: 1, cajero: 'a.romero', creadoEn: minutesAgo(25)}, {envio: 2, cajero: 'admin', creadoEn: minutesAgo(5)}],
     detalles: [
-      {id: 1, envio: 1, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, listos: 1, consumo: 'local', mesero, creadoEn: minutesAgo(25), productos: [], exclusiones: [tomate]},
-      {id: 2, envio: 1, tipo: 'promocion', nombre: 'Combo Brava', precioUnitario: 70, cantidad: 1, subtotal: 70, listos: 0, consumo: 'local', mesero, creadoEn: minutesAgo(25), productos: [{nombre: 'Doble Brava', cantidad: 1}, {nombre: 'Gaseosa 500 ml', cantidad: 1}], exclusiones: []},
-      {id: 3, envio: 2, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, listos: 0, consumo: 'llevar', mesero, creadoEn: minutesAgo(5), productos: [], exclusiones: [tomate]},
+      {id: 1, envio: 1, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, listos: 1, consumo: 'local', cajero: 'a.romero', creadoEn: minutesAgo(25), productos: [], exclusiones: [tomate]},
+      {id: 2, envio: 1, tipo: 'promocion', nombre: 'Combo Brava', precioUnitario: 70, cantidad: 1, subtotal: 70, listos: 0, consumo: 'local', cajero: 'a.romero', creadoEn: minutesAgo(25), productos: [{nombre: 'Doble Brava', cantidad: 1}, {nombre: 'Gaseosa 500 ml', cantidad: 1}], exclusiones: []},
+      {id: 3, envio: 2, tipo: 'producto', nombre: 'Hamburguesa Clásica', precioUnitario: 35, cantidad: 1, subtotal: 35, listos: 0, consumo: 'llevar', cajero: 'admin', creadoEn: minutesAgo(5), productos: [], exclusiones: [tomate]},
     ],
   },
   lines: [
@@ -79,10 +78,6 @@ const ORDER = {
   ],
   units: 5,
   totals: {registered: 140, pending: 100, total: 240},
-  waiters: [{id: 1, nombre: 'Carlos Mendoza', cargo: 'Mesero'}, {id: 2, nombre: 'Andrea Romero', cargo: 'Cajero'}],
-  idMesero: '1',
-  meseroError: '',
-  changeWaiter: fn(),
   changeQuantity: fn(),
   editLine: fn(),
   remove: fn(),
@@ -116,7 +111,7 @@ export const AutorizarReimpresion = {
     />
   ),
 };
-export const PedidoNuevoVacio = {render: () => <div className="max-w-md"><OrderPanel order={{...ORDER, venta: null, lines: [], units: 0, totals: {registered: 0, pending: 0, total: 0}, idMesero: ''}} now={NOW} /></div>};
+export const PedidoNuevoVacio = {render: () => <div className="max-w-md"><OrderPanel order={{...ORDER, venta: null, lines: [], units: 0, totals: {registered: 0, pending: 0, total: 0}}} now={NOW} /></div>};
 
 const picker = (kind, item) => ({open: true, session: 1, kind, item, line: null});
 
@@ -139,7 +134,7 @@ const CHECKOUT = {
 export const Cobro = {render: () => <CheckoutModal checkout={CHECKOUT} venta={ORDER.venta} mesa={ORDER.mesa} />};
 
 const TICKET = {
-  numero: 7, mesa: 'Mesa 2', seccion: 'Salón principal', mesero: 'Carlos Mendoza', cajero: 'a.romero', cobrador: 'admin', modificadoPor: 'admin', total: 140,
+  numero: 7, mesa: 'Mesa 2', seccion: 'Salón principal', cajero: 'a.romero', cobrador: 'admin', modificadoPor: 'admin', total: 140,
   lineas: [
     {nombre: 'Hamburguesa Clásica', consumo: 'local', precioUnitario: 35, cantidad: 1, subtotal: 35},
     {nombre: 'Combo Brava', consumo: 'local', precioUnitario: 70, cantidad: 1, subtotal: 70},
