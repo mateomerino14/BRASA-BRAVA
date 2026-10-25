@@ -9,7 +9,8 @@ export const loginAs = async (page, alias, password = DEMO_PASSWORD) => {
   await page.getByLabel('Usuario', {exact: true}).fill(alias);
   await page.getByLabel('Contraseña', {exact: true}).fill(password);
   await page.getByRole('button', {name: 'Ingresar'}).click();
-  await expect(page.getByRole('button', {name: 'Cerrar sesión'})).toBeVisible();
+  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page.getByRole('main')).toBeVisible();
 };
 
 // Inicia sesión en modo DIRECTORIO
