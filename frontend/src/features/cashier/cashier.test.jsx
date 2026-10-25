@@ -168,7 +168,7 @@ describe('Caja: armado del pedido', () => {
     expect(within(lines[0]).getByText('Sin tomate')).toBeInTheDocument();
     expect(within(lines[0]).getByText('Para llevar')).toBeInTheDocument();
     expect(within(lines[0]).getByLabelText('Cantidad de Hamburguesa Clásica')).toHaveValue('3');
-    expect(within(lines[0]).getByText('Bs 105,00')).toBeInTheDocument();
+    expect(within(lines[0]).getByText('105,00')).toBeInTheDocument();
     expect(within(lines[2]).getByText('Doble Brava sin queso cheddar')).toBeInTheDocument();
     expect(within(panel()).getByText('5 u.')).toBeInTheDocument();
     expect(within(panel()).getByLabelText('Bs 210,00')).toBeInTheDocument();
@@ -185,7 +185,7 @@ describe('Caja: armado del pedido', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(within(panel()).getByText('Sin queso cheddar')).toBeInTheDocument();
     await user.click(within(panel()).getByRole('button', {name: 'Sumar cantidad de Doble Brava'}));
-    expect(within(within(panel()).getByRole('list', {name: 'Productos por registrar'})).getByText('Bs 116,00')).toBeInTheDocument();
+    expect(within(within(panel()).getByRole('list', {name: 'Productos por registrar'})).getByText('116,00')).toBeInTheDocument();
     await user.click(within(panel()).getByRole('button', {name: 'Quitar Doble Brava'}));
     expect(await within(panel()).findByText('Toque un producto del menú para agregarlo.')).toBeInTheDocument();
     expect(within(panel()).getByRole('button', {name: 'Enviar a cocina'})).toBeDisabled();
@@ -227,7 +227,8 @@ describe('Caja: armado del pedido', () => {
     expect(within(panel()).getByText(/^Envío 1 · \d{1,2}:\d{2} (AM|PM) · Registró: a\.romero$/)).toBeInTheDocument();
     expect(within(panel()).getByText('Sin tomate')).toBeInTheDocument();
     expect(within(panel()).getByText('Listo')).toBeInTheDocument();
-    expect(within(panel()).getByText('0/1 listos')).toBeInTheDocument();
+    expect(within(panel()).getByText('0 de 1 listos')).toBeInTheDocument();
+    expect(within(panel()).getAllByText('Local').length).toBeGreaterThan(0);
 
     await addItem(user, 'Gaseosa 500 ml', {times: 1});
     expect(within(panel()).getByLabelText('Bs 125,00')).toBeInTheDocument();
