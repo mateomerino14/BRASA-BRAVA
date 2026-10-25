@@ -1,6 +1,7 @@
 export const MODULE_DESCRIPTIONS = {
   familia: 'Catálogo de productos y promociones',
   caja: 'Mesas, pedidos, cocina y cobro',
+  reportes: 'Ventas por fechas, PDF y correo',
   productos: 'Registrar y modificar el menú',
   secciones: 'Salones y mesas del local',
   stock: 'Ingredientes y bebidas en el local',

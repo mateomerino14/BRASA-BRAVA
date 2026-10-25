@@ -125,6 +125,7 @@ src/
 │   ├── promotions/            Promociones: combos con vigencia
 │   ├── sales/                 Caja: plano de mesas, catálogo del día y registro de pedidos
 │   ├── kitchen/               Lo que falta en cocina y marcar listos (lo usa Caja)
+│   ├── reports/               Reportes de ventas: resumen y detalladas, PDF, correo y envíos programados
 │   ├── settings/              Ajustes del local (enlace a la página de impuestos)
 │   ├── catalog/               Familia: catálogo del local con receta y stock
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
@@ -219,6 +220,14 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/api/sales/today` | Ventas cobradas hoy (día del local) con sus pagos y `resumen` (`cantidad`, `total`, `efectivo`, `qr`) |
 | `GET` | `/api/catalog` | Catálogo de Familia: categorías activas con sus subcategorías, productos activos (disponibilidad y porciones) y promociones activas que no vencieron (`vigencia`, precio, productos), primero las de hoy |
 | `GET` | `/api/catalog/products/:id` | Producto con su receta: cantidad por porción, stock, nivel y porciones que alcanza cada insumo |
+| `GET` | `/api/reports/employees` | Empleados (activos o de baja) para filtrar el reporte |
+| `GET` | `/api/reports/sales` | Reporte de ventas cobradas: `desde`, `hasta` (YYYY-MM-DD, días del local), `empleado` (`todos`, `directorio` o id) y `tipo` (`resumen` o `detalle`). Responde `resumen` (cantidad, total, efectivo, QR, promedio), `dias` y `ventas` con sus envíos, líneas, lo quitado, pagos e impresiones |
+| `GET` | `/api/reports/sales.pdf` | El mismo reporte en PDF para descargar |
+| `POST` | `/api/reports/sales/email` | Envía el PDF por correo (Brevo) al `correo` indicado |
+| `GET` `POST` | `/api/reports/schedules` | Envíos programados (solo el DIRECTORIO): `correo`, `tipo`, `dias` (7 dígitos de domingo a sábado) y `hora` HH:MM |
+| `PUT` `DELETE` | `/api/reports/schedules/:id` | Modifica o borra un envío programado |
+| `PATCH` | `/api/reports/schedules/:id/status` | Pausa o reactiva un envío programado |
+| `POST` | `/api/reports/schedules/:id/send` | Envía ahora; el próximo trae desde este envío |
 | `GET` | `/api/settings` | Ajustes del local (`enlaceImpuestos`); cualquier sesión |
 | `PUT` | `/api/settings` | Cambia el enlace a la página de impuestos (permiso `administracion`) |
 | `GET` | `/api/kitchen/orders` | (permiso `caja`) Envíos de las ventas abiertas (mesa, sección, cajero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
@@ -316,6 +325,14 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - El ticket junta las líneas iguales (mismo nombre, precio y consumo) y lleva todo lo acumulado de la mesa, los pagos, lo recibido, el cambio y "MODIFICADO POR" si hubo más de un envío.
 - "Hoy" para las ventas del día es el día del local (`TIMEZONE`): se convierte a un rango UTC (`utils/calendar.js`, `localDayRange`).
 
+### Reportes
+
+- Solo cuentan las ventas **cobradas**, por la hora de cobro y en los días del local (`TIMEZONE`).
+- El filtro de empleado trae las ventas que esa persona abrió, a las que agregó un envío o que cobró; `directorio` trae las del DIRECTORIO.
+- El PDF (`pdfkit`) tiene dos formatos: **Resumen de ventas** (totales y una fila por día) y **Ventas detalladas** (totales y cada venta con sus envíos, productos, lo quitado, cómo se pagó y las impresiones del ticket).
+- Por correo sale con el PDF adjunto mediante la API de Brevo (`MAIL_DRIVER=brevo`).
+- **Envíos programados** (`reporte_programado`): el servidor revisa cada minuto y al arrancar. Si ya pasó un turno (día marcado a su hora) que no se atendió, envía el reporte con las ventas **desde el envío anterior** hasta ese momento; si el sistema estaba apagado, sale al encenderlo y queda marcado como atrasado. Un turno se atiende una sola vez aunque se hayan perdido varios. Si el correo falla, se reintenta a los 15 minutos.
+
 ### Impresiones del ticket
 
 - Cada impresión del ticket de cobro queda en `ticket_impresion` con su número, quién la imprimió y la hora. Se numeran dentro de una transacción con la venta bloqueada.
@@ -339,6 +356,7 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 | Home | `home` (todos los cargos) |
 | Familia, Caja (con marcar listos de cocina) | `familia`, `caja` |
 | Administración | `productos`, `secciones`, `stock`, `categorias`, `promociones`, `empleados`, `cargos` |
+| Reportes | `reportes` (la migración 017 lo da a los cargos con `administracion`) |
 | Enlace de impuestos en Caja | `administracion` |
 
 ## Sesión y seguridad

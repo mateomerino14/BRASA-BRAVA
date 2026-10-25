@@ -11,6 +11,7 @@ export const SCREENS = Object.freeze([
   'promociones',
   'empleados',
   'cargos',
+  'reportes',
 ]);
 
 // Pantallas que se marcan en un cargo (home lo tienen todos)

@@ -42,11 +42,11 @@ describe('Gestión de cargos', () => {
     await user.click(within(group).getAllByRole('button', {name: 'Marcar todas'})[0]);
     expect(within(group).getByRole('checkbox', {name: /^Caja/})).toBeChecked();
     await user.click(within(group).getByRole('checkbox', {name: /Inventario/}));
-    expect(within(dialog).getByText('marcadas', {exact: false})).toHaveTextContent('3 de 10 marcadas');
+    expect(within(dialog).getByText('marcadas', {exact: false})).toHaveTextContent('4 de 11 marcadas');
     await user.click(within(dialog).getByRole('button', {name: 'Registrar'}));
 
     expect(await screen.findByText('Se registró el cargo Bartender')).toBeInTheDocument();
-    expect(backend.calls.saved[0]).toEqual({nombre: 'Bartender', pantallas: ['familia', 'caja', 'stock']});
+    expect(backend.calls.saved[0]).toEqual({nombre: 'Bartender', pantallas: ['familia', 'caja', 'reportes', 'stock']});
   });
 
   it('modifica un cargo con sus pantallas precargadas y avisa a quiénes afecta', async () => {

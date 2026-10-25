@@ -1,4 +1,4 @@
-import {Check, CircleX, HandCoins, KeyRound, ListChecks, LogIn, Mail, Plus, Printer, RotateCw, Save, Send, Trash2, UserRound} from 'lucide-react';
+import {CalendarClock, Check, CircleX, Download, Eye, FileChartColumn, HandCoins, KeyRound, ListChecks, LogIn, Mail, Plus, Printer, RotateCw, Save, Send, Trash2, UserRound} from 'lucide-react';
 
 // Ícono fijo de cada acción: la misma acción lleva el mismo ícono en todo el sistema
 export const ACTION_ICONS = {
@@ -17,4 +17,8 @@ export const ACTION_ICONS = {
   password: KeyRound,
   email: Mail,
   employee: UserRound,
+  report: FileChartColumn,
+  download: Download,
+  view: Eye,
+  schedule: CalendarClock,
 };
