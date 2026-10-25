@@ -1,4 +1,4 @@
-import {localDayRange} from '../../utils/calendar.js';
+import {localDayRange, localToday} from '../../utils/calendar.js';
 import {buildSalesReport} from './reportBuilder.js';
 import {renderReportPdf} from './reportPdf.js';
 import {dateTime, dayMonthYear, money} from './reportFormat.js';
@@ -8,10 +8,13 @@ const TITLES = {resumen: 'Resumen de ventas', detalle: 'Ventas detalladas'};
 const scheduleNotFound = {error: 'El envío programado no existe', status: 404};
 const onlyDirectorio = {error: 'Solo el DIRECTORIO programa envíos', status: 403};
 const employeeNotFound = {error: 'El empleado no existe', status: 400};
+const MS_PER_MINUTE = 60_000;
 // Un envío que falló se reintenta recién después de este tiempo
-const RETRY_MS = 15 * 60000;
+const RETRY_MS = 15 * MS_PER_MINUTE;
 // Un turno atendido después de este tiempo se marca como enviado al encender
-const LATE_MS = 10 * 60000;
+const LATE_MS = 10 * MS_PER_MINUTE;
+// Largo máximo del error guardado de un envío fallido
+const MAX_ERROR_LENGTH = 200;
 
 // Período legible de un rango de fechas: "20/10/2026 al 23/10/2026" o un solo día
 const datesText = (desde, hasta) => {
@@ -169,7 +172,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
       periodo: `${dateTime(startDate, timeZone)} al ${dateTime(now, timeZone)}`,
       generadoPor: 'envío programado',
     });
-    await mail(row.correo, result, fileName(row.tipo, startDate.toISOString().slice(0, 10), now.toISOString().slice(0, 10)));
+    await mail(row.correo, result, fileName(row.tipo, localToday(startDate, timeZone).date, localToday(now, timeZone).date));
     let atrasado = false;
     if (turno && !manual) {
       atrasado = now.getTime() - turno.getTime() > LATE_MS;
@@ -199,7 +202,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
       }
       catch (problem) {
         logger.error?.(problem);
-        await repository.markFailed(row.id_programado, {intentoEn: now, error: String(problem.message).slice(0, 200)});
+        await repository.markFailed(row.id_programado, {intentoEn: now, error: String(problem.message).slice(0, MAX_ERROR_LENGTH)});
       }
     }
     return sent;
