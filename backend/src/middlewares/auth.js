@@ -24,3 +24,11 @@ export const authorize = (permission) => (req, _res, next) => {
   }
   return next(forbidden());
 };
+
+// Permite el paso solo al DIRECTORIO
+export const requireDirectorio = (req, _res, next) => {
+  if (req.user?.isDirectorio) {
+    return next();
+  }
+  return next(forbidden('Solo el DIRECTORIO puede hacer esto'));
+};
