@@ -19,6 +19,7 @@ export const USERS = {
       'promociones',
       'empleados',
       'cargos',
+      'reportes',
     ],
   },
   directorio: {
@@ -28,7 +29,7 @@ export const USERS = {
     cargo: 'Directorio',
     fotoUrl: null,
     isDirectorio: true,
-    permissions: ['home', 'familia', 'caja', 'administracion', 'productos', 'secciones', 'stock', 'categorias', 'promociones', 'empleados', 'cargos'],
+    permissions: ['home', 'familia', 'caja', 'administracion', 'productos', 'secciones', 'stock', 'categorias', 'promociones', 'empleados', 'cargos', 'reportes'],
   },
   cajero: {
     id: 2,
@@ -41,8 +42,15 @@ export const USERS = {
   },
 };
 
-const json = (status, body) =>
-  Promise.resolve({ok: status < 400, status, json: () => Promise.resolve(body)});
+// Respuesta falsa; "file" (opcional) simula una descarga con sus cabeceras y su contenido
+const json = (status, body, file) =>
+  Promise.resolve({
+    ok: status < 400,
+    status,
+    json: () => Promise.resolve(body),
+    headers: {get: (name) => file?.headers?.[name.toLowerCase()] ?? null},
+    blob: () => Promise.resolve(file?.blob ?? new Blob([])),
+  });
 
 // Los handlers reciben JSON ya parseado o el FormData tal cual (subida de archivos)
 const parseBody = (body) => {
@@ -79,8 +87,8 @@ export const mockApi = (handlers = {}) => {
     if (!handler) {
       return json(404, {message: `Sin mock para ${key}`});
     }
-    const [status, body] = handler(parseBody(options.body), query);
-    return json(status, body);
+    const [status, body, file] = handler(parseBody(options.body), query);
+    return json(status, body, file);
   });
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;

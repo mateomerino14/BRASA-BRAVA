@@ -1,4 +1,4 @@
-import {Boxes, Database, FolderTree, Link2, LayoutGrid, Package, Percent, ShieldCheck, ShoppingCart, UsersRound} from 'lucide-react';
+import {Boxes, Database, FileChartColumn, FolderTree, Link2, LayoutGrid, Package, Percent, ShieldCheck, ShoppingCart, UsersRound} from 'lucide-react';
 
 export {STATUS_OPTIONS} from '../../../config/lists';
 
@@ -15,6 +15,7 @@ export const SCREEN_GROUPS = [
     screens: [
       {id: 'familia', label: 'Familia', hint: 'Consultar productos, recetas y stock', icon: Boxes},
       {id: 'caja', label: 'Caja', hint: 'Mesas, pedidos, cocina, cobro y autorizar reimpresiones', icon: ShoppingCart},
+      {id: 'reportes', label: 'Reportes', hint: 'Ventas por fechas, en PDF o por correo', icon: FileChartColumn},
     ],
   },
   {

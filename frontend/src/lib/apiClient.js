@@ -77,6 +77,41 @@ export const apiRequest = async (path, {method = 'GET', body, auth = true} = {})
   return data;
 };
 
+// Descarga un archivo de la API (por ejemplo un PDF) con la sesión; devuelve el contenido y su nombre
+export const apiDownload = async (path) => {
+  const headers = {};
+  const token = tokenStorage.get();
+  if (token) {
+    headers.authorization = `Bearer ${token}`;
+  }
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {headers});
+  }
+  catch {
+    throw new ApiError(0, 'No se pudo conectar con el servidor');
+  }
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, data.message ?? 'Ocurrió un error inesperado', data.details, data);
+  }
+  const disposition = response.headers.get('content-disposition') ?? '';
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? 'reporte.pdf';
+  return {blob: await response.blob(), filename};
+};
+
+// Guarda un archivo descargado en la computadora (en la app de escritorio abre el diálogo de guardar)
+export const saveFile = ({blob, filename}) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+};
+
 const toImageForm = (file) => {
   const form = new FormData();
   form.append('imagen', file);
