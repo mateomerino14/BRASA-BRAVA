@@ -395,3 +395,5 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/brasa_test npm tes
 ```
 
 `TEST_DATABASE_URL` borra y vuelve a crear el esquema de esa base: usar una base solo para pruebas.
+
+Los recorridos completos con la interfaz (Caja, Reportes, eliminación física) están en `e2e/` y usan esta misma API con PostgreSQL (ver `e2e/README.md`).

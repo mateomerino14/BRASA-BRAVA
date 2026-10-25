@@ -34,6 +34,7 @@ npm run storybook         # sistema de diseño en http://localhost:6006
 npm test                  # pruebas de backend, frontend y escritorio
 npm run test:e2e          # pruebas end to end en un navegador real (ver e2e/README.md)
 npm run lint              # revisión de estándares de código
+npm run lint:deadcode     # archivos, exportaciones y dependencias sin uso (knip)
 ```
 
 ### Usuarios de prueba
@@ -72,6 +73,7 @@ BRASA-BRAVA/
 ├── docs/manual/          Manual de usuario en LaTeX (ver docs/manual/README.md)
 ├── .github/workflows/    Pruebas automáticas en cada Pull Request
 ├── eslint.style.js       Reglas de formato compartidas
+├── knip.json             Configuración de la búsqueda de código sin uso
 └── reglas.md             Estándares de ramas, commits y codificación
 ```
 
@@ -108,4 +110,4 @@ BRASA-BRAVA/
 
 ## Ramas y pruebas automáticas
 
-El trabajo sigue el flujo `feature/<modulo>` → `develop` → `main` descrito en `reglas.md`. En cada Pull Request, GitHub Actions revisa los estándares de código, corre las pruebas del backend (con base en memoria y con PostgreSQL 16), las del frontend, compila la interfaz y Storybook, prueba el arranque de escritorio con PostgreSQL embebido y recorre el sistema en Chromium con las pruebas end to end.
+El trabajo sigue el flujo `feature/<modulo>` → `develop` → `main` descrito en `reglas.md`. En cada Pull Request, GitHub Actions revisa los estándares de código y que no haya código sin uso, corre las pruebas del backend (con base en memoria y con PostgreSQL 16), las del frontend, compila la interfaz y Storybook, prueba el arranque de escritorio con PostgreSQL embebido y recorre el sistema en Chromium con las pruebas end to end.

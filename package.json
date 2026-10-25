@@ -24,6 +24,11 @@
     "build": "npm run build -w frontend",
     "storybook": "npm run storybook -w frontend",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
-    "test:e2e": "npm run build -w frontend && npm run test:e2e -w e2e"
+    "test:e2e": "npm run build -w frontend && npm run test:e2e -w e2e",
+    "lint:deadcode": "knip"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "knip": "^5.88.1"
   }
 }
