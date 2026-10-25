@@ -1,58 +1,62 @@
 \chapter{Introducción}
 
-Este manual explica cómo usar el sistema de gestión de \textbf{Brasa Brava}: tomar los pedidos de cada mesa, mandarlos a cocina, cobrar, revisar las ventas y mantener al día el menú, el inventario y el personal.
+Este manual explica cómo usar el sistema de gestión de \textbf{Brasa Brava}, el que se usa en el local para tomar los pedidos de cada mesa, mandarlos a cocina, cobrar, revisar las ventas y mantener al día el menú, el inventario y el personal. Está pensado para leerse de corrido la primera vez y para consultarse después por partes: cada capítulo corresponde a una pantalla del menú.
 
 \section{Qué hace el sistema}
 
-\begin{itemize}
-  \item \textbf{Caja}: el plano de mesas, el armado del pedido, la comanda para cocina, lo que ya salió de cocina, el cobro y el ticket.
-  \item \textbf{Familia}: el catálogo del local con productos, recetas, porciones que alcanzan con el stock y promociones.
-  \item \textbf{Reportes}: las ventas cobradas por fechas y por empleado, en PDF o por correo, y los envíos automáticos.
-  \item \textbf{Administración}: productos, secciones y mesas, inventario, categorías, promociones, empleados y cargos.
-  \item \textbf{Eliminación física}: el borrado definitivo de lo que ya se dio de baja, solo para el DIRECTORIO.
-\end{itemize}
+\begin{tabla}{>{\titulos\bfseries}l X}
+  \encabezado{Pantalla} & \encabezado{Para qué sirve} \\
+  Página principal & Saludo, hora del local, resumen de caja y cocina del día y accesos rápidos \\
+  Familia & Catálogo del local: productos, recetas, porciones que alcanzan con el stock y promociones \\
+  Caja & Plano de mesas, armado del pedido, comanda para cocina, lo que ya salió, cobro y ticket \\
+  Reportes & Ventas cobradas por fechas y por empleado, en PDF o por correo, y envíos automáticos \\
+  Productos & Menú: precio, foto, categoría, disponibilidad y receta de cada producto \\
+  Secciones & Ambientes del local y sus mesas con su capacidad \\
+  Inventario & Insumos con su cantidad y su mínimo \\
+  Categorías & Categorías y subcategorías del menú \\
+  Promociones & Combos a precio fijo con sus fechas, días y horario \\
+  Empleados & Personal, sus datos, su cargo y su acceso al sistema \\
+  Cargos & Qué pantallas ve cada cargo \\
+  Eliminación física & Borrado definitivo de lo dado de baja (solo el DIRECTORIO) \\
+\end{tabla}
 
-\section{Cómo se usa}
+\section{Escritorio y web}
 
-El sistema funciona de dos formas con las mismas pantallas:
+El sistema funciona de dos formas con las mismas pantallas y los mismos datos de cada local:
 
 \begin{description}
-  \item[Aplicación de escritorio (Windows).] Se abre como cualquier programa. Trae su propia base de datos, así que no necesita internet. Es la que imprime directo en las ticketeras de cocina y de caja.
-  \item[Versión web.] Se abre en el navegador con la dirección que entregue el encargado del sistema. Imprime con el diálogo de impresión del navegador.
+  \item[Aplicación de escritorio (Windows).] Se abre como cualquier programa desde su ícono. Trae su propia base de datos, así que \textbf{no necesita internet} para vender. Es la que imprime directo en las ticketeras de cocina y de caja, sin abrir el diálogo de impresión. Al actualizarla no se pierde ningún dato.
+  \item[Versión web.] Se abre en el navegador con la dirección que entregue el encargado del sistema. Imprime con el diálogo de impresión del navegador, donde se elige la ticketera.
 \end{description}
 
-Las pantallas se adaptan a computadora, tablet y celular. En pantallas angostas el menú se abre con el botón de la barra naranja y las tablas se muestran como tarjetas (capítulo~\ref{cap:inicio}).
+Las pantallas se adaptan a computadora, tablet y celular. En pantallas angostas el menú se abre desde la barra naranja y las tablas se muestran como tarjetas (sección~\ref{sec:celular}).
 
 \section{Quién ve qué}
 
-Cada empleado tiene un \textbf{cargo}, y cada cargo tiene marcadas las pantallas que puede ver (sección~\ref{sec:cargos}). El \textbf{DIRECTORIO} es la cuenta del dueño: ve todo, programa los envíos automáticos de reportes y es el único que puede hacer la eliminación física.
+Cada empleado tiene un \textbf{cargo}, y cada cargo tiene marcadas las pantallas que puede ver (sección~\ref{sec:cargos}). Si una pantalla no aparece en el menú es porque el cargo no la tiene. El \textbf{DIRECTORIO} es la cuenta del dueño: ve todo, cambia su propia contraseña, programa los envíos automáticos de reportes y es el único que puede hacer la eliminación física.
 
-\begin{table}[H]
-  \centering
-  \caption{Pantallas de los cargos que trae el sistema al instalarse}
-  \rowcolors{2}{hueso}{white}
-  \begin{tabularx}{\linewidth}{lX}
-    \toprule
-    \textbf{Cargo} & \textbf{Pantallas} \\
-    \midrule
-    Administrador & Todas, menos la eliminación física \\
-    Cajero & Página principal, Familia y Caja \\
-    Mesero & Página principal, Familia y Caja \\
-    Cocinero & Página principal y Familia \\
-    DIRECTORIO & Todas, incluida la eliminación física \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
+\begin{tabla}{>{\titulos\bfseries}l X}
+  \encabezado{Cargo} & \encabezado{Pantallas con las que se instala el sistema} \\
+  Administrador & Todas, menos la eliminación física \\
+  Cajero & Página principal, Familia y Caja \\
+  Mesero & Página principal, Familia y Caja \\
+  Cocinero & Página principal y Familia \\
+  DIRECTORIO & Todas, incluida la eliminación física \\
+\end{tabla}
 
-\begin{consejo}
-Los cargos se pueden cambiar en \pantalla{Administración → Cargos}. Lo que se marque ahí es lo que verá cada empleado la próxima vez que entre.
-\end{consejo}
+Los cargos se pueden cambiar y se pueden crear otros (por ejemplo, Bartender o Delivery) en \pantalla{Administración \guilsinglright{} Cargos}.
 
-\section{Convenciones de este manual}
+\section{Cómo leer este manual}
 
 \begin{itemize}
   \item Los botones se escriben así: \boton{Enviar a cocina}.
-  \item Las pantallas y menús, así: \pantalla{Administración → Productos}.
-  \item Los montos están en bolivianos (Bs), con coma decimal: Bs 85,00.
-  \item Las fechas se muestran como día/mes/año y las horas en formato de 12 horas (AM/PM), en la hora del local.
+  \item Las pantallas y menús, así: \pantalla{Administración \guilsinglright{} Productos}.
+  \item Los campos de un formulario, en negrita: \campo{Correo de destino}.
+  \item Los montos están en bolivianos (Bs) con coma decimal: Bs 85,00.
+  \item Las fechas se muestran como día/mes/año y las horas en formato de 12 horas (AM/PM), siempre en la hora del local.
+  \item Las capturas se tomaron con los datos de demostración del sistema; los nombres y montos de su local serán otros.
 \end{itemize}
+
+\begin{consejo}
+Los campos obligatorios llevan un asterisco (*). Si falta algo o está mal escrito, el formulario no se guarda y el mensaje aparece en rojo debajo del campo, diciendo qué corregir.
+\end{consejo}
