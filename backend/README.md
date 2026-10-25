@@ -216,7 +216,7 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/sales/tables/:idMesa/orders` | Registra un envío a cocina: abre la venta si la mesa está libre o suma las líneas a la abierta, y descuenta el stock. Responde `nueva`, el número de `envio` y `sinStock` (insumos que no alcanzaron) |
 | `POST` | `/api/sales/tables/:idMesa/checkout` | Cobra la venta abierta de la mesa: `pagos` (`efectivo`, `qr` o ambos, con `monto`) y `recibido` opcional (efectivo entregado). Responde el `ticket` |
 | `GET` | `/api/sales/:idVenta/receipt` | Ticket de una venta para reimprimirlo, con sus `impresiones` |
-| `POST` | `/api/sales/:idVenta/prints` | Registra una impresión del ticket. Las 3 primeras salen directo; desde la 4.ª exige `alias` y `contrasena` de un empleado activo cuyo cargo tenga `reimpresion` (403 `motivo: autorizacion` con las `impresiones` anteriores si faltan; 400 con `campo` si están mal). El DIRECTORIO no necesita autorización |
+| `POST` | `/api/sales/:idVenta/prints` | Registra una impresión del ticket. Las 3 primeras salen directo; desde la 4.ª exige `alias` y `contrasena` de cualquier empleado activo con acceso a Caja, que queda registrado como quien autorizó (403 `motivo: autorizacion` con las `impresiones` anteriores si faltan; 400 con `campo` si están mal). El DIRECTORIO no necesita autorización |
 | `GET` | `/api/sales/today` | Ventas cobradas hoy (día del local) con sus pagos y `resumen` (`cantidad`, `total`, `efectivo`, `qr`) |
 | `GET` | `/api/catalog` | Catálogo de Familia: categorías activas con sus subcategorías, productos activos (disponibilidad y porciones) y promociones activas que no vencieron (`vigencia`, precio, productos), primero las de hoy |
 | `GET` | `/api/catalog/products/:id` | Producto con su receta: cantidad por porción, stock, nivel y porciones que alcanza cada insumo |
@@ -320,7 +320,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 ### Impresiones del ticket
 
 - Cada impresión del ticket de cobro queda en `ticket_impresion` con su número, quién la imprimió y la hora. Se numeran dentro de una transacción con la venta bloqueada.
-- Las 3 primeras salen sin pedir nada. Desde la 4.ª hace falta el usuario y la contraseña de un empleado autorizado (cargo con `reimpresion`), que queda registrado en `autorizado_por`. El DIRECTORIO imprime sin autorización.
+- Las 3 primeras salen sin pedir nada. Desde la 4.ª hace falta el usuario y la contraseña de cualquier empleado con acceso a Caja, que queda registrado en `autorizado_por` como responsable. El DIRECTORIO imprime sin autorización.
 - La comanda de cocina no cuenta: se puede reimprimir cuando haga falta.
 
 ### Reglas de cocina
@@ -329,7 +329,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - Cada línea guarda cuántas unidades ya están listas (`listos`, de 0 a la cantidad pedida). Sumar y restar se hacen en una sola sentencia que nunca pasa de la cantidad ni baja de 0, así dos cocineros tocando a la vez no se pisan.
 - Un envío está **listo** cuando todas sus unidades lo están; si se desmarca una, vuelve solo a **preparación**.
 - Solo se cambian líneas de ventas abiertas. Caja ve el avance en cada línea (`listos`) y en el plano de mesas (`listos` de la venta).
-- La migración 014 quita el permiso `cocina` de todos los cargos (la pantalla ya no existe) y da `reimpresion` a los cargos que tienen `administracion`.
+- La migración 014 quita el permiso `cocina` de todos los cargos (la pantalla ya no existe) (la 015 quita el permiso `reimpresion`, que existió poco: ahora autoriza cualquiera con Caja).
 
 ## Autorización
 
@@ -341,7 +341,6 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 | Familia, Caja (con marcar listos de cocina) | `familia`, `caja` |
 | Administración | `productos`, `secciones`, `stock`, `categorias`, `promociones`, `empleados`, `cargos` |
 | Enlace de impuestos en Caja | `administracion` |
-| Autorizar la reimpresión del ticket desde la 4.ª vez | `reimpresion` |
 
 ## Sesión y seguridad
 

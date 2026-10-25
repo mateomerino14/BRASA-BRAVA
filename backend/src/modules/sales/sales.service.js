@@ -10,12 +10,12 @@ const saleNotFound = {error: 'Pedido no encontrado', status: 404};
 // Impresiones del ticket que salen sin autorización
 export const FREE_PRINTS = 3;
 const needsAuthorization = {
-  error: `Este ticket ya se imprimió ${FREE_PRINTS} veces. Un empleado autorizado debe ingresar su usuario y contraseña`,
+  error: `Este ticket ya se imprimió ${FREE_PRINTS} veces. Un empleado con acceso a Caja debe ingresar su usuario y contraseña`,
   status: 403,
   detail: {motivo: 'autorizacion'},
 };
 const wrongAuthorizer = {error: 'Usuario o contraseña incorrectos', status: 400, detail: {motivo: 'autorizacion', campo: 'contrasena'}};
-const notAllowedAuthorizer = {error: 'Su cargo no puede autorizar reimpresiones', status: 403, detail: {motivo: 'autorizacion', campo: 'alias'}};
+const notAllowedAuthorizer = {error: 'Solo puede autorizar un empleado con acceso a Caja', status: 403, detail: {motivo: 'autorizacion', campo: 'alias'}};
 const cashOnly = {error: 'El monto recibido solo se usa con pago en efectivo', status: 400};
 
 // Monto como lo lee el cajero: 1234.5 → "1234,50"
@@ -450,7 +450,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     };
   };
 
-  // Quién autoriza la impresión: nadie hasta la tercera, el DIRECTORIO por sí mismo o un empleado con permiso
+  // Quién autoriza la impresión: nadie hasta la tercera, el DIRECTORIO por sí mismo o cualquier empleado con acceso a Caja
   const authorizerOf = async (tx, count, {alias, contrasena}, user) => {
     if (count < FREE_PRINTS || user.isDirectorio) {
       return {idAutorizador: null, autorizadoPor: null};

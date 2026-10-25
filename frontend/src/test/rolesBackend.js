@@ -1,7 +1,7 @@
 const role = (id, nombre, pantallas, totalEmpleados, extra = {}) => ({id, nombre, pantallas, totalEmpleados, activo: true, ...extra});
 
 export const ROLES = [
-  role(1, 'Administrador', ['familia', 'caja', 'reimpresion', 'administracion', 'productos', 'secciones', 'stock', 'categorias', 'promociones', 'empleados', 'cargos'], 1),
+  role(1, 'Administrador', ['familia', 'caja', 'administracion', 'productos', 'secciones', 'stock', 'categorias', 'promociones', 'empleados', 'cargos'], 1),
   role(2, 'Cajero', ['familia', 'caja'], 1),
   role(3, 'Mesero', ['familia', 'caja'], 2),
   role(4, 'Delivery', ['caja'], 0, {activo: false}),

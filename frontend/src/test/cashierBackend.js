@@ -162,7 +162,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       return [200, {ticket}];
     };
   }
-  // Impresiones del ticket: las tres primeras salen, desde la cuarta pide a admin con Brasa2026
+  // Impresiones del ticket: las tres primeras salen, desde la cuarta pide un empleado de Caja (admin con Brasa2026)
   const printsOf = {};
   for (let id = 1; id <= MAX_TEST_SALE; id += 1) {
     handlers[`POST /sales/${id}/prints`] = (body) => {
@@ -170,7 +170,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       const previous = printsOf[id] ?? [];
       if (previous.length >= 3) {
         if (!body.alias || !body.contrasena) {
-          return [403, {message: 'Este ticket ya se imprimió 3 veces. Un empleado autorizado debe ingresar su usuario y contraseña', motivo: 'autorizacion', impresiones: previous}];
+          return [403, {message: 'Este ticket ya se imprimió 3 veces. Un empleado con acceso a Caja debe ingresar su usuario y contraseña', motivo: 'autorizacion', impresiones: previous}];
         }
         if (body.alias !== 'admin' || body.contrasena !== 'Brasa2026') {
           return [400, {message: 'Usuario o contraseña incorrectos', motivo: 'autorizacion', campo: 'contrasena'}];
