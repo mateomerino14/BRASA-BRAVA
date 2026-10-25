@@ -8,7 +8,6 @@ import {Amount} from '../../../components/atoms/Amount';
 import {cn} from '../../../lib/cn';
 import {formatAmount} from '../../../lib/format';
 
-// Desde cuántas porciones o menos se avisa que queda poco
 const LOW_PORTIONS = 5;
 
 const styles = {
@@ -26,7 +25,6 @@ const styles = {
   inactiveRow: 'bg-hueso/40',
 };
 
-// Aviso cuando la categoría o subcategoría del producto se dio de baja (no aparecerá en caja)
 const hiddenReason = (product) => {
   if (!product.categoria.activa) {
     return 'Categoría de baja';
@@ -37,7 +35,6 @@ const hiddenReason = (product) => {
   return '';
 };
 
-// Porciones que alcanzan según la receta y el stock
 function PortionsBadge({portions}) {
   if (portions === null) {
     return <span className={styles.noRecipe}>Sin receta</span>;

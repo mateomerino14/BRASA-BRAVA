@@ -12,7 +12,6 @@ const styles = {
   empty: 'px-1 py-3 text-sm text-cafe',
 };
 
-// Cada sección muestra cuántas mesas tiene ocupadas (solo si hay alguna)
 const sectionOptions = (sections) => sections.map((section) => {
   const busy = section.mesas.filter((table) => table.venta).length;
   const option = {value: String(section.id), label: section.nombre};
@@ -27,7 +26,6 @@ const sectionOptions = (sections) => sections.map((section) => {
   return option;
 });
 
-// Barra de arriba de Caja: secciones, Ventas de hoy, Impresoras y las mesas de la sección elegida
 export function TablesBar({floor, selectedId, onSelectTable, onShowSales, onShowPrinters}) {
   const {section} = floor;
   return (

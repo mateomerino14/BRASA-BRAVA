@@ -19,7 +19,6 @@ const styles = {
 
 const hoverLift = {y: -4};
 
-// Tarjeta de Familia: portada corta con la banda de estado, nombre, descripción y precio
 export function ProductCard({product, onOpen}) {
   const soldOut = productStatus(product)?.key === 'agotado';
   return (

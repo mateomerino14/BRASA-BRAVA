@@ -2,8 +2,8 @@ import {z} from 'zod';
 import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
 import {decimalSchema} from '../../utils/numbers.js';
 
-export const UNITS = ['kg', 'g', 'l', 'ml', 'unidad'];
-export const MOVEMENT_TYPES = ['entrada', 'salida', 'ajuste'];
+const UNITS = ['kg', 'g', 'l', 'ml', 'unidad'];
+const MOVEMENT_TYPES = ['entrada', 'salida', 'ajuste'];
 
 const NAME_MAX = 60;
 const REASON_MAX = 160;
@@ -48,7 +48,7 @@ export const historyQuerySchema = z.object({
 });
 
 // Columnas por las que se puede ordenar el listado
-export const INGREDIENT_SORT_KEYS = ['nombre', 'stock', 'estado'];
+const INGREDIENT_SORT_KEYS = ['nombre', 'stock', 'estado'];
 
 export const listQuerySchema = baseListQuery(INGREDIENT_SORT_KEYS, {
   nivel: z.enum(['todos', 'bajo', 'sin_stock']).optional().default('todos'),

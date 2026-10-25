@@ -5,7 +5,6 @@ import {USERS, mockApi} from '../../test/mockApi';
 import {createCashierBackend} from '../../test/cashierBackend';
 import {buildCheckout, cashSuggestions, receiptLines} from './utils/checkout';
 
-// Recorre cobro, resumen, reimpresión y edición del enlace: necesita más que los 5 s por defecto
 const LONG_TEST_MS = 20000;
 
 const openMesa2 = async ({ready = true, user} = {}) => {

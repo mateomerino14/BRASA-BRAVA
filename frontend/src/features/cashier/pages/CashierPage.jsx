@@ -28,7 +28,6 @@ const styles = {
 
 const testDocument = (destino, printer) => <PrinterTestTicket destino={destino} printer={printer} printedAt={new Date()} />;
 
-// Pedido y menú de la mesa elegida; se monta de nuevo al cambiar de mesa. Avisa cuántas unidades quedan sin enviar
 function Workspace({idMesa, now, authorizePrint, onChanged, onCheckedOut, onPendingChange}) {
   const {printers} = useDesktopPrinters();
   let printKitchen;
@@ -43,8 +42,6 @@ function Workspace({idMesa, now, authorizePrint, onChanged, onCheckedOut, onPend
   return <TableWorkspace order={order} checkout={checkout} now={now} authorizePrint={authorizePrint} onCheckedOut={onCheckedOut} />;
 }
 
-// Caja en una sola pantalla, como en cafebar: secciones y mesas arriba, el pedido de la mesa a la izquierda y el menú
-// a la derecha. Cocina solo recibe la comanda impresa; el cajero marca lo que sale y cobra. Mesa y sección viven en la URL
 export function CashierPage() {
   const {user} = useAuth();
   const toast = useToast();
@@ -83,7 +80,6 @@ export function CashierPage() {
     update({mesa: String(mesa.id)});
   };
 
-  // Cambiar de mesa con productos sin enviar pide confirmación para no perderlos sin querer
   const selectTable = (mesa) => {
     if (String(mesa.id) === idMesa) {
       return;

@@ -19,7 +19,6 @@ const validate = (values) => {
   return errors;
 };
 
-// Envíos programados del reporte (solo el DIRECTORIO): lista, alta, cambios, pausa, borrar y enviar ahora
 export function useSchedules({api = reportsApi} = {}) {
   const toast = useToast();
   const [open, setOpen] = useState(false);
@@ -75,7 +74,6 @@ export function useSchedules({api = reportsApi} = {}) {
     }
   };
 
-  // Ejecuta una acción sobre un envío mostrando su botón como ocupado
   const run = async (key, action, success) => {
     setBusy(key);
     try {

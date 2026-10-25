@@ -32,7 +32,6 @@ const METHODS = [
   {value: 'mixto', label: 'Mixto', icon: SplitSquareHorizontal},
 ];
 
-// Cobro de la mesa: vista previa del ticket, método de pago, efectivo recibido y cambio
 export function CheckoutModal({checkout, venta, mesa}) {
   const {values, errors} = checkout;
   const total = venta.total;

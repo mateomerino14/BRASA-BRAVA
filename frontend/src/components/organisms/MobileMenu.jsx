@@ -77,7 +77,6 @@ function SlatGroup({item}) {
   );
 }
 
-// Menú de celular y tablet tipo persiana: baja desde la barra naranja; se cierra con Escape, la X o al navegar
 export function MobileMenu({open, onClose, items, user, onLogout, onChangePassword, title}) {
   const panelRef = useRef(null);
   useDialogFocus({open, panelRef, onClose, initialFocus: 'a[aria-current="page"], a[href]'});

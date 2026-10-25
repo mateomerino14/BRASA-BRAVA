@@ -10,7 +10,6 @@ const initialState = {loading: true, error: '', mesa: null, venta: null, catalog
 
 const matches = (item, search) => !search || normalizeText(item.nombre).includes(normalizeText(search));
 
-// Grupos de ingredientes que se pueden quitar: uno por producto (en un combo, uno por cada producto del combo)
 export const ingredientGroups = (kind, item) => {
   if (kind === 'promocion') {
     return item.productos.map((product) => ({idProducto: product.idProducto, nombre: product.nombre, cantidad: product.cantidad, ingredientes: product.ingredientes}));
@@ -18,9 +17,6 @@ export const ingredientGroups = (kind, item) => {
   return [{idProducto: item.id, nombre: item.nombre, cantidad: 1, ingredientes: item.ingredientes}];
 };
 
-// Pedido de una mesa: lo ya registrado, el catálogo del día, las líneas por registrar y lo que sale de cocina.
-// Sin mesa elegida solo carga el menú. "printKitchen" (app de escritorio con impresora de cocina) imprime la comanda
-// directo; si no está o falla, se abre la vista previa. "onChanged" avisa que cambió la mesa (para refrescar la barra)
 export function useTableOrder({api = cashierApi, idMesa, printKitchen, onChanged}) {
   const toast = useToast();
   const [state, setState] = useState(initialState);
@@ -59,7 +55,6 @@ export function useTableOrder({api = cashierApi, idMesa, printKitchen, onChanged
     };
   }, [api, idMesa]);
 
-  // Refresca lo registrado de la mesa por si otra caja la cambió
   useEffect(() => {
     if (!state.mesa) {
       return undefined;
@@ -70,7 +65,7 @@ export function useTableOrder({api = cashierApi, idMesa, printKitchen, onChanged
         setState((current) => ({...current, venta: table.venta}));
       }
       catch {
-        // Si falla, se intenta de nuevo en la próxima vuelta
+        return;
       }
     }, TABLE_REFRESH_MS);
     return () => clearInterval(timer);
@@ -97,7 +92,6 @@ export function useTableOrder({api = cashierApi, idMesa, printKitchen, onChanged
     setPicker((current) => ({open: true, session: current.session + 1, kind, item, line}));
   };
 
-  // Abre el detalle de una línea por registrar para cambiar cantidad, consumo o ingredientes
   const editLine = (line) => {
     let source = catalog.productos;
     if (line.tipo === 'promocion') {
@@ -161,14 +155,12 @@ export function useTableOrder({api = cashierApi, idMesa, printKitchen, onChanged
     }
   };
 
-  // Vuelve a leer la mesa después de marcar listos
   const refreshTable = async () => {
     const table = await api.table(idMesa);
     setState((current) => ({...current, venta: table.venta}));
     onChanged?.();
   };
 
-  // Suma, resta o marca todas las unidades listas de una línea
   const markReady = async (line, accion) => {
     setMarking(`line-${line.id}`);
     try {
@@ -183,7 +175,6 @@ export function useTableOrder({api = cashierApi, idMesa, printKitchen, onChanged
     }
   };
 
-  // Marca listo todo lo que falta, envío por envío
   const markAllReady = async () => {
     const envios = [...new Set(state.venta.detalles.filter((line) => line.listos < line.cantidad).map((line) => line.envio))];
     setMarking('all');

@@ -34,7 +34,6 @@ const RECIPE = [
   {id: 5, nombre: 'Lechuga', unidad: 'unidad', cantidad: 1, stock: 0, activo: true, nivel: 'sin_stock', alcanza: 0},
 ];
 
-// Backend falso para la pantalla de Familia
 export const createFamilyBackend = () => {
   const calls = [];
   const handlers = {'GET /catalog': () => [200, FAMILY_CATALOG]};

@@ -1,4 +1,4 @@
-export const PRODUCT_OPTIONS = [
+const PRODUCT_OPTIONS = [
   {id: 1, nombre: 'Doble Brava', precio: 58, categoria: 'Hamburguesas'},
   {id: 2, nombre: 'Papas Fritas Clásicas', precio: 15, categoria: 'Guarniciones'},
   {id: 3, nombre: 'Gaseosa 500 ml', precio: 10, categoria: 'Bebidas'},
@@ -17,7 +17,6 @@ export const PROMOTIONS = [
   },
 ];
 
-// Backend falso en memoria para las pruebas de la pantalla de promociones
 export const createPromotionsBackend = () => {
   const store = PROMOTIONS.map((promotion) => ({...promotion}));
   const calls = {list: [], saved: []};

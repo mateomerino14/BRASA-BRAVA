@@ -9,10 +9,8 @@ const MESSAGES = {
   imageFailed: 'La promoción se guardó, pero la foto no',
 };
 
-// Fecha local de hoy en el navegador, por si el listado todavía no trajo la del servidor
 const browserToday = () => new Date().toLocaleDateString('en-CA');
 
-// Productos activos más los de la promoción editada (pueden estar de baja), para mostrar nombre y precio
 const indexProducts = (products, editing) => {
   const byId = new Map(products.map((item) => [String(item.id), {...item, activo: true}]));
   for (const item of editing?.productos ?? []) {
@@ -38,7 +36,6 @@ export function usePromotionForm({onSaved, today, products = [], api = promotion
   const productsById = indexProducts(products, form.editing);
   const nextKey = useRef(0);
   const rows = form.values.productos;
-  // Repetidos y mínimo del combo dependen de todas las filas: al cambiar una se limpian los avisos de todas
   const rowErrors = ['productos', 'valor', ...rows.map((row) => productErrorKey(row.key))];
 
   const addProduct = () => {

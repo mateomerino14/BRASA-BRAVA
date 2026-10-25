@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {useAuth} from '../../../context/useAuth';
 import {useToast} from '../../../context/useToast';
 
-export const DIRECTORIO_USERNAME = 'DIRECTORIO';
+const DIRECTORIO_USERNAME = 'DIRECTORIO';
 
 export function useLoginForm({onSuccess} = {}) {
   const {login} = useAuth();

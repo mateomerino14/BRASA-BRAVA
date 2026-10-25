@@ -2,10 +2,8 @@ import {NAME_MAX_LENGTH, SUBCATEGORY_NAME_MAX_LENGTH} from '../constants/categor
 
 const MIN_NAME_LENGTH = 2;
 
-// Clave del error de una subcategoría dentro del objeto de errores del formulario
 export const subcategoryErrorKey = (key) => `sub:${key}`;
 
-// Valida el formulario con las mismas reglas que la API
 export const validateCategory = (values) => {
   const errors = {};
   const nombre = values.nombre.trim();
@@ -36,14 +34,12 @@ export const validateCategory = (values) => {
   return errors;
 };
 
-// Convierte una categoría de la API en valores editables (key estable para las animaciones)
 export const toFormValues = (category) => ({
   nombre: category.nombre,
   descripcion: category.descripcion ?? '',
   subcategorias: category.subcategorias.map((sub) => ({key: `sub-${sub.id}`, id: sub.id, nombre: sub.nombre})),
 });
 
-// Arma el cuerpo que espera la API
 export const toPayload = (values) => ({
   nombre: values.nombre.trim(),
   descripcion: values.descripcion.trim(),

@@ -5,13 +5,12 @@ const section = (id, nombre, mesas, extra = {}) => ({
   totalMesas: mesas.length, capacidad: mesas.reduce((total, table) => total + table.capacidad, 0), ...extra,
 });
 
-export const SECTIONS = [
+const SECTIONS = [
   section(1, 'Salón principal', tables('Mesa', 6, 4, 1), {descripcion: 'Junto a la parrilla'}),
   section(2, 'Terraza', tables('Terraza', 2, 4, 20)),
   section(3, 'Salón VIP', tables('VIP', 1, 8, 30), {activa: false}),
 ];
 
-// Backend falso en memoria para las pruebas de la pantalla de secciones
 export const createSectionsBackend = () => {
   const store = SECTIONS.map((item) => ({...item, mesas: [...item.mesas]}));
   const calls = {list: [], saved: []};

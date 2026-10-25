@@ -1,4 +1,4 @@
-export {PAGE_SIZE, STATUS_OPTIONS} from '../../../config/lists';
+export {STATUS_OPTIONS} from '../../../config/lists';
 
 export const EMPTY_FORM = {
   nombre: '',

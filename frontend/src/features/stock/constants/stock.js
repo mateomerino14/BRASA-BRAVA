@@ -13,7 +13,6 @@ export const UNIT_OPTIONS = [
 
 export const UNIT_NAMES = {kg: 'Kilogramos', g: 'Gramos', l: 'Litros', ml: 'Mililitros', unidad: 'Unidades'};
 
-// Color de la cantidad según el nivel: ámbar si está baja, rojo si no queda
 export const LEVEL_TONES = {suficiente: 'text-carbon', bajo: 'text-brasa-oscuro', sin_stock: 'text-error'};
 
 export const EMPTY_FORM = {nombre: '', unidad: '', stockActual: '', stockMinimo: ''};

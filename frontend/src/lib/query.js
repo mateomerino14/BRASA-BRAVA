@@ -1,4 +1,3 @@
-// Arma un query string omitiendo valores vacíos
 export const toQuery = (params) => {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {

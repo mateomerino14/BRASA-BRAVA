@@ -8,7 +8,6 @@ const createObjectUrl = (file) => {
   return URL.createObjectURL(file);
 };
 
-// URL a mostrar de una foto: el archivo recién elegido (y libera su URL temporal al cambiar) o la imagen guardada
 export function useImagePreview(file, url) {
   const objectUrl = useMemo(() => createObjectUrl(file), [file]);
   useEffect(() => () => {

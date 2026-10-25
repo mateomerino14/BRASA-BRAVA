@@ -12,7 +12,6 @@ const initialFilters = () => {
   return {tipo: 'resumen', desde: today, hasta: today, empleado: ALL_EMPLOYEES};
 };
 
-// Reporte de ventas: filtros, resultado en pantalla, descarga del PDF y envío por correo
 export function useReports({api = reportsApi} = {}) {
   const toast = useToast();
   const [filters, setFilters] = useState(initialFilters);
@@ -26,7 +25,6 @@ export function useReports({api = reportsApi} = {}) {
   const [downloading, setDownloading] = useState(false);
   const [sale, setSale] = useState(null);
 
-  // Genera con los filtros indicados; el reporte en pantalla queda con esos filtros
   const generate = useCallback(async (current) => {
     if (current.desde > current.hasta) {
       setErrors({hasta: 'La fecha "hasta" no puede ser anterior a "desde"'});
@@ -46,7 +44,6 @@ export function useReports({api = reportsApi} = {}) {
     }
   }, [api, toast]);
 
-  // Al abrir: empleados para el filtro y el reporte de hoy
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -77,7 +74,6 @@ export function useReports({api = reportsApi} = {}) {
     setErrors({});
   };
 
-  // Al cambiar el tipo se ve enseguida el otro formato del mismo período
   const changeType = (tipo) => {
     const next = {...filters, tipo};
     setFilters(next);

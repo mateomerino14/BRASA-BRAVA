@@ -1,7 +1,6 @@
 import {Amount} from '../../../components/atoms/Amount';
 import {quantityParts} from '../../../lib/format';
 
-// Cantidad de stock con el número destacado y la unidad aparte; "sign" antepone + o − (historial)
 export function QuantityAmount({value, unit, size, sign = false, valueClassName}) {
   const parts = quantityParts(Math.abs(value), unit);
   let amount = parts.amount;

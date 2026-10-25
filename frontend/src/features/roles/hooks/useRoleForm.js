@@ -29,7 +29,6 @@ export function useRoleForm({onSaved, api = rolesApi} = {}) {
     form.setField('pantallas', [...selected, id]);
   };
 
-  // Marca o desmarca todas las pantallas de un grupo
   const toggleGroup = (ids) => {
     const allChecked = ids.every((id) => selected.includes(id));
     if (allChecked) {

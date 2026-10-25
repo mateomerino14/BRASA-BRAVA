@@ -50,7 +50,6 @@ const lineVisible = {opacity: 1, x: 0};
 
 const pendingUnits = (venta) => venta.detalles.reduce((total, detail) => total + detail.cantidad - detail.listos, 0);
 
-// Motivo por el que todavía no se puede cobrar, o vacío si se puede
 const checkoutBlock = (venta, lines) => {
   if (lines.length > 0) {
     return 'Envíe a cocina o quite lo que falta registrar antes de cobrar.';
@@ -64,7 +63,6 @@ const checkoutBlock = (venta, lines) => {
 
 const unitsOf = (detalles) => detalles.reduce((total, detail) => total + detail.cantidad, 0);
 
-// Desde cuándo espera lo que cocina todavía no sacó (el envío pendiente más antiguo)
 const waitingSince = (venta) => {
   const pending = venta.detalles.filter((detail) => detail.listos < detail.cantidad).map((detail) => new Date(detail.creadoEn).getTime());
   if (pending.length === 0) {
@@ -96,7 +94,6 @@ function PanelHeader({mesa, venta, now}) {
   );
 }
 
-// Pedido de la mesa; "bare" lo muestra sin tarjeta ni cabecera (dentro del modal del celular)
 export function OrderPanel({order, now, bare = false}) {
   const {venta, mesa, lines, totals} = order;
   const [showRegistered, setShowRegistered] = useState(true);

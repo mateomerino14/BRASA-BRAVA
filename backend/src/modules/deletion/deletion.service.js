@@ -1,6 +1,6 @@
 import {localDayRange} from '../../utils/calendar.js';
 
-export const CONFIRMATION_WORD = 'ELIMINAR';
+const CONFIRMATION_WORD = 'ELIMINAR';
 const SAMPLE_SALES = 20;
 
 // Tabla, columna de id, columna de activo y foto de cada tipo que se elige en la pantalla
@@ -14,7 +14,9 @@ const KINDS = {
   promociones: {table: 'promocion', id: 'id_promocion', active: 'activa', image: 'imagen_url', singular: 'la promoción'},
 };
 
+// Une listas de ids sin repetir
 const unique = (...lists) => [...new Set(lists.flat())];
+// Quita de la lista los ids ya considerados
 const without = (list, removed) => list.filter((id) => !removed.includes(id));
 
 // Reglas de la eliminación física: qué se puede borrar, qué arrastra y el borrado en una transacción

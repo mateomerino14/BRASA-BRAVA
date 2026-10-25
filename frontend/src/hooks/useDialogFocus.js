@@ -2,11 +2,9 @@ import {useEffect, useRef} from 'react';
 
 const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), select, textarea, a[href], [tabindex]:not([tabindex="-1"])';
 
-// Paneles abiertos en orden: con un modal encima de otro, solo el de arriba responde al teclado
 const openPanels = [];
 const isTop = (panel) => openPanels.at(-1) === panel;
 
-// Mantiene el Tab dentro del panel: del último salta al primero y viceversa
 const trapTab = (event, panel) => {
   const items = [...panel.querySelectorAll(FOCUSABLE)];
   if (items.length === 0) {
@@ -24,7 +22,6 @@ const trapTab = (event, panel) => {
   }
 };
 
-// Foco accesible de un panel modal: enfoca al abrir, atrapa el Tab, cierra con Escape y devuelve el foco al cerrar
 export function useDialogFocus({open, panelRef, onClose, initialFocus = 'input, textarea, select'}) {
   const onCloseRef = useRef(onClose);
 
@@ -32,7 +29,6 @@ export function useDialogFocus({open, panelRef, onClose, initialFocus = 'input, 
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  // Depende solo de "open" para que escribir dentro del panel no le quite el foco
   useEffect(() => {
     if (!open) {
       return undefined;

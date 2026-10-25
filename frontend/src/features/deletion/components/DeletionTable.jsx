@@ -22,7 +22,6 @@ const styles = {
   srOnly: 'sr-only',
 };
 
-// Aviso de lo que arrastra un registro ("34 ventas se borran también") o un texto tenue si no arrastra nada
 function Drags({count, singular, plural}) {
   if (!count) {
     return <span className={styles.muted}>Nada asociado</span>;
@@ -32,7 +31,6 @@ function Drags({count, singular, plural}) {
 
 const saleWhen = (row) => `${formatDayMonthYear(isoDate(new Date(row.cerradaEn)))} · ${formatTime(row.cerradaEn)}`;
 
-// Columnas de cada tipo: encabezados y celdas
 const COLUMNS = {
   empleados: {head: ['Empleado', 'Usuario', 'Cargo', 'Al eliminar'], cells: (row) => [<span key="n" className={styles.name}>{row.nombre}</span>, row.alias, row.cargo, <Drags key="d" count={row.ventas} singular="venta" plural="ventas" />]},
   cargos: {head: ['Cargo', 'Al eliminar'], cells: (row) => [<span key="n" className={styles.name}>{row.nombre}</span>, <Drags key="d" count={row.empleados} singular="empleado" plural="empleados" />]},
@@ -44,7 +42,6 @@ const COLUMNS = {
   ventas: {head: ['Nº', 'Cobrada', 'Mesa', 'Cobró', 'Total Bs'], cells: (row) => [<span key="n" className={styles.name}>{row.id}</span>, saleWhen(row), `${row.mesa} · ${row.seccion}`, row.cobrador ?? '—', <span key="t" className={styles.num}>{formatAmount(row.total)}</span>]},
 };
 
-// Tabla con casillas para marcar lo que se elimina; toda la fila marca o desmarca
 export function DeletionTable({tipo, rows, selected, onToggle, label}) {
   const {head, cells} = COLUMNS[tipo];
   return (

@@ -10,7 +10,6 @@ const styles = {
 
 const OPTIONS = PAGE_SIZE_OPTIONS.map((size) => ({value: String(size), label: String(size)}));
 
-// Selector de cuántas filas se muestran por página
 export function PageSizeSelect({value, onChange}) {
   const id = useId();
   return (

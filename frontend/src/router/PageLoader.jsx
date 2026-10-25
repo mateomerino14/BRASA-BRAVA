@@ -4,7 +4,6 @@ const styles = {
   wrapper: 'flex justify-center py-24',
 };
 
-// Indicador mientras se descarga una pantalla
 export function PageLoader() {
   return (
     <div className={styles.wrapper}>

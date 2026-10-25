@@ -1,7 +1,6 @@
 import {formatClock, formatDate, formatDays, formatHours, normalizeText} from '../../../lib/format';
 import {ALL, LOW_PORTIONS} from '../constants/family';
 
-// Estado de un producto en el catálogo: agotado (lo marcó el local), sin stock, quedan pocas o disponible
 export const productStatus = (product) => {
   if (!product.disponible) {
     return {key: 'agotado', tone: 'danger', label: 'Agotado'};
@@ -15,10 +14,8 @@ export const productStatus = (product) => {
   return null;
 };
 
-// Días y horario juntos para la banda: "Lun a vie · 18:00 a 21:00"
 const whenHint = (promotion) => [formatDays(promotion.dias), formatHours(promotion.horaInicio, promotion.horaFin)].filter(Boolean).join(' · ');
 
-// Banda de estado de una promoción: no se vende (por un producto agotado), ahora, más tarde hoy, ya terminó, programada u otro día
 export const promotionBand = (promotion) => {
   if (!promotion.disponible) {
     let hint = 'Tiene un producto agotado';
@@ -46,7 +43,6 @@ export const promotionBand = (promotion) => {
   return {key: 'otroDia', label: formatDays(promotion.dias), hint: 'Hoy no aplica'};
 };
 
-// Marca en cada promoción los productos agotados que trae, en minúsculas para la frase de la banda
 export const withSoldOut = (promotions, products) => {
   const soldOut = new Set(products.filter((product) => !product.disponible).map((product) => product.id));
   return promotions.map((promotion) => ({
@@ -55,7 +51,6 @@ export const withSoldOut = (promotions, products) => {
   }));
 };
 
-// Filtra los productos por categoría, subcategoría y texto (sin tildes)
 export const filterProducts = (products, {categoria, subcategoria, search}) => {
   const text = normalizeText(search ?? '');
   return products.filter((product) => (
@@ -65,7 +60,6 @@ export const filterProducts = (products, {categoria, subcategoria, search}) => {
   ));
 };
 
-// Filtra las promociones por nombre o por los productos que incluyen
 export const filterPromotions = (promotions, search) => {
   const text = normalizeText(search ?? '');
   if (!text) {

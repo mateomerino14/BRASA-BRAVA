@@ -10,8 +10,6 @@ const styles = {
   controls: 'flex flex-wrap items-center gap-4',
 };
 
-// Tabla estándar de las pantallas de gestión: orden, filas por página, paginación y "Limpiar filtros" en un solo lugar.
-// Recibe el resultado de usePaginatedList en "list".
 export function ListTable({list, columns, caption, itemLabel, emptyMessage, rowKey = (row) => row.id, rowClassName}) {
   let emptyAction;
   let empty = emptyMessage;

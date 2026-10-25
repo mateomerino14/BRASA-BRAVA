@@ -21,7 +21,6 @@ const styles = {
   inactiveRow: 'bg-hueso/40',
 };
 
-// "13 oct 2026 – 12 nov 2026" o "Desde 13 oct 2026"
 const dateRange = (promotion) => {
   if (promotion.fechaFin) {
     return `${formatDate(promotion.fechaInicio)} – ${formatDate(promotion.fechaFin)}`;

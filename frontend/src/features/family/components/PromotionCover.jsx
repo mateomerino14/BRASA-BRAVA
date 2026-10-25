@@ -27,7 +27,6 @@ const BANDS = {
   otroDia: {className: 'border-t border-white/10 bg-carbon text-crema', icon: CalendarX},
 };
 
-// Portada de una promoción: el nombre en grande sobre carbón (o sobre su foto) y la banda con cuándo se vende
 export function PromotionCover({promotion, size = 'md', className}) {
   const band = promotionBand(promotion);
   const look = BANDS[band.key];

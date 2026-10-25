@@ -1,14 +1,10 @@
 import {useState} from 'react';
 import {useToast} from '../context/useToast';
 
-// Estado de la foto: archivo nuevo, URL guardada y si el usuario la quitó
 const emptyImage = {file: null, url: null, removed: false};
 
 const hasErrors = (errors) => Object.keys(errors).length > 0;
 
-// Formulario estándar de registro y modificación: valores, validación, guardado, foto opcional y avisos.
-// "api" necesita create/update y, si el módulo tiene foto, uploadImage/removeImage; "entityKey" es la clave de la respuesta
-// e "imageField" el campo con la URL de la foto (imagenUrl en el catálogo, fotoUrl en empleados).
 export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayload, validate, messages, onSaved, withImage = false, imageField = 'imagenUrl'}) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -31,7 +27,6 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
     setOpen(true);
   };
 
-  // Cambia varios campos a la vez y limpia sus errores (y los de "alsoClear", por ejemplo los de una fila)
   const setFields = (changes, alsoClear = []) => {
     setValues((current) => ({...current, ...changes}));
     setErrors((current) => {
@@ -52,7 +47,6 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
     }
   };
 
-  // Sube o quita la foto después de guardar los datos
   const syncImage = async (entity) => {
     if (!withImage) {
       return entity;
@@ -98,7 +92,6 @@ export function useEntityForm({api, entityKey, emptyValues, toFormValues, toPayl
     }
     catch (requestError) {
       if (saved) {
-        // Los datos ya se guardaron: el siguiente intento modifica en vez de duplicar y vuelve a subir la foto
         setEditing(saved);
         toast.error(`${messages.imageFailed}: ${requestError.message}`, errorTitle);
         onSaved?.();

@@ -59,7 +59,6 @@ describe('Gestión de secciones y mesas', () => {
     await user.click(within(dialog).getByRole('button', {name: 'Sumar capacidad de P1'}));
     await user.click(within(dialog).getByRole('button', {name: 'Sumar capacidad de P1'}));
     await user.click(within(dialog).getByRole('button', {name: 'Agregar mesa'}));
-    // La nueva sigue la numeración y copia la capacidad de la anterior
     expect(within(dialog).getByLabelText('Nombre de la mesa 2')).toHaveValue('P2');
     expect(within(dialog).getByLabelText('Capacidad de P2')).toHaveValue('6');
     expect(within(dialog).getByText('2 mesas · 12 personas')).toBeInTheDocument();

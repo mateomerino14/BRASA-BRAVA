@@ -1,7 +1,6 @@
 import {useState} from 'react';
 import {useToast} from '../context/useToast';
 
-// Confirmación de baja/reactivación: guarda el registro elegido, ejecuta el cambio y avisa el resultado
 export function useStatusToggle({request, successMessage, onChanged}) {
   const [target, setTarget] = useState(null);
   const [saving, setSaving] = useState(false);

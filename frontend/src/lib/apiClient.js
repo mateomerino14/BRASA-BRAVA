@@ -32,7 +32,6 @@ const serializeBody = (body) => {
   return JSON.stringify(body);
 };
 
-// Convierte una ruta de archivo subido (/uploads/...) en URL usable aunque la API esté en otro origen
 export const resolveAssetUrl = (url) => {
   if (!url || !/^https?:\/\//.test(API_URL)) {
     return url;
@@ -77,7 +76,6 @@ export const apiRequest = async (path, {method = 'GET', body, auth = true} = {})
   return data;
 };
 
-// Descarga un archivo de la API (por ejemplo un PDF) con la sesión; devuelve el contenido y su nombre
 export const apiDownload = async (path) => {
   const headers = {};
   const token = tokenStorage.get();
@@ -100,7 +98,6 @@ export const apiDownload = async (path) => {
   return {blob: await response.blob(), filename};
 };
 
-// Guarda un archivo descargado en la computadora (en la app de escritorio abre el diálogo de guardar)
 export const saveFile = ({blob, filename}) => {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -118,7 +115,6 @@ const toImageForm = (file) => {
   return form;
 };
 
-// Endpoints estándar de foto de un recurso (/categories, /products, /employees...): subir o reemplazar y quitar
 export const imageEndpoints = (resource) => ({
   uploadImage: (id, file) => apiRequest(`${resource}/${id}/image`, {method: 'PUT', body: toImageForm(file)}),
   removeImage: (id) => apiRequest(`${resource}/${id}/image`, {method: 'DELETE'}),

@@ -1,16 +1,15 @@
-export const ROLES = [
+const ROLES = [
   {id: 1, nombre: 'Administrador'},
   {id: 2, nombre: 'Cajero'},
   {id: 4, nombre: 'Mesero'},
 ];
 
-export const EMPLOYEES = [
+const EMPLOYEES = [
   {id: 2, nombre: 'Andrea', apellido: 'Romero', ci: '6812903 LP', alias: 'a.romero', correo: 'a.romero@brasabrava.bo', telefono: '76543210', fotoUrl: null, activo: true, cargo: {id: 2, nombre: 'Cajero'}},
   {id: 1, nombre: 'Carlos', apellido: 'Mendoza', ci: '4920114 LP', alias: 'c.mendoza', correo: 'c.mendoza@brasabrava.bo', telefono: null, fotoUrl: '/uploads/carlos.png', activo: true, cargo: {id: 4, nombre: 'Mesero'}},
   {id: 5, nombre: 'Javier', apellido: 'Ortiz', ci: '5912440 LP', alias: 'j.ortiz', correo: 'j.ortiz@brasabrava.bo', telefono: '78901234', fotoUrl: null, activo: false, cargo: {id: 4, nombre: 'Mesero'}},
 ];
 
-// Backend falso en memoria para las pruebas de la pantalla de empleados
 export const createEmployeesBackend = () => {
   const store = EMPLOYEES.map((employee) => ({...employee}));
   const calls = [];

@@ -34,7 +34,6 @@ const styles = {
 
 const paymentText = (pagos) => pagos.map((item) => PAYMENT_LABELS[item.metodo]).join(' + ');
 
-// Ventas cobradas hoy con totales por método, reimpresión del ticket y enlace a impuestos
 export function TodaySalesModal({sales, canEditLink, authorizePrint}) {
   const {resumen} = sales;
   const tiles = [

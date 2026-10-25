@@ -13,7 +13,6 @@ const loadKitchen = async (api) => {
   return {...data.summary, waiting};
 };
 
-// Resumen del día para quien tiene Caja: ventas, mesas y lo que falta en cocina, recargado cada cierto tiempo
 export function useDaySummary({canCashier, api = homeApi}) {
   const [summary, setSummary] = useState({cashier: null, kitchen: null});
   const [loading, setLoading] = useState(canCashier);

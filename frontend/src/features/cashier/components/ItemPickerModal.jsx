@@ -37,7 +37,6 @@ const initialValues = (line) => ({
   removed: new Set((line?.exclusiones ?? []).map((item) => exclusionKey(item.idProducto, item.idInsumo))),
 });
 
-// Elige cantidad, consumo e ingredientes a quitar de un producto o combo antes de sumarlo al pedido
 function PickerForm({picker, onConfirm, onClose}) {
   const {kind, item, line} = picker;
   const [values, setValues] = useState(() => initialValues(line));
