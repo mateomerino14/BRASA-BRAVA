@@ -14,13 +14,12 @@ export function HomePage() {
   const allowed = flattenNavigation(filterNavigation(NAVIGATION, user?.permissions));
   const shortcuts = allowed.filter((item) => item.permission !== 'home');
   const canCashier = shortcuts.some((item) => item.permission === 'caja');
-  const canKitchen = shortcuts.some((item) => item.permission === 'cocina');
-  const summary = useDaySummary({canCashier, canKitchen});
+  const summary = useDaySummary({canCashier});
 
   return (
     <div className={styles.page}>
       <WelcomeCard name={user?.nombre} />
-      {(canCashier || canKitchen) && <DaySummary summary={summary} showCashier={canCashier} showKitchen={canKitchen} />}
+      {canCashier && <DaySummary summary={summary} />}
       {shortcuts.length > 0 && <QuickAccessGrid items={shortcuts} />}
     </div>
   );

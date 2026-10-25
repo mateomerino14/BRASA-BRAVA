@@ -124,7 +124,7 @@ src/
 │   ├── sections/              Secciones del local y sus mesas
 │   ├── promotions/            Promociones: combos con vigencia
 │   ├── sales/                 Caja: plano de mesas, catálogo del día y registro de pedidos
-│   ├── kitchen/               Cocina: envíos de las ventas abiertas y unidades listas
+│   ├── kitchen/               Lo que falta en cocina y marcar listos (lo usa Caja)
 │   ├── settings/              Ajustes del local (enlace a la página de impuestos)
 │   ├── catalog/               Familia: catálogo del local con receta y stock
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
@@ -209,25 +209,26 @@ tests/                       Pruebas de la API y unitarias
 | `PATCH` | `/api/promotions/:id/status` | Da de baja o reactiva una promoción |
 | `PUT` | `/api/promotions/:id/image` | Sube o reemplaza la foto |
 | `DELETE` | `/api/promotions/:id/image` | Quita la foto |
-| `GET` | `/api/sales/floor` | Secciones activas con sus mesas, la venta abierta de cada una (total, unidades, mesero, hora de apertura) y `summary` (`mesas`, `ocupadas`, `libres`, `porCobrar`) |
+| `GET` | `/api/sales/floor` | Secciones activas con sus mesas, la venta abierta de cada una (total, unidades, mesero, hora de apertura y `esperaDesde`, la hora del envío pendiente más antiguo o `null` si cocina ya sacó todo) y `summary` (`mesas`, `ocupadas`, `libres`, `porCobrar`) |
 | `GET` | `/api/sales/catalog` | Lo que se vende hoy: categorías, productos activos con disponibilidad, porciones e ingredientes de su receta, y promociones vigentes hoy con su precio y productos |
 | `GET` | `/api/sales/waiters` | Empleados activos que pueden atender mesas (su cargo tiene acceso a Caja) |
 | `GET` | `/api/sales/tables/:idMesa` | Mesa con su sección y su venta abierta (`null` si está libre) con todas sus líneas agrupables por envío |
 | `POST` | `/api/sales/tables/:idMesa/orders` | Registra un envío a cocina: abre la venta si la mesa está libre o suma las líneas a la abierta, y descuenta el stock. Responde `nueva`, el número de `envio` y `sinStock` (insumos que no alcanzaron) |
 | `POST` | `/api/sales/tables/:idMesa/checkout` | Cobra la venta abierta de la mesa: `pagos` (`efectivo`, `qr` o ambos, con `monto`) y `recibido` opcional (efectivo entregado). Responde el `ticket` |
-| `GET` | `/api/sales/:idVenta/receipt` | Ticket de una venta para reimprimirlo |
+| `GET` | `/api/sales/:idVenta/receipt` | Ticket de una venta para reimprimirlo, con sus `impresiones` |
+| `POST` | `/api/sales/:idVenta/prints` | Registra una impresión del ticket. Las 3 primeras salen directo; desde la 4.ª exige `alias` y `contrasena` de un empleado activo cuyo cargo tenga `reimpresion` (403 `motivo: autorizacion` con las `impresiones` anteriores si faltan; 400 con `campo` si están mal). El DIRECTORIO no necesita autorización |
 | `GET` | `/api/sales/today` | Ventas cobradas hoy (día del local) con sus pagos y `resumen` (`cantidad`, `total`, `efectivo`, `qr`) |
 | `GET` | `/api/catalog` | Catálogo de Familia: categorías activas con sus subcategorías, productos activos (disponibilidad y porciones) y promociones activas que no vencieron (`vigencia`, precio, productos), primero las de hoy |
 | `GET` | `/api/catalog/products/:id` | Producto con su receta: cantidad por porción, stock, nivel y porciones que alcanza cada insumo |
 | `GET` | `/api/settings` | Ajustes del local (`enlaceImpuestos`); cualquier sesión |
 | `PUT` | `/api/settings` | Cambia el enlace a la página de impuestos (permiso `administracion`) |
-| `GET` | `/api/kitchen/orders` | Envíos de las ventas abiertas (mesa, sección, mesero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
+| `GET` | `/api/kitchen/orders` | (permiso `caja`) Envíos de las ventas abiertas (mesa, sección, mesero, hora, `modificadoPor`, líneas sin precios con `listos`) con su `estado` (`preparacion` o `listo`): primero los que más esperan, después los listos más recientes. Incluye `summary` |
 | `PATCH` | `/api/kitchen/lines/:id` | Cambia las unidades listas de una línea: `accion` = `sumar`, `restar`, `todos` o `ninguno`. Responde la lista actualizada |
 | `PATCH` | `/api/kitchen/shipments/:idVenta/:envio` | Marca todo el envío como listo (`todos`) o lo devuelve a preparación (`ninguno`) |
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y las opciones de cargos exigen el permiso `empleados`; la gestión de cargos, el permiso `cargos`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja, el permiso `caja`; las de cocina, el permiso `cocina`; las del catálogo, el permiso `familia`.
+Las rutas de empleados y las opciones de cargos exigen el permiso `empleados`; la gestión de cargos, el permiso `cargos`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja y las de `/api/kitchen`, el permiso `caja`; las del catálogo, el permiso `familia`.
 
 ### Parámetros comunes de los listados
 
@@ -316,12 +317,19 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 - El ticket junta las líneas iguales (mismo nombre, precio y consumo) y lleva todo lo acumulado de la mesa, los pagos, lo recibido, el cambio y "MODIFICADO POR" si hubo más de un envío.
 - "Hoy" para las ventas del día es el día del local (`TIMEZONE`): se convierte a un rango UTC (`utils/calendar.js`, `localDayRange`).
 
+### Impresiones del ticket
+
+- Cada impresión del ticket de cobro queda en `ticket_impresion` con su número, quién la imprimió y la hora. Se numeran dentro de una transacción con la venta bloqueada.
+- Las 3 primeras salen sin pedir nada. Desde la 4.ª hace falta el usuario y la contraseña de un empleado autorizado (cargo con `reimpresion`), que queda registrado en `autorizado_por`. El DIRECTORIO imprime sin autorización.
+- La comanda de cocina no cuenta: se puede reimprimir cuando haga falta.
+
 ### Reglas de cocina
 
+- Cocina no tiene pantalla: recibe la comanda impresa y el cajero marca en Caja lo que sale.
 - Cada línea guarda cuántas unidades ya están listas (`listos`, de 0 a la cantidad pedida). Sumar y restar se hacen en una sola sentencia que nunca pasa de la cantidad ni baja de 0, así dos cocineros tocando a la vez no se pisan.
 - Un envío está **listo** cuando todas sus unidades lo están; si se desmarca una, vuelve solo a **preparación**.
 - Solo se cambian líneas de ventas abiertas. Caja ve el avance en cada línea (`listos`) y en el plano de mesas (`listos` de la venta).
-- La pantalla `cocina` es nueva: la migración se la da a los cargos Administrador y Cocinero que ya existían.
+- La migración 014 quita el permiso `cocina` de todos los cargos (la pantalla ya no existe) y da `reimpresion` a los cargos que tienen `administracion`.
 
 ## Autorización
 
@@ -330,9 +338,10 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 | Pantalla | Clave |
 |---|---|
 | Home | `home` (todos los cargos) |
-| Familia, Caja, Cocina | `familia`, `caja`, `cocina` |
+| Familia, Caja (con marcar listos de cocina) | `familia`, `caja` |
 | Administración | `productos`, `secciones`, `stock`, `categorias`, `promociones`, `empleados`, `cargos` |
 | Enlace de impuestos en Caja | `administracion` |
+| Autorizar la reimpresión del ticket desde la 4.ª vez | `reimpresion` |
 
 ## Sesión y seguridad
 

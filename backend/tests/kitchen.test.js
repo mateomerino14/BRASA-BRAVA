@@ -5,17 +5,17 @@ import {loginAs} from './helpers/session.js';
 
 const NOW = new Date('2026-10-14T00:00:00Z');
 
-describe('Cocina: pedidos pendientes', () => {
+describe('Caja: lo que falta en cocina y marcar listos', () => {
   let ctx;
-  let cocinero;
+  let cajero;
 
   const start = async () => {
     ctx = await createTestApp({clock: () => NOW});
-    cocinero = await loginAs(ctx.app, 'r.sanchez');
+    cajero = await loginAs(ctx.app, 'a.romero');
   };
   afterEach(() => ctx.db.close());
 
-  const api = (method, url, session = cocinero) => request(ctx.app)[method](url).set('authorization', session.authorization);
+  const api = (method, url, session = cajero) => request(ctx.app)[method](url).set('authorization', session.authorization);
   const lineId = async (name, mesa) => (await ctx.db.query(
     `SELECT d.id_detalle AS id FROM venta_detalle d JOIN venta v ON v.id_venta = d.id_venta JOIN mesa m ON m.id_mesa = v.id_mesa
       WHERE d.nombre = $1 AND m.nombre = $2 ORDER BY d.id_detalle LIMIT 1`,
@@ -23,14 +23,13 @@ describe('Cocina: pedidos pendientes', () => {
   )).rows[0].id;
   const shipment = (body, mesa) => body.envios.find((item) => item.mesa === mesa);
 
-  it('exige sesión y el permiso de cocina', async () => {
+  it('exige sesión y el permiso de caja; el cocinero ya no entra', async () => {
     await start();
     expect((await request(ctx.app).get('/api/kitchen/orders')).status).toBe(401);
-    const cajero = await loginAs(ctx.app, 'a.romero');
-    expect((await api('get', '/api/kitchen/orders', cajero)).status).toBe(403);
-    expect(cocinero.user.permissions).toEqual(['home', 'familia', 'cocina']);
-    const admin = await loginAs(ctx.app, 'admin');
-    expect((await api('get', '/api/kitchen/orders', admin)).status).toBe(200);
+    const cocinero = await loginAs(ctx.app, 'r.sanchez');
+    expect(cocinero.user.permissions).toEqual(['home', 'familia']);
+    expect((await api('get', '/api/kitchen/orders', cocinero)).status).toBe(403);
+    expect((await api('get', '/api/kitchen/orders')).status).toBe(200);
   });
 
   it('lista los envíos de las ventas abiertas con su avance, del que más espera al más reciente', async () => {

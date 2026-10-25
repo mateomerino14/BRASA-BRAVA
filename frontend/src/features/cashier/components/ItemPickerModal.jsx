@@ -113,8 +113,8 @@ function PickerForm({picker, onConfirm, onClose}) {
         <Amount prefix="Bs" size="lg" value={formatAmount(addAmounts(item.precio * values.cantidad))} />
       </div>
       <div className={styles.actions}>
-        <Button variant="outline" onClick={onClose}>Cancelar</Button>
-        <Button onClick={confirm}>{line ? 'Guardar cambios' : 'Agregar al pedido'}</Button>
+        <Button variant="outline" action="cancel" onClick={onClose}>Cancelar</Button>
+        <Button action={line ? 'save' : 'add'} onClick={confirm}>{line ? 'Guardar cambios' : 'Agregar al pedido'}</Button>
       </div>
     </div>
   );
@@ -129,7 +129,7 @@ export function ItemPickerModal({picker, onConfirm, onClose}) {
     }
   }
   return (
-    <Modal open={picker.open} closeButton={false} onClose={onClose} title={picker.item?.nombre ?? ''} description={description || undefined} size="lg">
+    <Modal open={picker.open} onClose={onClose} title={picker.item?.nombre ?? ''} description={description || undefined} size="lg">
       {picker.item && <PickerForm key={picker.session} picker={picker} onConfirm={onConfirm} onClose={onClose} />}
     </Modal>
   );

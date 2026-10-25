@@ -1,4 +1,4 @@
-import {WAIT_DANGER_MINUTES, WAIT_WARNING_MINUTES} from '../constants/kitchen';
+import {WAIT_DANGER_MINUTES, WAIT_WARNING_MINUTES} from '../constants/cashier';
 
 const MINUTE_MS = 60000;
 

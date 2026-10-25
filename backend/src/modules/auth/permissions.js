@@ -1,9 +1,8 @@
-// Pantallas del sistema que se asignan a los cargos
+// Pantallas del sistema que se asignan a los cargos; "administracion" y "reimpresion" son permisos dentro de Caja
 export const SCREENS = Object.freeze([
   'home',
   'familia',
   'caja',
-  'cocina',
   'administracion',
   'productos',
   'secciones',
@@ -12,6 +11,7 @@ export const SCREENS = Object.freeze([
   'promociones',
   'empleados',
   'cargos',
+  'reimpresion',
 ]);
 
 // Pantallas que se marcan en un cargo (home lo tienen todos)

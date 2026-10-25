@@ -35,7 +35,7 @@ const styles = {
 const paymentText = (pagos) => pagos.map((item) => PAYMENT_LABELS[item.metodo]).join(' + ');
 
 // Ventas cobradas hoy con totales por método, reimpresión del ticket y enlace a impuestos
-export function TodaySalesModal({sales, canEditLink}) {
+export function TodaySalesModal({sales, canEditLink, authorizePrint}) {
   const {resumen} = sales;
   const tiles = [
     ['Ventas', String(resumen.cantidad)],
@@ -45,7 +45,14 @@ export function TodaySalesModal({sales, canEditLink}) {
   ];
   return (
     <>
-      <Modal open={sales.open} onClose={sales.close} title="Ventas de hoy" description={`${countText(resumen.cantidad, 'venta cobrada', 'ventas cobradas')}`} size="lg">
+      <Modal
+        open={sales.open}
+        onClose={sales.close}
+        title="Ventas de hoy"
+        description={`${countText(resumen.cantidad, 'venta cobrada', 'ventas cobradas')}`}
+        size="lg"
+        footer={<Button variant="outline" action="close" fullWidth onClick={sales.close}>Cerrar</Button>}
+      >
         <div className={styles.body}>
           {sales.error && <Alert tone="error">{sales.error}</Alert>}
           {sales.loading ? (
@@ -97,15 +104,22 @@ export function TodaySalesModal({sales, canEditLink}) {
                 {(field) => <Input {...field} type="url" value={sales.linkDraft} onChange={(event) => sales.changeLink(event.target.value)} />}
               </FormField>
               <div className={styles.linkActions}>
-                <Button variant="outline" size="sm" onClick={sales.cancelLink}>Cancelar</Button>
-                <Button size="sm" loading={sales.savingLink} onClick={sales.saveLink}>Guardar enlace</Button>
+                <Button variant="outline" size="sm" action="cancel" onClick={sales.cancelLink}>Cancelar</Button>
+                <Button size="sm" action="save" loading={sales.savingLink} onClick={sales.saveLink}>Guardar enlace</Button>
               </div>
             </div>
           )}
         </div>
       </Modal>
 
-      <PrintPreview open={sales.receipt.open} title="Ticket de venta" description="Reimpresión" destino="caja" onClose={sales.closeReceipt}>
+      <PrintPreview
+        open={sales.receipt.open}
+        title="Ticket de venta"
+        description="Reimpresión"
+        destino="caja"
+        guard={sales.receipt.ticket ? () => authorizePrint(sales.receipt.ticket) : undefined}
+        onClose={sales.closeReceipt}
+      >
         {sales.receipt.ticket && <ReceiptTicket ticket={sales.receipt.ticket} printedAt={sales.receipt.printedAt} />}
       </PrintPreview>
     </>

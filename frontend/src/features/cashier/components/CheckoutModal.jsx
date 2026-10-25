@@ -42,7 +42,7 @@ export function CheckoutModal({checkout, venta, mesa}) {
   };
   const cash = parseCashSplit(values, total);
   return (
-    <Modal closeButton={false} open={checkout.open} onClose={checkout.close} title={`Cobrar ${mesa.nombre}`} description={`Pedido Nº ${venta.numero}`} size="lg">
+    <Modal open={checkout.open} onClose={checkout.close} title={`Cobrar ${mesa.nombre}`} description={`Pedido Nº ${venta.numero}`} size="lg">
       <div className={styles.layout}>
         <section aria-label="Vista previa del ticket" className={styles.paper}>
           <ReceiptTicket ticket={preview} printedAt={new Date()} />
@@ -96,8 +96,8 @@ export function CheckoutModal({checkout, venta, mesa}) {
 
           {checkout.error && <Alert tone="error">{checkout.error}</Alert>}
           <div className={styles.actions}>
-            <Button variant="outline" onClick={checkout.close} disabled={checkout.saving}>Cancelar</Button>
-            <Button onClick={checkout.confirm} loading={checkout.saving}>Cobrar Bs {formatAmount(addAmounts(total))}</Button>
+            <Button variant="outline" action="cancel" onClick={checkout.close} disabled={checkout.saving}>Cancelar</Button>
+            <Button action="charge" onClick={checkout.confirm} loading={checkout.saving}>Cobrar Bs {formatAmount(addAmounts(total))}</Button>
           </div>
         </div>
       </div>
