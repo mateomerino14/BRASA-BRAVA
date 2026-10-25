@@ -127,7 +127,7 @@ describe('Caja: cobro, ticket y ventas del día', () => {
     expect((await api('get', '/api/settings')).body.enlaceImpuestos).toBe('https://siat.impuestos.gob.bo/nuevo');
   });
 
-  it('imprime el ticket tres veces y desde la cuarta pide un empleado autorizado, que queda registrado', async () => {
+  it('imprime el ticket tres veces y desde la cuarta pide cualquier empleado de Caja, que queda registrado', async () => {
     await start();
     await readyAll();
     const {body} = await checkout('Terraza 1', {pagos: [{metodo: 'qr', monto: 103}]});
@@ -138,18 +138,18 @@ describe('Caja: cobro, ticket y ventas del día', () => {
     const blocked = await print();
     expect(blocked.status).toBe(403);
     expect(blocked.body.impresiones.map((item) => item.impresoPor)).toEqual(['a.romero', 'a.romero', 'a.romero']);
-    expect(blocked.body).toMatchObject({motivo: 'autorizacion', message: 'Este ticket ya se imprimió 3 veces. Un empleado autorizado debe ingresar su usuario y contraseña'});
+    expect(blocked.body).toMatchObject({motivo: 'autorizacion', message: 'Este ticket ya se imprimió 3 veces. Un empleado con acceso a Caja debe ingresar su usuario y contraseña'});
     const wrong = await print({alias: 'admin', contrasena: 'otra'});
     expect(wrong.status).toBe(400);
     expect(wrong.body.campo).toBe('contrasena');
-    const notAllowed = await print({alias: 'c.mendoza', contrasena: 'Brasa2026'});
+    const notAllowed = await print({alias: 'r.sanchez', contrasena: 'Brasa2026'});
     expect(notAllowed.status).toBe(403);
-    expect(notAllowed.body.message).toBe('Su cargo no puede autorizar reimpresiones');
-    const allowed = await print({alias: 'ADMIN', contrasena: 'Brasa2026'});
+    expect(notAllowed.body.message).toBe('Solo puede autorizar un empleado con acceso a Caja');
+    const allowed = await print({alias: 'C.MENDOZA', contrasena: 'Brasa2026'});
     expect(allowed.status).toBe(201);
     expect(allowed.body.numero).toBe(4);
     expect(allowed.body.impresiones[3]).toMatchObject({numero: 4, impresoPor: 'a.romero'});
-    expect(allowed.body.impresiones[3].autorizadoPor).toBeTruthy();
+    expect(allowed.body.impresiones[3].autorizadoPor).toBe('Carlos Mendoza');
     const receipt = await api('get', `/api/sales/${body.ticket.id}/receipt`);
     expect(receipt.body.ticket.impresiones).toHaveLength(4);
     const directorio = await loginAs(ctx.app, 'DIRECTORIO');

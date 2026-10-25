@@ -343,12 +343,12 @@ export const createSalesRepository = (db) => ({
     );
   },
 
-  // Empleado activo por alias con su contraseña y si su cargo puede autorizar reimpresiones
+  // Empleado activo por alias con su contraseña y si su cargo tiene acceso a Caja (puede autorizar reimpresiones)
   findAuthorizer: async (alias) => {
     const {rows} = await db.query(
       `SELECT e.id_empleado, e.nombre, e.apellido, e.contrasena_hash, p.pantalla IS NOT NULL AS puede
          FROM empleado e JOIN cargo c ON c.id_cargo = e.id_cargo
-         LEFT JOIN cargo_permiso p ON p.id_cargo = c.id_cargo AND p.pantalla = 'reimpresion'
+         LEFT JOIN cargo_permiso p ON p.id_cargo = c.id_cargo AND p.pantalla = 'caja'
         WHERE LOWER(e.alias) = LOWER($1) AND e.activo = TRUE AND c.activo = TRUE`,
       [alias],
     );

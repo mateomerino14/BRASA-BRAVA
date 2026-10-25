@@ -1,4 +1,4 @@
-import {Boxes, Database, FolderTree, Link2, LayoutGrid, Package, Percent, Printer, ShieldCheck, ShoppingCart, UsersRound} from 'lucide-react';
+import {Boxes, Database, FolderTree, Link2, LayoutGrid, Package, Percent, ShieldCheck, ShoppingCart, UsersRound} from 'lucide-react';
 
 export {STATUS_OPTIONS} from '../../../config/lists';
 
@@ -14,8 +14,7 @@ export const SCREEN_GROUPS = [
     title: 'Operación del local',
     screens: [
       {id: 'familia', label: 'Familia', hint: 'Consultar productos, recetas y stock', icon: Boxes},
-      {id: 'caja', label: 'Caja', hint: 'Mesas, pedidos, cocina y cobro', icon: ShoppingCart},
-      {id: 'reimpresion', label: 'Autorizar reimpresiones', hint: 'Dar su usuario para imprimir el ticket desde la 4.ª vez', icon: Printer},
+      {id: 'caja', label: 'Caja', hint: 'Mesas, pedidos, cocina, cobro y autorizar reimpresiones', icon: ShoppingCart},
     ],
   },
   {
