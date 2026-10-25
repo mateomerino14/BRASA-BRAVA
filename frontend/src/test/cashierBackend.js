@@ -23,11 +23,6 @@ export const CATALOG = {
   ],
 };
 
-const WAITERS = [
-  {id: 1, nombre: 'Carlos Mendoza', cargo: 'Mesero'},
-  {id: 2, nombre: 'Andrea Romero', cargo: 'Cajero'},
-];
-
 const TABLES = [
   {id: 1, nombre: 'Mesa 1', capacidad: 4, seccion: {id: 1, nombre: 'Salón principal'}},
   {id: 2, nombre: 'Mesa 2', capacidad: 4, seccion: {id: 1, nombre: 'Salón principal'}},
@@ -42,18 +37,13 @@ const comboProducts = (line) => {
   return CATALOG.promociones.find((entry) => entry.id === (line.idPromocion ?? line.id)).productos.map((item) => ({nombre: item.nombre, cantidad: item.cantidad}));
 };
 
-const detail = (id, envio, line, mesero, creadoEn) => ({
+const detail = (id, envio, line, cajero, creadoEn) => ({
   productos: comboProducts(line),
   listos: line.listos ?? 0,
   id, envio, tipo: line.tipo, idProducto: line.idProducto ?? null, idPromocion: line.idPromocion ?? null,
   nombre: line.nombre, precioUnitario: line.precio, cantidad: line.cantidad, subtotal: line.precio * line.cantidad,
-  consumo: line.consumo, mesero, creadoEn, exclusiones: line.exclusiones ?? [],
+  consumo: line.consumo, cajero, creadoEn, exclusiones: line.exclusiones ?? [],
 });
-
-const waiterOf = (id) => {
-  const found = WAITERS.find((item) => item.id === id);
-  return {id: found.id, nombre: found.nombre};
-};
 
 // Busca un producto o una promoción del catálogo para armar una línea con nombre y precio
 const lineFrom = (item) => {
@@ -76,11 +66,11 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
   const openedAt = new Date(now - 25 * MINUTE_MS).toISOString();
   const sales = {
     2: {
-      id: 7, numero: 7, total: 105, envios: 1, abiertaEn: openedAt, cajero: 'a.romero', mesero: waiterOf(1),
-      modificado: false, modificadoPor: null, comandas: [{envio: 1, cajero: 'a.romero', mesero: waiterOf(1), creadoEn: openedAt}],
+      id: 7, numero: 7, total: 105, envios: 1, abiertaEn: openedAt, cajero: 'a.romero',
+      modificado: false, modificadoPor: null, comandas: [{envio: 1, cajero: 'a.romero', creadoEn: openedAt}],
       detalles: [
-        detail(1, 1, {tipo: 'producto', idProducto: 11, nombre: 'Hamburguesa Clásica', precio: 35, cantidad: 1, listos: 1, consumo: 'local', exclusiones: [{idProducto: 11, producto: 'Hamburguesa Clásica', idInsumo: 4, insumo: 'Tomate'}]}, waiterOf(1), openedAt),
-        detail(2, 1, {tipo: 'promocion', idPromocion: 2, nombre: 'Combo Brava', precio: 70, cantidad: 1, consumo: 'local'}, waiterOf(1), openedAt),
+        detail(1, 1, {tipo: 'producto', idProducto: 11, nombre: 'Hamburguesa Clásica', precio: 35, cantidad: 1, listos: 1, consumo: 'local', exclusiones: [{idProducto: 11, producto: 'Hamburguesa Clásica', idInsumo: 4, insumo: 'Tomate'}]}, 'a.romero', openedAt),
+        detail(2, 1, {tipo: 'promocion', idPromocion: 2, nombre: 'Combo Brava', precio: 70, cantidad: 1, consumo: 'local'}, 'a.romero', openedAt),
       ],
     },
   };
@@ -100,7 +90,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       lines.set(key, current);
     }
     return {
-      id: sale.id, numero: sale.numero, estado: 'cobrada', mesa: table.nombre, seccion: table.seccion.nombre, mesero: sale.mesero.nombre,
+      id: sale.id, numero: sale.numero, estado: 'cobrada', mesa: table.nombre, seccion: table.seccion.nombre,
       cajero: sale.cajero, cobrador: 'admin', modificadoPor: sale.modificadoPor, abiertaEn: sale.abiertaEn, cerradaEn: new Date(now).toISOString(),
       total: sale.total, lineas: [...lines.values()], ...payment,
     };
@@ -120,7 +110,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       let venta = null;
       if (sale) {
         const waiting = sale.detalles.filter((item) => item.listos < item.cantidad).map((item) => item.creadoEn).sort();
-        venta = {id: sale.id, total: sale.total, unidades: sale.detalles.reduce((total, item) => total + item.cantidad, 0), listos: sale.detalles.reduce((total, item) => total + item.listos, 0), mesero: sale.mesero.nombre, abiertaEn: sale.abiertaEn, esperaDesde: waiting[0] ?? null};
+        venta = {id: sale.id, total: sale.total, unidades: sale.detalles.reduce((total, item) => total + item.cantidad, 0), listos: sale.detalles.reduce((total, item) => total + item.listos, 0), cajero: sale.cajero, abiertaEn: sale.abiertaEn, esperaDesde: waiting[0] ?? null};
       }
       section.mesas.push({id: table.id, nombre: table.nombre, capacidad: table.capacidad, venta});
     }
@@ -131,7 +121,6 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
   const handlers = {
     'GET /sales/floor': () => [200, floor()],
     'GET /sales/catalog': () => [200, CATALOG],
-    'GET /sales/waiters': () => [200, {meseros: WAITERS}],
     'GET /sales/today': () => [200, {
       hoy: '2026-10-13',
       ventas: closed.map((ticket) => ({id: ticket.id, numero: ticket.numero, mesa: ticket.mesa, cobrador: ticket.cobrador, cerradaEn: ticket.cerradaEn, total: ticket.total, pagos: ticket.pagos})),
@@ -225,12 +214,12 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       const created = !sales[table.id];
       const stamp = new Date(now).toISOString();
       if (created) {
-        sales[table.id] = {id: nextSale, numero: nextSale, total: 0, envios: 0, abiertaEn: stamp, cajero: 'admin', mesero: waiterOf(body.idMesero), modificado: false, modificadoPor: null, comandas: [], detalles: []};
+        sales[table.id] = {id: nextSale, numero: nextSale, total: 0, envios: 0, abiertaEn: stamp, cajero: 'admin', modificado: false, modificadoPor: null, comandas: [], detalles: []};
         nextSale += 1;
       }
       const sale = sales[table.id];
       sale.envios += 1;
-      sale.comandas.push({envio: sale.envios, cajero: 'admin', mesero: waiterOf(body.idMesero), creadoEn: stamp});
+      sale.comandas.push({envio: sale.envios, cajero: 'admin', creadoEn: stamp});
       if (sale.envios > 1) {
         sale.modificado = true;
         sale.modificadoPor = 'admin';
@@ -238,7 +227,7 @@ export const createCashierBackend = ({now = Date.now()} = {}) => {
       for (const item of body.items) {
         nextDetail += 1;
         const line = lineFrom(item);
-        sale.detalles.push(detail(nextDetail, sale.envios, line, waiterOf(body.idMesero), stamp));
+        sale.detalles.push(detail(nextDetail, sale.envios, line, 'admin', stamp));
         sale.total += line.precio * line.cantidad;
       }
       return [201, {mesa: table, venta: structuredClone(sale), nueva: created, envio: sale.envios, sinStock: control.shortages}];

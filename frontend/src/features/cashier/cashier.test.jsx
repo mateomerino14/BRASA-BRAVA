@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from 'vitest';
 import {screen, waitFor, within} from '@testing-library/react';
 import {renderApp} from '../../test/renderApp';
-import {USERS, mockApi} from '../../test/mockApi';
+import {mockApi} from '../../test/mockApi';
 import {createCashierBackend} from '../../test/cashierBackend';
 import {setViewport} from '../../test/viewport';
 import {addLine, exclusionText, groupByShipment, lineKey, toOrderPayload} from './utils/cart';
@@ -191,21 +191,18 @@ describe('Caja: armado del pedido', () => {
     expect(within(panel()).getByRole('button', {name: 'Enviar a cocina'})).toBeDisabled();
   });
 
-  it('pide el mesero y abre la venta de una mesa libre', async () => {
+  it('abre la venta de una mesa libre sin pedir mesero: solo queda quién la registró', async () => {
     const {user, backend} = await openTable('Mesa 1');
+    expect(within(panel()).queryByLabelText(/^Mesero/)).not.toBeInTheDocument();
     await addItem(user, 'Hamburguesa Clásica', {remove: ['Lechuga']});
-    await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
-    expect(await within(panel()).findByText('Elija el mesero que atiende la mesa')).toBeInTheDocument();
-    expect(backend.calls.orders).toHaveLength(0);
-
-    await user.selectOptions(within(panel()).getByLabelText(/^Mesero/), 'Carlos Mendoza · Mesero');
     await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
     expect(await screen.findByText('Se abrió Mesa 1 con el pedido Nº 8 y se envió a cocina')).toBeInTheDocument();
     const print = vi.spyOn(window, 'print').mockImplementation(() => {});
     const dialog = await screen.findByRole('dialog', {name: 'Comanda de cocina'});
     const ticket = within(dialog).getByRole('article', {name: 'Comanda del envío 1'});
     expect(within(ticket).getByText('Pedido Nº 8 · Envío 1')).toBeInTheDocument();
-    expect(within(ticket).getByText('Mesero: Carlos Mendoza')).toBeInTheDocument();
+    expect(within(ticket).queryByText(/Mesero/)).not.toBeInTheDocument();
+    expect(within(ticket).getByText('Cajero: admin')).toBeInTheDocument();
     expect(within(ticket).getByText('sin: lechuga')).toBeInTheDocument();
     expect(within(ticket).queryByText(/MODIFICADO/)).not.toBeInTheDocument();
     expect(within(ticket).queryByText(/Bs/)).not.toBeInTheDocument();
@@ -215,20 +212,19 @@ describe('Caja: armado del pedido', () => {
     await user.click(within(dialog).getByRole('button', {name: 'Cerrar'}));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(document.querySelector('.print-only')).toBeNull();
-    expect(backend.calls.orders[0]).toEqual({idMesa: 1, body: {idMesero: 1, items: [{tipo: 'producto', id: 11, cantidad: 1, consumo: 'local', exclusiones: [{idProducto: 11, idInsumo: 5}]}]}});
+    expect(backend.calls.orders[0]).toEqual({idMesa: 1, body: {items: [{tipo: 'producto', id: 11, cantidad: 1, consumo: 'local', exclusiones: [{idProducto: 11, idInsumo: 5}]}]}});
     expect(within(panel()).getByText('Pedido Nº 8')).toBeInTheDocument();
     expect(within(panel()).getByText('Toque un producto del menú para agregarlo.')).toBeInTheDocument();
     expect(within(panel()).getByText('Sin lechuga')).toBeInTheDocument();
   });
 
-  it('suma un envío a la mesa ocupada con su mesero y muestra lo ya registrado', async () => {
+  it('suma un envío a la mesa ocupada y muestra lo ya registrado con quién registró cada envío', async () => {
     const {user, backend} = await openTable('Mesa 2');
     expect(within(panel()).getByText('Pedido Nº 7')).toBeInTheDocument();
-    expect(within(panel()).getByLabelText(/^Mesero/)).toHaveValue('1');
     const toggle = within(panel()).getByRole('button', {name: /Registrado/});
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(toggle).toHaveTextContent('1 envío · 2 u.');
-    expect(within(panel()).getByText(/^Envío 1 · \d{1,2}:\d{2} (AM|PM) · Carlos Mendoza$/)).toBeInTheDocument();
+    expect(within(panel()).getByText(/^Envío 1 · \d{1,2}:\d{2} (AM|PM) · Registró: a\.romero$/)).toBeInTheDocument();
     expect(within(panel()).getByText('Sin tomate')).toBeInTheDocument();
     expect(within(panel()).getByText('Listo')).toBeInTheDocument();
     expect(within(panel()).getByText('0/1 listos')).toBeInTheDocument();
@@ -247,7 +243,7 @@ describe('Caja: armado del pedido', () => {
     await user.click(within(dialog).getByRole('button', {name: 'Cerrar'}));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(within(panel()).getByText('Modificado por admin')).toBeInTheDocument();
-    expect(within(panel()).getByText(/^Envío 2 · /)).toBeInTheDocument();
+    expect(within(panel()).getByText(/^Envío 2 · .* · Registró: admin$/)).toBeInTheDocument();
 
     await user.click(within(panel()).getByRole('button', {name: 'Reimprimir la comanda del envío 1'}));
     const reprint = await screen.findByRole('dialog', {name: 'Comanda de cocina'});
@@ -264,11 +260,6 @@ describe('Caja: armado del pedido', () => {
     await user.click(within(panel()).getByRole('button', {name: 'Enviar a cocina'}));
     expect(await screen.findByText('No alcanzó el stock de Lechuga: quedó en 0 y el pedido se envió igual.')).toBeInTheDocument();
     expect(screen.getByText('Revise el inventario')).toBeInTheDocument();
-  });
-
-  it('elige al usuario de la sesión como mesero si atiende mesas', async () => {
-    await openTable('Mesa 1', {user: USERS.cajero});
-    expect(within(panel()).getByLabelText(/^Mesero/)).toHaveValue('2');
   });
 
   it('muestra el error del servidor y conserva lo que faltaba registrar', async () => {
@@ -333,9 +324,8 @@ describe('Caja: utilidades del pedido', () => {
   });
 
   it('arma el cuerpo del envío y agrupa lo registrado por envío', () => {
-    expect(toOrderPayload('3', [{...base, key: 'k', exclusiones: [tomate]}])).toEqual({idMesero: 3, items: [{tipo: 'producto', id: 11, cantidad: 2, consumo: 'local', exclusiones: [{idProducto: 11, idInsumo: 4}]}]});
-    const mesero = {id: 1, nombre: 'Carlos Mendoza'};
-    const groups = groupByShipment([{id: 1, envio: 1, mesero, creadoEn: 'a'}, {id: 2, envio: 2, mesero, creadoEn: 'b'}, {id: 3, envio: 1, mesero, creadoEn: 'a'}]);
+    expect(toOrderPayload([{...base, key: 'k', exclusiones: [tomate]}])).toEqual({items: [{tipo: 'producto', id: 11, cantidad: 2, consumo: 'local', exclusiones: [{idProducto: 11, idInsumo: 4}]}]});
+    const groups = groupByShipment([{id: 1, envio: 1, cajero: 'a.romero', creadoEn: 'a'}, {id: 2, envio: 2, cajero: 'admin', creadoEn: 'b'}, {id: 3, envio: 1, cajero: 'a.romero', creadoEn: 'a'}]);
     expect(groups.map((group) => [group.envio, group.detalles.map((item) => item.id)])).toEqual([[1, [1, 3]], [2, [2]]]);
   });
 });

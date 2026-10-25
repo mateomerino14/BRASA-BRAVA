@@ -31,7 +31,6 @@ export function ReceiptTicket({ticket, printedAt}) {
       <p>Fecha: {dateFormatter.format(printedAt)} · Hora: {formatTime(printedAt)}</p>
       <p>Nro. Venta: {ticket.numero}</p>
       <p>{ticket.mesa} · {ticket.seccion}</p>
-      <p>Mesero: {ticket.mesero}</p>
       <p>Cajero: {ticket.cobrador ?? ticket.cajero}</p>
       <div className={styles.rule} />
       <p className={styles.head}>

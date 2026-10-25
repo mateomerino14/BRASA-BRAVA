@@ -37,7 +37,7 @@ export function CheckoutModal({checkout, venta, mesa}) {
   const {values, errors} = checkout;
   const total = venta.total;
   const preview = {
-    numero: venta.numero, mesa: mesa.nombre, seccion: mesa.seccion.nombre, mesero: venta.mesero.nombre, cajero: venta.cajero,
+    numero: venta.numero, mesa: mesa.nombre, seccion: mesa.seccion.nombre, cajero: venta.cajero,
     modificadoPor: venta.modificadoPor, total, lineas: receiptLines(venta.detalles), pagos: [], recibido: null,
   };
   const cash = parseCashSplit(values, total);
