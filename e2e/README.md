@@ -28,6 +28,8 @@ Los archivos corren en orden y comparten la misma base, porque cada uno sigue lo
 | `02-cashier.spec.js` | Abrir una mesa sin mesero, quitar ingredientes, Local y Para llevar, comanda impresa, segundo envío de otro cajero (Registró y Modificado por), Marcar listos, cobro en efectivo con cambio y Ventas de hoy; aviso al cambiar de mesa y Cobrar bloqueado mientras falta algo |
 | `03-reports.spec.js` | Resumen del día, detalle de la venta con la columna Consumo y quién registró cada envío, PDF, filtro por empleado, envío por correo y envíos programados del DIRECTORIO |
 | `04-deletion.spec.js` | Eliminación física en cascada (empleado, sección con sus mesas y venta cobrada) con la palabra ELIMINAR, la venta borrada que desaparece de Reportes y el acceso solo para el DIRECTORIO |
+| `05-administration.spec.js` | Registro de una categoría con su subcategoría y un permiso nuevo del cargo que aparece en el menú de sus empleados |
+| `06-ticket-reprint.spec.js` | Las 3 impresiones directas del ticket y la 4.ª con usuario y contraseña de un empleado con Caja (rechaza una contraseña incorrecta sin imprimir) |
 
 La impresión se reemplaza por un contador (`stubPrinting`) para no abrir el diálogo del navegador, y el correo usa `MAIL_DRIVER=console`.
 
