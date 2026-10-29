@@ -1,4 +1,3 @@
-// Lucide ya no incluye íconos de marcas, así que se dibujan aquí
 const PATHS = {
   facebook: 'M14 8h3V4h-3c-2.8 0-4.5 1.9-4.5 4.6V11H7v4h2.5v9h4v-9H17l.5-4h-4V8.8c0-.5.3-.8.5-.8Z',
   instagram:

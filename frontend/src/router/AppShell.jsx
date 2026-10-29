@@ -3,6 +3,8 @@ import {Outlet, matchPath, useLocation, useNavigate} from 'react-router';
 import {MainLayout} from '../components/templates/MainLayout';
 import {useAuth} from '../context/useAuth';
 import {NAVIGATION, filterNavigation, flattenNavigation} from '../config/navigation';
+import {DirectorioPasswordModal} from '../features/auth/components/DirectorioPasswordModal';
+import {useDirectorioPassword} from '../features/auth/hooks/useDirectorioPassword';
 
 const COLLAPSED_KEY = 'brasa.sidebarCollapsed';
 const ROUTES = flattenNavigation(NAVIGATION);
@@ -17,6 +19,11 @@ export function AppShell() {
   const {pathname} = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSED_KEY) === '1');
+  const directorioPassword = useDirectorioPassword();
+  let changePassword;
+  if (user?.isDirectorio) {
+    changePassword = directorioPassword.show;
+  }
 
   const toggleCollapsed = () => {
     const next = !collapsed;
@@ -35,11 +42,13 @@ export function AppShell() {
       user={user}
       title={titleFor(pathname)}
       onLogout={handleLogout}
+      onChangePassword={changePassword}
       collapsed={collapsed}
       onToggleCollapsed={toggleCollapsed}
       pageKey={pathname}
     >
       <Outlet />
+      <DirectorioPasswordModal form={directorioPassword} />
     </MainLayout>
   );
 }

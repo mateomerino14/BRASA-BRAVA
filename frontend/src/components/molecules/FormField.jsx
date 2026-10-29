@@ -5,9 +5,9 @@ import {cn} from '../../lib/cn';
 const styles = {
   field: 'flex flex-col gap-1.5',
   label: 'text-base font-semibold text-carbon',
-  required: 'text-rojo',
+  required: 'text-error',
   message: 'text-sm',
-  error: 'text-rojo',
+  error: 'font-medium text-error',
   hint: 'text-cafe',
 };
 

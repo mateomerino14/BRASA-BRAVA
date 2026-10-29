@@ -1,0 +1,175 @@
+import {useCallback, useEffect, useState} from 'react';
+import {useSearchParams} from 'react-router';
+import {useToast} from '../context/useToast';
+import {PAGE_SIZE, PAGE_SIZE_OPTIONS, SEARCH_DELAY_MS} from '../config/lists';
+
+const emptyResult = {items: [], total: 0};
+const SORT_DIRECTIONS = ['asc', 'desc'];
+const BASE_DEFAULTS = {search: '', page: '1', pageSize: String(PAGE_SIZE), sort: '', dir: 'asc'};
+
+const toPositiveInt = (value, fallback) => {
+  const number = Number(value);
+  if (Number.isInteger(number) && number > 0) {
+    return number;
+  }
+  return fallback;
+};
+
+const toPageSize = (value) => {
+  const size = Number(value);
+  if (PAGE_SIZE_OPTIONS.includes(size)) {
+    return size;
+  }
+  return PAGE_SIZE;
+};
+
+const toDirection = (value) => {
+  if (SORT_DIRECTIONS.includes(value)) {
+    return value;
+  }
+  return 'asc';
+};
+
+const nextSort = (current, key) => {
+  if (current.key !== key) {
+    return {sort: key, dir: 'asc'};
+  }
+  if (current.dir === 'asc') {
+    return {sort: key, dir: 'desc'};
+  }
+  return {sort: '', dir: 'asc'};
+};
+
+export function usePaginatedList({fetchPage, filterDefaults = {}}) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const toast = useToast();
+  const defaults = {...BASE_DEFAULTS, ...filterDefaults};
+  const defaultsKey = JSON.stringify(defaults);
+  const read = (key) => searchParams.get(key) ?? defaults[key];
+
+  const urlSearch = read('search');
+  const [search, setSearch] = useState(urlSearch);
+  const [lastUrlSearch, setLastUrlSearch] = useState(urlSearch);
+  const [result, setResult] = useState(emptyResult);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
+
+  if (urlSearch !== lastUrlSearch) {
+    setLastUrlSearch(urlSearch);
+    if (search.trim() !== urlSearch) {
+      setSearch(urlSearch);
+    }
+  }
+
+  const filters = Object.fromEntries(Object.keys(filterDefaults).map((key) => [key, read(key)]));
+  const page = toPositiveInt(read('page'), 1);
+  const pageSize = toPageSize(read('pageSize'));
+  const sort = {key: read('sort'), dir: toDirection(read('dir'))};
+  const query = {search: urlSearch, ...filters, page, pageSize};
+  if (sort.key) {
+    query.sort = sort.key;
+    query.dir = sort.dir;
+  }
+  const queryKey = JSON.stringify(query);
+
+  const updateParams = useCallback((changes) => {
+    const initial = JSON.parse(defaultsKey);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      Object.entries(changes).forEach(([key, value]) => {
+        const text = String(value ?? '');
+        if (text === '' || text === initial[key]) {
+          next.delete(key);
+        }
+        else {
+          next.set(key, text);
+        }
+      });
+      return next;
+    }, {replace: true});
+  }, [setSearchParams, defaultsKey]);
+
+  useEffect(() => {
+    const trimmed = search.trim();
+    if (trimmed === urlSearch) {
+      return undefined;
+    }
+    const timer = setTimeout(() => updateParams({search: trimmed, page: 1}), SEARCH_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [search, urlSearch, updateParams]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchPage(JSON.parse(queryKey));
+        if (!cancelled) {
+          setResult(data);
+          setError('');
+        }
+      }
+      catch (requestError) {
+        if (!cancelled) {
+          setResult(emptyResult);
+          setError(requestError.message);
+          toast.error(requestError.message, 'No se pudo cargar la lista');
+        }
+      }
+      if (!cancelled) {
+        setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchPage, queryKey, reloadKey, toast]);
+
+  const reload = (message) => {
+    if (message) {
+      toast.success(message);
+    }
+    setReloadKey((key) => key + 1);
+  };
+
+  const hasActiveFilters = Boolean(urlSearch) || Object.entries(filters).some(([key, value]) => value !== filterDefaults[key]);
+
+  const changeSort = (key, dir) => {
+    if (dir) {
+      updateParams({sort: key, dir, page: 1});
+    }
+    else {
+      updateParams({...nextSort(sort, key), page: 1});
+    }
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    updateParams({search: '', page: 1, ...filterDefaults});
+  };
+
+  return {
+    items: result.items,
+    response: result,
+    total: result.total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(result.total / pageSize)),
+    loading,
+    error,
+    filters: {search, ...filters},
+    sort,
+    hasActiveFilters,
+    changeSearch: setSearch,
+    changeFilter: (name, value) => updateParams({[name]: value, page: 1}),
+    changeFilters: (changes) => updateParams({...changes, page: 1}),
+    setPage: (value) => updateParams({page: value}),
+    changePageSize: (value) => updateParams({pageSize: value, page: 1}),
+    changeSort,
+    clearFilters,
+    reload,
+    reportError: (message, title) => toast.error(message, title),
+  };
+}

@@ -1,11 +1,12 @@
 import {motion} from 'motion/react';
 import {SocialIcon} from '../atoms/SocialIcon';
+import {SOCIAL_LINKS} from '../../config/socialLinks';
 
 const styles = {
-  footer: 'flex flex-wrap items-center justify-between gap-4 bg-carbon px-6 py-4 text-crema sm:px-10',
-  copyright: 'text-sm font-semibold sm:text-base',
-  list: 'flex gap-4',
-  link: 'flex size-11 items-center justify-center rounded-full bg-crema text-carbon transition-colors hover:bg-brasa hover:text-white',
+  footer: 'flex flex-wrap items-center justify-between gap-3 bg-carbon px-4 py-2 text-crema sm:px-10 sm:py-2.5',
+  copyright: 'text-xs font-semibold text-crema/90 sm:text-sm',
+  list: 'flex gap-2.5',
+  link: 'flex size-8 items-center justify-center rounded-full bg-crema text-carbon transition-colors hover:bg-brasa hover:text-white',
 };
 
 const SOCIALS = [
@@ -17,7 +18,7 @@ const SOCIALS = [
 const hoverTilt = {y: -3, rotate: -6};
 const tapPress = {scale: 0.9};
 
-export function Footer({links = {}}) {
+export function Footer({links = SOCIAL_LINKS}) {
   const year = new Date().getFullYear();
 
   return (
@@ -27,15 +28,15 @@ export function Footer({links = {}}) {
         {SOCIALS.map(({name, label}) => (
           <li key={name}>
             <motion.a
-              href={links[name] ?? '#'}
+              href={links[name]}
               target="_blank"
-              rel="noreferrer"
-              aria-label={label}
+              rel="noopener noreferrer"
+              aria-label={`${label} de Brasa Brava`}
               whileHover={hoverTilt}
               whileTap={tapPress}
               className={styles.link}
             >
-              <SocialIcon name={name} size={20} />
+              <SocialIcon name={name} size={16} />
             </motion.a>
           </li>
         ))}

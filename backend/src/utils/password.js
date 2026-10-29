@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 
 const SALT_ROUNDS = 10;
 
-// Hash de relleno para comparar cuando el usuario no existe y no revelarlo por tiempo de respuesta
+// Hash de relleno para no revelar por tiempo si el usuario existe
 export const DUMMY_HASH = bcrypt.hashSync('brasa-brava-dummy', SALT_ROUNDS);
 
 // Genera el hash bcrypt de un texto (contraseña o código)

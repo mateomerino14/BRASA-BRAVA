@@ -1,6 +1,8 @@
 import {useState} from 'react';
 import {fn} from 'storybook/test';
 import {Sidebar} from './Sidebar';
+import {MobileMenu} from './MobileMenu';
+import {MobileTopBar} from './MobileTopBar';
 import {Header} from './Header';
 import {Footer} from './Footer';
 import {Modal} from './Modal';
@@ -61,6 +63,28 @@ export const Encabezado = {
       onLogout={fn()}
     />
   ),
+};
+const ADMIN = {alias: 'admin', nombre: 'Marco Vargas', cargo: 'Administrador'};
+
+function MobileMenuDemo() {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="h-[700px] bg-lienzo">
+      <MobileTopBar title="Página principal" expanded={open} onToggle={() => setOpen(true)} />
+      <MobileMenu open={open} onClose={() => setOpen(false)} items={filterNavigation(NAVIGATION, ALL)} user={ADMIN} onLogout={fn()} title="Página principal" />
+    </div>
+  );
+}
+
+export const MenuDeCelular = {
+  parameters: {layout: 'fullscreen'},
+  globals: {viewport: {value: 'mobile2'}},
+  render: () => <MobileMenuDemo />,
+};
+export const BarraDeCelular = {
+  parameters: {layout: 'fullscreen'},
+  globals: {viewport: {value: 'mobile2'}},
+  render: () => <MobileTopBar title="Gestión de categorías" onToggle={fn()} />,
 };
 export const PieDePagina = {parameters: {layout: 'fullscreen'}, render: () => <Footer />};
 

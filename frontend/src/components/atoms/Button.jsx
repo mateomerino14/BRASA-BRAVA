@@ -1,9 +1,10 @@
 import {motion} from 'motion/react';
 import {cn} from '../../lib/cn';
 import {Spinner} from './Spinner';
+import {ACTION_ICONS} from '../../config/actionIcons';
 
 const styles = {
-  base: 'inline-flex select-none items-center justify-center gap-2 rounded-lg font-display tracking-wide transition-[background-color,box-shadow,color,border-color] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
+  base: 'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg font-display tracking-wide transition-[background-color,box-shadow,color,border-color] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
   fullWidth: 'w-full',
   variants: {
     primary: 'bg-brasa text-white hover:bg-brasa-oscuro hover:shadow-brasa',
@@ -19,6 +20,8 @@ const styles = {
   },
 };
 
+const ICON_SIZES = {sm: 16, md: 18, lg: 20};
+
 const hoverLift = {y: -2};
 const tapPress = {scale: 0.96};
 const springTransition = {type: 'spring', stiffness: 400, damping: 22};
@@ -30,6 +33,7 @@ export function Button({
   fullWidth = false,
   disabled,
   icon,
+  action,
   className,
   children,
   type = 'button',
@@ -37,6 +41,10 @@ export function Button({
 }) {
   const isDisabled = disabled || loading;
   let leading = icon;
+  const ActionIcon = ACTION_ICONS[action];
+  if (!leading && ActionIcon) {
+    leading = <ActionIcon size={ICON_SIZES[size]} aria-hidden />;
+  }
   if (loading) {
     leading = <Spinner size={18} label="Procesando" />;
   }

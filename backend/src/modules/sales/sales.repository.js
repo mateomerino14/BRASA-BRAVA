@@ -1,0 +1,343 @@
+// Placeholders $1, $2... para una lista de ids, empezando en "from"
+const placeholders = (ids, from = 1) => ids.map((_, index) => `$${index + from}`).join(', ');
+
+// Porciones que alcanzan con el stock de cada producto
+const portionsJoin = `LEFT JOIN (
+    SELECT r.id_producto,
+           MIN(CASE WHEN i.activo THEN FLOOR(i.stock_actual / r.cantidad) ELSE 0 END)::int AS porciones
+      FROM receta r JOIN insumo i ON i.id_insumo = r.id_insumo
+     GROUP BY r.id_producto
+  ) rp ON rp.id_producto = p.id_producto`;
+
+// Unidades pedidas por venta
+const unitsJoin = `LEFT JOIN (
+    SELECT id_venta, SUM(cantidad)::int AS unidades, SUM(listos)::int AS listos FROM venta_detalle GROUP BY id_venta
+  ) u ON u.id_venta = v.id_venta`;
+
+const saleColumns = 'v.id_venta, v.id_mesa, v.total, v.envios, v.abierta_en, v.cajero, v.modificado, v.modificado_por';
+
+// Acceso a datos de Caja
+export const createSalesRepository = (db) => ({
+  // Mesas activas con su venta abierta, si la hay
+  floor: async () => {
+    const {rows} = await db.query(
+      `SELECT s.id_seccion, s.nombre AS seccion, m.id_mesa, m.nombre, m.capacidad,
+              v.id_venta, v.total, v.abierta_en, v.cajero, u.unidades, u.listos
+         FROM seccion s
+         JOIN mesa m ON m.id_seccion = s.id_seccion AND m.activa = TRUE
+         LEFT JOIN venta v ON v.id_mesa = m.id_mesa AND v.estado = 'abierta'
+         ${unitsJoin}
+        WHERE s.activa = TRUE
+        ORDER BY s.id_seccion, m.id_mesa`,
+    );
+    return rows;
+  },
+
+  // Desde cuándo espera cada venta abierta lo que cocina todavía no sacó (el envío pendiente más antiguo)
+  pendingSince: async () => {
+    const {rows} = await db.query(
+      `SELECT d.id_venta, MIN(ve.creado_en) AS desde
+         FROM venta_detalle d
+         JOIN venta v ON v.id_venta = d.id_venta AND v.estado = 'abierta'
+         JOIN venta_envio ve ON ve.id_venta = d.id_venta AND ve.numero = d.envio
+        WHERE d.listos < d.cantidad
+        GROUP BY d.id_venta`,
+    );
+    return rows;
+  },
+
+  // Productos a la venta con las porciones que alcanzan
+  sellableProducts: async () => {
+    const {rows} = await db.query(
+      `SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.imagen_url, p.disponible, rp.porciones,
+              c.id_categoria, c.nombre AS categoria
+         FROM producto p
+         JOIN subcategoria s ON s.id_subcategoria = p.id_subcategoria
+         JOIN categoria c ON c.id_categoria = s.id_categoria
+         ${portionsJoin}
+        WHERE p.activo = TRUE AND s.activa = TRUE AND c.activa = TRUE
+        ORDER BY c.nombre, p.nombre`,
+    );
+    return rows;
+  },
+
+  // Ingredientes de la receta de los productos indicados
+  recipeIngredients: async (productIds) => {
+    if (productIds.length === 0) {
+      return [];
+    }
+    const {rows} = await db.query(
+      `SELECT r.id_producto, r.cantidad, i.id_insumo, i.nombre FROM receta r JOIN insumo i ON i.id_insumo = r.id_insumo
+        WHERE r.id_producto IN (${placeholders(productIds)})
+        ORDER BY i.nombre`,
+      productIds,
+    );
+    return rows;
+  },
+
+  // Promociones activas (la vigencia de hoy se decide en el servicio)
+  activePromotions: async () => {
+    const {rows} = await db.query(
+      `SELECT id_promocion, nombre, descripcion, tipo, valor, fecha_inicio, fecha_fin, hora_inicio, hora_fin, dias, imagen_url, activa
+         FROM promocion WHERE activa = TRUE ORDER BY nombre`,
+    );
+    return rows;
+  },
+
+  // Productos de las promociones indicadas con su precio
+  promotionProducts: async (promotionIds) => {
+    if (promotionIds.length === 0) {
+      return [];
+    }
+    const {rows} = await db.query(
+      `SELECT pp.id_promocion, pp.id_producto, pp.cantidad, p.nombre, p.precio,
+              (p.activo AND p.disponible AND s.activa AND c.activa) AS vendible
+         FROM promocion_producto pp
+         JOIN producto p ON p.id_producto = pp.id_producto
+         JOIN subcategoria s ON s.id_subcategoria = p.id_subcategoria
+         JOIN categoria c ON c.id_categoria = s.id_categoria
+        WHERE pp.id_promocion IN (${placeholders(promotionIds)})
+        ORDER BY p.nombre`,
+      promotionIds,
+    );
+    return rows;
+  },
+
+  // Mesa activa con su sección (solo si la sección también está activa)
+  findTable: async (idMesa) => {
+    const {rows} = await db.query(
+      `SELECT m.id_mesa, m.nombre, m.capacidad, s.id_seccion, s.nombre AS seccion
+         FROM mesa m JOIN seccion s ON s.id_seccion = m.id_seccion
+        WHERE m.id_mesa = $1 AND m.activa = TRUE AND s.activa = TRUE`,
+      [idMesa],
+    );
+    return rows[0] ?? null;
+  },
+
+  // Bloquea la mesa hasta el fin de la transacción
+  lockTable: async (idMesa) => {
+    await db.query('SELECT id_mesa FROM mesa WHERE id_mesa = $1 FOR UPDATE', [idMesa]);
+  },
+
+  // Venta abierta de una mesa
+  openSale: async (idMesa) => {
+    const {rows} = await db.query(
+      `SELECT ${saleColumns} FROM venta v
+        WHERE v.id_mesa = $1 AND v.estado = 'abierta'`,
+      [idMesa],
+    );
+    return rows[0] ?? null;
+  },
+
+  // Líneas de una venta con el cajero que registró su envío
+  saleDetails: async (idVenta) => {
+    const {rows} = await db.query(
+      `SELECT d.id_detalle, d.envio, d.id_producto, d.id_promocion, d.nombre, d.precio_unitario, d.cantidad, d.listos, d.consumo,
+              d.creado_en, s.cajero
+         FROM venta_detalle d JOIN venta_envio s ON s.id_venta = d.id_venta AND s.numero = d.envio
+        WHERE d.id_venta = $1
+        ORDER BY d.envio, d.id_detalle`,
+      [idVenta],
+    );
+    return rows;
+  },
+
+  // Ingredientes quitados de las líneas indicadas
+  detailExclusions: async (detailIds) => {
+    if (detailIds.length === 0) {
+      return [];
+    }
+    const {rows} = await db.query(
+      `SELECT x.id_detalle, x.id_producto, p.nombre AS producto, x.id_insumo, i.nombre AS insumo
+         FROM venta_detalle_exclusion x
+         JOIN producto p ON p.id_producto = x.id_producto
+         JOIN insumo i ON i.id_insumo = x.id_insumo
+        WHERE x.id_detalle IN (${placeholders(detailIds)})
+        ORDER BY p.nombre, i.nombre`,
+      detailIds,
+    );
+    return rows;
+  },
+
+  // Abre una venta para la mesa y devuelve su número
+  insertSale: async ({idMesa, idCajero, cajero, abiertaEn}) => {
+    const {rows} = await db.query(
+      `INSERT INTO venta (id_mesa, id_cajero, cajero, abierta_en)
+       VALUES ($1, $2, $3, $4) RETURNING id_venta`,
+      [idMesa, idCajero, cajero, abiertaEn],
+    );
+    return rows[0].id_venta;
+  },
+
+  // Suma un envío y su importe a la venta; devuelve el número de este envío
+  addShipment: async (idVenta, amount) => {
+    const {rows} = await db.query(
+      'UPDATE venta SET envios = envios + 1, total = total + $2::numeric WHERE id_venta = $1 RETURNING envios',
+      [idVenta, amount],
+    );
+    return rows[0].envios;
+  },
+
+  // Inserta una línea de la venta y devuelve su id
+  insertDetail: async ({idVenta, envio, idProducto, idPromocion, nombre, precioUnitario, cantidad, consumo, creadoEn}) => {
+    const {rows} = await db.query(
+      `INSERT INTO venta_detalle (id_venta, envio, id_producto, id_promocion, nombre, precio_unitario, cantidad, consumo, creado_en)
+       VALUES ($1, $2, $3, $4, $5, $6::numeric, $7, $8, $9) RETURNING id_detalle`,
+      [idVenta, envio, idProducto, idPromocion, nombre, precioUnitario, cantidad, consumo, creadoEn],
+    );
+    return rows[0].id_detalle;
+  },
+
+  // Envíos de una venta con el cajero que registró cada uno, en orden
+  saleShipments: async (idVenta) => {
+    const {rows} = await db.query(
+      `SELECT s.numero, s.cajero, s.creado_en
+         FROM venta_envio s
+        WHERE s.id_venta = $1 ORDER BY s.numero`,
+      [idVenta],
+    );
+    return rows;
+  },
+
+  // Registra un envío (comanda) de la venta
+  insertShipment: async ({idVenta, numero, idCajero, cajero, creadoEn}) => {
+    await db.query(
+      `INSERT INTO venta_envio (id_venta, numero, id_cajero, cajero, creado_en)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [idVenta, numero, idCajero, cajero, creadoEn],
+    );
+  },
+
+  // Marca la venta como modificada por el cajero indicado
+  markModified: async (idVenta, cajero) => {
+    await db.query('UPDATE venta SET modificado = TRUE, modificado_por = $2 WHERE id_venta = $1', [idVenta, cajero]);
+  },
+
+  // Bloquea los insumos indicados y devuelve su stock
+  lockIngredients: async (ids) => {
+    if (ids.length === 0) {
+      return [];
+    }
+    const {rows} = await db.query(
+      `SELECT id_insumo, nombre, stock_actual, activo FROM insumo
+        WHERE id_insumo IN (${placeholders(ids)}) ORDER BY id_insumo FOR UPDATE`,
+      ids,
+    );
+    return rows;
+  },
+
+  // Fija el stock de un insumo
+  setStock: async (idInsumo, value) => {
+    await db.query('UPDATE insumo SET stock_actual = $2::numeric WHERE id_insumo = $1', [idInsumo, value]);
+  },
+
+  // Registra un movimiento de stock en el historial
+  insertMovement: async ({idInsumo, cantidad, stockResultante, motivo, idEmpleado, responsable}) => {
+    await db.query(
+      `INSERT INTO movimiento_stock (id_insumo, tipo, cantidad, stock_resultante, motivo, id_empleado, responsable)
+       VALUES ($1, 'venta', $2::numeric, $3::numeric, $4, $5, $6)`,
+      [idInsumo, cantidad, stockResultante, motivo, idEmpleado, responsable],
+    );
+  },
+
+  // Unidades de la venta que cocina todavía no marcó como listas
+  pendingUnits: async (idVenta) => {
+    const {rows} = await db.query('SELECT COALESCE(SUM(cantidad - listos), 0)::int AS pendientes FROM venta_detalle WHERE id_venta = $1', [idVenta]);
+    return rows[0].pendientes;
+  },
+
+  // Cierra una venta abierta como cobrada
+  closeSale: async ({idVenta, idCobrador, cobrador, recibido, cambio, cerradaEn}) => {
+    const {rows} = await db.query(
+      `UPDATE venta SET estado = 'cobrada', id_cobrador = $2, cobrador = $3, recibido = $4::numeric, cambio = $5::numeric, cerrada_en = $6
+        WHERE id_venta = $1 AND estado = 'abierta' RETURNING id_venta`,
+      [idVenta, idCobrador, cobrador, recibido, cambio, cerradaEn],
+    );
+    return rows[0] ?? null;
+  },
+
+  // Registra un pago de la venta
+  insertPayment: async ({idVenta, metodo, monto, creadoEn}) => {
+    await db.query('INSERT INTO pago (id_venta, metodo, monto, creado_en) VALUES ($1, $2, $3::numeric, $4)', [idVenta, metodo, monto, creadoEn]);
+  },
+
+  // Venta con su mesa, sección y datos del cobro (abierta o cerrada)
+  saleById: async (idVenta) => {
+    const {rows} = await db.query(
+      `SELECT ${saleColumns}, v.estado, v.cobrador, v.recibido, v.cambio, v.cerrada_en, m.nombre AS mesa, s.nombre AS seccion
+         FROM venta v
+         JOIN mesa m ON m.id_mesa = v.id_mesa JOIN seccion s ON s.id_seccion = m.id_seccion
+        WHERE v.id_venta = $1`,
+      [idVenta],
+    );
+    return rows[0] ?? null;
+  },
+
+  // Pagos de varias ventas
+  payments: async (saleIds) => {
+    if (saleIds.length === 0) {
+      return [];
+    }
+    const {rows} = await db.query(
+      `SELECT id_venta, metodo, monto FROM pago WHERE id_venta IN (${placeholders(saleIds)}) ORDER BY id_pago`,
+      saleIds,
+    );
+    return rows;
+  },
+
+  // Ventas cobradas entre dos instantes, de la más reciente a la más antigua
+  closedSales: async (start, end) => {
+    const {rows} = await db.query(
+      `SELECT v.id_venta, v.total, v.cerrada_en, v.cobrador, m.nombre AS mesa
+         FROM venta v JOIN mesa m ON m.id_mesa = v.id_mesa
+        WHERE v.estado = 'cobrada' AND v.cerrada_en >= $1 AND v.cerrada_en < $2
+        ORDER BY v.cerrada_en DESC, v.id_venta DESC`,
+      [start, end],
+    );
+    return rows;
+  },
+
+  // Registra un ingrediente quitado de una línea
+  insertExclusion: async (idDetalle, {idProducto, idInsumo}) => {
+    await db.query(
+      'INSERT INTO venta_detalle_exclusion (id_detalle, id_producto, id_insumo) VALUES ($1, $2, $3)',
+      [idDetalle, idProducto, idInsumo],
+    );
+  },
+
+  // Impresiones del ticket de una venta, en orden
+  prints: async (idVenta) => {
+    const {rows} = await db.query(
+      `SELECT numero, impreso_por, autorizado_por, impreso_en FROM ticket_impresion
+        WHERE id_venta = $1 ORDER BY numero`,
+      [idVenta],
+    );
+    return rows;
+  },
+
+  // Bloquea la venta para numerar sus impresiones sin repetir
+  lockSale: async (idVenta) => {
+    await db.query('SELECT id_venta FROM venta WHERE id_venta = $1 FOR UPDATE', [idVenta]);
+  },
+
+  // Registra una impresión del ticket
+  insertPrint: async ({idVenta, numero, idEmpleado, impresoPor, idAutorizador, autorizadoPor, impresoEn}) => {
+    await db.query(
+      `INSERT INTO ticket_impresion (id_venta, numero, id_empleado, impreso_por, id_autorizador, autorizado_por, impreso_en)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [idVenta, numero, idEmpleado, impresoPor, idAutorizador, autorizadoPor, impresoEn],
+    );
+  },
+
+  // Empleado activo por alias con su contraseña y si su cargo tiene acceso a Caja (puede autorizar reimpresiones)
+  findAuthorizer: async (alias) => {
+    const {rows} = await db.query(
+      `SELECT e.id_empleado, e.nombre, e.apellido, e.contrasena_hash, p.pantalla IS NOT NULL AS puede
+         FROM empleado e JOIN cargo c ON c.id_cargo = e.id_cargo
+         LEFT JOIN cargo_permiso p ON p.id_cargo = c.id_cargo AND p.pantalla = 'caja'
+        WHERE LOWER(e.alias) = LOWER($1) AND e.activo = TRUE AND c.activo = TRUE`,
+      [alias],
+    );
+    return rows[0] ?? null;
+  },
+});

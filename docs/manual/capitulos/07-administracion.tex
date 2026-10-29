@@ -1,0 +1,186 @@
+\chapter{Administración}
+
+Las pantallas de \pantalla{Administración} mantienen al día el menú, el local y el personal. Todas funcionan de la misma forma, así que primero se explica lo común y después lo propio de cada una.
+
+\section{Lo común a todas las pantallas de gestión}
+
+\captura{productos}{Una pantalla de gestión: Productos}
+
+\begin{description}
+  \item[Buscar.] El buscador de arriba filtra mientras se escribe, sin importar tildes ni mayúsculas.
+  \item[Filtrar.] Los selectores de la derecha (estado, categoría, cargo, disponibilidad, vigencia…). \boton{Limpiar filtros} aparece cuando hay alguno puesto y los quita todos.
+  \item[Ordenar.] Toque el encabezado de una columna con flechas para ordenar por ella; otra vez invierte el orden.
+  \item[Paginar.] Abajo se elige cuántas \campo{Filas por página} ver (5, 10 o 20) y se pasa de página con los números o las flechas. A la izquierda dice cuántos registros se muestran del total.
+  \item[Registrar.] El recuadro del final (\textit{¿Desea registrar…?}) y su botón naranja abren el formulario vacío.
+  \item[Acciones de cada fila.] El \textbf{lápiz} abre el formulario para modificar. El \textbf{círculo tachado} da de baja, con confirmación. La \textbf{flecha circular} reactiva lo dado de baja.
+\end{description}
+
+Los filtros, el orden y la página quedan en la dirección de la página: al volver atrás o recargar se conservan.
+
+\begin{consejo}
+\textbf{Dar de baja no borra nada.} El registro deja de usarse (no aparece en Caja, no puede ingresar, no se elige en formularios) pero se conserva con todo su historial: las ventas viejas siguen mostrando ese producto o ese empleado. Lo dado de baja aparece tachado, con su estado en rojo, y se puede reactivar en cualquier momento. Para borrarlo definitivamente está la eliminación física (capítulo~\ref{cap:eliminacion}).
+\end{consejo}
+
+\conventana{0.38}{categorias-baja}{Confirmación de baja}{%
+Antes de dar de baja, el sistema pide confirmar y explica qué pasa. Algunas bajas no se permiten mientras algo dependa del registro, y el aviso dice qué hacer:
+\begin{itemize}
+  \item Una sección con mesas ocupadas.
+  \item Un cargo que tienen empleados activos.
+  \item La propia cuenta de quien está usando el sistema.
+\end{itemize}
+}
+
+Los nombres no se pueden repetir: no puede haber dos productos, categorías, insumos, secciones, promociones o cargos con el mismo nombre. Las fotos aceptan PNG, JPG o WEBP de hasta 5 MB; se arrastran al recuadro o se elige el archivo tocándolo.
+
+\section{Productos}
+
+La tabla muestra cada producto con su foto, categoría y subcategoría, precio, si está disponible, cuántas porciones alcanzan con su receta y su estado.
+
+\conventana{0.43}{productos-registrar}{Registrar un producto}{%
+\begin{tabla}{>{\bfseries}l X}
+  \encabezado{Campo} & \encabezado{Detalle} \\
+  Foto & Opcional; se ve en Caja y en Familia \\
+  Nombre* & De 2 letras en adelante, sin repetir \\
+  Precio* & En bolivianos, con coma decimal \\
+  Categoría* & Primero la categoría\ldots \\
+  Subcategoría* & \ldots{} y después una de sus subcategorías activas \\
+  Descripción & Hasta 200 caracteres; la ve el cliente \\
+\end{tabla}
+}
+
+\paragraph{Disponible o agotado} La columna \textbf{Disponible} es un interruptor. Apagado, el producto figura como \textbf{Agotado}: en Caja aparece como \textit{No disponible} y no se puede elegir, y en Familia dice \textit{No se vende hoy}. Se vuelve a encender cuando hay de nuevo. Es distinto de dar de baja: agotado es por hoy; de baja es porque el producto sale del menú.
+
+\paragraph{Porciones} La columna \textbf{Receta} dice para cuántas porciones alcanza el stock, \textit{Sin insumos} si algún insumo se acabó, o \textit{Sin receta}.
+
+\subsection{Receta}
+
+\conventana{0.34}{productos-receta}{Receta de un producto}{%
+El botón del gorro de cocinero abre la \textbf{receta}: los insumos que lleva \textbf{una porción} y cuánto de cada uno. Caja descuenta esas cantidades del inventario en cada venta, salvo los ingredientes que el cliente pidió quitar.
+
+\begin{enumerate}
+  \item \boton{Agregar insumo} suma una fila.
+  \item Elija el insumo; debajo se ve su stock actual.
+  \item Escriba la cantidad por porción en la unidad del insumo (kg, g, L, ml o unidades).
+  \item El tacho quita la fila.
+  \item Presione \boton{Guardar receta}.
+\end{enumerate}
+
+Abajo se ve en vivo para cuántas porciones alcanza el stock actual. Un insumo no puede repetirse en la receta, y solo se eligen insumos activos.
+}
+
+\section{Secciones y mesas}
+
+\captura{secciones}{Gestión de secciones}
+
+Las secciones son los ambientes del local (Salón principal, Terraza, Barra…). La tabla muestra sus mesas agrupadas por tamaño y cuántas personas entran en total. En Caja, cada sección es una pestaña con sus mesas.
+
+\conventana{0.4}{secciones-registrar}{Registrar una sección}{%
+\begin{enumerate}
+  \item Escriba el \campo{Nombre} y, si quiere, una \campo{Descripción} (por ejemplo, \textit{planta alta, al aire libre}).
+  \item Presione \boton{Agregar mesa} por cada mesa. Se numeran solas (\textit{Mesa 1}, \textit{Mesa 2}…) y el nombre se puede cambiar.
+  \item Ajuste la capacidad de cada mesa con sus botones.
+  \item Presione \boton{Registrar}.
+\end{enumerate}
+
+Debe haber al menos una mesa y no puede haber dos mesas con el mismo nombre en la sección. Una mesa que se quita deja de aparecer en Caja, pero sus ventas anteriores se conservan. Una sección con mesas ocupadas no se puede dar de baja hasta cobrarlas.
+}
+
+\section{Inventario}
+
+\captura{inventario}{Inventario de insumos}
+
+Cada insumo tiene su \textbf{unidad} (kilogramos, gramos, litros, mililitros o unidades), la \textbf{cantidad} actual y el \textbf{mínimo}. La cantidad se pinta según el nivel: en naranja cuando llegó al mínimo o está por debajo, y en rojo cuando no queda nada. El filtro de estado permite ver solo lo activo o lo dado de baja.
+
+\conventana{0.36}{inventario-modificar}{Modificar un insumo}{%
+\paragraph{Registrar} Se carga el nombre, la unidad, la cantidad inicial y el mínimo.
+
+\paragraph{Corregir la cantidad} Después de contar el depósito o de recibir mercadería, modifique el insumo y escriba la cantidad real en \campo{Cantidad}. Queda registrado como un \textit{ajuste}, con la fecha y quién lo hizo.
+
+\paragraph{Ventas} Cada envío a cocina descuenta lo que indica la receta. Si un insumo no alcanza, queda en cero y Caja avisa \textit{Revise el inventario}; la venta no se bloquea.
+
+\paragraph{Unidad} No se puede cambiar una vez que el insumo se usó en recetas, ventas o correcciones, para no alterar el historial.
+}
+
+\section{Categorías}
+
+\captura{categorias}{Gestión de categorías}
+
+\conventana{0.42}{categorias-registrar}{Registrar una categoría}{%
+Cada categoría del menú tiene foto, nombre, descripción (hasta 160 caracteres) y sus \textbf{subcategorías}, por ejemplo Hamburguesas \guilsinglright{} Clásicas, Especiales, Doble Carne.
+
+\begin{itemize}
+  \item \boton{Agregar subcategoría} suma una fila; el tacho la quita. Debe haber al menos una y hasta 20, sin repetir nombres.
+  \item Renombrar una subcategoría mantiene sus productos.
+  \item Una subcategoría quitada deja de ofrecerse al registrar productos.
+\end{itemize}
+
+En la tabla, la columna \textbf{Productos} dice cuántos tiene cada categoría. Las subcategorías que no entran se despliegan con \boton{+N más}.
+}
+
+\section{Promociones}
+
+\captura{promociones}{Gestión de promociones}
+
+Las promociones son \textbf{combos a precio fijo}: dos o más productos con sus cantidades por un precio menor al que costarían por separado. La columna \textbf{Vigencia} dice su estado:
+
+\begin{tabla}{>{\titulos\bfseries}l X}
+  \encabezado{Vigencia} & \encabezado{Significa} \\
+  Vigente ahora & Vale en este momento y aparece en \boton{Promociones de hoy} de Caja \\
+  Hoy no aplica & Está dentro de sus fechas, pero hoy no es uno de sus días o no es su horario \\
+  Programada & Empieza en una fecha futura \\
+  Vencida & Ya pasó su fecha de fin \\
+  Inactiva & Está dada de baja \\
+\end{tabla}
+
+\conventana{0.32}{promociones-registrar}{Registrar una promoción}{%
+\begin{enumerate}
+  \item Cargue la foto (opcional) y el \campo{Nombre}.
+  \item Con \boton{Agregar producto} sume cada producto y su cantidad. Un recuadro muestra en vivo cuánto cuestan por separado.
+  \item Escriba el \campo{Precio del combo}: debe ser menor que comprar los productos por separado. Se muestra el porcentaje de ahorro.
+  \item Elija la fecha \campo{Desde} y, si quiere, \campo{Hasta}; vacía, la promoción no vence.
+  \item Marque los \campo{Días} en que vale (al menos uno).
+  \item Si solo vale a ciertas horas, elija el \campo{Horario} de inicio y de fin (por ejemplo, 6:00 PM a 9:00 PM). Sin horario, vale todo el día.
+  \item Presione \boton{Registrar}.
+\end{enumerate}
+}
+
+\section{Empleados}
+\label{sec:empleados}
+
+\captura{empleados}{Gestión de empleados}
+
+La tabla muestra a cada empleado con su foto o iniciales, correo, CI, cargo, usuario, teléfono y estado. Se puede filtrar por cargo y por estado.
+
+\conventana{0.35}{empleados-registrar}{Registrar un empleado}{%
+\begin{tabla}{>{\bfseries}l X}
+  \encabezado{Campo} & \encabezado{Detalle} \\
+  Foto & Opcional; se ve al iniciar sesión \\
+  Nombre*, Apellido* & Como figuran en su documento \\
+  CI* & Con su extensión, por ejemplo \texttt{4920114 LP} \\
+  Teléfono & 7 u 8 dígitos \\
+  Cargo* & Define qué pantallas ve \\
+  Usuario* & Se sugiere con el nombre (\texttt{c.mendoza}); letras, números, punto y guion bajo \\
+  Correo* & Para recuperar la contraseña \\
+  Contraseña* & 8 caracteres o más, con letras y números \\
+\end{tabla}
+}
+
+Al \textbf{modificar}, la contraseña se deja vacía para mantener la actual; si se escribe una, reemplaza a la anterior. Un empleado dado de baja no puede ingresar ni recuperar su contraseña, pero sus ventas se conservan y sigue apareciendo en Reportes. Nadie puede darse de baja a sí mismo.
+
+\section{Cargos}
+\label{sec:cargos}
+
+\captura{cargos}{Gestión de cargos}
+
+La tabla muestra cada cargo con las pantallas que puede ver y cuántos empleados lo tienen.
+
+\conventana{0.32}{cargos-modificar}{Pantallas de un cargo}{%
+\begin{enumerate}
+  \item Escriba el \campo{Nombre del cargo}.
+  \item Marque las pantallas que verá. Están agrupadas en \textbf{Operación del local} (Familia, Caja, Reportes) y \textbf{Administración}; \boton{Marcar todas} marca un grupo entero.
+  \item Revise el aviso de abajo: dice a cuántos empleados afecta el cambio. Lo verán la próxima vez que inicien sesión.
+  \item Presione \boton{Guardar}.
+\end{enumerate}
+
+La página principal la tienen todos. Debe marcarse al menos una pantalla más. Un cargo no se puede dar de baja mientras lo tengan empleados activos: primero hay que cambiarles el cargo. La eliminación física no se puede dar a ningún cargo.
+}

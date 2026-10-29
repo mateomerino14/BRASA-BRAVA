@@ -1,0 +1,62 @@
+import {useRef} from 'react';
+import {promotionsApi} from '../services/promotionsApi';
+import {emptyPromotion, productErrorKey, toFormValues, toPayload, validatePromotion} from '../utils/promotionForm';
+import {useEntityForm} from '../../../hooks/useEntityForm';
+
+const MESSAGES = {
+  created: (promotion) => `Se registró la promoción ${promotion.nombre}`,
+  updated: (promotion) => `Se actualizó la promoción ${promotion.nombre}`,
+  imageFailed: 'La promoción se guardó, pero la foto no',
+};
+
+const browserToday = () => new Date().toLocaleDateString('en-CA');
+
+const indexProducts = (products, editing) => {
+  const byId = new Map(products.map((item) => [String(item.id), {...item, activo: true}]));
+  for (const item of editing?.productos ?? []) {
+    if (!byId.has(String(item.idProducto))) {
+      byId.set(String(item.idProducto), {id: item.idProducto, nombre: item.nombre, precio: item.precio, activo: item.activo});
+    }
+  }
+  return byId;
+};
+
+export function usePromotionForm({onSaved, today, products = [], api = promotionsApi} = {}) {
+  const form = useEntityForm({
+    api,
+    entityKey: 'promotion',
+    emptyValues: emptyPromotion(today ?? browserToday()),
+    toFormValues,
+    toPayload,
+    validate: (values, {editing}) => validatePromotion(values, {productsById: indexProducts(products, editing)}),
+    messages: MESSAGES,
+    onSaved,
+    withImage: true,
+  });
+  const productsById = indexProducts(products, form.editing);
+  const nextKey = useRef(0);
+  const rows = form.values.productos;
+  const rowErrors = ['productos', 'valor', ...rows.map((row) => productErrorKey(row.key))];
+
+  const addProduct = () => {
+    nextKey.current += 1;
+    form.setFields({productos: [...rows, {key: `nuevo-${nextKey.current}`, idProducto: '', cantidad: 1}]}, rowErrors);
+  };
+
+  const removeProduct = (key) => {
+    form.setFields({productos: rows.filter((row) => row.key !== key)}, rowErrors);
+  };
+
+  const setProduct = (key, field, value) => {
+    form.setFields({
+      productos: rows.map((row) => {
+        if (row.key === key) {
+          return {...row, [field]: value};
+        }
+        return row;
+      }),
+    }, rowErrors);
+  };
+
+  return {...form, productsById, addProduct, removeProduct, setProduct};
+}

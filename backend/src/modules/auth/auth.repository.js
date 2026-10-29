@@ -1,4 +1,4 @@
-// Acceso a datos del módulo de autenticación (solo SQL, sin reglas de negocio)
+// Acceso a datos del módulo de autenticación
 export const createAuthRepository = (db) => ({
   // Busca un empleado activo por alias, con su cargo
   findActiveEmployeeByAlias: async (alias) => {
@@ -9,6 +9,21 @@ export const createAuthRepository = (db) => ({
          JOIN cargo c ON c.id_cargo = e.id_cargo
         WHERE LOWER(e.alias) = LOWER($1) AND e.activo = TRUE AND c.activo = TRUE`,
       [alias],
+    );
+    return rows[0] ?? null;
+  },
+
+  // Nombre y foto actuales de un empleado
+  findProfile: async (idEmpleado) => {
+    const {rows} = await db.query('SELECT nombre, apellido, foto_url FROM empleado WHERE id_empleado = $1', [idEmpleado]);
+    return rows[0] ?? null;
+  },
+
+  // Busca un empleado por correo, activo o dado de baja
+  findEmployeeByEmail: async (email) => {
+    const {rows} = await db.query(
+      'SELECT id_empleado, nombre, correo, activo FROM empleado WHERE LOWER(correo) = LOWER($1)',
+      [email],
     );
     return rows[0] ?? null;
   },
@@ -39,7 +54,12 @@ export const createAuthRepository = (db) => ({
     return rows[0] ?? null;
   },
 
-  // Lista los empleados activos para el carrusel del login (sin datos sensibles)
+  // Guarda la nueva contraseña del DIRECTORIO
+  updateDirectorioPassword: async (idDirectorio, passwordHash) => {
+    await db.query('UPDATE directorio SET contrasena_hash = $1 WHERE id_directorio = $2', [passwordHash, idDirectorio]);
+  },
+
+  // Lista los empleados activos para el carrusel del login
   listLoginUsers: async () => {
     const {rows} = await db.query(
       `SELECT e.alias, e.nombre, e.apellido, e.foto_url, c.nombre AS cargo
@@ -67,11 +87,11 @@ export const createAuthRepository = (db) => ({
     );
   },
 
-  // Obtiene el código vigente más reciente de un empleado
-  findLatestActiveCode: async (idEmpleado) => {
+  // Obtiene el código más reciente de un empleado, con su estado
+  findLatestCode: async (idEmpleado) => {
     const {rows} = await db.query(
-      `SELECT id_codigo, codigo_hash, intentos, expira_en FROM codigo_recuperacion
-        WHERE id_empleado = $1 AND usado = FALSE
+      `SELECT id_codigo, codigo_hash, intentos, usado, expira_en FROM codigo_recuperacion
+        WHERE id_empleado = $1
         ORDER BY id_codigo DESC LIMIT 1`,
       [idEmpleado],
     );

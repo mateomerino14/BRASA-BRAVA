@@ -1,7 +1,7 @@
 import {cn} from '../../lib/cn';
 
 const styles = {
-  base: 'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold',
+  base: 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-bold',
   dot: 'size-1.5 rounded-full bg-current',
   tones: {
     success: 'bg-verde/10 text-verde border-verde',

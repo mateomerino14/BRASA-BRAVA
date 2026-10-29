@@ -1,3 +1,4 @@
+import {Suspense, lazy} from 'react';
 import {Route, Routes} from 'react-router';
 import {NAVIGATION, flattenNavigation} from '../config/navigation';
 import {LoginPage} from '../features/auth/pages/LoginPage';
@@ -6,14 +7,33 @@ import {ComingSoonPage} from '../features/shared/pages/ComingSoonPage';
 import {NotFoundPage} from '../features/shared/pages/NotFoundPage';
 import {AppShell} from './AppShell';
 import {RequireAuth, RequirePermission} from './guards';
+import {PageLoader} from './PageLoader';
 
-const PAGES = {home: HomePage};
+const lazyPage = (load, name) => lazy(() => load().then((module) => ({default: module[name]})));
+
+const PAGES = {
+  familia: lazyPage(() => import('../features/family/pages/FamilyPage'), 'FamilyPage'),
+  caja: lazyPage(() => import('../features/cashier/pages/CashierPage'), 'CashierPage'),
+  reportes: lazyPage(() => import('../features/reports/pages/ReportsPage'), 'ReportsPage'),
+  empleados: lazyPage(() => import('../features/employees/pages/EmployeesPage'), 'EmployeesPage'),
+  categorias: lazyPage(() => import('../features/categories/pages/CategoriesPage'), 'CategoriesPage'),
+  productos: lazyPage(() => import('../features/products/pages/ProductsPage'), 'ProductsPage'),
+  stock: lazyPage(() => import('../features/stock/pages/StockPage'), 'StockPage'),
+  secciones: lazyPage(() => import('../features/sections/pages/SectionsPage'), 'SectionsPage'),
+  cargos: lazyPage(() => import('../features/roles/pages/RolesPage'), 'RolesPage'),
+  eliminacion: lazyPage(() => import('../features/deletion/pages/DeletionPage'), 'DeletionPage'),
+  promociones: lazyPage(() => import('../features/promotions/pages/PromotionsPage'), 'PromotionsPage'),
+};
 const MODULE_ROUTES = flattenNavigation(NAVIGATION).filter((route) => route.permission !== 'home');
 
 const renderModule = (permission, label) => {
   const Page = PAGES[permission];
   if (Page) {
-    return <Page />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Page />
+      </Suspense>
+    );
   }
   return <ComingSoonPage title={label} />;
 };

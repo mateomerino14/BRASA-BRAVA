@@ -1,8 +1,9 @@
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {app, BrowserWindow, dialog, shell} from 'electron';
+import {app, BrowserWindow, dialog, ipcMain, shell} from 'electron';
 import {loadSettings} from './settings.js';
 import {startDesktopServices} from './services.js';
+import {registerPrinting} from './printers.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 // Carpeta del frontend compilado: dentro del instalador o en el repositorio durante el desarrollo
@@ -27,12 +28,14 @@ const createWindow = (url) => {
     title: 'Brasa Brava',
     autoHideMenuBar: true,
     show: false,
-    webPreferences: {contextIsolation: true, sandbox: true, nodeIntegration: false},
+    webPreferences: {contextIsolation: true, sandbox: true, nodeIntegration: false, preload: path.join(ROOT, 'preload.cjs')},
   });
   window.once('ready-to-show', () => window.show());
   // Los enlaces externos (redes sociales) se abren en el navegador del sistema
   window.webContents.setWindowOpenHandler(({url: target}) => {
-    shell.openExternal(target);
+    if (/^https:\/\//.test(target)) {
+      shell.openExternal(target);
+    }
     return {action: 'deny'};
   });
   window.loadURL(url);
@@ -41,6 +44,7 @@ const createWindow = (url) => {
 // Arranca base de datos y API, y abre la ventana
 const boot = async () => {
   const dataDir = app.getPath('userData');
+  registerPrinting({ipcMain, BrowserWindow, dataDir});
   services = await startDesktopServices({
     dataDir,
     staticDir: STATIC_DIR,

@@ -4,11 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // La API sirve el build (web y escritorio), así que las rutas de assets son absolutas.
   base: '/',
   server: {
     port: 5173,
-    proxy: {'/api': 'http://127.0.0.1:3000'},
+    proxy: {'/api': 'http://127.0.0.1:3000', '/uploads': 'http://127.0.0.1:3000'},
   },
   test: {
     environment: 'jsdom',

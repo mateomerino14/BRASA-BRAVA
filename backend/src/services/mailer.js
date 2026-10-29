@@ -5,6 +5,7 @@ export const createConsoleMailer = (logger = console) => {
   const outbox = [];
   return {
     outbox,
+    // Guarda el correo y lo muestra en consola
     send: async (message) => {
       outbox.push(message);
       logger.info?.(`[mail] Para: ${message.to} | ${message.subject} | ${message.preview ?? ''}`);
@@ -14,7 +15,18 @@ export const createConsoleMailer = (logger = console) => {
 
 // Mailer de producción que envía mediante la API transaccional de Brevo
 export const createBrevoMailer = ({apiKey, fromEmail, fromName}, fetchImpl = fetch) => ({
-  send: async ({to, toName, subject, html}) => {
+  // Envía el correo con la API de Brevo
+  send: async ({to, toName, subject, html, attachments = []}) => {
+    const payload = {
+      sender: {email: fromEmail, name: fromName},
+      to: [{email: to, name: toName}],
+      subject,
+      htmlContent: html,
+    };
+    // Adjuntos (por ejemplo el PDF de un reporte) en base64, como los pide Brevo
+    if (attachments.length > 0) {
+      payload.attachment = attachments.map((item) => ({name: item.name, content: item.content.toString('base64')}));
+    }
     const response = await fetchImpl(BREVO_URL, {
       method: 'POST',
       headers: {
@@ -22,12 +34,7 @@ export const createBrevoMailer = ({apiKey, fromEmail, fromName}, fetchImpl = fet
         'content-type': 'application/json',
         accept: 'application/json',
       },
-      body: JSON.stringify({
-        sender: {email: fromEmail, name: fromName},
-        to: [{email: to, name: toName}],
-        subject,
-        htmlContent: html,
-      }),
+      body: JSON.stringify(payload),
     });
     if (!response.ok) {
       throw new Error(`Brevo respondió ${response.status}`);
