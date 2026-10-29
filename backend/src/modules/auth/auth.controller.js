@@ -1,14 +1,6 @@
-const resetRequested = 'Si el correo está registrado, recibirá un código de verificación';
+import {respond} from '../../utils/respond.js';
 
-// Responde el error previsto de un servicio o ejecuta la respuesta de éxito
-const respond = (res, result, onSuccess) => {
-  if (result.error) {
-    return res.status(result.status).json({message: result.error});
-  }
-  else {
-    return onSuccess(result);
-  }
-};
+const resetRequested = 'Le enviamos un código de verificación a su correo';
 
 // Controladores HTTP del módulo de autenticación
 export const createAuthController = (service) => ({
@@ -18,10 +10,10 @@ export const createAuthController = (service) => ({
     return respond(res, result, ({session}) => res.json(session));
   },
 
-  // Devuelve el perfil de la sesión actual sin los datos del token
-  me: (req, res) => {
+  // Devuelve el perfil de la sesión actual
+  me: async (req, res) => {
     const {iat: _iat, exp: _exp, ...user} = req.user;
-    return res.json({user});
+    return res.json({user: await service.profile(user)});
   },
 
   // Lista los empleados para el carrusel del login
@@ -33,7 +25,7 @@ export const createAuthController = (service) => ({
   // Envía el código de verificación al correo indicado
   requestReset: async (req, res) => {
     const result = await service.requestPasswordReset(req.validated.body);
-    return respond(res, result, () => res.json({message: resetRequested}));
+    return respond(res, result, () => res.json({message: resetRequested, venceEn: result.expiresAt}));
   },
 
   // Verifica el código ingresado sin consumirlo
@@ -46,5 +38,11 @@ export const createAuthController = (service) => ({
   confirmReset: async (req, res) => {
     const result = await service.confirmPasswordReset(req.validated.body);
     return respond(res, result, () => res.json({message: 'Contraseña actualizada correctamente'}));
+  },
+
+  // Cambia la contraseña del DIRECTORIO
+  changeDirectorioPassword: async (req, res) => {
+    const result = await service.changeDirectorioPassword(req.user, req.validated.body);
+    return respond(res, result, () => res.json({message: 'Contraseña del DIRECTORIO actualizada'}));
   },
 });

@@ -15,7 +15,6 @@ export function useLoginUsers({api = authApi} = {}) {
         }
       }
       catch {
-        // Si la lista falla, el login sigue funcionando escribiendo el usuario
         if (!cancelled) {
           setUsers([]);
         }

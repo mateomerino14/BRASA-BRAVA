@@ -1,21 +1,24 @@
 import {
   Boxes,
   Database,
+  FileChartColumn,
   FolderTree,
   House,
   LayoutGrid,
   Package,
   Percent,
   Settings,
+  ShieldCheck,
   ShoppingCart,
+  Trash2,
   UsersRound,
 } from 'lucide-react';
 
-// Menú del sidebar. "permission" coincide con las pantallas que devuelve el backend.
 export const NAVIGATION = [
   {label: 'Home', title: 'Página principal', to: '/', icon: House, permission: 'home', end: true},
   {label: 'Familia', title: 'Familia', to: '/familia', icon: Boxes, permission: 'familia'},
   {label: 'Caja', title: 'Caja', to: '/caja', icon: ShoppingCart, permission: 'caja'},
+  {label: 'Reportes', title: 'Reportes de ventas', to: '/reportes', icon: FileChartColumn, permission: 'reportes'},
   {
     label: 'Administración',
     icon: Settings,
@@ -36,9 +39,9 @@ export const NAVIGATION = [
         permission: 'secciones',
       },
       {
-        label: 'Stock',
-        title: 'Gestión de stock',
-        to: '/stock',
+        label: 'Inventario',
+        title: 'Inventario de insumos',
+        to: '/inventario',
         icon: Database,
         permission: 'stock',
       },
@@ -62,6 +65,20 @@ export const NAVIGATION = [
         to: '/empleados',
         icon: UsersRound,
         permission: 'empleados',
+      },
+      {
+        label: 'Cargos',
+        title: 'Gestión de cargos',
+        to: '/cargos',
+        icon: ShieldCheck,
+        permission: 'cargos',
+      },
+      {
+        label: 'Eliminación física',
+        title: 'Eliminación física',
+        to: '/eliminacion',
+        icon: Trash2,
+        permission: 'eliminacion',
       },
     ],
   },

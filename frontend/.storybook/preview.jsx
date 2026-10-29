@@ -1,11 +1,14 @@
 import {MemoryRouter} from 'react-router';
 import '../src/styles/index.css';
+import {ToastProvider} from '../src/context/ToastContext';
 
 const preview = {
   decorators: [
     (Story, {parameters}) => (
       <MemoryRouter initialEntries={[parameters.route ?? '/']}>
-        <Story />
+        <ToastProvider>
+          <Story />
+        </ToastProvider>
       </MemoryRouter>
     ),
   ],

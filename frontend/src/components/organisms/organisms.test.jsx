@@ -5,6 +5,7 @@ import {MemoryRouter} from 'react-router';
 import {MotionConfig} from 'motion/react';
 import {Sidebar} from './Sidebar';
 import {Modal} from './Modal';
+import {Footer} from './Footer';
 import {NAVIGATION, filterNavigation, flattenNavigation} from '../../config/navigation';
 
 const renderSidebar = (permissions, route = '/') =>
@@ -25,11 +26,11 @@ describe('navegación', () => {
   it('mantiene el grupo con los hijos permitidos', () => {
     const items = filterNavigation(NAVIGATION, ['home', 'stock']);
     const group = items.find((item) => item.children);
-    expect(group.children.map((child) => child.label)).toEqual(['Stock']);
+    expect(group.children.map((child) => child.label)).toEqual(['Inventario']);
   });
 
   it('aplana todas las rutas', () => {
-    expect(flattenNavigation(NAVIGATION)).toHaveLength(9);
+    expect(flattenNavigation(NAVIGATION)).toHaveLength(12);
   });
 });
 
@@ -38,23 +39,23 @@ describe('Sidebar', () => {
     renderSidebar(['home', 'productos', 'stock']);
     const toggle = screen.getByRole('button', {name: 'Administración'});
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('link', {name: 'Stock'})).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', {name: 'Inventario'})).not.toBeInTheDocument();
     await userEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('link', {name: 'Stock'})).toBeInTheDocument();
+    expect(screen.getByRole('link', {name: 'Inventario'})).toBeInTheDocument();
     await userEvent.click(toggle);
     await waitFor(() =>
-      expect(screen.queryByRole('link', {name: 'Stock'})).not.toBeInTheDocument(),
+      expect(screen.queryByRole('link', {name: 'Inventario'})).not.toBeInTheDocument(),
     );
   });
 
   it('abre el grupo y marca activo el ítem de la ruta actual', () => {
-    renderSidebar(['home', 'stock'], '/stock');
+    renderSidebar(['home', 'stock'], '/inventario');
     expect(screen.getByRole('button', {name: 'Administración'})).toHaveAttribute(
       'aria-expanded',
       'true',
     );
-    expect(screen.getByRole('link', {name: 'Stock'})).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', {name: 'Inventario'})).toHaveAttribute('aria-current', 'page');
   });
 
   it('no muestra módulos sin permiso', () => {
@@ -65,7 +66,7 @@ describe('Sidebar', () => {
 });
 
 describe('Modal', () => {
-  it('se cierra con Escape y con el botón', async () => {
+  it('se cierra con Escape y no tiene X arriba (cada modal trae su Cerrar o Cancelar)', async () => {
     const onClose = vi.fn();
     render(
       <Modal open onClose={onClose} title="Recuperar contraseña">
@@ -73,13 +74,30 @@ describe('Modal', () => {
       </Modal>,
     );
     expect(screen.getByRole('dialog', {name: 'Recuperar contraseña'})).toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Cerrar'})).not.toBeInTheDocument();
     await userEvent.keyboard('{Escape}');
-    await userEvent.click(screen.getByRole('button', {name: 'Cerrar'}));
-    expect(onClose).toHaveBeenCalledTimes(2);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('no renderiza nada cerrado', () => {
     render(<Modal open={false} title="Oculto" />);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+describe('Footer', () => {
+  it('enlaza las redes sociales del local en una pestaña nueva', () => {
+    render(<Footer />);
+    const links = {
+      'Facebook de Brasa Brava': 'https://www.facebook.com/BrasaBravaTiquipaya/?locale=es_LA',
+      'Instagram de Brasa Brava': 'https://www.instagram.com/brasabrava_tiquipaya/',
+      'TikTok de Brasa Brava': 'https://www.tiktok.com/@brasa.brava.tiqui',
+    };
+    for (const [name, href] of Object.entries(links)) {
+      const link = screen.getByRole('link', {name});
+      expect(link).toHaveAttribute('href', href);
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
   });
 });

@@ -1,19 +1,21 @@
 import {useState} from 'react';
 import {NavLink, useLocation, matchPath} from 'react-router';
 import {AnimatePresence, motion} from 'motion/react';
-import {ChevronDown, PanelLeftClose, PanelLeftOpen} from 'lucide-react';
+import {ChevronDown, ChevronsLeft} from 'lucide-react';
 import {Logo} from '../atoms/Logo';
 import {cn} from '../../lib/cn';
 
 const styles = {
-  aside: 'relative flex h-full shrink-0 flex-col overflow-hidden bg-brasa bg-sidebar-glow px-4 py-6',
-  brand: 'flex items-center gap-3 px-1',
+  frame: 'relative h-full shrink-0',
+  aside: 'relative flex h-full flex-col overflow-hidden bg-brasa bg-sidebar-glow px-4 pb-6',
+  notch: 'absolute -right-3.5 top-[76px] z-10 flex size-7 items-center justify-center rounded-full bg-carbon text-crema shadow-card ring-4 ring-lienzo transition-colors hover:bg-brasa-oscuro',
+  brand: '-mx-4 flex items-center gap-3 border-b-4 border-mostaza bg-carbon px-5 pb-5 pt-[22px]',
   brandCollapsed: 'justify-center',
   logo: 'shrink-0 ring-2 ring-white/70',
   brandText: 'min-w-0 leading-tight text-white',
   brandName: 'font-display text-2xl tracking-wide',
-  brandSubtitle: 'text-xs text-white/85',
-  nav: 'mt-8 flex flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden',
+  brandSubtitle: 'text-xs font-medium text-mostaza',
+  nav: 'mt-5 flex flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden',
   link: 'group relative flex h-10 items-center gap-3 rounded-xl px-3 text-[15px] font-semibold outline-offset-0 transition-colors duration-200 focus-visible:outline-white',
   linkNested: 'h-9 text-sm',
   linkActive: 'text-brasa',
@@ -28,7 +30,6 @@ const styles = {
   groupLabel: 'flex-1 text-left',
   groupContent: 'overflow-hidden',
   groupList: 'ml-5 mt-1 flex flex-col gap-1 border-l-2 border-white/30 pl-3',
-  collapseButton: 'mt-4 flex h-10 items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white/90 transition hover:bg-white/15 focus-visible:outline-white',
 };
 
 const SPRING = {type: 'spring', stiffness: 380, damping: 32};
@@ -72,7 +73,6 @@ function MenuGroup({item, collapsed}) {
   const Icon = item.icon;
   const contentId = `menu-${item.label}`;
 
-  // Al navegar a una pantalla del grupo, el grupo se abre solo
   if (pathname !== lastPath) {
     setLastPath(pathname);
     if (hasActiveChild && !open) {
@@ -129,43 +129,42 @@ function MenuGroup({item, collapsed}) {
 }
 
 export function Sidebar({items, collapsed = false, onToggleCollapsed}) {
+  let width = {width: expandedWidth};
+  let toggleLabel = 'Contraer menú';
+  if (collapsed) {
+    width = {width: collapsedWidth};
+    toggleLabel = 'Expandir menú';
+  }
+
   return (
-    <motion.aside
-      aria-label="Menú principal"
-      animate={{width: collapsed ? collapsedWidth : expandedWidth}}
-      transition={SPRING}
-      className={styles.aside}
-    >
-      <div className={cn(styles.brand, collapsed && styles.brandCollapsed)}>
-        <Logo size={44} className={styles.logo} />
-        {!collapsed && (
-          <div className={styles.brandText}>
-            <p className={styles.brandName}>Brasa Brava</p>
-            <p className={styles.brandSubtitle}>Panel de Gestión</p>
-          </div>
-        )}
-      </div>
+    <motion.div animate={width} transition={SPRING} className={styles.frame}>
+      <aside aria-label="Menú principal" className={styles.aside}>
+        <div className={cn(styles.brand, collapsed && styles.brandCollapsed)}>
+          <Logo size={44} className={styles.logo} />
+          {!collapsed && (
+            <div className={styles.brandText}>
+              <p className={styles.brandName}>Brasa Brava</p>
+              <p className={styles.brandSubtitle}>Panel de Gestión</p>
+            </div>
+          )}
+        </div>
 
-      <nav className={styles.nav}>
-        {items.map((item) => {
-          if (item.children) {
-            return <MenuGroup key={item.label} item={item} collapsed={collapsed} />;
-          }
-          return <MenuLink key={item.to} item={item} collapsed={collapsed} />;
-        })}
-      </nav>
-
+        <nav className={styles.nav}>
+          {items.map((item) => {
+            if (item.children) {
+              return <MenuGroup key={item.label} item={item} collapsed={collapsed} />;
+            }
+            return <MenuLink key={item.to} item={item} collapsed={collapsed} />;
+          })}
+        </nav>
+      </aside>
       {onToggleCollapsed && (
-        <button
-          type="button"
-          onClick={onToggleCollapsed}
-          aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'}
-          className={styles.collapseButton}
-        >
-          {collapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
-          {!collapsed && <span>Contraer</span>}
+        <button type="button" onClick={onToggleCollapsed} aria-label={toggleLabel} title={toggleLabel} className={styles.notch}>
+          <motion.span animate={{rotate: collapsed ? 180 : 0}} transition={SPRING}>
+            <ChevronsLeft size={16} aria-hidden />
+          </motion.span>
         </button>
       )}
-    </motion.aside>
+    </motion.div>
   );
 }

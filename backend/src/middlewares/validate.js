@@ -1,6 +1,6 @@
 import {badRequest} from '../utils/httpError.js';
 
-// Valida req[source] con un esquema Zod y reemplaza el valor por el dato limpio
+// Valida req[source] con un esquema Zod y deja el dato limpio
 export const validate =
   (schema, source = 'body') =>
     (req, _res, next) => {

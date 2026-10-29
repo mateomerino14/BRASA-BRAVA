@@ -23,7 +23,7 @@ export const findFreePort = () =>
   });
 
 // Arranca el Postgres embebido en la carpeta de datos (lo inicializa la primera vez)
-export const startDatabase = async ({dataDir, password}) => {
+const startDatabase = async ({dataDir, password}) => {
   const databaseDir = path.join(dataDir, 'pgdata');
   const port = await findFreePort();
   const postgres = new EmbeddedPostgres({
@@ -65,6 +65,7 @@ export const startDesktopServices = async ({dataDir, staticDir, settings}) => {
     DATABASE_URL: database.url,
     JWT_SECRET: settings.jwtSecret,
     STATIC_DIR: staticDir,
+    UPLOADS_DIR: path.join(dataDir, 'uploads'),
     CORS_ORIGINS: `http://127.0.0.1:${port}`,
     MAIL_DRIVER: settings.mailDriver,
     BREVO_API_KEY: settings.brevoApiKey || undefined,

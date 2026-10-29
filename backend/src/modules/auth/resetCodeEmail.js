@@ -5,7 +5,7 @@ const escapeHtml = (text) =>
     (char) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[char],
   );
 
-// Arma el HTML del correo con el código de verificación, con la paleta de la marca
+// Arma el HTML del correo con el código de verificación
 export const resetCodeEmail = ({name, code, minutes}) => `
 <div style="font-family:Inter,Arial,sans-serif;background:#FAF3EA;padding:32px">
   <div style="max-width:480px;margin:auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #E0D7CD">

@@ -1,0 +1,48 @@
+\chapter{Página principal y menú}
+\label{cap:inicio}
+
+\section{Página principal}
+
+\captura{home}{Página principal de un administrador}
+
+La primera pantalla saluda según la hora del día (\textit{Buenos días}, \textit{Buenas tardes}, \textit{Buenas noches}) y muestra la fecha y la \textbf{hora del local}, que es la que usa todo el sistema.
+
+Quien tiene acceso a Caja ve además el \textbf{Resumen de hoy}, que se actualiza solo cada 30 segundos:
+
+\begin{description}
+  \item[Caja.] Lo vendido y en cuántas ventas, lo cobrado en efectivo y por QR, y cuántas mesas están ocupadas con lo que falta cobrar en ellas.
+  \item[Cocina.] Los envíos en preparación, las unidades que faltan preparar, los envíos ya listos para entregar y la \textbf{espera más larga}, con la mesa que la tiene. La espera se pinta de rojo cuando pasa de 30 minutos.
+\end{description}
+
+\boton{Abrir caja} lleva directo a Caja. Más abajo, los \textbf{accesos rápidos} muestran las pantallas del cargo con una breve descripción.
+
+\section{Menú lateral}
+
+El menú de la izquierda muestra solo las pantallas que el cargo puede ver:
+
+\begin{itemize}
+  \item \pantalla{Home}, \pantalla{Familia}, \pantalla{Caja} y \pantalla{Reportes} están siempre a la vista.
+  \item \pantalla{Administración} se despliega para mostrar Productos, Secciones, Inventario, Categorías, Promociones, Empleados, Cargos y, para el DIRECTORIO, Eliminación física. Se abre solo al entrar a una de ellas.
+  \item La pestaña redonda del borde (\guillemotleft) contrae el menú para dejar solo los íconos y ganar espacio; al pasar el mouse sobre un ícono se ve su nombre. El sistema recuerda cómo lo dejó.
+\end{itemize}
+
+Arriba a la derecha están el nombre, el usuario y el cargo de quien ingresó, y el botón \boton{Cerrar sesión}. Abajo, el pie con las redes sociales del local.
+
+\section{En celular y tablet}
+\label{sec:celular}
+
+\begin{figure}[!htb]
+  \centering
+  \imagen{0.26\linewidth}{celular-home}\hspace{0.04\linewidth}
+  \imagen{0.26\linewidth}{celular-menu}\hspace{0.04\linewidth}
+  \imagen{0.26\linewidth}{celular-caja}
+  \caption{Página principal, menú y Caja en el celular}
+\end{figure}
+
+En pantallas angostas el sistema cambia la forma de mostrarse, pero hace lo mismo:
+
+\begin{itemize}
+  \item El menú baja como una persiana desde la barra naranja con el botón de la derecha. Se cierra con la X, con la tecla Escape o al elegir una pantalla. Al final del menú está \boton{Cerrar sesión}.
+  \item Las tablas de las pantallas de gestión se muestran como \textbf{tarjetas}, una por fila, y el orden se elige en una lista.
+  \item En Caja, el pedido de la mesa se abre desde la \textbf{barra inferior}, que muestra la mesa y cuántos productos faltan registrar.
+\end{itemize}

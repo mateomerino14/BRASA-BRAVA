@@ -1,0 +1,56 @@
+\chapter{Ingreso al sistema}
+
+\section{Iniciar sesión}
+
+\conventana{0.5}{login}{Pantalla de inicio de sesión}{%
+Cada empleado entra con su propio usuario. Así el sistema sabe quién registró cada pedido, quién cobró y quién autorizó cada reimpresión.
+
+\begin{enumerate}
+  \item Toque su foto en la fila de arriba: el usuario se completa solo y el cursor pasa a la contraseña. Si no ve su foto, use las flechas de los costados o escriba el \campo{Usuario} (por ejemplo, \texttt{a.romero}).
+  \item Escriba la \campo{Contraseña}. El ojo del campo la muestra u oculta.
+  \item Presione \boton{Ingresar} o la tecla Enter.
+\end{enumerate}
+
+Al entrar, el sistema abre la \pantalla{Página principal}, o la pantalla que estaba abierta si la sesión se había cerrado sola.
+}
+
+\paragraph{Si algo sale mal} Con una contraseña incorrecta aparece un aviso rojo arriba y el campo se vacía para volver a escribirla. Un empleado \textbf{dado de baja} no puede ingresar aunque su contraseña sea correcta: debe pedir que lo reactiven (sección~\ref{sec:empleados}).
+
+\paragraph{Duración de la sesión} La sesión dura un turno (8 horas). Pasado ese tiempo el sistema pide ingresar de nuevo y vuelve a la pantalla en la que estaba.
+
+\section{Modo DIRECTORIO}
+
+\conventana{0.5}{login-directorio}{Modo DIRECTORIO}{%
+El dueño no ingresa como empleado sino con el botón \boton{Modo directorio}:
+
+\begin{enumerate}
+  \item Presione \boton{Modo directorio}. El usuario queda como \texttt{DIRECTORIO} y aparece un aviso negro que lo recuerda.
+  \item Escriba la contraseña de administración general y presione \boton{Ingresar}.
+\end{enumerate}
+
+Para volver al ingreso normal se presiona \boton{Modo empleado}.
+
+El DIRECTORIO cambia su contraseña con el botón de la llave, junto a su nombre arriba a la derecha: pide la contraseña actual y la nueva dos veces.
+}
+
+\section{Recuperar la contraseña}
+
+\conventana{0.42}{recuperar-contrasena}{Recuperar la contraseña}{%
+Un empleado que olvidó su contraseña puede ponerse una nueva sin pedir ayuda, si su cuenta tiene correo:
+
+\begin{enumerate}
+  \item En el inicio de sesión toque \boton{¿Olvidaste tu contraseña?}.
+  \item Escriba el \campo{Correo} de su cuenta y presione \boton{Enviar código}.
+  \item Llega un correo con un \textbf{código de 6 dígitos} que vale 10 minutos. Escríbalo (o péguelo) en los seis casilleros y presione \boton{Verificar}.
+  \item Escriba la \campo{Nueva contraseña} y repítala en \campo{Confirmar contraseña}. Debe tener al menos 8 caracteres, con letras y números.
+  \item Presione \boton{Guardar contraseña} e ingrese con ella.
+\end{enumerate}
+}
+
+\begin{importante}
+El código admite 5 intentos; después hay que pedir uno nuevo. Si la cuenta de ese correo está dada de baja, el sistema no envía el código y lo avisa: pida a administración que la reactive. La contraseña del DIRECTORIO no se recupera por correo.
+\end{importante}
+
+\section{Cerrar sesión}
+
+Presione \boton{Cerrar sesión}, el botón rojo arriba a la derecha (en el celular está al final del menú). Hágalo siempre al terminar el turno o al dejar la caja: mientras la sesión esté abierta, todo lo que se registre queda a su nombre.

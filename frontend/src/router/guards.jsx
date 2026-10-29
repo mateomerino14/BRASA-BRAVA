@@ -6,7 +6,7 @@ const styles = {
   loader: 'flex min-h-dvh items-center justify-center bg-lienzo',
 };
 
-export function SessionLoader() {
+function SessionLoader() {
   return (
     <div role="status" aria-label="Validando sesión" className={styles.loader}>
       <Logo size={120} glow />

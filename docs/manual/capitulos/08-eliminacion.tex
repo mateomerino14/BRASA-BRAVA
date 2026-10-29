@@ -1,0 +1,61 @@
+\chapter{Eliminación física}
+\label{cap:eliminacion}
+
+\begin{importante}
+Lo que se elimina aquí \textbf{se borra para siempre}, junto con todo lo que depende de ello, y no se puede recuperar. Solo el DIRECTORIO entra a esta pantalla, y ningún cargo puede recibir este permiso.
+\end{importante}
+
+En el día a día alcanza con \textbf{dar de baja}. La eliminación física sirve para limpiar datos que ya no se necesitan: empleados que se fueron hace tiempo, productos que salieron del menú, ventas de prueba o de períodos que ya se cerraron.
+
+\captura{eliminacion}{Eliminación física}
+
+\section{Elegir qué eliminar}
+
+Solo se puede elegir lo que \textbf{ya está dado de baja} y las \textbf{ventas ya cobradas}. Lo activo no aparece en la lista.
+
+\begin{enumerate}
+  \item Entre a \pantalla{Administración \guilsinglright{} Eliminación física}.
+  \item Elija una pestaña: Empleados, Cargos, Secciones y mesas, Productos, Categorías, Insumos, Promociones o Ventas. Cada pestaña dice cuántos registros tiene marcados.
+  \item Toque las filas que quiere borrar; la fila marcada se pinta de rojo. \boton{Marcar todos} y \boton{Quitar marcas} ayudan cuando son muchas.
+  \item En \textbf{Ventas}, elija primero las fechas: se listan las ventas cobradas de ese período con su número, mesa, fecha y total.
+  \item Puede marcar en varias pestañas. Abajo se lee cuántos registros hay marcados entre todas.
+  \item Presione \boton{Eliminar N marcados}.
+\end{enumerate}
+
+\section{Qué arrastra cada cosa}
+
+La eliminación es \textbf{en cascada}: al eliminar algo se borra también todo lo que depende de eso. En la lista, la columna \textbf{Al eliminar} avisa lo que arrastra cada fila, por ejemplo \textit{2 ventas se borran también}, o \textit{Nada asociado}.
+
+\begin{tabla}{>{\titulos\bfseries}l X}
+  \encabezado{Si elimina…} & \encabezado{También se borra} \\
+  Un cargo & Sus empleados (y con ellos sus ventas) \\
+  Un empleado & Las ventas que abrió, aquellas a las que agregó un envío y las que cobró \\
+  Una sección & Sus mesas y las ventas de esas mesas \\
+  Una categoría & Sus subcategorías y sus productos \\
+  Un producto & Su receta, las promociones que lo incluyen y las ventas donde aparece \\
+  Una promoción & Las ventas donde se vendió \\
+  Un insumo & Su lugar en las recetas, sus movimientos de stock y las ventas donde se quitó \\
+  Una venta & Sus productos, envíos, pagos e impresiones del ticket \\
+\end{tabla}
+
+Las fotos de lo eliminado también se borran de la computadora.
+
+\section{Confirmar}
+
+\conventana{0.42}{eliminacion-confirmar}{Confirmación de la eliminación}{%
+Antes de borrar, el sistema muestra en rojo \textbf{todo lo que se va}, incluido lo que arrastra: los registros elegidos de cada tipo, las mesas de las secciones, las ventas afectadas y los empleados de los cargos.
+
+\begin{enumerate}
+  \item Revise la lista con calma.
+  \item Escriba la palabra \texttt{ELIMINAR} en mayúsculas.
+  \item Presione \boton{Sí, eliminar}.
+\end{enumerate}
+
+Todo se borra junto: si algo falla, no se borra nada.
+}
+
+\paragraph{Cuando no deja seguir} Si algo de lo elegido sigue activo, o si arrastra una mesa con un pedido abierto, la ventana dice qué lo impide y no deja eliminar. Dé de baja ese registro, o cobre el pedido, y vuelva a intentarlo.
+
+\begin{consejo}
+Antes de una eliminación grande, descargue el PDF de Reportes del período que se va a borrar: las ventas eliminadas dejan de aparecer en los reportes y en los totales.
+\end{consejo}

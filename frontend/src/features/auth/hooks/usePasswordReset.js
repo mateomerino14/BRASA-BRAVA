@@ -1,9 +1,24 @@
 import {useState} from 'react';
+import {useToast} from '../../../context/useToast';
 import {authApi} from '../services/authApi';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_PATTERN = /^\d{6}$/;
 const minPasswordLength = 8;
+const ERROR_TITLES = {
+  403: 'Cuenta inhabilitada',
+  404: 'Cuenta inexistente',
+  429: 'Demasiados intentos',
+  502: 'Correo no enviado',
+};
+
+const BLOCKING_REASONS = {
+  codigo_bloqueado: 'bloqueado',
+  codigo_vencido: 'vencido',
+  codigo_invalido: 'invalido',
+};
+
+const errorTitle = (error, fallback) => ERROR_TITLES[error.status] ?? fallback;
 
 export const passwordError = (password) => {
   if (password.length < minPasswordLength) {
@@ -19,21 +34,29 @@ export const passwordError = (password) => {
 };
 
 export function usePasswordReset({api = authApi} = {}) {
+  const toast = useToast();
   const [step, setStep] = useState('closed');
-  const [email, setEmail] = useState('');
+  const [email, setEmailValue] = useState('');
   const [code, setCode] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
+  const [codeStatus, setCodeStatus] = useState('activo');
+  const [attemptsLeft, setAttemptsLeft] = useState(null);
+  const [expiresAt, setExpiresAt] = useState(null);
 
-  const run = async (work) => {
+  const run = async (work, fallbackTitle, handleError) => {
     setLoading(true);
-    setError('');
+    setErrors({});
     try {
-      return await work();
+      const result = await work();
+      toast.clear();
+      return result;
     }
     catch (requestError) {
-      setError(requestError.message);
+      if (!handleError?.(requestError)) {
+        toast.error(requestError.message, errorTitle(requestError, fallbackTitle));
+      }
       return undefined;
     }
     finally {
@@ -41,48 +64,76 @@ export function usePasswordReset({api = authApi} = {}) {
     }
   };
 
-  const open = () => {
-    setStep('email');
+  const startCode = (response) => {
     setCode('');
-    setError('');
-    setNotice('');
+    setCodeStatus('activo');
+    setAttemptsLeft(null);
+    setExpiresAt(response.venceEn ?? null);
   };
 
-  const close = () => {
-    setStep('closed');
+  const restart = (nextStep) => {
+    setStep(nextStep);
+    setEmailValue('');
     setCode('');
-    setError('');
+    setErrors({});
     setNotice('');
+    setCodeStatus('activo');
+    setAttemptsLeft(null);
+    setExpiresAt(null);
+  };
+
+  const handleCodeError = (requestError) => {
+    const blocked = BLOCKING_REASONS[requestError.body?.motivo];
+    if (blocked) {
+      toast.clear();
+      setCode('');
+      setNotice('');
+      setCodeStatus(blocked);
+      return true;
+    }
+    if (requestError.body?.motivo === 'codigo_incorrecto') {
+      setAttemptsLeft(requestError.body.intentosRestantes);
+    }
+    return false;
+  };
+
+  const open = () => restart('email');
+
+  const close = () => restart('closed');
+
+  const setEmail = (value) => {
+    setEmailValue(value);
+    setErrors({});
   };
 
   const sendCode = async () => {
     if (!EMAIL_PATTERN.test(email.trim())) {
-      setError('Ingrese un correo válido');
+      setErrors({email: 'Ingrese un correo válido'});
       return;
     }
-    const ok = await run(() => api.requestResetCode(email.trim()));
+    const ok = await run(() => api.requestResetCode(email.trim()), 'No se pudo enviar el código');
     if (ok) {
-      setCode('');
+      startCode(ok);
       setStep('code');
       setNotice('Le enviamos un código de 6 dígitos. Revise su bandeja de entrada.');
     }
   };
 
   const resendCode = async () => {
-    const ok = await run(() => api.requestResetCode(email.trim()));
+    const ok = await run(() => api.requestResetCode(email.trim()), 'No se pudo enviar el código');
     if (ok) {
-      setCode('');
-      setNotice('Le enviamos un código nuevo.');
+      startCode(ok);
+      setNotice('Le enviamos un código nuevo. El anterior ya no sirve.');
     }
   };
 
   const verifyCode = async () => {
     if (!CODE_PATTERN.test(code)) {
-      setError('Complete los 6 dígitos del código');
+      setErrors({code: 'Complete los 6 dígitos del código'});
       return;
     }
     setNotice('');
-    const ok = await run(() => api.verifyResetCode(email.trim(), code));
+    const ok = await run(() => api.verifyResetCode(email.trim(), code), 'Código no válido', handleCodeError);
     if (ok) {
       setStep('password');
     }
@@ -94,14 +145,21 @@ export function usePasswordReset({api = authApi} = {}) {
   const savePassword = async (password, confirmation) => {
     const rule = passwordError(password);
     if (rule) {
-      setError(rule);
+      setErrors({password: rule});
       return;
     }
     if (password !== confirmation) {
-      setError('Las contraseñas no coinciden');
+      setErrors({confirmation: 'Las contraseñas no coinciden'});
       return;
     }
-    const ok = await run(() => api.confirmPasswordReset(email.trim(), code, password));
+    const backToCode = (requestError) => {
+      const handled = handleCodeError(requestError);
+      if (handled) {
+        setStep('code');
+      }
+      return handled;
+    };
+    const ok = await run(() => api.confirmPasswordReset(email.trim(), code, password), 'No se pudo cambiar la contraseña', backToCode);
     if (ok) {
       setStep('done');
     }
@@ -109,18 +167,24 @@ export function usePasswordReset({api = authApi} = {}) {
 
   const changeCode = (value) => {
     setCode(value);
-    setError('');
+    setErrors({});
   };
+
+  const clearErrors = () => setErrors({});
 
   return {
     step,
     email,
     code,
-    error,
+    errors,
     notice,
     loading,
+    codeStatus,
+    attemptsLeft,
+    expiresAt,
     setEmail,
     changeCode,
+    clearErrors,
     open,
     close,
     sendCode,

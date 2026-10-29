@@ -3,6 +3,10 @@
 @import '@fontsource/playfair-display-sc/400.css';
 @import 'tailwindcss';
 
+/* Pantallas bajas (laptops, app de escritorio con zoom de Windows): compacta lo que no entra sin scroll */
+@custom-variant short (@media (max-height: 860px));
+@custom-variant xshort (@media (max-height: 720px));
+
 /*
  * Design tokens de Brasa Brava (tomados de "PALETA DE COLORES" y "TIPOGRAFIA" del Figma).
  * Tailwind genera utilidades a partir de estas variables: bg-brasa, text-carbon, font-display...
@@ -15,6 +19,7 @@
   --color-crema: #faf3ea; /* fondos suaves, ítem activo, modales */
   --color-rojo: #c1272d; /* peligro, cancelar, errores */
   --color-verde: #2fa84f; /* éxito, estado activo */
+  --color-error: #d91a22; /* mensajes de error: más vivo que el rojo de los botones y con contraste AA sobre crema */
 
   /* Derivados usados en las pantallas del Figma */
   --color-brasa-oscuro: #d97c0b;
@@ -23,6 +28,7 @@
   --color-arena: #dac2af; /* bordes */
   --color-hueso: #f4ede4; /* chips */
   --color-lienzo: #f7f8fa; /* fondo del área de contenido */
+  --color-campo: #ffffff; /* fondo de todo campo editable: resalta sobre el crema de modales y el lienzo */
 
   /* Tipografía: títulos/marca, interfaz y detalle de bienvenida */
   --font-display: 'Bebas Neue', 'Impact', sans-serif;
@@ -37,6 +43,15 @@
 
   --animate-shake: shake 0.4s ease-in-out;
   --animate-ember: ember 3.5s ease-in-out infinite;
+  --animate-coal: coal 4s ease-in-out infinite;
+
+  /* Brasa que respira en la pizarra de la página principal */
+  @keyframes coal {
+    50% {
+      opacity: 0.55;
+      transform: translateY(6px) scale(1.06);
+    }
+  }
 
   @keyframes shake {
     0%,
@@ -70,6 +85,11 @@
   background-image: radial-gradient(120% 60% at 0% 0%, rgb(255 255 255 / 0.18), transparent 60%);
 }
 
+/* Rayas suaves de parrilla sobre fondos oscuros */
+@utility bg-grill {
+  background-image: repeating-linear-gradient(-28deg, rgb(255 255 255 / 0.035) 0 2px, transparent 2px 26px);
+}
+
 @utility bg-auth-glow {
   background-image: radial-gradient(60% 50% at 50% 0%, rgb(232 178 61 / 0.18), transparent 70%);
 }
@@ -90,5 +110,119 @@
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+/*
+ * Listas desplegables: el <select> nativo con el menú propio del sistema (Chrome 135+ y la app de escritorio).
+ * Se conserva el teclado y la accesibilidad del control nativo; los navegadores sin soporte muestran su menú.
+ */
+.select-field {
+  appearance: none;
+}
+
+@supports (appearance: base-select) {
+  .select-field,
+  .select-field::picker(select) {
+    appearance: base-select;
+  }
+
+  .select-field {
+    display: flex;
+    align-items: center;
+    padding-block: 0;
+  }
+
+  .select-field::picker-icon {
+    display: none;
+  }
+
+  .select-wrap:has(.select-field:open) .select-chevron {
+    rotate: 180deg;
+  }
+
+  .select-field:open {
+    border-color: var(--color-brasa);
+  }
+
+  .select-field::picker(select) {
+    margin-block: 6px;
+    padding: 6px;
+    border: 1px solid rgb(218 194 175 / 0.55);
+    border-radius: 14px;
+    background: var(--color-campo);
+    box-shadow: var(--shadow-float);
+    max-block-size: 18rem;
+    opacity: 1;
+    translate: 0 0;
+    transition: opacity 0.16s ease, translate 0.16s ease, overlay 0.16s allow-discrete, display 0.16s allow-discrete;
+  }
+
+  @starting-style {
+    .select-field::picker(select):popover-open {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+
+  .select-field option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-carbon);
+    cursor: pointer;
+  }
+
+  .select-field option[value=''] {
+    color: rgb(84 68 53 / 0.7);
+  }
+
+  .select-field option:hover,
+  .select-field option:focus-visible {
+    background: var(--color-hueso);
+    outline: none;
+  }
+
+  .select-field option:checked {
+    background: var(--color-crema);
+    color: var(--color-brasa-oscuro);
+    font-weight: 700;
+  }
+
+  .select-field option::checkmark {
+    order: 1;
+    margin-inline-start: auto;
+    content: '';
+    inline-size: 12px;
+    block-size: 7px;
+    border-inline-start: 2.5px solid var(--color-brasa-oscuro);
+    border-block-end: 2.5px solid var(--color-brasa-oscuro);
+    rotate: -45deg;
+    translate: 0 -2px;
+  }
+}
+
+/* Impresión: solo se imprime el contenido de .print-only (comandas y tickets), con márgenes de ticketera */
+.print-only {
+  display: none;
+}
+
+@media print {
+  body > *:not(.print-only) {
+    display: none !important;
+  }
+
+  /* Ancho útil de una ticketera de 80 mm */
+  .print-only {
+    display: block;
+    width: 72mm;
+  }
+
+  @page {
+    margin: 4mm;
   }
 }

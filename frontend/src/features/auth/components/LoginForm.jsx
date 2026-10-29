@@ -4,14 +4,13 @@ import {Button} from '../../../components/atoms/Button';
 import {Input} from '../../../components/atoms/Input';
 import {PasswordInput} from '../../../components/atoms/PasswordInput';
 import {FormField} from '../../../components/molecules/FormField';
-import {Alert} from '../../../components/molecules/Alert';
 
 const styles = {
-  form: 'flex w-full flex-col gap-5',
+  form: 'flex w-full flex-col gap-5 short:gap-4 xshort:gap-3',
   bannerWrapper: 'overflow-hidden',
   banner: 'flex items-center gap-2 rounded-lg bg-carbon px-4 py-2 text-sm font-semibold text-crema',
   bannerIcon: 'text-brasa',
-  passwordBlock: 'flex flex-col gap-2',
+  passwordBlock: 'flex flex-col gap-2 short:gap-1',
   forgot: 'self-end text-base font-medium text-rojo underline-offset-4 transition hover:underline',
   actions: 'grid gap-4 sm:grid-cols-2',
 };
@@ -20,7 +19,7 @@ const bannerHidden = {opacity: 0, height: 0};
 const bannerVisible = {opacity: 1, height: 'auto'};
 
 export function LoginForm({form, onForgotPassword, passwordRef}) {
-  const {values, errors, formError, submitting, isDirectorio, setField, submit, toggleDirectorio} = form;
+  const {values, errors, submitting, isDirectorio, setField, submit, toggleDirectorio} = form;
 
   return (
     <form onSubmit={submit} noValidate className={styles.form}>
@@ -68,16 +67,15 @@ export function LoginForm({form, onForgotPassword, passwordRef}) {
         )}
       </div>
 
-      {formError && <Alert tone="error">{formError}</Alert>}
-
       <div className={styles.actions}>
-        <Button type="submit" variant="dark" size="lg" loading={submitting}>
+        <Button type="submit" variant="dark" size="lg" action="login" loading={submitting}>
           Ingresar
         </Button>
         <Button
           type="button"
           size="lg"
           variant={isDirectorio ? 'outline' : 'primary'}
+          action={isDirectorio ? 'employee' : 'password'}
           aria-pressed={isDirectorio}
           onClick={toggleDirectorio}
         >
