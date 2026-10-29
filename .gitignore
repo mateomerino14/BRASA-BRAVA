@@ -13,3 +13,7 @@ storybook-static/
 !.vscode/extensions.json
 backend/uploads/
 electron/pgdata/
+
+# Pruebas end to end
+e2e/test-results/
+e2e/playwright-report/
