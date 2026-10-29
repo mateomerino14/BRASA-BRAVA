@@ -31,7 +31,8 @@ npm run dev:backend       # API en http://localhost:3000
 npm run dev:frontend      # interfaz en http://localhost:5173
 npm run dev:desktop       # aplicación de escritorio (requiere npm run build)
 npm run storybook         # sistema de diseño en http://localhost:6006
-npm test                  # todas las pruebas
+npm test                  # pruebas de cada paquete
+npm run e2e               # pruebas end to end en el navegador (requiere PostgreSQL)
 npm run lint              # revisión de estándares de código
 ```
 
@@ -55,18 +56,19 @@ Para probar la recuperación de contraseña se usa `c.mendoza@brasabrava.bo`; co
 | Frontend | React 19, Vite, Tailwind CSS v4, React Router, Motion, lucide-react |
 | Backend | Node.js 22, Express 5, PostgreSQL, Zod, JWT, bcrypt |
 | Escritorio | Electron, PostgreSQL embebido, electron-builder |
-| Calidad | Vitest, Testing Library, Supertest, pg-mem, Storybook 10, ESLint, GitHub Actions |
+| Calidad | Vitest, Testing Library, Supertest, pg-mem, Playwright, Storybook 10, ESLint, GitHub Actions |
 | Correo | Brevo |
 
 ## Estructura
 
-Monorepo con tres paquetes (npm workspaces):
+Monorepo con cuatro paquetes (npm workspaces):
 
 ```
 BRASA-BRAVA/
 ├── backend/              API REST (ver backend/README.md)
 ├── frontend/             Interfaz React (ver frontend/README.md)
 ├── electron/             Aplicación de escritorio (ver electron/README.md)
+├── e2e/                  Pruebas end to end con Playwright (ver e2e/README.md)
 ├── .github/workflows/    Pruebas automáticas en cada Pull Request
 ├── eslint.style.js       Reglas de formato compartidas
 └── reglas.md             Estándares de ramas, commits y codificación
@@ -102,4 +104,4 @@ BRASA-BRAVA/
 
 ## Ramas y pruebas automáticas
 
-El trabajo sigue el flujo `feature/<modulo>` → `develop` → `main` descrito en `reglas.md`. En cada Pull Request, GitHub Actions revisa los estándares de código, corre las pruebas del backend (con base en memoria y con PostgreSQL 16), las del frontend, compila la interfaz y Storybook, y prueba el arranque de escritorio con PostgreSQL embebido.
+El trabajo sigue el flujo `feature/<modulo>` → `develop` → `main` descrito en `reglas.md`. En cada Pull Request, GitHub Actions revisa los estándares de código, corre las pruebas del backend (con base en memoria y con PostgreSQL 16), las del frontend, compila la interfaz y Storybook, prueba el arranque de escritorio con PostgreSQL embebido y recorre los flujos principales end to end en Chromium contra la API y PostgreSQL reales.
