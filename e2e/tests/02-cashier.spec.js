@@ -1,33 +1,6 @@
 import {expect, test} from '@playwright/test';
 import {loginAs, printCalls, stubPrinting} from '../src/session.js';
-import {escapeRegExp, menu, orderPanel, tableButton} from '../src/cashier.js';
-
-// Toca un producto del menú, ajusta el diálogo y lo agrega al pedido
-const addItem = async (page, name, {times = 0, remove = [], llevar = false} = {}) => {
-  await menu(page).getByRole('button', {name: new RegExp(`^${escapeRegExp(name)},`)}).click();
-  const dialog = page.getByRole('dialog', {name});
-  await expect(dialog).toBeVisible();
-  for (let index = 0; index < times; index += 1) {
-    await dialog.getByRole('button', {name: `Sumar cantidad de ${name}`}).click();
-  }
-  for (const ingredient of remove) {
-    await dialog.getByRole('button', {name: ingredient, exact: true}).click();
-  }
-  if (llevar) {
-    await dialog.getByRole('radio', {name: 'Para llevar'}).click();
-  }
-  await dialog.getByRole('button', {name: 'Agregar al pedido'}).click();
-  await expect(dialog).toBeHidden();
-};
-
-// Cierra la comanda que se abre después de enviar a cocina
-const closeKitchenTicket = async (page, envio) => {
-  const dialog = page.getByRole('dialog', {name: 'Comanda de cocina'});
-  await expect(dialog.getByRole('article', {name: `Comanda del envío ${envio}`})).toBeVisible();
-  await dialog.getByRole('button', {name: 'Cerrar'}).click();
-  await expect(dialog).toBeHidden();
-  return dialog;
-};
+import {addItem, closeKitchenTicket, menu, orderPanel, tableButton} from '../src/cashier.js';
 
 test.describe('Caja de punta a punta', () => {
   test.beforeEach(async ({page}) => {
