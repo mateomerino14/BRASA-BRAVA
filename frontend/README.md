@@ -67,7 +67,15 @@ Las redes sociales del pie (Facebook, Instagram y TikTok de Brasa Brava Tiquipay
 
 El inicio de sesión y la recuperación de contraseña ya siguen este estándar. Un aviso con el mismo título reemplaza al anterior en lugar de apilarse. En la verificación, el modal muestra cuánto falta para que venza el código y los intentos que quedan; si el código se bloquea, vence o queda anulado, las casillas se desactivan y el único paso es «Reenviar código». El cliente HTTP (`lib/apiClient.js`) agrega el token, envía JSON o archivos (`FormData`), normaliza los errores y cierra la sesión si el servidor responde que venció.
 
-El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco). ### Pantallas de gestión estándar
+El foco de modales y del menú de celular lo maneja `useDialogFocus` (enfoca al abrir, mantiene el Tab dentro, cierra con Escape y devuelve el foco).
+
+### Botones y ventanas
+
+- Todo botón con texto lleva su ícono según lo que hace, con la prop `action` de `Button` (`cancel`, `close`, `save`, `add`, `confirm`, `remove`, `print`, `retry`, `send`, `ready`, `charge`, `login`, `password`, `email`, `employee`, `report`, `download`, `view`, `schedule`). Los íconos se definen una sola vez en `config/actionIcons.js`, así la misma acción se ve igual en toda la app. El texto del botón no se parte en dos líneas.
+- Los modales (`organisms/Modal`, tamaños `sm`, `md`, `lg` y `xl`) no tienen X: cada uno cierra con su botón **Cerrar** o **Cancelar** al pie, con Escape o tocando el fondo.
+- Las confirmaciones usan `ConfirmDialog`; las que no se pueden deshacer (eliminación física) piden escribir una palabra.
+
+### Pantallas de gestión estándar
 
 Todas las pantallas de administración se arman igual, así que una pantalla nueva no puede quedar distinta:
 
@@ -92,13 +100,13 @@ Como el estado vive en la URL, recargar la página o volver atrás conserva bús
 src/
 ├── components/
 │   ├── atoms/           Button, IconButton, Input, PasswordInput, NumberInput, MoneyInput, Textarea, Select, Switch,
-│   │                    Amount, LevelBar, Avatar, Thumbnail, TimeInput,
+│   │                    Amount, CountUp, LevelBar, ProgressBar, Avatar, Thumbnail, TimeInput,
 │   │                    Badge, Logo, Spinner, SocialIcon
 │   ├── molecules/       FormField, CodeInput, Alert, Toast, LiveClock, SearchInput, Pagination, PageSizeSelect,
 │   │                    FilterSelect, ImagePicker, AvatarPicker, DateInput, TagInput, SegmentedControl, StatCard, Stepper, ChipList,
-│   │                    DayPicker, PriceTag
-│   ├── organisms/       Sidebar, MobileMenu, Header, Footer, Modal, EmployeeCarousel, DataTable, ListTable, FilterBar,
-│   │                    RegisterCallout, ConfirmDialog
+│   │                    ChipTabs, ScrollRow, DayPicker, PriceTag
+│   ├── organisms/       Sidebar, MobileMenu, MobileTopBar, Header, Footer, Modal, PrintPreview, EmployeeCarousel, DataTable,
+│   │                    ListTable, FilterBar, RegisterCallout, ConfirmDialog
 │   └── templates/       MainLayout, AuthLayout, ManagementPage
 ├── features/
 │   ├── auth/            Login, carrusel de empleados, modo DIRECTORIO y recuperación
@@ -115,11 +123,14 @@ src/
 │   ├── reports/         Reportes: filtros con atajos, totales, resumen por día, ventas detalladas con su ventana de detalle, PDF, correo y envíos programados
 │   ├── cashier/         Caja en una sola pantalla: secciones y mesas con su espera, Marcar listos, límite de impresiones del ticket, menú del día, pedido con Local/Para llevar e ingredientes quitados, comanda de cocina, cobro, ticket y ventas del día
 │   └── shared/          Páginas "en construcción" y 404
-├── config/              Menú lateral (navigation.js), valores de las tablas (lists.js) y anchos (breakpoints.js)
-├── hooks/               Hooks compartidos: listado paginado, cambio de estado, foco de diálogos y media queries
+├── config/              Menú lateral (navigation.js), íconos de los botones (actionIcons.js), valores de las tablas (lists.js),
+│                        unidades del inventario (units.js), redes sociales (socialLinks.js) y anchos (breakpoints.js)
+├── hooks/               Hooks compartidos: listado paginado, formulario, cambio de estado, foco de diálogos, vista previa de fotos,
+│                        cuenta regresiva, impresoras de escritorio y media queries
 ├── context/             Sesión del usuario
 ├── router/              Rutas, guardas de sesión y de permisos
-├── lib/                 Cliente HTTP, query strings y funciones de formato
+├── lib/                 Cliente HTTP, query strings, formato de montos, fechas y horas, días de la semana (week.js),
+│                        nivel de stock, validación de fotos e impresión en escritorio
 ├── stories/             Introducción del sistema de diseño en Storybook
 └── styles/index.css     Tokens de colores, fuentes, sombras y animaciones
 ```
