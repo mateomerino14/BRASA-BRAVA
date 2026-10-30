@@ -73,4 +73,9 @@ describe('mailer', () => {
     expect(mailer.outbox).toHaveLength(1);
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('123456'));
   });
+
+  it('indica si los correos llegan de verdad: Brevo sí, la consola no', () => {
+    expect(createMailer({MAIL_DRIVER: 'console'}, {}).delivers).toBe(false);
+    expect(createMailer({MAIL_DRIVER: 'brevo', BREVO_API_KEY: 'k', MAIL_FROM_EMAIL: 'a@b.bo', MAIL_FROM_NAME: 'Brasa'}).delivers).toBe(true);
+  });
 });

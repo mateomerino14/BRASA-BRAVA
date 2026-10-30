@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {useToast} from '../../../context/useToast';
 import {reportsApi} from '../services/reportsApi';
-import {EMPTY_SCHEDULE} from '../constants/reports';
+import {EMPTY_SCHEDULE, MAIL_NOT_CONFIGURED, MAIL_NOT_CONFIGURED_TITLE} from '../constants/reports';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -27,11 +27,14 @@ export function useSchedules({api = reportsApi} = {}) {
   const [form, setForm] = useState({open: false, editing: null, values: EMPTY_SCHEDULE, errors: {}, saving: false});
   const [busy, setBusy] = useState('');
   const [removing, setRemoving] = useState(null);
+  const [mailConfigured, setMailConfigured] = useState(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      setItems((await api.schedules()).programados);
+      const result = await api.schedules();
+      setItems(result.programados);
+      setMailConfigured(result.correoConfigurado !== false);
     }
     catch (problem) {
       toast.error(problem.message, 'No se pudieron cargar los envíos');
@@ -81,7 +84,12 @@ export function useSchedules({api = reportsApi} = {}) {
       if (result?.programado) {
         replace(result.programado);
       }
-      toast.success(success);
+      if (result?.simulado) {
+        toast.warning(MAIL_NOT_CONFIGURED, MAIL_NOT_CONFIGURED_TITLE);
+      }
+      else {
+        toast.success(success);
+      }
       return true;
     }
     catch (problem) {
@@ -102,6 +110,7 @@ export function useSchedules({api = reportsApi} = {}) {
     close: () => setOpen(false),
     items,
     loading,
+    mailConfigured,
     form,
     openCreate: () => setForm({open: true, editing: null, values: EMPTY_SCHEDULE, errors: {}, saving: false}),
     openEdit: (item) => setForm({open: true, editing: item, values: {correo: item.correo, tipo: item.tipo, dias: item.dias, hora: item.hora}, errors: {}, saving: false}),

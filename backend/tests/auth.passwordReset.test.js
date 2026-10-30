@@ -24,6 +24,7 @@ describe('Autenticación: recuperación de contraseña', () => {
   it('envía un código de 6 dígitos al correo registrado', async () => {
     const res = await requestCode();
     expect(res.status).toBe(200);
+    expect(res.body.simulado).toBe(true);
     expect(ctx.mailer.outbox).toHaveLength(1);
     expect(ctx.mailer.outbox[0].to).toBe(EMAIL);
     expect(lastCode(ctx.mailer)).toMatch(/^\d{6}$/);

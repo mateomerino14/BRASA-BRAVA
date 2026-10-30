@@ -118,7 +118,7 @@ function CodeStep({reset, status, secondsLeft}) {
       {blocked && <CodeProblem status={status} />}
       {!blocked && <CodeMeta secondsLeft={secondsLeft} attemptsLeft={reset.attemptsLeft} />}
       {!blocked && reset.errors.code && <p role="alert" className={styles.fieldError}>{reset.errors.code}</p>}
-      {!blocked && !reset.errors.code && reset.notice && <Alert tone="info">{reset.notice}</Alert>}
+      {!blocked && !reset.errors.code && reset.notice && <Alert tone={reset.noticeTone}>{reset.notice}</Alert>}
     </div>
   );
 }

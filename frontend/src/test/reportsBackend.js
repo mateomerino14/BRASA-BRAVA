@@ -36,7 +36,7 @@ const employeeName = (id) => {
 
 export const createReportsBackend = ({now = Date.now()} = {}) => {
   const calls = {reports: [], pdfs: [], emails: [], schedules: []};
-  const control = {emailError: null};
+  const control = {emailError: null, mailSimulated: false};
   let schedules = [
     {id: 1, correo: 'gerencia@brasabrava.bo', tipo: 'resumen', dias: '0100100', hora: '08:00', activo: true, ultimoEnvioEn: new Date(now - 60 * MINUTE_MS).toISOString(), ultimoHasta: null, ultimoAtrasado: true, ultimoTurno: new Date(now - 600 * MINUTE_MS).toISOString(), ultimoError: null, proximo: new Date(now + 600 * MINUTE_MS).toISOString()},
   ];
@@ -98,9 +98,9 @@ export const createReportsBackend = ({now = Date.now()} = {}) => {
       if (control.emailError) {
         return [502, {message: control.emailError}];
       }
-      return [200, {correo: body.correo}];
+      return [200, {correo: body.correo, simulado: Boolean(control.mailSimulated)}];
     },
-    'GET /reports/schedules': () => [200, {programados: schedules}],
+    'GET /reports/schedules': () => [200, {programados: schedules, correoConfigurado: !control.mailSimulated}],
     'POST /reports/schedules': (body) => {
       calls.schedules.push({create: body});
       const programado = {id: nextId, ...body, activo: true, ultimoEnvioEn: null, ultimoHasta: null, ultimoAtrasado: false, ultimoTurno: null, ultimoError: null, proximo: new Date(now + 60 * MINUTE_MS).toISOString()};
