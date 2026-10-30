@@ -12,12 +12,18 @@ Brasa Brava — convenciones de ramas, commits y codificación.
 | `develop` | Integración de los módulos terminados |
 | `feature/<modulo>` | Desarrollo de un módulo o funcionalidad, en `snake_case` (ej. `feature/gestion_productos`) |
 | `fix/<tema>` | Corrección puntual sobre `develop` |
+| `style/<tema>` | Cambio visual sin tocar la lógica |
+| `refactor/<tema>` | Reestructuración o limpieza del código sin cambiar el comportamiento |
+| `test/<tema>` | Pruebas nuevas o ajustes de pruebas |
+| `docs/<tema>` | Documentación (README, manual, reglas) |
 
 ### Flujo
 
 1. Cada módulo se desarrolla en su rama `feature/<modulo>`, creada desde `develop`.
 2. Al terminarlo se abre un Pull Request hacia `develop`. Las pruebas automáticas de GitHub Actions deben pasar antes del merge.
 3. Cuando `develop` reúne una entrega completa, se abre un Pull Request de `develop` hacia `main`.
+4. Después del merge, la rama de trabajo se borra; en el repositorio solo quedan `main` y `develop`, protegidas para que no se borren.
+5. El instalador de escritorio que va al local se genera siempre desde `main`.
 
 ---
 
@@ -145,6 +151,8 @@ const minPasswordLength = 8;
 const msPerMinute = 60_000;
 ```
 
+Se exceptúan los códigos HTTP (`res.status(404)`), que ya se leen solos. Los largos de validación que usan varios módulos viven en `backend/src/utils/limits.js`, y los días de la semana del frontend en `frontend/src/lib/week.js`.
+
 ---
 
 ## FRONTEND
@@ -229,6 +237,13 @@ const styles = {logout: 'bg-[#c1272d]'};
 | Bebas Neue | `font-display` | Títulos, marca y botones |
 | Inter | `font-sans` | Interfaz, formularios y tablas |
 | Playfair Display SC | `font-accent` | Solo el mensaje de bienvenida del Home |
+
+### Botones y ventanas
+
+- Todo botón con texto lleva el ícono de su acción mediante la prop `action` de `Button`; los íconos se eligen una sola vez en `config/actionIcons.js`. Un botón nuevo no elige su ícono a mano.
+- El texto de un botón no se parte en dos líneas.
+- Los modales no tienen X: cierran con su botón **Cerrar** o **Cancelar** al pie, con Escape o tocando el fondo.
+- Antes de un cambio visual se presenta una maqueta para aprobarla.
 
 ### Animaciones
 
@@ -323,7 +338,8 @@ El backend es la única fuente de verdad: una validación presente solo en el cl
 ## PRUEBAS
 
 - Cada módulo incluye pruebas de la API (Supertest) y de la interfaz (Testing Library).
-- Los recorridos principales (inicio de sesión, Caja, Reportes y eliminación física) se prueban de punta a punta con Playwright en `e2e/`, contra la API y PostgreSQL reales.
+- Los recorridos principales (inicio de sesión, Caja, reimpresión del ticket, Reportes, eliminación física y administración) se prueban de punta a punta con Playwright en `e2e/`, contra la API y PostgreSQL reales.
+- En cada Pull Request, GitHub Actions corre el lint, la búsqueda de código sin uso (`npm run lint:deadcode`, con knip), las pruebas de cada paquete, la compilación de la interfaz y de Storybook, y las pruebas end to end. Un archivo, una exportación o una dependencia sin uso hace fallar el CI.
 - Un módulo se considera terminado cuando las pruebas pasan en GitHub Actions, su historia de Storybook está al día, su README está actualizado y el manual de usuario (`docs/manual/`) explica la pantalla.
 
 ---

@@ -34,6 +34,9 @@ const styles = {
 
 const SPRING = {type: 'spring', stiffness: 380, damping: 32};
 const expandedWidth = 280;
+const FLIPPED_DEG = 180;
+const ICON_SIZE = 19;
+const NESTED_ICON_SIZE = 17;
 const collapsedWidth = 84;
 const groupClosed = {height: 0, opacity: 0};
 const groupOpen = {height: 'auto', opacity: 1};
@@ -57,7 +60,7 @@ function MenuLink({item, collapsed, nested = false}) {
       {({isActive}) => (
         <>
           {isActive && <motion.span layoutId="sidebar-active-pill" transition={SPRING} className={styles.pill} />}
-          <Icon size={compactNested ? 17 : 19} aria-hidden className={styles.linkIcon} />
+          <Icon size={compactNested ? NESTED_ICON_SIZE : ICON_SIZE} aria-hidden className={styles.linkIcon} />
           {!collapsed && <span className={styles.linkLabel}>{item.label}</span>}
         </>
       )}
@@ -97,9 +100,9 @@ function MenuGroup({item, collapsed}) {
         aria-controls={contentId}
         className={cn(styles.groupToggle, hasActiveChild && !open && styles.groupToggleMarked)}
       >
-        <Icon size={19} aria-hidden className={styles.groupIcon} />
+        <Icon size={ICON_SIZE} aria-hidden className={styles.groupIcon} />
         <span className={styles.groupLabel}>{item.label}</span>
-        <motion.span animate={{rotate: open ? 180 : 0}} transition={SPRING}>
+        <motion.span animate={{rotate: open ? FLIPPED_DEG : 0}} transition={SPRING}>
           <ChevronDown size={18} aria-hidden />
         </motion.span>
       </button>
@@ -160,7 +163,7 @@ export function Sidebar({items, collapsed = false, onToggleCollapsed}) {
       </aside>
       {onToggleCollapsed && (
         <button type="button" onClick={onToggleCollapsed} aria-label={toggleLabel} title={toggleLabel} className={styles.notch}>
-          <motion.span animate={{rotate: collapsed ? 180 : 0}} transition={SPRING}>
+          <motion.span animate={{rotate: collapsed ? FLIPPED_DEG : 0}} transition={SPRING}>
             <ChevronsLeft size={16} aria-hidden />
           </motion.span>
         </button>

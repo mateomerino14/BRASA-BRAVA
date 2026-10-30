@@ -19,7 +19,12 @@ function TableDemo() {
   const [rows, setRows] = useState(PRODUCTS);
   const availability = {
     isPending: () => false,
-    toggle: (product) => setRows((current) => current.map((item) => (item.id === product.id ? {...item, disponible: !item.disponible} : item))),
+    toggle: (product) => setRows((current) => current.map((item) => {
+      if (item.id === product.id) {
+        return {...item, disponible: !item.disponible};
+      }
+      return item;
+    })),
   };
   return <ProductsTable list={fakeList({items: rows})} onEdit={fn()} onToggleStatus={fn()} onRecipe={fn()} availability={availability} />;
 }

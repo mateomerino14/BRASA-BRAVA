@@ -2,6 +2,8 @@ import {useState} from 'react';
 import {useToast} from '../../../context/useToast';
 import {authApi} from '../services/authApi';
 
+const MAIL_NOT_CONFIGURED = 'Este sistema todavía no tiene configurado el servicio de correo, así que el código no llegará. Pida a administración que le cambie la contraseña.';
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_PATTERN = /^\d{6}$/;
 const minPasswordLength = 8;
@@ -40,6 +42,7 @@ export function usePasswordReset({api = authApi} = {}) {
   const [code, setCode] = useState('');
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState('');
+  const [noticeTone, setNoticeTone] = useState('info');
   const [loading, setLoading] = useState(false);
   const [codeStatus, setCodeStatus] = useState('activo');
   const [attemptsLeft, setAttemptsLeft] = useState(null);
@@ -62,6 +65,16 @@ export function usePasswordReset({api = authApi} = {}) {
     finally {
       setLoading(false);
     }
+  };
+
+  const announceCode = (response, text) => {
+    if (response.simulado) {
+      setNoticeTone('warning');
+      setNotice(MAIL_NOT_CONFIGURED);
+      return;
+    }
+    setNoticeTone('info');
+    setNotice(text);
   };
 
   const startCode = (response) => {
@@ -115,7 +128,7 @@ export function usePasswordReset({api = authApi} = {}) {
     if (ok) {
       startCode(ok);
       setStep('code');
-      setNotice('Le enviamos un código de 6 dígitos. Revise su bandeja de entrada.');
+      announceCode(ok, 'Le enviamos un código de 6 dígitos. Revise su bandeja de entrada.');
     }
   };
 
@@ -123,7 +136,7 @@ export function usePasswordReset({api = authApi} = {}) {
     const ok = await run(() => api.requestResetCode(email.trim()), 'No se pudo enviar el código');
     if (ok) {
       startCode(ok);
-      setNotice('Le enviamos un código nuevo. El anterior ya no sirve.');
+      announceCode(ok, 'Le enviamos un código nuevo. El anterior ya no sirve.');
     }
   };
 
@@ -178,6 +191,7 @@ export function usePasswordReset({api = authApi} = {}) {
     code,
     errors,
     notice,
+    noticeTone,
     loading,
     codeStatus,
     attemptsLeft,

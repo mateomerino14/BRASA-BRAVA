@@ -7,6 +7,7 @@ const MINUTE_MS = 60000;
 export const startReportScheduler = ({db, mailer, config, logger = console, clock = () => new Date(), intervalMs = MINUTE_MS}) => {
   const service = createReportsService({repository: createReportsRepository(db), mailer, clock, timeZone: config.TIMEZONE, logger});
   let running = false;
+  // Corre los envíos vencidos sin superponer dos revisiones
   const tick = async () => {
     if (running) {
       return [];

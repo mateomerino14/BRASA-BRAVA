@@ -148,7 +148,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
       logger.error?.(problem);
       return {error: 'No se pudo enviar el correo. Revise la conexión e intente de nuevo', status: 502};
     }
-    return {correo};
+    return {correo, simulado: !mailer.delivers};
   };
 
   // Empleados para el filtro del reporte
@@ -216,13 +216,14 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return null;
   };
 
+  // Lista los envíos programados con su próximo envío (solo el DIRECTORIO)
   const schedules = async (user) => {
     const problem = guard(user);
     if (problem) {
       return problem;
     }
     const now = clock();
-    return {programados: (await repository.schedules()).map((row) => toSchedule(row, now, timeZone))};
+    return {programados: (await repository.schedules()).map((row) => toSchedule(row, now, timeZone)), correoConfigurado: Boolean(mailer.delivers)};
   };
 
   // Devuelve un programado o el error si no existe
@@ -234,6 +235,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return {programado: toSchedule(row, clock(), timeZone)};
   };
 
+  // Registra un envío programado nuevo
   const createSchedule = async (data, user) => {
     const problem = guard(user);
     if (problem) {
@@ -254,6 +256,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return null;
   };
 
+  // Modifica correo, días y hora de un envío programado
   const updateSchedule = async (id, data, user) => {
     const problem = await editable(id, user);
     if (problem) {
@@ -263,6 +266,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return scheduleById(id);
   };
 
+  // Pausa o reactiva un envío programado
   const setScheduleStatus = async (id, activo, user) => {
     const problem = await editable(id, user);
     if (problem) {
@@ -272,6 +276,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return scheduleById(id);
   };
 
+  // Borra un envío programado
   const deleteSchedule = async (id, user) => {
     const problem = await editable(id, user);
     if (problem) {
@@ -299,7 +304,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
       logger.error?.(problemSending);
       return {error: 'No se pudo enviar el correo. Revise la conexión e intente de nuevo', status: 502};
     }
-    return scheduleById(id);
+    return {...await scheduleById(id), simulado: !mailer.delivers};
   };
 
   return {report, pdf, email, employees, runDue, schedules, createSchedule, updateSchedule, setScheduleStatus, deleteSchedule, sendScheduleNow};

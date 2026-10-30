@@ -4,9 +4,10 @@ import {IconButton} from '../../../components/atoms/IconButton';
 import {Spinner} from '../../../components/atoms/Spinner';
 import {Switch} from '../../../components/atoms/Switch';
 import {Modal} from '../../../components/organisms/Modal';
+import {Alert} from '../../../components/molecules/Alert';
 import {cn} from '../../../lib/cn';
 import {formatClock, formatDayMonthYear, formatTime} from '../../../lib/format';
-import {REPORT_TITLES} from '../constants/reports';
+import {MAIL_NOT_CONFIGURED, REPORT_TITLES} from '../constants/reports';
 import {daysText, isoDate} from '../utils/reports';
 
 const styles = {
@@ -22,6 +23,7 @@ const styles = {
   tools: 'flex shrink-0 items-center gap-2',
   empty: 'rounded-2xl border border-dashed border-arena bg-white px-4 py-8 text-center text-sm text-cafe',
   loading: 'flex justify-center py-8',
+  warning: 'mb-3',
   actions: 'grid gap-3 sm:grid-cols-2',
 };
 
@@ -59,6 +61,7 @@ export function SchedulesModal({schedules}) {
         </div>
       )}
     >
+      {!schedules.loading && !schedules.mailConfigured && <Alert tone="warning" className={styles.warning}>{MAIL_NOT_CONFIGURED}</Alert>}
       {schedules.loading && <div className={styles.loading}><Spinner size={28} label="Cargando envíos" /></div>}
       {!schedules.loading && schedules.items.length === 0 && (
         <p className={styles.empty}>No hay envíos programados. Use Nuevo envío para que el reporte llegue solo a un correo.</p>

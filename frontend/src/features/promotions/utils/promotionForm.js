@@ -1,4 +1,5 @@
-import {ALL_DAYS, NAME_MAX_LENGTH} from '../constants/promotions';
+import {ALL_DAYS} from '../../../lib/week';
+import {NAME_MAX_LENGTH} from '../constants/promotions';
 
 const MIN_NAME_LENGTH = 2;
 const MIN_COMBO_ITEMS = 2;

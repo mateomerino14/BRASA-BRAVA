@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
+import {NAME_MIN_LENGTH} from '../../utils/limits.js';
 
 const NAME_MAX = 50;
 const TABLE_NAME_MAX = 30;
@@ -20,7 +21,7 @@ const table = z.object({
 });
 
 export const sectionSchema = z.object({
-  nombre: z.string({error: 'Ingrese el nombre de la sección'}).trim().min(2, 'Ingrese el nombre de la sección (mínimo 2 letras)').max(NAME_MAX, 'El nombre es demasiado largo'),
+  nombre: z.string({error: 'Ingrese el nombre de la sección'}).trim().min(NAME_MIN_LENGTH, `Ingrese el nombre de la sección (mínimo ${NAME_MIN_LENGTH} letras)`).max(NAME_MAX, 'El nombre es demasiado largo'),
   descripcion: z.string().trim().max(DESCRIPTION_MAX, `La descripción admite hasta ${DESCRIPTION_MAX} caracteres`).optional().or(z.literal('')).transform((value) => value || null),
   mesas: z
     .array(table, {error: 'Agregue al menos una mesa'})

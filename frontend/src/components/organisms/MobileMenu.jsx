@@ -29,6 +29,9 @@ const styles = {
   stripes: 'h-2.5 shrink-0 bg-[repeating-linear-gradient(90deg,var(--color-brasa)_0_18px,var(--color-mostaza)_18px_36px)]',
 };
 
+const FLIPPED_DEG = 180;
+const ICON_SIZE = 22;
+const NESTED_ICON_SIZE = 19;
 const rolledUp = {clipPath: 'inset(0 0 100% 0)'};
 const rolledDown = {clipPath: 'inset(0 0 0% 0)'};
 const rollTransition = {duration: 0.42, ease: [0.22, 1, 0.36, 1]};
@@ -45,7 +48,7 @@ function Slat({item, nested = false}) {
     <NavLink to={item.to} end={item.end} className={({isActive}) => cn(styles.slat, nested && styles.subSlat, isActive ? styles.slatActive : styles.slatIdle)}>
       {({isActive}) => (
         <>
-          <Icon size={nested ? 19 : 22} aria-hidden className={isActive ? styles.slatIconActive : styles.slatIcon} />
+          <Icon size={nested ? NESTED_ICON_SIZE : ICON_SIZE} aria-hidden className={isActive ? styles.slatIconActive : styles.slatIcon} />
           {item.label}
         </>
       )}
@@ -60,9 +63,9 @@ function SlatGroup({item}) {
   return (
     <>
       <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className={cn(styles.slat, styles.slatIdle)}>
-        <Icon size={22} aria-hidden className={styles.slatIcon} />
+        <Icon size={ICON_SIZE} aria-hidden className={styles.slatIcon} />
         {item.label}
-        <motion.span animate={{rotate: open ? 180 : 0}} className={styles.chevron}>
+        <motion.span animate={{rotate: open ? FLIPPED_DEG : 0}} className={styles.chevron}>
           <ChevronDown size={20} aria-hidden />
         </motion.span>
       </button>

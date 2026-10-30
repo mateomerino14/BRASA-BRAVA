@@ -40,7 +40,11 @@ export const createFamilyBackend = () => {
   for (const item of FAMILY_CATALOG.productos) {
     handlers[`GET /catalog/products/${item.id}`] = () => {
       calls.push(item.id);
-      return [200, {producto: {...item, receta: item.id === 1 ? RECIPE : []}}];
+      let receta = [];
+      if (item.id === 1) {
+        receta = RECIPE;
+      }
+      return [200, {producto: {...item, receta}}];
     };
   }
   return {handlers, calls};

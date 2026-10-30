@@ -25,7 +25,7 @@ export const createAuthController = (service) => ({
   // Envía el código de verificación al correo indicado
   requestReset: async (req, res) => {
     const result = await service.requestPasswordReset(req.validated.body);
-    return respond(res, result, () => res.json({message: resetRequested, venceEn: result.expiresAt}));
+    return respond(res, result, () => res.json({message: resetRequested, venceEn: result.expiresAt, simulado: result.simulado}));
   },
 
   // Verifica el código ingresado sin consumirlo
@@ -43,6 +43,6 @@ export const createAuthController = (service) => ({
   // Cambia la contraseña del DIRECTORIO
   changeDirectorioPassword: async (req, res) => {
     const result = await service.changeDirectorioPassword(req.user, req.validated.body);
-    return respond(res, result, () => res.json({message: 'Contraseña del DIRECTORIO actualizada'}));
+    return respond(res, result, ({session}) => res.json({message: 'Contraseña del DIRECTORIO actualizada', ...session}));
   },
 });

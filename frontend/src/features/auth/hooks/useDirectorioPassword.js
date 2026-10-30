@@ -26,8 +26,9 @@ const validate = (values) => {
   return errors;
 };
 
-export function useDirectorioPassword({api = authApi} = {}) {
-  const [open, setOpen] = useState(false);
+export function useDirectorioPassword({api = authApi, required = false, onChanged} = {}) {
+  const [shown, setShown] = useState(false);
+  const open = shown || required;
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -36,7 +37,7 @@ export function useDirectorioPassword({api = authApi} = {}) {
   const show = () => {
     setValues(EMPTY);
     setErrors({});
-    setOpen(true);
+    setShown(true);
   };
 
   const setField = (field, value) => {
@@ -57,8 +58,10 @@ export function useDirectorioPassword({api = authApi} = {}) {
     }
     setSaving(true);
     try {
-      await api.changeDirectorioPassword(values);
-      setOpen(false);
+      const session = await api.changeDirectorioPassword(values);
+      setShown(false);
+      setValues(EMPTY);
+      onChanged?.(session);
       toast.success('Se cambió la contraseña del DIRECTORIO. Úsela la próxima vez que ingrese');
     }
     catch (requestError) {
@@ -72,5 +75,11 @@ export function useDirectorioPassword({api = authApi} = {}) {
     setSaving(false);
   };
 
-  return {open, values, errors, saving, show, close: () => setOpen(false), setField, submit};
+  const close = () => {
+    if (!required) {
+      setShown(false);
+    }
+  };
+
+  return {open, required, values, errors, saving, show, close, setField, submit};
 }

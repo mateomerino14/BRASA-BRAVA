@@ -1,6 +1,7 @@
 import {z} from 'zod';
 import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
 import {decimalSchema} from '../../utils/numbers.js';
+import {NAME_MIN_LENGTH} from '../../utils/limits.js';
 
 const NAME_MAX = 80;
 const DESCRIPTION_MAX = 200;
@@ -14,7 +15,7 @@ const id = (message) => z.coerce.number({error: message}).int(message).positive(
 const price = decimalSchema({label: 'el precio', decimals: PRICE_DECIMALS, max: MAX_PRICE});
 
 export const productSchema = z.object({
-  nombre: z.string({error: 'Ingrese el nombre del producto'}).trim().min(2, 'Ingrese el nombre del producto (mínimo 2 letras)').max(NAME_MAX, 'El nombre es demasiado largo'),
+  nombre: z.string({error: 'Ingrese el nombre del producto'}).trim().min(NAME_MIN_LENGTH, `Ingrese el nombre del producto (mínimo ${NAME_MIN_LENGTH} letras)`).max(NAME_MAX, 'El nombre es demasiado largo'),
   descripcion: z.string().trim().max(DESCRIPTION_MAX, `La descripción admite hasta ${DESCRIPTION_MAX} caracteres`).optional().or(z.literal('')).transform((value) => value || null),
   precio: price,
   idSubcategoria: id('Seleccione una subcategoría'),

@@ -19,6 +19,19 @@ npm run dist                 # instalador .exe en release/
 
 `npm run dist` debe correrse en Windows: el instalador incluye el PostgreSQL de la plataforma donde se genera.
 
+## Generar el instalador para el local
+
+La versión que se instala en el local sale siempre de la rama `main`:
+
+```bash
+git checkout main
+git pull
+npm ci
+npm run dist -w electron     # deja Brasa Brava Setup <versión>.exe en electron/release/
+```
+
+Para actualizar un local se instala la versión nueva encima de la anterior: la base y las fotos viven en la carpeta del usuario y no se tocan, y las migraciones nuevas se aplican solas al abrir.
+
 ## Funcionamiento
 
 | Archivo | Responsabilidad |
@@ -37,9 +50,13 @@ Los datos (la base en `pgdata/` y las fotos en `uploads/`) quedan en la carpeta 
 
 | Clave | Propósito |
 |---|---|
-| `mailDriver` | `console` (por defecto) o `brevo` para enviar correos reales |
+| `mailDriver` | `console` (por defecto) o `brevo` para enviar correos reales: códigos de recuperación de contraseña y reportes de ventas (a pedido y programados) |
 | `brevoApiKey` | Clave de Brevo, si se usa `brevo` |
-| `seedDemoData` | `false` antes del primer arranque para no cargar los usuarios de prueba |
+| `seedDemoData` | `true` por defecto: carga los datos de demostración (cargos, empleados, menú, mesas y ventas) en las tablas que estén vacías. En un local real, crear antes de la primera apertura `%APPDATA%/Brasa Brava/brasa-brava.json` con `{"seedDemoData": false}`: el sistema arranca vacío, solo con la cuenta del DIRECTORIO (contraseña inicial `Directorio2026`, que pide cambiar al primer ingreso) |
+
+El archivo está en `%APPDATA%/Brasa Brava/brasa-brava.json`; los cambios se toman al volver a abrir la aplicación. Los correos salen con el remitente `no-reply@brasabrava.bo`, que debe estar verificado en la cuenta de Brevo. Mientras siga en `console`, el sistema avisa en Reportes y en la recuperación de contraseña que el correo no está configurado y no llega a nadie.
+
+Los envíos programados de reportes solo corren mientras la aplicación está abierta; si estuvo cerrada a la hora de un envío, sale al abrirla.
 
 ## Impresión directa
 

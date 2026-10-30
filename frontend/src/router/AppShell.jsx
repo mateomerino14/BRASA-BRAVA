@@ -15,11 +15,18 @@ const titleFor = (pathname) => {
 };
 
 export function AppShell() {
-  const {user, logout} = useAuth();
+  const {user, logout, replaceSession} = useAuth();
   const {pathname} = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSED_KEY) === '1');
-  const directorioPassword = useDirectorioPassword();
+  const directorioPassword = useDirectorioPassword({
+    required: Boolean(user?.isDirectorio && user.cambiarContrasena),
+    onChanged: (session) => {
+      if (session?.token) {
+        replaceSession(session);
+      }
+    },
+  });
   let changePassword;
   if (user?.isDirectorio) {
     changePassword = directorioPassword.show;
@@ -48,7 +55,7 @@ export function AppShell() {
       pageKey={pathname}
     >
       <Outlet />
-      <DirectorioPasswordModal form={directorioPassword} />
+      <DirectorioPasswordModal form={directorioPassword} onLogout={handleLogout} />
     </MainLayout>
   );
 }

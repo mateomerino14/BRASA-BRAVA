@@ -1,3 +1,5 @@
+const ISO_DATE_LENGTH = 10;
+
 // Fecha de hoy, día de la semana y hora (HH:MM) en la zona del local
 export const localToday = (now, timeZone) => {
   const parts = Object.fromEntries(
@@ -15,9 +17,9 @@ export const toIsoDate = (value) => {
     return null;
   }
   if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
+    return value.toISOString().slice(0, ISO_DATE_LENGTH);
   }
-  return String(value).slice(0, 10);
+  return String(value).slice(0, ISO_DATE_LENGTH);
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -41,6 +43,6 @@ const localMidnight = (isoDate, timeZone) => {
 
 // Inicio y fin (UTC) de un día de calendario del local
 export const localDayRange = (isoDate, timeZone) => {
-  const nextDate = new Date(Date.parse(`${isoDate}T00:00:00Z`) + DAY_MS).toISOString().slice(0, 10);
+  const nextDate = new Date(Date.parse(`${isoDate}T00:00:00Z`) + DAY_MS).toISOString().slice(0, ISO_DATE_LENGTH);
   return {start: localMidnight(isoDate, timeZone), end: localMidnight(nextDate, timeZone)};
 };
