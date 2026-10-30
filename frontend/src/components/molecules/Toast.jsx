@@ -21,6 +21,7 @@ const ICONS = {error: CircleAlert, success: CircleCheck};
 const TITLES = {error: 'No se pudo completar', success: 'Listo'};
 const hidden = {opacity: 0, x: 80, scale: 0.96};
 const visible = {opacity: 1, x: 0, scale: 1};
+const MS_PER_SECOND = 1000;
 const leave = {opacity: 0, x: 80, transition: {duration: 0.2}};
 const spring = {type: 'spring', stiffness: 360, damping: 30};
 const fullWidth = {scaleX: 1};
@@ -58,7 +59,7 @@ export function Toast({tone = 'error', title, message, duration, onClose}) {
           aria-hidden
           initial={fullWidth}
           animate={emptyWidth}
-          transition={{duration: duration / 1000, ease: 'linear'}}
+          transition={{duration: duration / MS_PER_SECOND, ease: 'linear'}}
           className={cn(styles.progress, 'w-full', colors.progress)}
         />
       )}

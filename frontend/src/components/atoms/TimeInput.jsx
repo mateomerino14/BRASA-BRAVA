@@ -14,10 +14,11 @@ const styles = {
   clear: 'ml-1 flex size-8 shrink-0 items-center justify-center rounded-md text-cafe transition-colors hover:bg-hueso hover:text-carbon',
 };
 
-const HOURS = Array.from({length: 12}, (_, index) => String(index + 1));
-const MINUTE_STEP = 5;
-const MINUTES = Array.from({length: 60 / MINUTE_STEP}, (_, index) => String(index * MINUTE_STEP).padStart(2, '0'));
 const NOON = 12;
+const HOURS = Array.from({length: NOON}, (_, index) => String(index + 1));
+const MINUTE_STEP = 5;
+const MINUTES_PER_HOUR = 60;
+const MINUTES = Array.from({length: MINUTES_PER_HOUR / MINUTE_STEP}, (_, index) => String(index * MINUTE_STEP).padStart(2, '0'));
 const DEFAULT_PERIOD = 'PM';
 
 const pad = (value) => String(value).padStart(2, '0');
