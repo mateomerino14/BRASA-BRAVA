@@ -8,6 +8,7 @@ import {countText, formatAmount, formatDate, formatHours, formatQuantity} from '
 import {LOW_PORTIONS} from '../constants/family';
 import {ProductCover} from './ProductCover';
 import {PromotionCover} from './PromotionCover';
+import {ALL_DAYS, WEEKDAYS, WEEKEND, WEEKDAY_NAMES, selectedDays} from '../../../lib/week';
 
 const styles = {
   body: 'flex flex-col gap-5',
@@ -122,19 +123,17 @@ function ProductDetail({product, loading, failed, onRetry}) {
   );
 }
 
-const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const PLURAL_DAY = {sábado: 'sábados', domingo: 'domingos'};
 
 const daysPhrase = (days) => {
-  const selected = WEEK_ORDER.filter((index) => days[index] === '1').map((index) => DAY_NAMES[index]);
-  if (selected.length === WEEK_ORDER.length) {
+  const selected = selectedDays(days).map((index) => WEEKDAY_NAMES[index]);
+  if (days === ALL_DAYS) {
     return 'todos los días';
   }
-  if (days === '0111110') {
+  if (days === WEEKDAYS) {
     return 'de lunes a viernes';
   }
-  if (days === '1000001') {
+  if (days === WEEKEND) {
     return 'los fines de semana';
   }
   const names = selected.map((name) => PLURAL_DAY[name] ?? name);

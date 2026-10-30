@@ -1,5 +1,6 @@
 import {motion} from 'motion/react';
 import {cn} from '../../lib/cn';
+import {ALL_DAYS} from '../../lib/week';
 
 const styles = {
   wrapper: 'flex flex-wrap items-center gap-1.5',
@@ -18,7 +19,6 @@ const DAYS = [
   {index: 6, short: 'S', name: 'Sábado'},
   {index: 0, short: 'D', name: 'Domingo'},
 ];
-const ALL_DAYS = '1111111';
 const tapPress = {scale: 0.88};
 
 export function DayPicker({value, onChange}) {
