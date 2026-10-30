@@ -340,7 +340,7 @@ El backend es la única fuente de verdad: una validación presente solo en el cl
 - Cada módulo incluye pruebas de la API (Supertest) y de la interfaz (Testing Library).
 - Los recorridos principales (inicio de sesión, Caja, reimpresión del ticket, Reportes, eliminación física y administración) se prueban de punta a punta con Playwright en `e2e/`, contra la API y PostgreSQL reales.
 - En cada Pull Request, GitHub Actions corre el lint, la búsqueda de código sin uso (`npm run lint:deadcode`, con knip), las pruebas de cada paquete, la compilación de la interfaz y de Storybook, y las pruebas end to end. Un archivo, una exportación o una dependencia sin uso hace fallar el CI.
-- Un módulo se considera terminado cuando las pruebas pasan en GitHub Actions, su historia de Storybook está al día, su README está actualizado y el manual de usuario (`docs/manual/`) explica la pantalla.
+- Un módulo se considera terminado cuando las pruebas pasan en GitHub Actions, su historia de Storybook está al día, su README está actualizado y el manual de usuario (`docs/manual/`) explica la pantalla, con su PDF compilado de nuevo.
 
 ---
 

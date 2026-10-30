@@ -9,7 +9,9 @@ cd docs/manual
 latexmk -pdf manual.tex      # o: pdflatex manual.tex (dos veces, para el índice)
 ```
 
-Necesita una distribución de LaTeX con `babel` (español), las fuentes `inter`, `montserrat` y `sourcecodepro`, y los paquetes `tcolorbox`, `titlesec`, `titletoc`, `paracol` y `fancyhdr`. Todo viene en TeX Live completo, MiKTeX (los instala solo al compilar) y Overleaf. El PDF no se sube al repositorio.
+Necesita una distribución de LaTeX con `babel` (español), las fuentes `inter`, `montserrat` y `sourcecodepro`, y los paquetes `tcolorbox`, `titlesec`, `titletoc`, `paracol` y `fancyhdr`. Todo viene en TeX Live completo, MiKTeX (los instala solo al compilar) y Overleaf.
+
+El PDF listo para leer o imprimir está en `Manual_Usuario_Brasa_Brava.pdf`. Al cambiar un capítulo se compila de nuevo y se reemplaza ese archivo con el `manual.pdf` que genera LaTeX, en el mismo Pull Request, para que el PDF nunca quede atrás del texto.
 
 ## Diseño
 
