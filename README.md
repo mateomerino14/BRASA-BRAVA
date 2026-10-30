@@ -1,6 +1,6 @@
 # Brasa Brava — Sistema de Gestión
 
-Sistema interno del restaurante Brasa Brava: inicio de sesión por empleado, caja (con lo que sale de cocina), catálogo y administración de productos, categorías, stock, secciones y mesas, promociones, empleados y cargos.
+Sistema interno del restaurante Brasa Brava: inicio de sesión por empleado, Caja en una sola pantalla (mesas, pedido, comanda de cocina, Marcar listos, cobro y ticket), catálogo del local (Familia), reportes de ventas en PDF o por correo con envíos programados, administración de productos, recetas, inventario, categorías, secciones y mesas, promociones, empleados y cargos con permisos por pantalla, y eliminación física para el DIRECTORIO.
 
 Funciona de dos formas con el mismo código:
 
@@ -8,6 +8,18 @@ Funciona de dos formas con el mismo código:
 - **Web:** API y frontend desplegables en un servidor, con PostgreSQL en la nube.
 
 El diseño sale del prototipo de Figma *Brasa Brava* (paleta, tipografías y pantallas).
+
+## Documentación
+
+| Documento | Para quién | Contenido |
+|---|---|---|
+| [`docs/manual`](docs/manual/README.md) | Personal del local | Manual de usuario en LaTeX con capturas: ingreso, Caja, Familia, Reportes, Administración y eliminación física |
+| [`reglas.md`](reglas.md) | Desarrollo | Ramas, commits y estándares de código |
+| [`backend/README.md`](backend/README.md) | Desarrollo | API: variables de entorno, arquitectura, rutas y reglas de negocio de cada módulo |
+| [`backend/database/README.md`](backend/database/README.md) | Desarrollo | Migraciones, tablas y datos de prueba |
+| [`frontend/README.md`](frontend/README.md) | Desarrollo | Interfaz: arquitectura, sistema de diseño, rutas y pruebas |
+| [`electron/README.md`](electron/README.md) | Desarrollo e instalación | Aplicación de escritorio, configuración del local, impresoras e instalador |
+| [`e2e/README.md`](e2e/README.md) | Desarrollo | Pruebas end to end y capturas del manual |
 
 ## Requisitos
 
@@ -105,8 +117,26 @@ BRASA-BRAVA/
 | Familia: catálogo del local con productos por categoría, receta y porciones que alcanzan, y promociones con cuándo aplican | Terminado |
 | Impresión directa en escritorio: comanda en la ticketera de cocina y ticket en la de caja, sin diálogo, con hoja de prueba | Terminado |
 | Pedido sin mesero: cada envío guarda quién lo registró, y el consumo (Local o Para llevar) va en su propia columna en Caja y en el detalle de la venta | Terminado |
-| Pruebas end to end: inicio de sesión, Caja de punta a punta, Reportes y eliminación física en un navegador real | Terminado |
+| Pruebas end to end: inicio de sesión, Caja de punta a punta, reimpresión autorizada del ticket, Reportes, eliminación física, categorías y permisos de cargos en un navegador real | Terminado |
+| Código ajustado a `reglas.md`: lint, sin código sin uso (knip), constantes con nombre y sin ternarios en la lógica | Terminado |
 | Manual de usuario (LaTeX, con capturas del sistema) | Terminado |
+
+## Versiones y despliegue
+
+`main` tiene siempre la versión estable entregada al local; `develop` reúne lo terminado hasta la próxima entrega (ver `reglas.md`).
+
+**Aplicación de escritorio (Windows).** Se genera desde `main`, en una PC con Windows:
+
+```bash
+git checkout main
+git pull
+npm ci
+npm run dist -w electron     # compila la interfaz y deja el instalador .exe en electron/release/
+```
+
+El instalador trae su propia base PostgreSQL y aplica las migraciones al abrir, así que actualizar un local es instalar la versión nueva encima: los datos se conservan. Para que los reportes salgan por correo, configurar Brevo en `brasa-brava.json` (ver `electron/README.md`).
+
+**Versión web.** En el servidor: `npm ci`, `npm run build`, definir las variables de `backend/.env` (`DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `STATIC_DIR=../frontend/dist`, `MAIL_DRIVER=brevo` y `BREVO_API_KEY`) y arrancar con `npm start -w backend`. La API sirve también la interfaz.
 
 ## Ramas y pruebas automáticas
 
