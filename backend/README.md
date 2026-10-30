@@ -9,7 +9,7 @@ API REST del sistema de gestión del restaurante Brasa Brava. La misma API corre
 
 ## Instalación
 
-Desde la raíz del repositorio (instala los tres paquetes a la vez):
+Desde la raíz del repositorio (instala todos los paquetes a la vez):
 
 ```bash
 npm install
@@ -36,15 +36,15 @@ BREVO_API_KEY=...
 | `JWT_SECRET` | Clave de firma del token de sesión. Obligatoria en producción |
 | `JWT_EXPIRES_IN` | Duración de la sesión (por defecto `8h`) |
 | `CORS_ORIGINS` | Dominios del cliente web que pueden usar la API, separados por coma |
-| `MAIL_DRIVER` | `console` muestra los códigos en la terminal; `brevo` envía correos reales |
+| `MAIL_DRIVER` | `console` muestra los correos en la terminal (códigos de recuperación y reportes); `brevo` los envía de verdad |
 | `BREVO_API_KEY` | Clave de Brevo, obligatoria con `MAIL_DRIVER=brevo` |
-| `MAIL_FROM_EMAIL` / `MAIL_FROM_NAME` | Remitente de los correos |
+| `MAIL_FROM_EMAIL` / `MAIL_FROM_NAME` | Remitente de los correos; con Brevo, el correo debe estar verificado como remitente en la cuenta |
 | `RESET_CODE_TTL_MINUTES` | Minutos de vigencia del código de recuperación (por defecto 10) |
 | `RESET_CODE_MAX_ATTEMPTS` | Intentos antes de bloquear el código (por defecto 5) |
 | `RATE_LIMIT_ENABLED` | `false` desactiva el límite de intentos por IP (solo para pruebas) |
 | `STATIC_DIR` | Opcional. Carpeta del frontend compilado para servirlo desde la API |
 | `UPLOADS_DIR` | Carpeta donde se guardan las imágenes subidas (por defecto `uploads`) |
-| `TIMEZONE` | Zona horaria del local para saber qué día es hoy (por defecto `America/La_Paz`) |
+| `TIMEZONE` | Zona horaria del local para saber qué día es hoy, cortar los reportes por día y disparar los envíos programados (por defecto `America/La_Paz`) |
 
 La configuración se valida con Zod al arrancar: si falta una variable obligatoria o tiene formato inválido, el servidor no inicia e indica cuál corregir.
 
@@ -129,17 +129,21 @@ src/
 │   ├── reports/               Reportes de ventas: resumen y detalladas, PDF, correo y envíos programados
 │   ├── settings/              Ajustes del local (enlace a la página de impuestos)
 │   ├── catalog/               Familia: catálogo del local con receta y stock
+│   ├── roles/                 Cargos y sus pantallas: gestión y opciones para empleados
 │   └── shared/                Acciones de foto y sincronización de hijos (subcategorías, mesas)
-│   └── roles/                 Cargos y sus pantallas: gestión y opciones para empleados
 ├── middlewares/
-│   ├── auth.js                Token de sesión y permisos por pantalla
+│   ├── auth.js                Token de sesión, permisos por pantalla y solo DIRECTORIO
+│   ├── rateLimit.js           Límite de intentos por IP
 │   ├── validate.js            Validación de la petición con Zod
 │   ├── upload.js              Recepción de una imagen (multipart, máx. 5 MB)
 │   └── errorHandler.js        Respuesta uniforme ante errores
 ├── services/
-│   ├── mailer.js              Correo por consola (desarrollo) o Brevo
-│   └── imageStorage.js        Guardado de imágenes validando su formato real
-├── utils/                   Hash, tokens, códigos, errores HTTP, respuesta de servicios y parámetros de listados
+│   ├── mailer.js              Correo por consola (desarrollo) o Brevo, con adjuntos
+│   ├── imageStorage.js        Guardado de imágenes validando su formato real
+│   ├── imageCleanup.js        Al arrancar, borra las fotos que ya no usa ningún registro
+│   └── reportScheduler.js     Revisa cada minuto los envíos programados del reporte
+├── utils/                   Hash, tokens, códigos, errores HTTP, respuesta de servicios, parámetros de listados,
+│                            días del local (calendar.js) y largos de validación compartidos (limits.js)
 ├── scripts/                 migrate y seed para npm run
 ├── app.js                   Configuración de Express (seguridad, CORS, rutas)
 └── server.js                Arranque del servidor
@@ -240,7 +244,7 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/uploads/:archivo` | Imágenes subidas |
 | `GET` | `/api/health` | Estado de la API y de la base |
 
-Las rutas de empleados y las opciones de cargos exigen el permiso `empleados`; la gestión de cargos, el permiso `cargos`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja y las de `/api/kitchen`, el permiso `caja`; las del catálogo, el permiso `familia`.
+Las rutas de empleados y las opciones de cargos exigen el permiso `empleados`; la gestión de cargos, el permiso `cargos`; las de categorías, el permiso `categorias`; las de productos, el permiso `productos`; las de insumos, el permiso `stock`; las de secciones, el permiso `secciones`; las de promociones, el permiso `promociones`; las de Caja y las de `/api/kitchen`, el permiso `caja`; las del catálogo, el permiso `familia`; las de reportes, el permiso `reportes` (los envíos programados, solo el DIRECTORIO); las de eliminación física, solo el DIRECTORIO.
 
 ### Parámetros comunes de los listados
 
@@ -256,6 +260,10 @@ Todos los listados aceptan los mismos parámetros (definidos una sola vez en `ut
 | `dir` | `asc` o `desc` | `asc` |
 
 El orden se arma con una lista blanca de columnas por módulo: un `sort` que no está en la lista responde 400 y nunca llega al SQL.
+
+### Validación
+
+Cada ruta valida su entrada con el esquema Zod del módulo (`<modulo>.schemas.js`) antes de llegar al controlador; si falla responde 400 con el mensaje del primer error y la lista `details` (`campo` y `mensaje` de cada uno). Los largos que comparten varios módulos (usuario, correo, contraseña y largo mínimo de un nombre) están en `utils/limits.js`; los propios de cada módulo, como constantes al inicio de su esquema.
 
 ### Reglas de la gestión de empleados
 
@@ -353,7 +361,7 @@ El orden se arma con una lista blanca de columnas por módulo: un `sort` que no 
 ### Reglas de cocina
 
 - Cocina no tiene pantalla: recibe la comanda impresa y el cajero marca en Caja lo que sale.
-- Cada línea guarda cuántas unidades ya están listas (`listos`, de 0 a la cantidad pedida). Sumar y restar se hacen en una sola sentencia que nunca pasa de la cantidad ni baja de 0, así dos cocineros tocando a la vez no se pisan.
+- Cada línea guarda cuántas unidades ya están listas (`listos`, de 0 a la cantidad pedida). Sumar y restar se hacen en una sola sentencia que nunca pasa de la cantidad ni baja de 0, así dos cajeros marcando a la vez no se pisan.
 - Un envío está **listo** cuando todas sus unidades lo están; si se desmarca una, vuelve solo a **preparación**.
 - Solo se cambian líneas de ventas abiertas. Caja ve el avance en cada línea (`listos`) y en el plano de mesas (`listos` de la venta).
 - La migración 014 quita el permiso `cocina` de todos los cargos (la pantalla ya no existe) (la 015 quita el permiso `reimpresion`, que existió poco: ahora autoriza cualquiera con Caja).
