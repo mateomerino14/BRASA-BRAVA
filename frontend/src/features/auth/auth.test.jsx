@@ -87,6 +87,17 @@ describe('Recuperación de contraseña', () => {
     return screen.findByRole('dialog', {name: 'Recuperar contraseña'});
   };
 
+  it('avisa que el código no llegará si el correo no está configurado', async () => {
+    mockApi({'POST /auth/password-reset/request': () => [200, {message: 'ok', simulado: true}]});
+    const {user} = renderApp('/login');
+    const dialog = await openReset(user);
+    await user.type(within(dialog).getByLabelText('Correo'), 'c.mendoza@brasabrava.bo');
+    await user.click(within(dialog).getByRole('button', {name: 'Enviar código'}));
+    const codeDialog = await screen.findByRole('dialog', {name: 'Verificación de identidad'});
+    expect(await within(codeDialog).findByText(/el código no llegará/)).toBeInTheDocument();
+    expect(within(codeDialog).queryByText(/Revise su bandeja de entrada/)).not.toBeInTheDocument();
+  });
+
   it('recorre correo → código → nueva contraseña → listo', async () => {
     const fetchMock = mockApi({
       'POST /auth/password-reset/request': () => [200, {message: 'ok'}],

@@ -23,8 +23,11 @@ Los archivos de `migrations/` se aplican en orden alfabetico, una sola vez cada 
 15. `015_autorizacion_caja.sql` - la reimpresion la autoriza cualquiera con Caja
 16. `016_sin_mesero.sql` - el pedido deja de guardar mesero: esas columnas quedan vacias y opcionales
 17. `017_reportes.sql` - pantalla de reportes y envios programados por correo
+18. `018_contrasena_inicial.sql` - aviso para que el DIRECTORIO cambie la contrasena inicial
 
 La tabla `schema_migrations` guarda cuales ya se aplicaron, asi que una base nueva y una existente quedan siempre en el mismo estado.
+
+Despues de las migraciones, la API crea la cuenta del DIRECTORIO si la base no tiene ninguna (`src/db/bootstrap.js`), con la contrasena inicial `Directorio2026` y el aviso `cambiar_contrasena`: hasta que la cambie, solo puede ver su perfil y cambiar la contrasena. Asi un local nuevo arranca sin datos de prueba y con una sola cuenta para empezar a cargar todo.
 
 ## Como agregar un cambio
 
@@ -50,7 +53,7 @@ Solo para entornos de prueba, nunca en produccion.
 | cargo | Cargos del personal (Administrador, Cajero, Mesero, Cocinero) |
 | cargo_permiso | Pantallas a las que accede cada cargo |
 | empleado | Empleados del local, con alias de ingreso y correo |
-| directorio | Cuenta unica del duenio, con acceso total |
+| directorio | Cuenta unica del duenio, con acceso total; `cambiar_contrasena` marca que todavia tiene la contrasena inicial |
 | codigo_recuperacion | Codigos de 6 digitos para recuperar la contrasenia, guardados cifrados, con vencimiento e intentos |
 | categoria | Secciones del menu, con descripcion, foto y estado |
 | subcategoria | Subdivisiones de cada categoria; se dan de baja en vez de borrarse |

@@ -24,13 +24,13 @@ export const createReportsController = (service) => ({
   // Envía el reporte por correo
   email: async (req, res) => {
     const result = await service.email(req.validated.body, req.user);
-    return respond(res, result, ({correo}) => res.json({correo}));
+    return respond(res, result, ({correo, simulado}) => res.json({correo, simulado}));
   },
 
   // Envíos programados
   schedules: async (req, res) => {
     const result = await service.schedules(req.user);
-    return respond(res, result, ({programados}) => res.json({programados}));
+    return respond(res, result, ({programados, correoConfigurado}) => res.json({programados, correoConfigurado}));
   },
 
   // Registra un envío programado
@@ -60,6 +60,6 @@ export const createReportsController = (service) => ({
   // Envía un programado ahora
   sendScheduleNow: async (req, res) => {
     const result = await service.sendScheduleNow(req.validated.params.id, req.user);
-    return respond(res, result, ({programado}) => res.json({programado}));
+    return respond(res, result, ({programado, simulado}) => res.json({programado, simulado}));
   },
 });

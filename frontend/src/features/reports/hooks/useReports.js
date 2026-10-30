@@ -4,6 +4,7 @@ import {saveFile} from '../../../lib/apiClient';
 import {reportsApi} from '../services/reportsApi';
 import {ALL_EMPLOYEES} from '../constants/reports';
 import {isoDate} from '../utils/reports';
+import {MAIL_NOT_CONFIGURED, MAIL_NOT_CONFIGURED_TITLE} from '../constants/reports';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -101,8 +102,13 @@ export function useReports({api = reportsApi} = {}) {
     }
     setSending(true);
     try {
-      await api.email(report.filters, address);
-      toast.success(`Se envió el reporte a ${address.toLowerCase()}`);
+      const result = await api.email(report.filters, address);
+      if (result?.simulado) {
+        toast.warning(MAIL_NOT_CONFIGURED, MAIL_NOT_CONFIGURED_TITLE);
+      }
+      else {
+        toast.success(`Se envió el reporte a ${address.toLowerCase()}`);
+      }
     }
     catch (problem) {
       toast.error(problem.message, 'No se pudo enviar el correo');
