@@ -1,5 +1,7 @@
 # Brasa Brava — Sistema de Gestión
 
+[![CI](https://github.com/mateomerino14/BRASA-BRAVA/actions/workflows/ci.yml/badge.svg)](https://github.com/mateomerino14/BRASA-BRAVA/actions/workflows/ci.yml)
+
 Sistema interno del restaurante Brasa Brava: inicio de sesión por empleado, Caja en una sola pantalla (mesas, pedido, comanda de cocina, Marcar listos, cobro y ticket), catálogo del local (Familia), reportes de ventas en PDF o por correo con envíos programados, administración de productos, recetas, inventario, categorías, secciones y mesas, promociones, empleados y cargos con permisos por pantalla, y eliminación física para el DIRECTORIO.
 
 Funciona de dos formas con el mismo código:
