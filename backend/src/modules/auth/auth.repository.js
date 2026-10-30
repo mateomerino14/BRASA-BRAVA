@@ -49,14 +49,14 @@ export const createAuthRepository = (db) => ({
   // Devuelve la cuenta DIRECTORIO (hay una sola)
   findDirectorio: async () => {
     const {rows} = await db.query(
-      'SELECT id_directorio, alias, contrasena_hash FROM directorio ORDER BY id_directorio LIMIT 1',
+      'SELECT id_directorio, alias, contrasena_hash, cambiar_contrasena FROM directorio ORDER BY id_directorio LIMIT 1',
     );
     return rows[0] ?? null;
   },
 
-  // Guarda la nueva contraseña del DIRECTORIO
+  // Guarda la nueva contraseña del DIRECTORIO y quita el aviso de cambiarla
   updateDirectorioPassword: async (idDirectorio, passwordHash) => {
-    await db.query('UPDATE directorio SET contrasena_hash = $1 WHERE id_directorio = $2', [passwordHash, idDirectorio]);
+    await db.query('UPDATE directorio SET contrasena_hash = $1, cambiar_contrasena = FALSE WHERE id_directorio = $2', [passwordHash, idDirectorio]);
   },
 
   // Lista los empleados activos para el carrusel del login

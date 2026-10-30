@@ -58,4 +58,32 @@ describe('Contraseña del DIRECTORIO', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(calls.at(-1)).toEqual({actual: 'Directorio2026', nueva: 'Nueva2027', confirmacion: 'Nueva2027'});
   });
+
+  it('con la contraseña inicial obliga a cambiarla antes de usar el sistema', async () => {
+    const pending = {...USERS.directorio, cambiarContrasena: true};
+    const {calls, user} = await openAs(pending, {
+      'PUT /auth/directorio/password': (body) => {
+        calls.push(body);
+        return [200, {message: 'ok', token: 'nuevo', user: {...USERS.directorio, cambiarContrasena: false}}];
+      },
+    });
+    const dialog = await screen.findByRole('dialog', {name: 'Elija su contraseña'});
+    expect(within(dialog).queryByRole('button', {name: 'Cancelar'})).not.toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('dialog', {name: 'Elija su contraseña'})).toBeInTheDocument();
+
+    await fill(user, dialog, 'Contraseña actual', 'Directorio2026');
+    await fill(user, dialog, 'Nueva contraseña', 'Propia2027');
+    await fill(user, dialog, 'Repita la nueva contraseña', 'Propia2027');
+    await user.click(within(dialog).getByRole('button', {name: 'Cambiar contraseña'}));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(localStorage.getItem('brasa.token')).toBe('nuevo');
+  });
+
+  it('con la contraseña inicial deja cerrar sesión', async () => {
+    const {user} = await openAs({...USERS.directorio, cambiarContrasena: true});
+    const dialog = await screen.findByRole('dialog', {name: 'Elija su contraseña'});
+    await user.click(within(dialog).getByRole('button', {name: 'Cerrar sesión'}));
+    expect(await screen.findByRole('heading', {name: 'Inicio de sesión'})).toBeInTheDocument();
+  });
 });

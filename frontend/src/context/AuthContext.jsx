@@ -52,6 +52,11 @@ export function AuthProvider({children, api = authApi}) {
     [api],
   );
 
-  const value = useMemo(() => ({user, status, login, logout}), [user, status, login, logout]);
+  const replaceSession = useCallback((session) => {
+    tokenStorage.set(session.token);
+    setUser(session.user);
+  }, []);
+
+  const value = useMemo(() => ({user, status, login, logout, replaceSession}), [user, status, login, logout, replaceSession]);
   return <AuthContext value={value}>{children}</AuthContext>;
 }
