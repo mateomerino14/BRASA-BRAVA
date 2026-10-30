@@ -3,6 +3,7 @@ import {createApp} from './app.js';
 import {loadConfig} from './config/env.js';
 import {createDb, createPool} from './db/pool.js';
 import {runMigrations} from './db/migrate.js';
+import {ensureDirectorio} from './db/bootstrap.js';
 import {createMailer} from './services/mailer.js';
 import {cleanUnusedImages} from './services/imageCleanup.js';
 import {startReportScheduler} from './services/reportScheduler.js';
@@ -12,6 +13,7 @@ export const startServer = async (overrides = {}) => {
   const config = loadConfig({...process.env, ...overrides});
   const db = createDb(createPool(config.DATABASE_URL));
   await runMigrations(db);
+  await ensureDirectorio(db);
   await cleanUnusedImages({db, directory: config.UPLOADS_DIR});
   const mailer = createMailer(config);
   const app = createApp({db, mailer, config});

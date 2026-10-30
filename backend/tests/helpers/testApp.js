@@ -8,6 +8,7 @@ import {loadConfig} from '../../src/config/env.js';
 import {createDb} from '../../src/db/pool.js';
 import {runMigrations} from '../../src/db/migrate.js';
 import {seedDemoData} from '../../src/db/seed.js';
+import {ensureDirectorio} from '../../src/db/bootstrap.js';
 import {createConsoleMailer} from '../../src/services/mailer.js';
 
 const silentLogger = {info: () => {}, error: () => {}};
@@ -28,11 +29,14 @@ const createTestDb = async () => {
   return createDb(new Pool());
 };
 
-// Levanta la app completa con base migrada, datos demo y mailer en memoria
-export const createTestApp = async ({mailer: customMailer, clock} = {}) => {
+// Levanta la app completa con base migrada, datos demo (o solo el DIRECTORIO inicial) y mailer en memoria
+export const createTestApp = async ({mailer: customMailer, clock, seed = true} = {}) => {
   const db = await createTestDb();
   await runMigrations(db);
-  await seedDemoData(db, {now: clock?.()});
+  await ensureDirectorio(db);
+  if (seed) {
+    await seedDemoData(db, {now: clock?.()});
+  }
   const config = loadConfig({
     NODE_ENV: 'test',
     RATE_LIMIT_ENABLED: 'false',

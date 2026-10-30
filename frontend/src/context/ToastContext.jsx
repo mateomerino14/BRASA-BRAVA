@@ -46,6 +46,7 @@ export function ToastProvider({children}) {
   const value = useMemo(() => ({
     error: (message, title) => show('error', message, title),
     success: (message, title) => show('success', message, title),
+    warning: (message, title) => show('warning', message, title),
     dismiss,
     clear,
   }), [show, dismiss, clear]);

@@ -1,10 +1,11 @@
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 
-// Mailer de desarrollo: guarda los correos en memoria y los muestra en consola
+// Mailer de desarrollo: guarda los correos en memoria y los muestra en consola; no llegan a nadie (delivers: false)
 export const createConsoleMailer = (logger = console) => {
   const outbox = [];
   return {
     outbox,
+    delivers: false,
     // Guarda el correo y lo muestra en consola
     send: async (message) => {
       outbox.push(message);
@@ -15,6 +16,7 @@ export const createConsoleMailer = (logger = console) => {
 
 // Mailer de producción que envía mediante la API transaccional de Brevo
 export const createBrevoMailer = ({apiKey, fromEmail, fromName}, fetchImpl = fetch) => ({
+  delivers: true,
   // Envía el correo con la API de Brevo
   send: async ({to, toName, subject, html, attachments = []}) => {
     const payload = {

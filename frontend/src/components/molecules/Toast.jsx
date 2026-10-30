@@ -1,5 +1,5 @@
 import {motion} from 'motion/react';
-import {CircleAlert, CircleCheck, X} from 'lucide-react';
+import {CircleAlert, CircleCheck, TriangleAlert, X} from 'lucide-react';
 import {cn} from '../../lib/cn';
 
 const styles = {
@@ -14,11 +14,12 @@ const styles = {
   tones: {
     error: {accent: 'bg-error', icon: 'bg-error/10 text-error', title: 'text-error', progress: 'bg-error/40'},
     success: {accent: 'bg-verde', icon: 'bg-verde/10 text-verde', title: 'text-verde', progress: 'bg-verde/40'},
+    warning: {accent: 'bg-mostaza', icon: 'bg-mostaza/15 text-brasa-oscuro', title: 'text-brasa-oscuro', progress: 'bg-mostaza/50'},
   },
 };
 
-const ICONS = {error: CircleAlert, success: CircleCheck};
-const TITLES = {error: 'No se pudo completar', success: 'Listo'};
+const ICONS = {error: CircleAlert, success: CircleCheck, warning: TriangleAlert};
+const TITLES = {error: 'No se pudo completar', success: 'Listo', warning: 'Atención'};
 const hidden = {opacity: 0, x: 80, scale: 0.96};
 const visible = {opacity: 1, x: 0, scale: 1};
 const MS_PER_SECOND = 1000;
