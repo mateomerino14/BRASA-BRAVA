@@ -1,6 +1,7 @@
 import {z} from 'zod';
 import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
 import {decimalSchema} from '../../utils/numbers.js';
+import {NAME_MIN_LENGTH} from '../../utils/limits.js';
 
 const NAME_MAX = 60;
 const DESCRIPTION_MAX = 200;
@@ -22,7 +23,7 @@ const optionalTime = z.union([z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Ing
 const optionalDate = z.union([z.iso.date({error: 'Ingrese una fecha válida'}), z.literal(''), z.null()]).optional().transform((value) => value || null);
 
 export const promotionSchema = z.object({
-  nombre: z.string({error: 'Ingrese el nombre de la promoción'}).trim().min(2, 'Ingrese el nombre de la promoción (mínimo 2 letras)').max(NAME_MAX, 'El nombre es demasiado largo'),
+  nombre: z.string({error: 'Ingrese el nombre de la promoción'}).trim().min(NAME_MIN_LENGTH, `Ingrese el nombre de la promoción (mínimo ${NAME_MIN_LENGTH} letras)`).max(NAME_MAX, 'El nombre es demasiado largo'),
   descripcion: z.string().trim().max(DESCRIPTION_MAX, `La descripción admite hasta ${DESCRIPTION_MAX} caracteres`).optional().or(z.literal('')).transform((value) => value || null),
   tipo: z.enum(['combo'], {error: 'Por ahora solo se pueden registrar combos'}),
   valor: decimalSchema({label: 'el valor', decimals: 2, max: MAX_VALUE}),
