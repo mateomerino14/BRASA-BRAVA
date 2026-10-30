@@ -37,6 +37,7 @@ export const createAuthService = ({repository, mailer, config, logger = console,
       cargo: 'Directorio',
       fotoUrl: null,
       isDirectorio: true,
+      cambiarContrasena: directorio.cambiar_contrasena,
       permissions: [...SCREENS],
     });
   };
@@ -106,7 +107,7 @@ export const createAuthService = ({repository, mailer, config, logger = console,
       logger.error?.(`Error enviando el código a ${employee.correo}: ${error.message}`);
       return {error: 'No se pudo enviar el correo. Intente nuevamente', status: 502};
     }
-    return {sent: true, expiresAt: expiresAt.toISOString()};
+    return {sent: true, expiresAt: expiresAt.toISOString(), simulado: !mailer.delivers};
   };
 
   // Arma el error de un código incorrecto según los intentos que le quedan
@@ -169,16 +170,23 @@ export const createAuthService = ({repository, mailer, config, logger = console,
     return {updated: true};
   };
 
-  // Perfil de la sesión con el nombre y la foto actuales
+  // Perfil de la sesión con el nombre y la foto actuales (y, del DIRECTORIO, si debe cambiar la contraseña)
   const profile = async (user) => {
     if (user.isDirectorio) {
-      return user;
+      const directorio = await repository.findDirectorio();
+      return {...user, cambiarContrasena: Boolean(directorio?.cambiar_contrasena)};
     }
     const row = await repository.findProfile(user.id);
     if (!row) {
       return user;
     }
     return {...user, nombre: `${row.nombre} ${row.apellido}`, fotoUrl: row.foto_url};
+  };
+
+  // Datos de la sesión sin los campos que agrega el token (iat, exp)
+  const sessionUser = (user) => {
+    const {iat: _iat, exp: _exp, ...rest} = user;
+    return rest;
   };
 
   // Cambia la contraseña del DIRECTORIO comprobando la actual
@@ -191,7 +199,8 @@ export const createAuthService = ({repository, mailer, config, logger = console,
       return wrongCurrent;
     }
     await repository.updateDirectorioPassword(directorio.id_directorio, await hashSecret(nueva));
-    return {updated: true};
+    // Sesión nueva para que el token ya no diga que falta cambiar la contraseña
+    return buildSession({...sessionUser(user), cambiarContrasena: false});
   };
 
   return {login, listLoginUsers, requestPasswordReset, verifyResetCode, confirmPasswordReset, profile, changeDirectorioPassword};

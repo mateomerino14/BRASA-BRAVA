@@ -1,6 +1,7 @@
 import {hashSecret} from '../utils/password.js';
 import {ASSIGNABLE_SCREENS} from '../modules/auth/permissions.js';
 import {localToday} from '../utils/calendar.js';
+import {DIRECTORIO_ALIAS, INITIAL_DIRECTORIO_PASSWORD} from './bootstrap.js';
 
 // Datos de demostración basados en el prototipo de Figma
 const ROLES = {
@@ -89,6 +90,15 @@ const seedCategories = async (db) => {
   return true;
 };
 
+// Deja al DIRECTORIO demo con su contraseña conocida, sin pedir que la cambie
+const seedDirectorio = async (db, directorioPassword) => {
+  const passwordHash = await hashSecret(directorioPassword);
+  const updated = await db.query('UPDATE directorio SET contrasena_hash = $1, cambiar_contrasena = FALSE', [passwordHash]);
+  if (updated.rowCount === 0) {
+    await db.query('INSERT INTO directorio (alias, contrasena_hash) VALUES ($1, $2)', [DIRECTORIO_ALIAS, passwordHash]);
+  }
+};
+
 // Inserta cargos, empleados y el DIRECTORIO demo si la base está vacía
 const seedStaff = async (
   db,
@@ -122,10 +132,7 @@ const seedStaff = async (
   for (const alias of INACTIVE_ALIASES) {
     await db.query('UPDATE empleado SET activo = FALSE WHERE alias = $1', [alias]);
   }
-  await db.query('INSERT INTO directorio (alias, contrasena_hash) VALUES ($1, $2)', [
-    'DIRECTORIO',
-    await hashSecret(directorioPassword),
-  ]);
+  await seedDirectorio(db, directorioPassword);
   return true;
 };
 
@@ -353,7 +360,7 @@ const seedSales = async (db, now) => {
 };
 
 // Carga cada bloque de datos demo que falte; devuelve true si insertó algo
-export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = 'Directorio2026', now = new Date()} = {}) => {
+export const seedDemoData = async (db, {password = 'Brasa2026', directorioPassword = INITIAL_DIRECTORIO_PASSWORD, now = new Date()} = {}) => {
   const staff = await seedStaff(db, {password, directorioPassword});
   const categories = await seedCategories(db);
   const products = await seedProducts(db);
