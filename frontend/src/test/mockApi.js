@@ -65,16 +65,16 @@ export const mockApi = (handlers = {}) => {
       {users: [{alias: 'a.romero', nombre: 'Andrea Romero', cargo: 'Cajero', fotoUrl: null}]},
     ],
     'GET /auth/me': () => [200, {user: USERS.admin}],
-    'POST /auth/login': ({username, password}) =>
-      password === 'Brasa2026'
-        ? [
-          200,
-          {
-            token: 'token-de-prueba',
-            user: username === 'a.romero' ? USERS.cajero : USERS.admin,
-          },
-        ]
-        : [401, {message: 'Usuario o contraseña incorrectos'}],
+    'POST /auth/login': ({username, password}) => {
+      if (password !== 'Brasa2026') {
+        return [401, {message: 'Usuario o contraseña incorrectos'}];
+      }
+      let user = USERS.admin;
+      if (username === 'a.romero') {
+        user = USERS.cajero;
+      }
+      return [200, {token: 'token-de-prueba', user}];
+    },
   };
   const routes = {...defaults, ...handlers};
   const fetchMock = vi.fn((url, options = {}) => {

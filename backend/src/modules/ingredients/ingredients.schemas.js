@@ -1,6 +1,7 @@
 import {z} from 'zod';
 import {listQuerySchema as baseListQuery} from '../../utils/listQuery.js';
 import {decimalSchema} from '../../utils/numbers.js';
+import {NAME_MIN_LENGTH} from '../../utils/limits.js';
 
 const UNITS = ['kg', 'g', 'l', 'ml', 'unidad'];
 const MOVEMENT_TYPES = ['entrada', 'salida', 'ajuste'];
@@ -16,7 +17,7 @@ const MAX_HISTORY_SIZE = 50;
 const quantity = (label) => decimalSchema({label, decimals: QUANTITY_DECIMALS, max: MAX_QUANTITY, allowZero: true});
 
 const baseFields = {
-  nombre: z.string({error: 'Ingrese el nombre del insumo'}).trim().min(2, 'Ingrese el nombre del insumo (mínimo 2 letras)').max(NAME_MAX, 'El nombre es demasiado largo'),
+  nombre: z.string({error: 'Ingrese el nombre del insumo'}).trim().min(NAME_MIN_LENGTH, `Ingrese el nombre del insumo (mínimo ${NAME_MIN_LENGTH} letras)`).max(NAME_MAX, 'El nombre es demasiado largo'),
   unidad: z.enum(UNITS, {error: 'Seleccione la unidad de medida'}),
   stockMinimo: quantity('el stock mínimo'),
 };

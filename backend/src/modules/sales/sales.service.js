@@ -66,6 +66,7 @@ const addRecipeUsage = (usage, recipe, units, removed) => {
 const consumptionOf = (lines, recipes, promotionItems) => {
   const usage = new Map();
   for (const line of lines) {
+    // Insumos que el cliente pidió quitar de ese producto
     const removedOf = (idProducto) => new Set(line.exclusiones.filter((item) => item.idProducto === idProducto).map((item) => item.idInsumo));
     if (line.idProducto) {
       addRecipeUsage(usage, recipes.get(line.idProducto) ?? [], line.cantidad, removedOf(line.idProducto));
@@ -360,6 +361,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
     const cashier = cashierOf(user);
     const amount = round2(lines.reduce((total, line) => total + line.precioUnitario * line.cantidad, 0));
     const now = clock();
+    // Abre la venta si hace falta y registra el envío con su consumo de stock
     const register = () => transaction(async (tx) => {
       await tx.lockTable(idMesa);
       let idVenta = (await tx.openSale(idMesa))?.id_venta;
@@ -541,6 +543,7 @@ export const createSalesService = ({repository, transaction, clock, timeZone}) =
       total: Number(row.total),
       pagos: (payments.get(row.id_venta) ?? []).map((item) => ({metodo: item.metodo, monto: Number(item.monto)})),
     }));
+    // Total cobrado del día con un método de pago
     const byMethod = (metodo) => round2(ventas.reduce((total, sale) => total + sale.pagos.filter((item) => item.metodo === metodo).reduce((sum, item) => sum + item.monto, 0), 0));
     return {
       hoy: day.date,

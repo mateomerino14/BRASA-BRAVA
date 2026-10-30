@@ -21,7 +21,11 @@ export function FormField({label, error, hint, required = false, className, chil
 
   let control = children;
   if (typeof children === 'function') {
-    control = children({id, 'aria-describedby': message ? messageId : undefined, invalid: Boolean(error)});
+    let describedBy;
+    if (message) {
+      describedBy = messageId;
+    }
+    control = children({id, 'aria-describedby': describedBy, invalid: Boolean(error)});
   }
 
   return (

@@ -4,7 +4,6 @@ export const NAME_MAX_LENGTH = 60;
 export const DESCRIPTION_MAX_LENGTH = 200;
 export const MAX_PRODUCTS = 10;
 export const MAX_QUANTITY = 20;
-export const ALL_DAYS = '1111111';
 
 export const VIGENCIA_OPTIONS = [
   {value: 'todos', label: 'Vigencia: Todas'},

@@ -216,6 +216,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return null;
   };
 
+  // Lista los envíos programados con su próximo envío (solo el DIRECTORIO)
   const schedules = async (user) => {
     const problem = guard(user);
     if (problem) {
@@ -234,6 +235,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return {programado: toSchedule(row, clock(), timeZone)};
   };
 
+  // Registra un envío programado nuevo
   const createSchedule = async (data, user) => {
     const problem = guard(user);
     if (problem) {
@@ -254,6 +256,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return null;
   };
 
+  // Modifica correo, días y hora de un envío programado
   const updateSchedule = async (id, data, user) => {
     const problem = await editable(id, user);
     if (problem) {
@@ -263,6 +266,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return scheduleById(id);
   };
 
+  // Pausa o reactiva un envío programado
   const setScheduleStatus = async (id, activo, user) => {
     const problem = await editable(id, user);
     if (problem) {
@@ -272,6 +276,7 @@ export const createReportsService = ({repository, mailer, clock, timeZone, logge
     return scheduleById(id);
   };
 
+  // Borra un envío programado
   const deleteSchedule = async (id, user) => {
     const problem = await editable(id, user);
     if (problem) {

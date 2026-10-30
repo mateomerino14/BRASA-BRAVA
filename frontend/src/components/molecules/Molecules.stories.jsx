@@ -11,7 +11,12 @@ import {Input} from '../atoms/Input';
 export default {title: 'Moléculas'};
 
 function CodeDemo({invalid}) {
-  const [value, setValue] = useState(invalid ? '123456' : '');
+  const [value, setValue] = useState(() => {
+    if (invalid) {
+      return '123456';
+    }
+    return '';
+  });
   return <CodeInput value={value} onChange={setValue} invalid={invalid} />;
 }
 

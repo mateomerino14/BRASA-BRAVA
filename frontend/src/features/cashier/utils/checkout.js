@@ -3,6 +3,7 @@ import {addAmounts} from './cart';
 
 const CENT = 0.005;
 const BILLS = [10, 20, 50, 100, 200];
+const MAX_SUGGESTIONS = 4;
 
 export const PAYMENT_LABELS = {efectivo: 'Efectivo', qr: 'QR'};
 
@@ -16,7 +17,7 @@ export const cashSuggestions = (total) => {
       options.push(rounded);
     }
   }
-  return options.slice(0, 4);
+  return options.slice(0, MAX_SUGGESTIONS);
 };
 
 const readReceived = (text, cash, errors) => {
