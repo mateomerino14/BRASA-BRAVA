@@ -120,6 +120,8 @@ BRASA-BRAVA/
 | Pruebas end to end: inicio de sesión, Caja de punta a punta, reimpresión autorizada del ticket, Reportes, eliminación física, categorías y permisos de cargos en un navegador real | Terminado |
 | Código ajustado a `reglas.md`: lint, sin código sin uso (knip), constantes con nombre y sin ternarios en la lógica | Terminado |
 | Manual de usuario (LaTeX, con capturas del sistema) | Terminado |
+| Instalación limpia: un local nuevo arranca sin datos de prueba, solo con el DIRECTORIO, que debe cambiar la contraseña inicial al entrar | Terminado |
+| Aviso de correo no configurado en Reportes, envíos programados y recuperación de contraseña | Terminado |
 
 ## Versiones y despliegue
 
@@ -134,9 +136,9 @@ npm ci
 npm run dist -w electron     # compila la interfaz y deja el instalador .exe en electron/release/
 ```
 
-El instalador trae su propia base PostgreSQL y aplica las migraciones al abrir, así que actualizar un local es instalar la versión nueva encima: los datos se conservan. Para que los reportes salgan por correo, configurar Brevo en `brasa-brava.json` (ver `electron/README.md`).
+El instalador trae su propia base PostgreSQL y aplica las migraciones al abrir, así que actualizar un local es instalar la versión nueva encima: los datos se conservan. En un local nuevo, desactivar los datos de prueba antes de la primera apertura: el sistema arranca vacío, solo con la cuenta del DIRECTORIO (contraseña inicial `Directorio2026`, que pide cambiar al entrar). Para que los reportes y la recuperación de contraseña salgan por correo, configurar Brevo. Las dos cosas se hacen en `brasa-brava.json` (ver `electron/README.md`).
 
-**Versión web.** En el servidor: `npm ci`, `npm run build`, definir las variables de `backend/.env` (`DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `STATIC_DIR=../frontend/dist`, `MAIL_DRIVER=brevo` y `BREVO_API_KEY`) y arrancar con `npm start -w backend`. La API sirve también la interfaz.
+**Versión web.** En el servidor: `npm ci`, `npm run build`, definir las variables de `backend/.env` (`DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `STATIC_DIR=../frontend/dist`, `MAIL_DRIVER=brevo` y `BREVO_API_KEY`) y arrancar con `npm start -w backend`. La API sirve también la interfaz. Sin correr `db:seed`, la base arranca vacía con la cuenta del DIRECTORIO y su contraseña inicial.
 
 ## Ramas y pruebas automáticas
 
