@@ -2,6 +2,8 @@ import {defineConfig} from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+const TEST_TIMEOUT_MS = 15_000;
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: '/',
@@ -15,6 +17,7 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.js'],
     include: ['src/**/*.test.{js,jsx}'],
     css: false,
+    testTimeout: TEST_TIMEOUT_MS,
     coverage: {
       include: ['src/**/*.{js,jsx}'],
       exclude: ['src/**/*.stories.jsx', 'src/test/**', 'src/main.jsx'],
