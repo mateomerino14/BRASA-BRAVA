@@ -75,6 +75,7 @@ export const createDeletionService = ({repository, transaction, images, timeZone
   // Resumen para la confirmación: lo elegido y lo que arrastra
   const describe = async (result) => {
     const {seleccion} = result;
+    // Nombres de los registros elegidos de un tipo
     const names = async (tipo, ids) => (await repository.namesOf(KINDS[tipo].table, KINDS[tipo].id, ids, KINDS[tipo].label)).map((row) => row.nombre);
     const elegidos = {};
     for (const tipo of Object.keys(KINDS)) {
