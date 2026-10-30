@@ -52,9 +52,9 @@ Los datos (la base en `pgdata/` y las fotos en `uploads/`) quedan en la carpeta 
 |---|---|
 | `mailDriver` | `console` (por defecto) o `brevo` para enviar correos reales: códigos de recuperación de contraseña y reportes de ventas (a pedido y programados) |
 | `brevoApiKey` | Clave de Brevo, si se usa `brevo` |
-| `seedDemoData` | `true` por defecto: carga los datos de demostración (cargos, empleados, DIRECTORIO, menú, mesas y ventas) en las tablas que estén vacías. Con `false` no se crea ninguna cuenta, ni siquiera la del DIRECTORIO, así que la primera apertura debe hacerse con `true` |
+| `seedDemoData` | `true` por defecto: carga los datos de demostración (cargos, empleados, menú, mesas y ventas) en las tablas que estén vacías. En un local real, crear antes de la primera apertura `%APPDATA%/Brasa Brava/brasa-brava.json` con `{"seedDemoData": false}`: el sistema arranca vacío, solo con la cuenta del DIRECTORIO (contraseña inicial `Directorio2026`, que pide cambiar al primer ingreso) |
 
-El archivo está en `%APPDATA%/Brasa Brava/brasa-brava.json`; los cambios se toman al volver a abrir la aplicación. Los correos salen con el remitente `no-reply@brasabrava.bo`, que debe estar verificado en la cuenta de Brevo.
+El archivo está en `%APPDATA%/Brasa Brava/brasa-brava.json`; los cambios se toman al volver a abrir la aplicación. Los correos salen con el remitente `no-reply@brasabrava.bo`, que debe estar verificado en la cuenta de Brevo. Mientras siga en `console`, el sistema avisa en Reportes y en la recuperación de contraseña que el correo no está configurado y no llega a nadie.
 
 Los envíos programados de reportes solo corren mientras la aplicación está abierta; si estuvo cerrada a la hora de un envío, sale al abrirla.
 
