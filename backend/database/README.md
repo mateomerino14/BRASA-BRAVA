@@ -31,7 +31,7 @@ Despues de las migraciones, la API crea la cuenta del DIRECTORIO si la base no t
 
 ## Como agregar un cambio
 
-1. Crear un archivo nuevo con el siguiente numero (por ejemplo `018_reservas.sql`).
+1. Crear un archivo nuevo con el siguiente numero (por ejemplo `019_reservas.sql`).
 2. Nunca editar una migracion que ya se subio: los locales que la aplicaron no volverian a correrla.
 
 Se usan migraciones numeradas porque la aplicacion de escritorio se instala en cada local y se actualiza sola, sin que nadie corra scripts en la base.
