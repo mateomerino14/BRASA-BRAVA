@@ -1,3 +1,4 @@
+import {ALL_DAYS, WEEKDAYS, WEEKEND, selectedDays} from './week';
 
 export const getInitials = (name = '') =>
   name
@@ -81,12 +82,10 @@ export const formatDate = (isoDate) => shortDateFormatter.format(new Date(`${iso
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 const DAY_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-const WEEKDAYS = '0111110';
-const WEEKEND = '1000001';
 
 export const formatDays = (days) => {
-  const selected = [1, 2, 3, 4, 5, 6, 0].filter((index) => days[index] === '1');
-  if (selected.length === 7) {
+  const selected = selectedDays(days);
+  if (days === ALL_DAYS) {
     return 'Todos los días';
   }
   if (days === WEEKDAYS) {

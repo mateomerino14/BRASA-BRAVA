@@ -1,4 +1,4 @@
-import {WEEKDAY_NAMES} from '../constants/reports';
+import {ALL_DAYS, WEEKDAY_NAMES, selectedDays} from '../../../lib/week';
 
 const pad = (value) => String(value).padStart(2, '0');
 const DAYS_IN_WEEK = 7;
@@ -19,10 +19,10 @@ export const periodShortcuts = (today = new Date()) => {
 };
 
 export const daysText = (dias) => {
-  if (dias === '1111111') {
+  if (dias === ALL_DAYS) {
     return 'Todos los días';
   }
-  const order = [1, 2, 3, 4, 5, 6, 0].filter((index) => dias[index] === '1').map((index) => WEEKDAY_NAMES[index]);
+  const order = selectedDays(dias).map((index) => WEEKDAY_NAMES[index]);
   if (order.length === 1) {
     return order[0][0].toUpperCase() + order[0].slice(1);
   }

@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL ?? '/api';
+const UNAUTHORIZED = 401;
 const TOKEN_KEY = 'brasa.token';
 
 export class ApiError extends Error {
@@ -63,7 +64,7 @@ export const apiRequest = async (path, {method = 'GET', body, auth = true} = {})
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    if (response.status === 401 && auth && token) {
+    if (response.status === UNAUTHORIZED && auth && token) {
       onUnauthorized();
     }
     throw new ApiError(

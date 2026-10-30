@@ -90,10 +90,12 @@ describe('Recuperación de contraseña', () => {
   it('recorre correo → código → nueva contraseña → listo', async () => {
     const fetchMock = mockApi({
       'POST /auth/password-reset/request': () => [200, {message: 'ok'}],
-      'POST /auth/password-reset/verify': ({code}) =>
-        code === '123456'
-          ? [200, {}]
-          : [400, {message: 'Código incorrecto. Le quedan 4 intento(s)'}],
+      'POST /auth/password-reset/verify': ({code}) => {
+        if (code === '123456') {
+          return [200, {}];
+        }
+        return [400, {message: 'Código incorrecto. Le quedan 4 intento(s)'}];
+      },
       'POST /auth/password-reset/confirm': () => [200, {}],
     });
     const {user} = renderApp('/login');
@@ -139,10 +141,12 @@ describe('Recuperación de contraseña', () => {
 
   it('avisa cuando el correo no es de una cuenta registrada o activa', async () => {
     mockApi({
-      'POST /auth/password-reset/request': ({email}) =>
-        email === 'j.ortiz@brasabrava.bo'
-          ? [403, {message: 'La cuenta de ese correo está dada de baja. Pida a administración que la reactive'}]
-          : [404, {message: 'No hay ninguna cuenta registrada con ese correo. Revise que esté bien escrito'}],
+      'POST /auth/password-reset/request': ({email}) => {
+        if (email === 'j.ortiz@brasabrava.bo') {
+          return [403, {message: 'La cuenta de ese correo está dada de baja. Pida a administración que la reactive'}];
+        }
+        return [404, {message: 'No hay ninguna cuenta registrada con ese correo. Revise que esté bien escrito'}];
+      },
     });
     const {user} = renderApp('/login');
     const dialog = await openReset(user);
