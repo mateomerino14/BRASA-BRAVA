@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {EMAIL_MAX_LENGTH} from '../../utils/limits.js';
 
 // Fecha YYYY-MM-DD con el mensaje de error de su campo
 const isoDate = (label) => z.string({error: `Elija la fecha ${label}`}).regex(/^\d{4}-\d{2}-\d{2}$/, `Elija la fecha ${label}`);
@@ -17,7 +18,7 @@ export const reportQuerySchema = z.object({
 }).refine((query) => query.desde <= query.hasta, {message: 'La fecha "hasta" no puede ser anterior a "desde"', path: ['hasta']})
   .refine((query) => (Date.parse(query.hasta) - Date.parse(query.desde)) / DAY_MS <= MAX_RANGE_DAYS, {message: 'El período no puede pasar de un año', path: ['hasta']});
 
-const email = z.string({error: 'Ingrese el correo'}).trim().toLowerCase().email('Ingrese un correo válido').max(120, 'Correo demasiado largo');
+const email = z.string({error: 'Ingrese el correo'}).trim().toLowerCase().email('Ingrese un correo válido').max(EMAIL_MAX_LENGTH, 'Correo demasiado largo');
 
 // Reporte que se envía por correo
 export const reportEmailSchema = z.object({

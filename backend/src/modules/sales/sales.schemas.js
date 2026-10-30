@@ -1,9 +1,11 @@
 import {z} from 'zod';
 import {decimalSchema} from '../../utils/numbers.js';
+import {ALIAS_MAX_LENGTH, PASSWORD_MAX_LENGTH} from '../../utils/limits.js';
 
 const MAX_QUANTITY = 99;
 const MAX_LINES = 50;
 const MAX_EXCLUSIONS = 30;
+const PAYMENT_METHODS = 2;
 
 // Id entero positivo con un mensaje de error
 const positiveId = (message) => z.coerce.number({error: message}).int(message).positive(message);
@@ -43,7 +45,7 @@ export const checkoutSchema = z.object({
   pagos: z
     .array(payment, {error: 'Indique cómo paga el cliente'})
     .min(1, 'Indique cómo paga el cliente')
-    .max(2, 'Se admite efectivo, QR o ambos')
+    .max(PAYMENT_METHODS, 'Se admite efectivo, QR o ambos')
     .refine((items) => new Set(items.map((item) => item.metodo)).size === items.length, 'No repita el método de pago'),
   recibido: decimalSchema({label: 'el monto recibido', decimals: 2, max: MAX_AMOUNT}).optional().nullable(),
 });
@@ -52,6 +54,6 @@ export const saleParamSchema = z.object({idVenta: positiveId('Pedido inválido')
 
 // Impresión del ticket; desde la cuarta se manda el alias y la contraseña de quien la autoriza
 export const printSchema = z.object({
-  alias: z.string({error: 'Ingrese el usuario'}).trim().max(40, 'Usuario demasiado largo').optional(),
-  contrasena: z.string({error: 'Ingrese la contraseña'}).max(100, 'Contraseña demasiado larga').optional(),
+  alias: z.string({error: 'Ingrese el usuario'}).trim().max(ALIAS_MAX_LENGTH, 'Usuario demasiado largo').optional(),
+  contrasena: z.string({error: 'Ingrese la contraseña'}).max(PASSWORD_MAX_LENGTH, 'Contraseña demasiado larga').optional(),
 });
