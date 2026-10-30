@@ -87,6 +87,19 @@ describe('Reportes de ventas', () => {
     expect(backend.calls.emails[0]).toMatchObject({correo: 'Gerencia@BrasaBrava.bo', tipo: 'resumen'});
   });
 
+  it('avisa que el correo no está configurado en lugar de decir que se envió', async () => {
+    const {user, backend} = await openReports({user: USERS.directorio});
+    backend.control.mailSimulated = true;
+    const form = screen.getByRole('form', {name: 'Descargar o enviar el reporte'});
+    await user.type(within(form).getByLabelText('Enviar a este correo'), 'gerencia@brasabrava.bo');
+    await user.click(within(form).getByRole('button', {name: 'Enviar por correo'}));
+    expect(await screen.findByText('Correo no configurado')).toBeInTheDocument();
+    expect(screen.queryByText('Se envió el reporte a gerencia@brasabrava.bo')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', {name: 'Envíos programados'}));
+    const dialog = await screen.findByRole('dialog', {name: /Envíos programados/});
+    expect(await within(dialog).findByText(/todavía no tiene configurado el servicio de correo/)).toBeInTheDocument();
+  });
+
   it('el DIRECTORIO programa, pausa, envía ahora y borra envíos', async () => {
     const {user, backend} = await openReports({user: USERS.directorio});
     await user.click(screen.getByRole('button', {name: 'Envíos programados'}));

@@ -19,13 +19,19 @@ function PasswordField({form, field, label, hint, autoComplete}) {
   );
 }
 
-export function DirectorioPasswordModal({form}) {
+export function DirectorioPasswordModal({form, onLogout}) {
+  let title = 'Cambiar contraseña';
+  let description = 'Contraseña del DIRECTORIO, la cuenta con acceso a todo el sistema.';
+  if (form.required) {
+    title = 'Elija su contraseña';
+    description = 'Es la primera vez que entra con la contraseña inicial. Elija una propia para proteger la cuenta con acceso a todo el sistema; hasta entonces no se puede usar el sistema.';
+  }
   return (
     <Modal
       open={form.open}
       onClose={form.close}
-      title="Cambiar contraseña"
-      description="Contraseña del DIRECTORIO, la cuenta con acceso a todo el sistema."
+      title={title}
+      description={description}
     >
       <form onSubmit={form.submit} noValidate className={styles.form}>
         <PasswordField form={form} field="actual" label="Contraseña actual" autoComplete="current-password" />
@@ -33,9 +39,16 @@ export function DirectorioPasswordModal({form}) {
         <PasswordField form={form} field="nueva" label="Nueva contraseña" hint="Mínimo 8 caracteres, con letras y números." autoComplete="new-password" />
         <PasswordField form={form} field="confirmacion" label="Repita la nueva contraseña" autoComplete="new-password" />
         <div className={styles.actions}>
-          <Button variant="outline" action="cancel" onClick={form.close} disabled={form.saving}>
-            Cancelar
-          </Button>
+          {form.required && (
+            <Button variant="outline" action="close" onClick={onLogout} disabled={form.saving}>
+              Cerrar sesión
+            </Button>
+          )}
+          {!form.required && (
+            <Button variant="outline" action="cancel" onClick={form.close} disabled={form.saving}>
+              Cancelar
+            </Button>
+          )}
           <Button type="submit" action="password" loading={form.saving}>
             Cambiar contraseña
           </Button>

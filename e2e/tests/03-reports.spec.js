@@ -51,13 +51,14 @@ test.describe('Reportes de ventas', () => {
     await expect(page.getByRole('table', {name: 'Ventas cobradas'}).getByRole('row').filter({hasText: 'Mesa 3'})).toHaveCount(0);
   });
 
-  test('envía el reporte por correo', async ({page}) => {
+  test('sin Brevo configurado avisa que el correo no llega en lugar de confirmarlo', async ({page}) => {
     await loginAs(page, 'admin');
     await openReports(page);
     const form = page.getByRole('form', {name: 'Descargar o enviar el reporte'});
     await form.getByLabel('Enviar a este correo').fill('gerencia@brasabrava.bo');
     await form.getByRole('button', {name: 'Enviar por correo'}).click();
-    await expect(page.getByText('Se envió el reporte a gerencia@brasabrava.bo')).toBeVisible();
+    await expect(page.getByText('Correo no configurado')).toBeVisible();
+    await expect(page.getByText('Se envió el reporte a gerencia@brasabrava.bo')).toHaveCount(0);
   });
 
   test('el DIRECTORIO programa, pausa y borra un envío automático', async ({page}) => {

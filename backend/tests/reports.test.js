@@ -89,6 +89,7 @@ describe('Reportes de ventas', () => {
     }
     const sent = await api('post', '/api/reports/sales/email').send({desde: '2026-10-13', hasta: '2026-10-13', tipo: 'detalle', correo: 'Gerencia@BrasaBrava.bo'});
     expect(sent.status).toBe(200);
+    expect(sent.body).toEqual({correo: 'gerencia@brasabrava.bo', simulado: true});
     const mail = ctx.mailer.outbox.at(-1);
     expect(mail).toMatchObject({to: 'gerencia@brasabrava.bo', subject: 'Brasa Brava · Ventas detalladas · 13/10/2026'});
     expect(mail.attachments[0].name).toBe('brasa-brava-detalle-2026-10-13-al-2026-10-13.pdf');
@@ -109,7 +110,9 @@ describe('Reportes de ventas', () => {
     expect((await api('post', '/api/reports/schedules', directorio).send({...body, dias: '0000000'})).body.message).toBe('Elija al menos un día');
     const paused = await api('patch', `/api/reports/schedules/${id}/status`, directorio).send({activo: false});
     expect(paused.body.programado).toMatchObject({activo: false, proximo: null});
-    expect((await api('get', '/api/reports/schedules', directorio)).body.programados).toHaveLength(1);
+    const listed = await api('get', '/api/reports/schedules', directorio);
+    expect(listed.body.programados).toHaveLength(1);
+    expect(listed.body.correoConfigurado).toBe(false);
     expect((await api('delete', `/api/reports/schedules/${id}`, directorio)).status).toBe(204);
     expect((await api('delete', `/api/reports/schedules/${id}`, directorio)).status).toBe(404);
   });

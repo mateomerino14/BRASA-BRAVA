@@ -162,7 +162,7 @@ tests/                       Pruebas de la API y unitarias
 | `POST` | `/api/auth/password-reset/request` | Envía un código de 6 dígitos al correo de un empleado activo; responde `venceEn`, 404 si no hay cuenta con ese correo y 403 si está dada de baja |
 | `POST` | `/api/auth/password-reset/verify` | Verifica el código sin consumirlo. Los errores incluyen `motivo` (`codigo_incorrecto` con `intentosRestantes`, `codigo_bloqueado`, `codigo_vencido` o `codigo_invalido`) |
 | `POST` | `/api/auth/password-reset/confirm` | Cambia la contraseña con el código verificado |
-| `PUT` | `/api/auth/directorio/password` | El DIRECTORIO cambia su contraseña con `actual`, `nueva` y `confirmacion`; si la actual no es correcta responde 400 con `campo: 'actual'` |
+| `PUT` | `/api/auth/directorio/password` | El DIRECTORIO cambia su contraseña con `actual`, `nueva` y `confirmacion`; si la actual no es correcta responde 400 con `campo: 'actual'`. Responde una sesión nueva (`token`, `user`) sin el aviso de contraseña inicial |
 | `GET` | `/api/employees` | Empleados con búsqueda (`search`, por nombre, usuario o CI), filtro por cargo (`idCargo`) y los parámetros comunes de listado. Orden: `nombre`, `ci`, `cargo`, `usuario`, `estado` |
 | `GET` | `/api/employees/:id` | Detalle de un empleado |
 | `POST` | `/api/employees` | Registra un empleado con su contraseña inicial |
@@ -228,8 +228,8 @@ tests/                       Pruebas de la API y unitarias
 | `GET` | `/api/reports/employees` | Empleados (activos o de baja) para filtrar el reporte |
 | `GET` | `/api/reports/sales` | Reporte de ventas cobradas: `desde`, `hasta` (YYYY-MM-DD, días del local), `empleado` (`todos`, `directorio` o id) y `tipo` (`resumen` o `detalle`). Responde `resumen` (cantidad, total, efectivo, QR, promedio), `dias` y `ventas` con sus envíos, líneas, lo quitado, pagos e impresiones |
 | `GET` | `/api/reports/sales.pdf` | El mismo reporte en PDF para descargar |
-| `POST` | `/api/reports/sales/email` | Envía el PDF por correo (Brevo) al `correo` indicado |
-| `GET` `POST` | `/api/reports/schedules` | Envíos programados (solo el DIRECTORIO): `correo`, `tipo`, `dias` (7 dígitos de domingo a sábado) y `hora` HH:MM |
+| `POST` | `/api/reports/sales/email` | Envía el PDF por correo (Brevo) al `correo` indicado. `simulado: true` indica que el correo no está configurado (`MAIL_DRIVER=console`) y no llegó a nadie |
+| `GET` `POST` | `/api/reports/schedules` | Envíos programados (solo el DIRECTORIO): `correo`, `tipo`, `dias` (7 dígitos de domingo a sábado) y `hora` HH:MM. El listado trae `correoConfigurado` |
 | `PUT` `DELETE` | `/api/reports/schedules/:id` | Modifica o borra un envío programado |
 | `PATCH` | `/api/reports/schedules/:id/status` | Pausa o reactiva un envío programado |
 | `POST` | `/api/reports/schedules/:id/send` | Envía ahora; el próximo trae desde este envío |
@@ -388,6 +388,8 @@ Cada cargo tiene asignadas las pantallas a las que accede (tabla `cargo_permiso`
 - Límite de intentos por IP en el ingreso y en la recuperación de contraseña, con el mensaje «Demasiados intentos» en español.
 - Las respuestas de error nunca exponen detalles internos.
 - El DIRECTORIO cambia su contraseña desde el sistema comprobando la actual; la ruta usa el mismo límite de intentos que la recuperación.
+- **Instalación nueva:** al arrancar, si la base no tiene DIRECTORIO, se crea con la contraseña inicial `Directorio2026` y `cambiarContrasena: true` (`db/bootstrap.js`). Con ese aviso, `authorize` y `requireDirectorio` responden 403 «Cambie la contraseña inicial del DIRECTORIO para continuar» en todas las pantallas; el perfil (`/api/auth/me`) y el cambio de contraseña siguen funcionando. Los datos de prueba (`db:seed`) dejan al DIRECTORIO con `Directorio2026` sin el aviso.
+- **Correo sin configurar:** con `MAIL_DRIVER=console` los correos solo se muestran en la terminal. Las respuestas que mandan correo (recuperación de contraseña, reporte por correo y «enviar ahora») traen `simulado: true` para que la interfaz avise que no llegó.
 
 ## Pruebas
 
