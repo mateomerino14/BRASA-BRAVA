@@ -145,6 +145,8 @@ const minPasswordLength = 8;
 const msPerMinute = 60_000;
 ```
 
+Se exceptúan los códigos HTTP (`res.status(404)`), que ya se leen solos. Los largos de validación que usan varios módulos viven en `backend/src/utils/limits.js`, y los días de la semana del frontend en `frontend/src/lib/week.js`.
+
 ---
 
 ## FRONTEND
