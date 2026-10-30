@@ -13,8 +13,14 @@ const EDGE_TOLERANCE = 2;
 const PAGE_SHARE = 0.8;
 
 const fadeMask = ({start, end}) => {
-  const left = start ? `transparent, black ${FADE_PX}px` : 'black, black';
-  const right = end ? `black calc(100% - ${FADE_PX}px), transparent` : 'black, black';
+  let left = 'black, black';
+  if (start) {
+    left = `transparent, black ${FADE_PX}px`;
+  }
+  let right = 'black, black';
+  if (end) {
+    right = `black calc(100% - ${FADE_PX}px), transparent`;
+  }
   const mask = `linear-gradient(to right, ${left}, ${right})`;
   return {maskImage: mask, WebkitMaskImage: mask};
 };
