@@ -13,7 +13,7 @@ El diseño sale del prototipo de Figma *Brasa Brava* (paleta, tipografías y pan
 
 | Documento | Para quién | Contenido |
 |---|---|---|
-| [`docs/manual`](docs/manual/README.md) | Personal del local | Manual de usuario en LaTeX con capturas: ingreso, Caja, Familia, Reportes, Administración y eliminación física |
+| [`docs/manual`](docs/manual/README.md) | Personal del local | Manual de usuario con capturas: ingreso, Caja, Familia, Reportes, Administración y eliminación física. PDF listo en [`Manual_Usuario_Brasa_Brava.pdf`](docs/manual/Manual_Usuario_Brasa_Brava.pdf), fuente en LaTeX |
 | [`reglas.md`](reglas.md) | Desarrollo | Ramas, commits y estándares de código |
 | [`backend/README.md`](backend/README.md) | Desarrollo | API: variables de entorno, arquitectura, rutas y reglas de negocio de cada módulo |
 | [`backend/database/README.md`](backend/database/README.md) | Desarrollo | Migraciones, tablas y datos de prueba |
